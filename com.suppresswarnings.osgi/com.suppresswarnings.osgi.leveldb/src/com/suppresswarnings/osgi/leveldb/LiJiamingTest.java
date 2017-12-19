@@ -3,6 +3,8 @@ package com.suppresswarnings.osgi.leveldb;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.leveldb.common.Function;
+import com.leveldb.common.Iterator;
 import com.leveldb.common.Slice;
 import com.leveldb.common.Status;
 import com.leveldb.common.db.DB;
@@ -56,6 +58,20 @@ public class LiJiamingTest{
 			TimeUnit.SECONDS.sleep(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+		
+		Iterator itr = db_.NewIterator(new ReadOptions());
+		itr.RegisterCleanup(new Function() {
+			
+			@Override
+			public void exec(Object... args) {
+				for(Object x : args) {
+					System.out.println("======= "+x);
+				}
+			}
+		}, "hello", "olleh");
+		for(itr.Seek(new Slice("f5"));itr.Valid();itr.Next()) {
+			System.out.println(itr.key() + " = " + itr.value());
 		}
 		
 		db_.Close();

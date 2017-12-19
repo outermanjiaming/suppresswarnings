@@ -10,3 +10,4 @@ Import-Package: org.apache.commons.io,
  org.slf4j
 Export-Package: com.suppresswarnings.osgi.leveldb
 Service-Component: OSGI-INF/provider.xml
+Bundle-ActivationPolicy: lazy
