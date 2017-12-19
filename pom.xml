@@ -8,5 +8,6 @@
   
   <modules>
       <module>com.suppresswarnings.osgi</module>
+	  <module>com.suppresswarnings.util</module>
   </modules>
 </project>
