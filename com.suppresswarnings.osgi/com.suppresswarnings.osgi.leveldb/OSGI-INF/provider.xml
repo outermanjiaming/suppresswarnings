@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.suppresswarnings.osgi.leveldb.provider">
+   <implementation class="com.suppresswarnings.osgi.leveldb.LevelDBImpl"/>
+   <service>
+      <provide interface="com.suppresswarnings.osgi.leveldb.LevelDB"/>
+   </service>
+</scr:component>

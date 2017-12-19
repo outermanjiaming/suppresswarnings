@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: LevelDB
+Bundle-SymbolicName: com.suppresswarnings.osgi.leveldb
+Bundle-Version: 0.0.3.osgi
+Bundle-Vendor: LIJIAMING
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.apache.commons.io,
+ org.apache.commons.logging,
+ org.slf4j
+Export-Package: com.suppresswarnings.osgi.leveldb
+Service-Component: OSGI-INF/provider.xml
