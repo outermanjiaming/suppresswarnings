@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
       <module>com.suppresswarnings.osgi.nn</module>
+	  <module>com.suppresswarnings.osgi.leveldb</module>
   </modules>
 </project>
