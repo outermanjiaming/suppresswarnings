@@ -34,6 +34,8 @@ public class NodeImpl implements Node, Serializable {
 		if(type == TYPE_BIAS) {
 			node.placeholder = 1;
 			node.fx = Activation.ReLU;
+		} else if(type == TYPE_HIDDEN){
+			node.fx = Activation.Tanh;
 		} else {
 			node.fx = Activation.Sigmoid;
 		}
