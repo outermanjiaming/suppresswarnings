@@ -1,4 +1,4 @@
-package org.com.suppresswarnings.osgi.ner;
+package com.suppresswarnings.osgi.ner;
 
 import java.util.List;
 

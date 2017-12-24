@@ -1,4 +1,4 @@
-package org.com.suppresswarnings.osgi.ner;
+package com.suppresswarnings.osgi.ner;
 
 import java.io.IOException;
 import java.nio.file.Files;

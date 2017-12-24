@@ -1,4 +1,4 @@
-package org.com.suppresswarnings.osgi.ner;
+package com.suppresswarnings.osgi.ner;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,12 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Timing;
 
+/**
+ * tsv is like this:
+ * 政{1月71日|checkin}{株洲凤凰鑫城酒店|hotel},{行政商务单人间|type}{1间|rooms}总价
+ * @author lijiaming
+ *
+ */
 public class Train {
 	public static Charset cs = Charset.forName("UTF-8");
 	public static void train(String tsvFile, String serializeToFile) {
