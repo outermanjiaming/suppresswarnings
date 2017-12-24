@@ -19,7 +19,6 @@ public class RNN implements Serializable {
 	Node[] input;
 	Node[] hidden;
 	Node[] hiddent;
-	Node[] hxWhh;
 	Node[] output;
 	Node[] target;
 	int t;
@@ -38,10 +37,6 @@ public class RNN implements Serializable {
 		for(int i=0;i<hiddenSize;i++) {
 			hiddent[i] = NodeImpl.node(Node.TYPE_HIDDEN, 1, i, momentum, learningRate);
 		}
-		this.hxWhh = new Node[hiddenSize];
-		for(int i=0;i<hiddenSize;i++) {
-			hxWhh[i] = NodeImpl.node(Node.TYPE_BIAS, 1, i, momentum, learningRate);
-		}
 		this.output = new Node[inputSize];
 		for(int i=0;i<inputSize;i++) {
 			output[i] = NodeImpl.node(Node.TYPE_OUTPUT, Node.LEVEL_OUTPUT, i, momentum, learningRate);
@@ -55,9 +50,9 @@ public class RNN implements Serializable {
 		for(int i=0;i<biases.length;i++) {
 			biases[i] = NodeImpl.node(Node.TYPE_BIAS, i, Node.INDEX_BIAS, momentum, learningRate);
 		}
-		//hidden bias -> hidden
+		//input bias -> hiddent
 		for(int j=0;j<hiddenSize;j++) {
-			LinkImpl.link(0, random(), biases[0], hidden[j]);
+			LinkImpl.link(0, random(), biases[0], hiddent[j]);
 		}
 		//hidden bias -> hiddent
 		for(int j=0;j<hiddenSize;j++) {
@@ -70,7 +65,7 @@ public class RNN implements Serializable {
 		//x -> h
 		for(int i=0;i<inputSize;i++) {
 			for(int j=0;j<hiddenSize;j++) {
-				LinkImpl.link(0, random(), input[i], hidden[j]);
+				LinkImpl.link(0, random(), input[i], hiddent[j]);
 			}
 		}
 		
@@ -79,11 +74,6 @@ public class RNN implements Serializable {
 			for(int j=0;j<hiddenSize;j++) {
 				LinkImpl.link(1, random(), hidden[i], hiddent[j]);
 			}
-		}
-		
-		//hiddent == hxWhh
-		for(int i=0;i<hiddenSize;i++) {
-			LinkImpl.link(0, 1.0, hxWhh[i], hidden[i]);
 		}
 		
 		//h(t) -> y
@@ -114,19 +104,18 @@ public class RNN implements Serializable {
 		backward();
 	}
 	public void forward(){
-		for(Node node : biases) {
-			node.forward();
-		}
+		biases[0].forward();
 		for(Node node : hidden) {
 			node.propagate();
 		}
 		for(int i=0;i<hiddent.length;i++) {
 			Node node = hiddent[i];
-			node.receive();
 			double hixWhh = node.value();
-			hxWhh[i].assign(hixWhh);
+			hidden[i].assign(hixWhh);
 		}
-		for(Node node : hxWhh) {
+		biases[1].forward();
+		biases[2].forward();
+		for(Node node : hidden) {
 			node.forward();
 		}
 		for(Node node : input) {
@@ -163,18 +152,18 @@ public class RNN implements Serializable {
 	public double error() {
 		return error;
 	}
+	public static String hello = "RNN rnn = (RNN) Util.deserialize('D:/files/tmp/rnn.ser');char[]Systeeem.out.println(toVec.toString()); targets = world.toCharArray()n";
+	public static String world = "NN rnn = (RNN) Util.deserialize('D:/files/tmp/rnn.ser');char[]Systeeem.out.println(toVec.toString()); targets = world.toCharArray()nR";
 	public static void train(String[] args) {
-		String hello = "char[] targets = world.toCharArray()n";
-		String world = "System.out.println(toVec.toString());";
 		char[] chars = hello.toCharArray();
 		char[] targets = world.toCharArray();
 		Char2Vec toVec = new Char2Vec();
 		toVec.feed(hello).feed(world).build();
 		System.out.println(toVec.toString());
+		RNN rnn = (RNN) Util.deserialize("D:/files/tmp/rnn.ser");
+//		RNN rnn = new RNN(toVec.size(), toVec.size(), targets.length, 0.8, 0.0015);
 		
-		RNN rnn = new RNN(toVec.size(), toVec.size(), targets.length, 0.8, 0.015);
-		
-		for(int n=0;n<100000;n++) {
+		for(int n=0;n<1000000;n++) {
 			rnn.clear();
 			for(int i=0;i<targets.length;i++) {
 				char x = chars[i];
@@ -200,19 +189,23 @@ public class RNN implements Serializable {
 		Util.serialize(rnn, "D:/files/tmp/rnn.ser");
 	}
 	
-	public static void main(String[] args) {
-		String hello = "char[] targets = world.toCharArray()n";
-		String world = "System.out.println(toVec.toString());";
-		char[] targets = world.toCharArray();
+	public static void test(String[] args) {
 		Char2Vec toVec = new Char2Vec();
 		toVec.feed(hello).feed(world).build();
-		System.out.println(toVec.toString());
 		RNN rnn = (RNN) Util.deserialize("D:/files/tmp/rnn.ser");
-		String test = "ets = world.toCharArray()nchar[] targ";
-		char[] tests = test.toCharArray();
+		StringBuffer start = new StringBuffer("; targets =");
 		StringBuffer sb = new StringBuffer();
-		for(int i=0;i<targets.length;i++) {
-			char x = tests[i];
+		for(int i=0;i<start.length();i++) {
+			char x = start.charAt(i);
+			double[] vec = toVec.onehot(x);
+			double[] out = rnn.test(vec);
+			int index = Util.argmax(out);
+			char o = toVec.get(index);
+			sb.append(o);
+		}
+		System.out.println(sb.charAt(sb.length()-1));
+		for(int i=0;i<85;i++) {
+			char x = sb.charAt(sb.length()-1);
 			double[] vec = toVec.onehot(x);
 			double[] out = rnn.test(vec);
 			int index = Util.argmax(out);
@@ -221,7 +214,10 @@ public class RNN implements Serializable {
 		}
 		System.out.println(hello);
 		System.out.println(world);
-		System.out.println(test);
 		System.out.println(sb.toString());
+	}
+	
+	public static void main(String[] args) {
+		train(args);
 	}
 }

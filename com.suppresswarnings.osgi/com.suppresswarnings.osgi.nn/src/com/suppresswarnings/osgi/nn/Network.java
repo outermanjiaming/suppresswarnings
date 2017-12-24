@@ -16,7 +16,6 @@ public class Network implements Serializable {
 	Node[] inputs;
 	Node[] biases;
 	Node[] outputs;
-	Node[] targets;
 	Node[][] network;
 	double lastErr = Double.MAX_VALUE;
 	double error;
@@ -47,12 +46,6 @@ public class Network implements Serializable {
 			outputs[index] = NodeImpl.node(Node.TYPE_OUTPUT, Node.LEVEL_OUTPUT, index, momentum, learningRate);
 		}
 		network[size - 1] = outputs;
-		
-		//target
-		targets = new Node[output];
-		for(int index=0;index<output;index++) {
-			targets[index] = NodeImpl.node(Node.TYPE_OUTPUT, Node.LEVEL_OUTPUT, index, momentum, learningRate);
-		}
 		
 		//bias
 		biases = new Node[size - 1];
@@ -100,11 +93,7 @@ public class Network implements Serializable {
 			inputs[i].assign(input[i]);
 		}
 		forward();
-		
-		for(int i=0;i<targets.length;i++) {
-			targets[i].assign(target[i]);
-		}
-		backward();
+		backward(target);
 		return error;
 	}
 	
@@ -137,11 +126,11 @@ public class Network implements Serializable {
 			node.forward();
 		}
 	}
-	public void backward(){
+	public void backward(double[] targets){
 		for(int i=0;i<targets.length;i++) {
 			Node o = outputs[i];
-			Node t = targets[i];
-			double err = t.value() - o.value();
+			double target = targets[i];
+			double err = target - o.value();
 			error += 0.5d * err * err;
 			o.gradient(err);
 		}

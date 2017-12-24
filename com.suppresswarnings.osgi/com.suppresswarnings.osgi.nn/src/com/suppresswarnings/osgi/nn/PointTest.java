@@ -6,6 +6,9 @@ import java.util.List;
 public class PointTest {
 
 	public static void main(String[] args) {
+		System.out.println(Activation.Sigmoid.f(Activation.Sigmoid.f(0.2)*0.4+0.2));
+	}
+	public static void main2(String[] args) {
 		PointMatrix pm = new PointMatrix(11, 11, 1);
 		List<PointMatrix> convolutionLayer = new ArrayList<PointMatrix>();
 		List<PointMatrix> maxpoolLayer = new ArrayList<PointMatrix>();

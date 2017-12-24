@@ -14,8 +14,8 @@ import com.suppresswarnings.osgi.nn.cnn.NormalizeLayer;
 
 public class Test {
 
-	public static void main(String[] args) {
-		String file = "/Users/lijiaming/Codes/gesture/6/2801512180600_.pic_thumb.jpg";
+	public static void main2(String[] args) {
+		String file = "./gesture/6/2801512180600_.pic_thumb.jpg";
 		double[][] image = Util.readImageAsGray(file);
 		ConvolutionLayer convolutionLayer = new ConvolutionLayer(5, 5, 1);
 		image = convolutionLayer.conv(image, true);
@@ -24,23 +24,23 @@ public class Test {
 		NormalizeLayer normalizeLayer = new NormalizeLayer(17);
 		normalizeLayer.normalize(image);
 		Util.print(image);
-		Util.saveImage("/Users/lijiaming/Codes/gesture/6/2801512180600_.conv.jpg", image);
+		Util.saveImage("./gesture/6/2801512180600_.conv.jpg", image);
 	}
 	public static void filter(String[] args) {
 		try {
-			String[] names = Util.getFileNames("/Users/lijiaming/Codes/gesture/6/", "pic_thumb.jpg");
-			for(String string : names) System.out.println("/Users/lijiaming/Codes/gesture/6/"+string);
+			String[] names = Util.getFileNames("./gesture/6/", "pic_thumb.jpg");
+			for(String string : names) System.out.println("./gesture/6/"+string);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	public static void backup(String[] args) {
-		String origin = "/Users/lijiaming/Codes/hand11.jpeg";
+		String origin = "./hand11.jpeg";
 		boolean result = Util.backup(origin, true);
 		System.out.println("backup = "+result);
 	}
 	public static void togray(String[] args) {
-		File file = new File("/Users/lijiaming/Codes/hand11.jpeg");
+		File file = new File("./hand11.jpeg");
 		try {
 			BufferedImage bi = ImageIO.read(file);
 			int width = bi.getWidth();
@@ -57,7 +57,7 @@ public class Test {
 				System.out.println();
 			}
 			System.out.println();
-			ImageIO.write(gray, "jpeg", new File("/Users/lijiaming/Codes/grayhand11.jpeg"));
+			ImageIO.write(gray, "jpeg", new File("./grayhand11.jpeg"));
 
 			System.out.println("w: "+width);
 			System.out.println("h: "+height);
@@ -68,7 +68,7 @@ public class Test {
 		
 	}
 	public static void test(String[] args) {
-		Network network = (Network) Util.deserialize("/Users/lijiaming/Codes/network.ser");
+		Network network = (Network) Util.deserialize("./network.ser");
 		double[][] inputs = {{0,0},{1,0},{1,1},{0,1}};
 		double[][] targets = {{0},{1},{0},{1}};
 		
@@ -82,8 +82,8 @@ public class Test {
 			System.out.println(" output = "+Arrays.toString(output));
 		}
 	}
-	public static void train(String[] args) {
-		Network network = new Network(2, new int[]{2}, 1, 0.88d, 0.15d);
+	public static void main(String[] args) {
+		Network network = new Network(2, new int[]{2}, 1, 0.88d, 0.015d);
 		network.fullConnect();
 		double[][] inputs = {{0,0},{1,0},{1,1},{0,1}};
 		double[][] targets = {{0},{1},{0},{1}};
@@ -111,6 +111,6 @@ public class Test {
 			System.out.println("output = "+Arrays.toString(output));
 			System.out.println("target = "+Arrays.toString(target));
 		}
-		Util.serialize(network, "/Users/lijiaming/Codes/network.ser");
+		Util.serialize(network, "./network.ser");
 	}
 }
