@@ -68,19 +68,9 @@ public class NN implements Serializable {
 		
 		this.input.backprop();
 	}
-	public void input(double[] input){
-		this.input.assign(input);
-	}
+	
 	public double[] output(){
 		return this.output.value();
-	}
-	
-	public double[] value(Cell[] cells) {
-		double[] result = new double[cells.length];
-		for(int i=0;i<cells.length;i++) {
-			result[i] = cells[i].value();
-		}
-		return result;
 	}
 	
 	public void loss(double[] target) {
@@ -102,6 +92,7 @@ public class NN implements Serializable {
 			this.gradients[i] = 0;
 		}
 	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -112,6 +103,5 @@ public class NN implements Serializable {
 		builder.append("]");
 		return builder.toString();
 	}
-	
 	
 }
