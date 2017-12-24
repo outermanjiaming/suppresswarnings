@@ -11,5 +11,6 @@
       <module>com.suppresswarnings.osgi.nn</module>
 	  <module>com.suppresswarnings.osgi.leveldb</module>
 	  <module>com.suppresswarnings.osgi.ner</module>
+	  <module>com.suppresswarnings.osgi.user</module>
   </modules>
 </project>
