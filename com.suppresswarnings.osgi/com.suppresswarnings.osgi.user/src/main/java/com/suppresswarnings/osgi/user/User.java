@@ -9,9 +9,6 @@ import java.util.Random;
 
 public class User {
 	public static final String HEAD = "00000";
-	public static enum KEY {
-		UID, Name, Invite, Invited, InviteCount, Account, AccountCount, LastLogin;
-	}
 	String uid;
 	Map<String, String> attributs;
 	
