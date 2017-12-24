@@ -1,11 +1,21 @@
 package com.suppresswarnings.osgi.nn.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.suppresswarnings.osgi.nn.Activation;
 
-public class Cell {
+/**
+ * 有向图的节点
+ * @author lijiaming
+ *
+ */
+public class Cell implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4613811449299202920L;
 	public static final int TYPE_BIAS   = 100;
 	public static final int TYPE_INPUT  = 101;
 	public static final int TYPE_HIDDEN = 102;
@@ -68,9 +78,11 @@ public class Cell {
 		double y = fx.f(sum);
 		assign(y);
 	}
+	
 	public double value() {
 		return placeholder;
 	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

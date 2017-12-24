@@ -1,6 +1,17 @@
 package com.suppresswarnings.osgi.nn.impl;
 
-public class Edge {
+import java.io.Serializable;
+
+/**
+ * 有向图的边
+ * @author lijiaming
+ *
+ */
+public class Edge implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4295048482858519951L;
 	int level;
 	double weight;
 	double placeholder;

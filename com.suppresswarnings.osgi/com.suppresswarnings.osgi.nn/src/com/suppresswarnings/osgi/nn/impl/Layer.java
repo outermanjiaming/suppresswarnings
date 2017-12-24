@@ -1,11 +1,16 @@
 package com.suppresswarnings.osgi.nn.impl;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import com.suppresswarnings.osgi.nn.Activation;
 import com.suppresswarnings.osgi.nn.Util;
 
-public class Layer {
+public class Layer implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1473266256640666460L;
 	String name;
 	int type;
 	int level;

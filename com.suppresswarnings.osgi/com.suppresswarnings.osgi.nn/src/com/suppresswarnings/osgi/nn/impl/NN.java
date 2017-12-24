@@ -1,5 +1,6 @@
 package com.suppresswarnings.osgi.nn.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,11 @@ import com.suppresswarnings.osgi.nn.LossFunction;
  * @author lijiaming
  *
  */
-public class NN {
+public class NN implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5742996892170581827L;
 	List<Layer> hiddenLayer;
 	Layer input;
 	Layer output;
@@ -41,6 +46,7 @@ public class NN {
 		this.output = new Layer(Cell.TYPE_OUTPUT, outputSize, level++);
 		linker.link(this.output);
 		this.gradients = new double[this.output.size];
+		linker = null;
 	}
 
 	public void forward(double[] x){
