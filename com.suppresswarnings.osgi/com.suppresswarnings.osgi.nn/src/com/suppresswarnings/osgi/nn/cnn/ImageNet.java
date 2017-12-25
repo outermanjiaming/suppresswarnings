@@ -87,7 +87,7 @@ public class ImageNet implements Serializable {
 		}
 		ReentrantLock lock = new ReentrantLock(true);
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn"), 70, 130, TimeUnit.SECONDS);
+		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", 100), 70, 130, TimeUnit.SECONDS);
 		System.out.println(network);
 		int counter = 0;
 		int step = 100000;

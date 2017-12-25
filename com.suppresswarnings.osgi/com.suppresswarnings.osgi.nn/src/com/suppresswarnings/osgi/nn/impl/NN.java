@@ -2,6 +2,7 @@ package com.suppresswarnings.osgi.nn.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.suppresswarnings.osgi.nn.LossFunction;
@@ -24,6 +25,9 @@ public class NN implements Serializable {
 	double lastErr;
 	double[] gradients;
 	int count = 0;
+	int inputSize;
+	int outputSize;
+	int[] hiddenSize;
 	
 	/**
 	 * for unlinked layers
@@ -32,9 +36,12 @@ public class NN implements Serializable {
 	 * @param hiddenSize
 	 */
 	public NN(int inputSize, int outputSize, int[] hiddenSize) {
+		this.inputSize = inputSize;
+		this.outputSize = outputSize;
+		this.hiddenSize = hiddenSize;
 		int level=0;
 		Layer linker = null;
-		this.input = new Layer(Cell.TYPE_INPUT, inputSize, level);
+		this.input = new Layer(Cell.TYPE_INPUT, inputSize, level++);
 		linker = this.input;
 		this.hiddenLayer = new ArrayList<Layer>();
 		for(int hidden : hiddenSize) {
@@ -83,6 +90,13 @@ public class NN implements Serializable {
 		}
 	}
 	
+	public double[] dEdYj(){
+		double[] dEdYj = new double[gradients.length];
+		for(int i=0;i<gradients.length;i++) {
+			dEdYj[i] = gradients[i] / count;
+		}
+		return dEdYj;
+	}
 	
 	public void clear(){
 		this.lastErr = this.error;
@@ -97,11 +111,17 @@ public class NN implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("NN [network=\n");
+		builder.append("[").append(inputSize).append(" -> ").append(Arrays.toString(hiddenSize)).append(" -> ").append(outputSize).append("]\n");
 		builder.append(input).append("\n");
 		for(Layer hidden : hiddenLayer) builder.append(hidden).append("\n");
 		builder.append(output).append("\n");
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public double last() {
+		if(lastErr == 0) lastErr = error;
+		return lastErr;
 	}
 	
 }

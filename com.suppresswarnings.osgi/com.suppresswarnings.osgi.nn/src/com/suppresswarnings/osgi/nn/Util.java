@@ -413,7 +413,9 @@ public class Util {
 	}
 
 	public static double random() {
-		return random.nextDouble();
+		double rand = random.nextDouble();
+		double init = 0.12;
+		return rand * 2 * init - (rand / Math.abs(rand)) * init;
 	}
 
 	public static double[][] ones(int w, int h) {

@@ -79,7 +79,7 @@ public class PointMatrix implements Serializable {
 				int stopY = Math.min(y + frameH, this.height);
 				for(int m =x;m<stopX;m++) {
 					for(int n=y;n<stopY;n++) {
-						this.matrix[m][n].out(mask[m-x][n-y], v);
+						this.matrix[m][n].out(mask[m-x][n-y], v);//
 					}
 				}
 				y += step;

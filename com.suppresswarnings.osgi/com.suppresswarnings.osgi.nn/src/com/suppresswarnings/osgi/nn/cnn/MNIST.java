@@ -32,7 +32,7 @@ public class MNIST implements Closeable {
 	int bound = 0;
 	long dataStart = 0;
 	long labelStart = 0;
-	String path = "/Users/lijiaming/MNIST/";
+	String path = "D:/lijiaming/";
 	String[] train = {"train-images-idx3-ubyte", "train-labels-idx1-ubyte"};
 	String[] test  = {"t10k-images-idx3-ubyte",  "t10k-labels-idx1-ubyte"};
 	String[][] files = {train, test};

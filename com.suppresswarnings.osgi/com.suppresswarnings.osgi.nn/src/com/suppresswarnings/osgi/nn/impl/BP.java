@@ -93,7 +93,7 @@ public class BP {
 		bp.init();
 		double[][] inputs = {{0,0},{1,0},{1,1},{0,1}};
 		double[][] outputs = {{0},{1},{0},{1}};
-		for(int n=0;n<2000000;n++) {
+		for(int n=0;n<2000;n++) {
 			for(int i=0;i<inputs.length;i++) {
 				double[] input = inputs[i];
 				double[] target = outputs[i];

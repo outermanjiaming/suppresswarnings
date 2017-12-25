@@ -4,9 +4,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.suppresswarnings.osgi.nn.Network;
 import com.suppresswarnings.osgi.nn.Util;
+import com.suppresswarnings.osgi.nn.impl.NN;
 
 public class Saver implements Runnable {
-	Network network;
+	NN network;
 	String serializeTo;
 	String job;
 	int count=0;
@@ -14,15 +15,16 @@ public class Saver implements Runnable {
 	ReentrantLock lock;
 	public Saver() {
 	}
-	public Saver(String job, Network network, String serializeTo) {
+	public Saver(String job, Object network, String serializeTo) {
 		this.job = job;
-		this.network = network;
+		this.network = (NN) network;
 		this.serializeTo = serializeTo;
-		this.last = network.last();
 	}
-	public Saver(ReentrantLock lock, String job, Network network, String serializeTo) {
+	public Saver(ReentrantLock lock, String job, Object network, String serializeTo, double startError) {
 		this(job, network, serializeTo);
+		this.last = this.network.last();
 		this.lock = lock;
+		this.last = startError;
 	}
 	@Override
 	public void run() {

@@ -94,7 +94,7 @@ public class MnistNetwork implements Serializable {
 		double accuracy = 0;
 		ReentrantLock lock = new ReentrantLock(true);
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn"), 35, 55, TimeUnit.SECONDS);
+		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", 100), 35, 55, TimeUnit.SECONDS);
 		System.out.println(network);
 		try {
 			PrintStream err = new PrintStream(serializeTo + ".err");

@@ -1,36 +1,37 @@
-package com.suppresswarnings.osgi.nn.cnn;
+package com.suppresswarnings.osgi.nn.impl;
 
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.suppresswarnings.osgi.nn.Network;
 import com.suppresswarnings.osgi.nn.PointMatrix;
 import com.suppresswarnings.osgi.nn.Util;
+import com.suppresswarnings.osgi.nn.cnn.Clock;
+import com.suppresswarnings.osgi.nn.cnn.Data;
+import com.suppresswarnings.osgi.nn.cnn.DescendLayer;
+import com.suppresswarnings.osgi.nn.cnn.Digit;
+import com.suppresswarnings.osgi.nn.cnn.MNIST;
+import com.suppresswarnings.osgi.nn.cnn.Row;
+import com.suppresswarnings.osgi.nn.cnn.Saver;
 
-public class MnistNet implements Serializable {
+public class TestMnist implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7414761069664389410L;
-	/**
-	 * 
-	 */
+	private static final long serialVersionUID = 8817978059488892956L;
 	DescendLayer descendLayer = new DescendLayer();
 	PointMatrix pm;
 	PointMatrix view;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "/Users/lijiaming/Codes/gesture/digit.net";
-	
-	public Network init(Digit digit, int output, double momentum, double learningRate) {
+	public static String serializeTo = "D:/lijiaming/digit.nn.mini";
+	public NN init(Digit digit, int output) {
 		double[][] image = digit.data;
-		this.pm = new PointMatrix(image.length, image[0].length, 1);
+		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
 		double[][] mask = Util.random(2,2);
 		this.view = pm.viewOf(mask, 2);
 		this.pm.feedMatrix(image, PointMatrix.TYPE_CONVOLUTION);
@@ -41,11 +42,13 @@ public class MnistNet implements Serializable {
 		System.out.println();
 		Util.print(v);
 		double[] input = this.descendLayer.descend(v);
-		Network network = new Network(input.length, new int[]{31}, output, momentum, learningRate);
-		network.fullConnect();
+		NN network = new NN(input.length, output, new int[]{27});
+		network.forward(input);
+		network.loss(digit.label);
+		network.clear();
 		return network;
 	}
-	public void test(Network network) {
+	public void test(NN network) {
 		MNIST mnist = new MNIST(MNIST.TYPE_TEST);
 		mnist.init();
 		double accuracy = 0;
@@ -58,13 +61,13 @@ public class MnistNet implements Serializable {
 			double[][] v = this.view.normalizeAndTake();
 			double[] input = this.descendLayer.descend(v);
 			double[] output = digit.label;
-			double[] result = network.test(input);
+			network.forward(input);
+			double[] result = network.output();
 			int t = Util.argmax(output);
 			int r = Util.argmax(result);
 			if(t==r) right++;
 			else {
 				System.out.println(names[Util.argmax(output)]);
-				System.out.println(names[t]);
 				List<Integer> rs = Util.multimax(result);
 				if(rs.isEmpty()){
 					System.out.println("[Maybe] " + names[r]);
@@ -93,24 +96,25 @@ public class MnistNet implements Serializable {
 		}
 	}
 	
-	public void train(Network network) {
+	public void train(NN network) {
 		Data data = new Data();
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
-		int batch = 1000;
+		int step = 10000;
+		int batch = 5000;
 		int epoch = 0;
 		boolean run = true;
 		double accuracy = 0;
 		ReentrantLock lock = new ReentrantLock(true);
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", 100), 35, 55, TimeUnit.SECONDS);
+		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", 100), 35, 85, TimeUnit.SECONDS);
 		System.out.println(network);
-		try {
-			PrintStream err = new PrintStream(serializeTo + ".err");
-			System.setErr(err);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+//		try {
+//			PrintStream err = new PrintStream(serializeTo + ".err");
+//			System.setErr(err);
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
 		while(run) {
 			epoch ++;
 			Digit[] digits = mnist.random(batch);
@@ -126,26 +130,27 @@ public class MnistNet implements Serializable {
 				clock.start("test");
 				int count = 0;
 				int right = 0;
-				for(Row row : data.rows) {
-					double[] result = network.test(row.feature);
-					int t = Util.argmax(row.target);
+				for(int i=0;i<data.size();i++) {
+					Row row = data.get(i);
+					network.forward(row.getFeature());
+					double[] result = network.output();
+					int t = Util.argmax(row.getTarget());
 					int r = Util.argmax(result);
 					if(t==r) right++;
 					else {
-						System.out.println(row.file);
-						System.out.println(names[t]);
-						List<Integer> rs = Util.multimax(result);
-						if(rs.isEmpty()){
-							System.out.println("[Maybe] " + names[r]);
-						} else if(rs.size() == 1){
-							System.out.println(names[r]);
-						} else {
-							for(int rt : rs) 
-								System.out.print(names[rt] + " ");
-						}
-						
-						Util.print(result);
-						System.out.println();
+//						System.out.println(row.getFile());
+//						List<Integer> rs = Util.multimax(result);
+//						if(rs.isEmpty()){
+//							System.out.println("[Maybe] " + names[r]);
+//						} else if(rs.size() == 1){
+//							System.out.println(names[r]);
+//						} else {
+//							for(int rt : rs) 
+//								System.out.print(names[rt] + " ");
+//						}
+//						
+//						Util.print(result);
+//						System.out.println();
 					}
 					count ++;
 				}
@@ -153,12 +158,6 @@ public class MnistNet implements Serializable {
 				long time = clock.get("test");
 				accuracy = (double)right / count;
 				System.out.println("test used "+time+"ms of test size: " + right + "/" + count + " = " + accuracy);
-				try {
-					System.out.println("sleep 10 seconds");
-					TimeUnit.SECONDS.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 			}
 			if(accuracy > 0.99) {
 				run = false;
@@ -166,24 +165,39 @@ public class MnistNet implements Serializable {
 			}
 			
 			int counter = 0;
-			int step = 1000;
 			int size = data.size();
-			Random random = new Random();
-			while(counter ++ < step) {
+			while(counter++ < step) {
 				lock.lock();
 				try {
-					network.clear();
+					double error = 0;
 					for(int n=0;n<size;n++) {
-						int i = random.nextInt(size);
-						Row r = data.get(i);
-						network.train(r.feature, r.target);
+						Row r = data.get(n);
+						network.forward(r.getFeature());
+						network.loss(r.getTarget());
+						network.backprop(network.gradients);
+						error += network.error;
+						network.clear();
 					}
-					double error = network.error();
-					System.err.println(error);
-					if(error < 0.001) {
-						batch = 1000;
+					System.err.println(epoch + " E: " + error);
+					if(error < 0.0001) {
 						break;
 					}
+//					for(int n=0;n<size;n++) {
+//						Row r = data.get(n);
+//						network.forward(r.getFeature());
+//						network.loss(r.getTarget());
+//					}
+//					double[] dEdYj = network.dEdYj();
+//					for(int n=0;n<size;n++) {
+//						Row r = data.get(n);
+//						network.forward(r.getFeature());
+//						network.backprop(dEdYj);
+//					}
+//					
+//					double error = network.error;
+//					System.err.println(epoch + " E: " + error);
+//					network.clear();
+					
 				} finally {
 					lock.unlock();
 				}
@@ -195,7 +209,6 @@ public class MnistNet implements Serializable {
 	}
 	
 	public static void init() {
-		MnistNet net = new MnistNet();
 		MNIST mnist = new MNIST(MNIST.TYPE_TEST);
 		mnist.init();
 		mnist.start(12);
@@ -203,24 +216,16 @@ public class MnistNet implements Serializable {
 		Util.print(digit.data);
 		Util.print(digit.label);
 		mnist.close();
-		Network network = net.init(digit, 10, 0.8, 0.0025);
-		Util.serialize(net, serializeTo);
-		Util.serialize(network, serializeTo + ".nn");
+		TestMnist test = new TestMnist();
+		NN nn = test.init(digit, 10);
+		Util.serialize(test, serializeTo);
+		Util.serialize(nn, serializeTo + ".nn");
+		
 	}
 
-	public static void test() {
-		MnistNet net = (MnistNet) Util.deserialize(serializeTo);
-		Network network = (Network) Util.deserialize(serializeTo + ".nn.last");
-		net.test(network);
-	}
-	public static void train() {
-		MnistNet net = (MnistNet) Util.deserialize(serializeTo);
-		Network network = (Network) Util.deserialize(serializeTo + ".nn");
-		net.train(network);
-	}
 	public static void main(String[] args) throws Exception {
-//		init();
-//		train();
-		test();
+		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
+		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
+		test.train(nn);
 	}
 }
