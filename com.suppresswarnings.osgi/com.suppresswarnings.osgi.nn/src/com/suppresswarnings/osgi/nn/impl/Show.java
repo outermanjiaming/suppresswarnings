@@ -21,7 +21,7 @@ public class Show extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 6491242556168785338L;
-	public static String serializeTo = "D:/lijiaming/digit.nn.batch";
+	public static String serializeTo = "D:/lijiaming/digit.nn.best";
 	public Show(String string) {
 		super(string);
 	}

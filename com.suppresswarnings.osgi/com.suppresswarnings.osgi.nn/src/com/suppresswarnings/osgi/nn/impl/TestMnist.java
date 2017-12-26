@@ -100,7 +100,7 @@ public class TestMnist implements Serializable {
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
 		int step = 100;
-		int batch = 100;
+		int batch = 256;
 		int epoch = 0;
 		boolean run = true;
 		double accuracy = 0;
@@ -114,9 +114,15 @@ public class TestMnist implements Serializable {
 //		} catch (Exception e1) {
 //			e1.printStackTrace();
 //		}
+		int position = 0;
 		while(run) {
+			if(position + batch >= mnist.size()) {
+				position = 0;
+			}
+			mnist.start(position);
+			Digit[] digits = mnist.next(batch);
 			epoch ++;
-			Digit[] digits = mnist.random(batch);
+			position += batch;
 			for(int i=0;i<batch;i++) {
 				Digit digit = digits[i];
 				this.pm.feedMatrix(digit.data, PointMatrix.TYPE_CONVOLUTION);
@@ -129,8 +135,22 @@ public class TestMnist implements Serializable {
 				clock.start("test");
 				int count = 0;
 				int right = 0;
-				for(int i=0;i<data.size();i++) {
-					Row row = data.get(i);
+				
+				MNIST testmnist = new MNIST(MNIST.TYPE_TEST);
+				testmnist.init();
+				Data testdata = new Data();
+				while(testmnist.hasNext()) {
+					Digit digit = testmnist.next();
+					this.pm.feedMatrix(digit.data, PointMatrix.TYPE_CONVOLUTION);
+					double[][] v = this.view.normalizeAndTake();
+					double[] input = this.descendLayer.descend(v);
+					double[] output = digit.label;
+					testdata.put(new Row(names[Util.argmax(output)], input, output));
+				}
+				testmnist.close();
+				
+				for(int i=0;i<testdata.size();i++) {
+					Row row = testdata.get(i);
 					network.forward(row.getFeature());
 					double[] result = network.output();
 					int t = Util.argmax(row.getTarget());
@@ -165,7 +185,7 @@ public class TestMnist implements Serializable {
 					error = error/batch;
 					System.err.println(epoch + " E: " + error);
 					network.setLast(error);
-					if(error < 0.00001) {
+					if(error < 0.000001) {
 						break;
 					}
 					
@@ -191,7 +211,8 @@ public class TestMnist implements Serializable {
 				}
 			}
 			data.clear();
-			if(counter < 2) break;
+			double rand = Util.random();
+			if(counter < 2 && rand < 0) break;
 		}
 		executorService.shutdown();
 		mnist.close();

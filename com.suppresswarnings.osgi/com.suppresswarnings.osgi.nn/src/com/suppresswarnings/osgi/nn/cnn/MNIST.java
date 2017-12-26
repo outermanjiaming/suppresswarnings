@@ -12,13 +12,15 @@ import com.suppresswarnings.osgi.nn.Util;
 public class MNIST implements Closeable {
 	interface Data {
 		int magic = 2051;
-		int size  = 60000;
+		int train  = 60000;
+		int test = 10000;
 		int width = 28;
 		int height= 28;
 	}
 	interface Label {
 		int magic = 2049;
-		int size  = 10000;
+		int train  = 60000;
+		int test = 10000;
 		int step  = 1;
 	}
 	int magix = 4;
@@ -188,5 +190,9 @@ public class MNIST implements Closeable {
 			Util.print(label);
 		}
 		mnist.close();
+	}
+
+	public int size() {
+		return type == TYPE_TEST ? Data.test : Data.train;
 	}
 }
