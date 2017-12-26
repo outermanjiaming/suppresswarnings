@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.common;
+package com.suppresswarnings.osgi.common.proxy;
 
 import com.suppresswarnings.osgi.common.proxy.CP9;
 import com.suppresswarnings.osgi.common.proxy.SafeThirdProxy;
