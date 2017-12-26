@@ -27,7 +27,7 @@ public class TestMnist implements Serializable {
 	PointMatrix view;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "D:/lijiaming/digit.nn.batch";
+	public static String serializeTo = "D:/lijiaming/digit.nn.best";
 	public NN init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
@@ -99,7 +99,7 @@ public class TestMnist implements Serializable {
 		Data data = new Data();
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
-		int step = 10000;
+		int step = 100;
 		int batch = 100;
 		int epoch = 0;
 		boolean run = true;

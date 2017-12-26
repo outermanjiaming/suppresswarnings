@@ -7,6 +7,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.suppresswarnings.osgi.nn.PointMatrix;
@@ -20,7 +21,7 @@ public class Show extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 6491242556168785338L;
-	public static String serializeTo = "D:/lijiaming/digit.nn.mini";
+	public static String serializeTo = "D:/lijiaming/digit.nn.batch";
 	public Show(String string) {
 		super(string);
 	}
@@ -61,6 +62,7 @@ public class Show extends JFrame {
 				if(right) count ++;
 				sum ++;
 				show.setTitle(r + " == " + t + " ? " + right + " right=" + count + " / " + sum);
+				if(!right) JOptionPane.showConfirmDialog(show, "Wrong guess!");
 			} else {
 				mnist.close();
 			}
