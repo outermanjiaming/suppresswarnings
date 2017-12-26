@@ -118,7 +118,9 @@ public class NN implements Serializable {
 		builder.append("]");
 		return builder.toString();
 	}
-
+	public void setLast(double last) {
+		this.lastErr = last;
+	}
 	public double last() {
 		if(lastErr == 0) lastErr = error;
 		return lastErr;

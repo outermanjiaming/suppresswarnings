@@ -1,6 +1,5 @@
 package com.suppresswarnings.osgi.nn.impl;
 
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -28,7 +27,7 @@ public class TestMnist implements Serializable {
 	PointMatrix view;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "D:/lijiaming/digit.nn.mini";
+	public static String serializeTo = "D:/lijiaming/digit.nn.batch";
 	public NN init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
@@ -101,7 +100,7 @@ public class TestMnist implements Serializable {
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
 		int step = 10000;
-		int batch = 5000;
+		int batch = 100;
 		int epoch = 0;
 		boolean run = true;
 		double accuracy = 0;
@@ -137,21 +136,6 @@ public class TestMnist implements Serializable {
 					int t = Util.argmax(row.getTarget());
 					int r = Util.argmax(result);
 					if(t==r) right++;
-					else {
-//						System.out.println(row.getFile());
-//						List<Integer> rs = Util.multimax(result);
-//						if(rs.isEmpty()){
-//							System.out.println("[Maybe] " + names[r]);
-//						} else if(rs.size() == 1){
-//							System.out.println(names[r]);
-//						} else {
-//							for(int rt : rs) 
-//								System.out.print(names[rt] + " ");
-//						}
-//						
-//						Util.print(result);
-//						System.out.println();
-					}
 					count ++;
 				}
 				clock.end("test");
@@ -178,31 +162,36 @@ public class TestMnist implements Serializable {
 						error += network.error;
 						network.clear();
 					}
+					error = error/batch;
 					System.err.println(epoch + " E: " + error);
-					if(error < 0.0001) {
+					network.setLast(error);
+					if(error < 0.00001) {
 						break;
 					}
-//					for(int n=0;n<size;n++) {
-//						Row r = data.get(n);
-//						network.forward(r.getFeature());
-//						network.loss(r.getTarget());
-//					}
-//					double[] dEdYj = network.dEdYj();
-//					for(int n=0;n<size;n++) {
-//						Row r = data.get(n);
-//						network.forward(r.getFeature());
-//						network.backprop(dEdYj);
-//					}
-//					
-//					double error = network.error;
-//					System.err.println(epoch + " E: " + error);
-//					network.clear();
+					
+//					under below doesn't work.
+////					for(int n=0;n<size;n++) {
+////						Row r = data.get(n);
+////						network.forward(r.getFeature());
+////						network.loss(r.getTarget());
+////					}
+////					double[] dEdYj = network.dEdYj();
+////					for(int n=0;n<size;n++) {
+////						Row r = data.get(n);
+////						network.forward(r.getFeature());
+////						network.backprop(dEdYj);
+////					}
+////					
+////					double error = network.error;
+////					System.err.println(epoch + " E: " + error);
+////					network.clear();
 					
 				} finally {
 					lock.unlock();
 				}
 			}
 			data.clear();
+			if(counter < 2) break;
 		}
 		executorService.shutdown();
 		mnist.close();

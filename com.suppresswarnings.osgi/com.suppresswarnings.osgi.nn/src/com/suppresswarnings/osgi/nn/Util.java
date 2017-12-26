@@ -1,6 +1,7 @@
 package com.suppresswarnings.osgi.nn;
 
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -444,5 +445,18 @@ public class Util {
 			}
 		}
 		return matrix;
+	}
+	public static Image getImage(double[][] image) {
+		int y = image.length;
+		int x = image[0].length;
+		BufferedImage bi = new BufferedImage(x, y, BufferedImage.TYPE_BYTE_GRAY);
+		for(int j=0;j<y;j++) {
+			for(int i=0;i<x;i++){
+				int rgb = (int) (255* image[j][i]);
+				Color color = new Color(rgb, rgb, rgb);
+				bi.setRGB(i, j, color.getRGB());
+			}
+		}
+		return bi;
 	}
 }
