@@ -17,5 +17,13 @@ public class CP9 implements ThirdParty {
 		System.out.println("call: " + action);
 		return token() + " called " + action;
 	}
-
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("CP9 [action=");
+		builder.append(action);
+		builder.append("]");
+		return builder.toString();
+	}
 }

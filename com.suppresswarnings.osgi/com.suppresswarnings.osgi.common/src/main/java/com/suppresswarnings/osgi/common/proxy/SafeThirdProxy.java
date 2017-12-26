@@ -29,7 +29,7 @@ public class SafeThirdProxy implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		System.out.println("this object has been checked: " + safe);
+		System.out.println("Going to invoke: " + method.getName());
 		Object result = null;
 		try {
 			result = method.invoke(safe, args);
@@ -38,14 +38,5 @@ public class SafeThirdProxy implements InvocationHandler {
 		}
 		System.out.println("method has been invoked and result is going to return");
 		return result;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SafeThirdProxy [safe=");
-		builder.append(safe);
-		builder.append("]");
-		return builder.toString();
 	}
 }

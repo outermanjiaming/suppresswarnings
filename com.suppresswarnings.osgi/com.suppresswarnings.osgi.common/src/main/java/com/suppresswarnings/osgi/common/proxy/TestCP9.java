@@ -9,11 +9,10 @@ import junit.framework.TestCase;
 public class TestCP9 extends TestCase {
 
 	public void testCp9(){
-		ThirdParty cp = new CP9("this is what you want.");
+		ThirdParty cp = new CP9("invite");
 		ThirdParty safe = SafeThirdProxy.newInstance(cp);
 		String result = safe.call();
-		System.out.println(result);
-		System.out.println(safe);
+		System.out.println("result: "+result);
 		System.out.println(cp);
 	}
 }
