@@ -86,19 +86,19 @@ public class Cell implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Cell [index=");
+		builder.append("Cell [(");
 		builder.append(index);
-		builder.append(", level=");
+		builder.append(",");
 		builder.append(level);
-		builder.append(", type=");
+		builder.append(") ");
 		builder.append(getType(type));
-		builder.append(", placeholder=");
+		builder.append(", ${");
 		builder.append(placeholder);
-		builder.append(", fx=");
+		builder.append("} ");
 		builder.append(fx);
-		builder.append(", up=");
+		builder.append(",");
 		builder.append(up.size());
-		builder.append(", down=");
+		builder.append(":->");
 		builder.append(down.size());
 		builder.append("]");
 		return builder.toString();

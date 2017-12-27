@@ -91,4 +91,16 @@ public class Layer implements Serializable {
 		return value;
 	}
 	
+	public double[] softmax() {
+		double[] value = new double[size];
+		double sum = 0; 
+		for(int i=0;i<size;i++) {
+			sum += Math.exp(cells[i].value());
+		}
+		for(int i=0;i<size;i++) {
+			value[i] = Math.exp(cells[i].value()) / sum;
+		}
+		return value;
+	}
+	
 }

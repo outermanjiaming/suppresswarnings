@@ -25,9 +25,10 @@ public class TestMnist implements Serializable {
 	DescendLayer descendLayer = new DescendLayer();
 	PointMatrix pm;
 	PointMatrix view;
+	public static int batch = 2048;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "D:/lijiaming/digit.nn.best";
+	public static String serializeTo = "D:/lijiaming/digit.nn.softplus";
 	public NN init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
@@ -100,7 +101,6 @@ public class TestMnist implements Serializable {
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
 		int step = 100;
-		int batch = 256;
 		int epoch = 0;
 		boolean run = true;
 		double accuracy = 0;
@@ -234,8 +234,9 @@ public class TestMnist implements Serializable {
 	}
 
 	public static void main(String[] args) throws Exception {
+		init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
-		NN nn = (NN) Util.deserialize(serializeTo + ".nn.last");
-		test.test(nn);
+		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
+		test.train(nn);
 	}
 }
