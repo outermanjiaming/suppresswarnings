@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -37,6 +39,20 @@ public class Show extends JFrame {
 		mnist.init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
 		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
+		show.addMouseWheelListener(new MouseWheelListener() {
+			int position = 0;
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				position += e.getWheelRotation();
+				position = Math.max(0, position);
+				mnist.start(position);
+				if(mnist.hasNext()) {
+					Digit digit = mnist.next();
+					bgp.change(Util.getImage(digit.data));
+					bgp.repaint();
+				}
+		      }
+		});
 		show.addMouseListener(new MouseListener() {
 			int count = 0;
 			int sum = 0;
@@ -62,7 +78,7 @@ public class Show extends JFrame {
 				if(right) count ++;
 				sum ++;
 				show.setTitle(r + " == " + t + " ? " + right + " right=" + count + " / " + sum);
-				if(!right) JOptionPane.showConfirmDialog(show, "Wrong guess!");
+				if(!right) JOptionPane.showConfirmDialog(show, "You thought it was " + r, "Wrong guess!", JOptionPane.OK_CANCEL_OPTION);
 			} else {
 				mnist.close();
 			}
@@ -70,26 +86,21 @@ public class Show extends JFrame {
 		});  
 	}
 }
-class BackgroundPanel extends JPanel  
-{  
+class BackgroundPanel extends JPanel {  
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = -282392135192671752L;
-	Image im;  
-    public BackgroundPanel(Image im)  
-    {  
+	Image im;
+    public BackgroundPanel(Image im) {  
         this.im=im;  
-        this.setOpaque(false);                    //设置控件不透明,若是false,那么就是透明
+        this.setOpaque(true);
     }
     public void change(Image nw) {
     	this.im = nw;
     }
-    //Draw the background again,继承自Jpanle,是Swing控件需要继承实现的方法,而不是AWT中的Paint()
-    public void paintComponent(Graphics g)       //绘图类,详情可见博主的Java 下 java-Graphics 
-    {  
+    public void paintComponent(Graphics g) {  
         super.paintComponents(g);  
-        g.drawImage(im,0,0,this.getWidth(),this.getHeight(),this);  //绘制指定图像中当前可用的图像。图像的左上角位于该图形上下文坐标空间的 (x, y)。图像中的透明像素不影响该处已存在的像素
-
+        g.drawImage(im,0,0,this.getWidth(),this.getHeight(),this);
     }  
 }

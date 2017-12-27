@@ -235,7 +235,7 @@ public class TestMnist implements Serializable {
 
 	public static void main(String[] args) throws Exception {
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
-		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
-		test.train(nn);
+		NN nn = (NN) Util.deserialize(serializeTo + ".nn.last");
+		test.test(nn);
 	}
 }
