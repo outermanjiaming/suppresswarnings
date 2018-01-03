@@ -1,12 +1,13 @@
 package com.suppresswarnings.osgi.nn;
 
+import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Random;
 
 import com.suppresswarnings.osgi.nn.impl.LinkImpl;
 import com.suppresswarnings.osgi.nn.impl.NodeImpl;
 
-public class Network implements Serializable {
+public class Network implements Serializable, Closeable {
 
 	/**
 	 * 
@@ -52,6 +53,7 @@ public class Network implements Serializable {
 		for(int level=0;level < biases.length;level ++) {
 			biases[level] = NodeImpl.node(Node.TYPE_BIAS, level, Node.INDEX_BIAS, momentum, learningRate);
 		}
+		System.out.println("Connect before train.");
 	}
 	public void fullConnect(){
 		int size = network.length;
@@ -181,5 +183,17 @@ public class Network implements Serializable {
 		}
 		int outputLevel = network.length - 1;
 		network[outputLevel] = output;
+	}
+	
+	/**
+	 * remember to connect before train.
+	 */
+	@Override
+	public void close() {
+		for(int i=0;i<network.length;i++) {
+			for(int j=0;j<network[i].length;i++) {
+				network[i][j] = null;
+			}
+		}
 	}
 }

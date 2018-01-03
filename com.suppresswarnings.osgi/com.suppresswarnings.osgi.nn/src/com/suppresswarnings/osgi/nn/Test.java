@@ -9,6 +9,7 @@ import java.util.Arrays;
 import javax.imageio.ImageIO;
 
 import com.suppresswarnings.osgi.nn.cnn.ConvolutionLayer;
+import com.suppresswarnings.osgi.nn.cnn.DescendLayer;
 import com.suppresswarnings.osgi.nn.cnn.MaxPoolLayer;
 import com.suppresswarnings.osgi.nn.cnn.NormalizeLayer;
 
@@ -67,10 +68,33 @@ public class Test {
 		
 		
 	}
-	public static void test(String[] args) {
-		Network network = (Network) Util.deserialize("./network.ser");
-		double[][] inputs = {{0,0},{1,0},{1,1},{0,1}};
-		double[][] targets = {{0},{1},{0},{1}};
+	
+	public static void main4(String[] args) {
+		double[][] image = Util.readImageAsGray("D:/image/0.png");
+		NormalizeLayer normal = new NormalizeLayer(255);
+		normal.normalize(image);
+		DescendLayer descend = new DescendLayer();
+		double[] input = descend.descend(image);
+		System.out.println("input: "+input.length);
+		System.out.println("input: " + Arrays.toString(input));
+		Network network = new Network(input.length, new int[]{800}, input.length, 0.88d, 0.015d);
+		network.fullConnect();
+		int step = 1000000;
+		int counter = 0;
+		while(counter++ < step) {
+			network.train(input, input);
+			if(counter % 100 == 0) System.out.println(network.error());
+			network.clear();
+		}
+		System.out.println("input: "+input.length);
+		System.out.println("input: " + Arrays.toString(input));
+		network.close();
+	}
+	
+	public static void main(String[] args) {
+		Network network = (Network) Util.deserialize("./add.ser");
+		double[][] inputs = {{7,3},{9,4},{8,7},{7,6}};
+		double[][] targets = {{10},{13},{15},{13}};
 		
 		for(int i=0;i<inputs.length;i++) {
 			double[] input = inputs[i];
@@ -82,11 +106,11 @@ public class Test {
 			System.out.println(" output = "+Arrays.toString(output));
 		}
 	}
-	public static void main(String[] args) {
-		Network network = new Network(2, new int[]{2}, 1, 0.88d, 0.015d);
+	public static void main1(String[] args) {
+		Network network = new Network(2, new int[]{3}, 1, 0.88d, 0.015d);
 		network.fullConnect();
-		double[][] inputs = {{0,0},{1,0},{1,1},{0,1}};
-		double[][] targets = {{0},{1},{0},{1}};
+		double[][] inputs = {{2,3},{3,4},{4,5},{5,6}};
+		double[][] targets = {{5},{7},{9},{11}};
 		int step = 10000;
 		int counter = 0;
 		while(counter++ < step) {
@@ -111,6 +135,6 @@ public class Test {
 			System.out.println("output = "+Arrays.toString(output));
 			System.out.println("target = "+Arrays.toString(target));
 		}
-		Util.serialize(network, "./network.ser");
+		Util.serialize(network, "./add.ser");
 	}
 }
