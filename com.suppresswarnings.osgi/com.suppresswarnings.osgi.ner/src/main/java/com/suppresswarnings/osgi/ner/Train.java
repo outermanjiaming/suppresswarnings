@@ -19,7 +19,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Timing;
 
 /**
- * tsv is like this:
+ * tagged is like this:
  * 政{1月71日|checkin}{株洲凤凰鑫城酒店|hotel},{行政商务单人间|type}{1间|rooms}总价
  * @author lijiaming
  *

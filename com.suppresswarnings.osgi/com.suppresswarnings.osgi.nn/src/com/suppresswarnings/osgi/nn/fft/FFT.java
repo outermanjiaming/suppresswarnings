@@ -58,13 +58,19 @@ public class FFT {
 	public static void main(String[] args) {
 		int N = 64;
         Complex[] x = new Complex[N];
+        Complex[] x1 = new Complex[N];
+        Complex[] x2 = new Complex[N];
 
-        double step = 2 * Math.PI / N; 
+        double step = 2 * Math.PI / N;
         // original data
         for(int i=0;i<N;i++) {
-        	x[i] = new Complex(Math.cos(i*step) + 0.7*Math.cos(i*7*step), 0);
+        	x1[i] = new Complex(Math.cos(i*step), 0);
+        	x2[i] = new Complex(Math.cos(i*13*step), 0);
+        	x[i] = x1[i].plus(x2[i]);
         }
         show(x, "x");
+        show(x1, "x1");
+        show(x2, "x2");
 
         // FFT of original data
         Complex[] y = fft(x);
