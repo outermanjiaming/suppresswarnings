@@ -95,7 +95,7 @@ public class User {
 	
 	@Override
 	public String toString() {
-		return "User [uid=" + uid + ", attributs=" + attributs + "]";
+		return "User:" + attributs;
 	}
 	
 }
