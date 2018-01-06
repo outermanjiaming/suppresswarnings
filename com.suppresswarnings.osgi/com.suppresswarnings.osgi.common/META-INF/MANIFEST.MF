@@ -3,4 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Common
 Bundle-SymbolicName: com.suppresswarnings.osgi.common
 Bundle-Version: 1.0.0.osgi
-Export-Package: com.suppresswarnings.osgi.common.proxy
+Export-Package: com.suppresswarnings.osgi.common.protocol,
+ com.suppresswarnings.osgi.common.proxy,
+ com.suppresswarnings.osgi.common.user
+Import-Package: com.suppresswarnings.osgi.network.http

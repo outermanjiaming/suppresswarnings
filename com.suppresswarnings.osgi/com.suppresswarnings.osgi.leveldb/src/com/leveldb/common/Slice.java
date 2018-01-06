@@ -56,7 +56,7 @@ public class Slice implements Comparable<Slice> {
 		// } else
 		// {
 		if(size_ <= 0){
-			size_ = size_;
+			size_ = 0;
 		}
 		byte[] ret = new byte[size_];
 		System.arraycopy(data_, offset_, ret, 0, size_);

@@ -14,9 +14,27 @@ import com.leveldb.common.options.WriteOptions;
 
 public class LevelDBImpl implements LevelDB {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	boolean inited = false;
 	String dbname_;
 	DB db_;
-
+	public LevelDBImpl(DB db, String dbname) {
+		this.db_ = db;
+		this.dbname_ = dbname;
+		this.inited = true;
+	}
+	public LevelDBImpl(){
+		String HB_HOME = System.getenv("HB_HOME");
+		logger.info("[leveldb] default path: " + HB_HOME + "/leveldb");
+		init(HB_HOME + "/leveldb", true);
+		logger.info("[leveldb] created.");
+	}
+	public LevelDBImpl(String leveldb){
+		String HB_HOME = System.getenv("HB_HOME");
+		logger.info("[leveldb] path: " + HB_HOME + leveldb);
+		init(HB_HOME + leveldb, true);
+		logger.info("[leveldb] created.");
+	}
+	
 	@Override
 	public int put(String key, String value) {
 		WriteOptions woption = new WriteOptions();
@@ -53,18 +71,37 @@ public class LevelDBImpl implements LevelDB {
 	
 	@Override
 	public int init(String dbname, boolean create_if_missing) {
+		logger.info("[leveldb] init.");
+		if(inited && dbname_ != null && db_ != null) {
+			if(dbname_.equals(dbname)) {
+				logger.info("[leveldb] inited already.");
+				return OK;
+			}
+			logger.info("[leveldb] to init a new db");
+		}
 		Options options = new Options();
 		options.create_if_missing = create_if_missing;
 		dbname_ = dbname;
 		db_ = DB.Open(options, dbname_);
-		if(db_ == null) return OK;
-		return 0;
+		if(db_ != null) {
+			inited = true;
+			logger.info("[leveldb] inited just now.");
+			return OK;
+		}
+		inited = false;
+		logger.info("[leveldb] fail to init.");
+		return NO;
 	}
 
 	@Override
 	public void close() {
-		if(db_ != null) db_.Close();
-		
+		logger.info("[leveldb] close.");
+		if(db_ != null) {
+			db_.Close();
+			logger.info("[leveldb] closed.");
+		}
+		inited = false;
+		logger.info("[leveldb] close done.");
 	}
 
 	@Override
@@ -94,11 +131,20 @@ public class LevelDBImpl implements LevelDB {
 			count++;
 		}
 	}
+	
 
+	public boolean inited() {
+		return inited;
+	}
+	public String getDBname() {
+		return dbname_;
+	}
+	public DB getDB() {
+		return db_;
+	}
 	@Override
 	public String toString() {
-		return "LevelDBImpl [dbname_=" + dbname_ + ", db_=" + db_ + "]";
+		return "LevelDBImpl ["+inited+", dbname_=" + dbname_ + ", db_=" + db_ + "]";
 	}
-
 	
 }

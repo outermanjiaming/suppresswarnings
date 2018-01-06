@@ -4,3 +4,10 @@ Bundle-Name: User
 Bundle-SymbolicName: com.suppresswarnings.osgi.user
 Bundle-Version: 1.0.0.osgi
 Export-Package: com.suppresswarnings.osgi.user
+Import-Package: com.suppresswarnings.osgi.common.protocol,
+ com.suppresswarnings.osgi.common.proxy,
+ com.suppresswarnings.osgi.common.user,
+ com.suppresswarnings.osgi.leveldb,
+ com.suppresswarnings.osgi.network.http,
+ org.slf4j;version="1.7.2"
+Service-Component: OSGI-INF/component.xml

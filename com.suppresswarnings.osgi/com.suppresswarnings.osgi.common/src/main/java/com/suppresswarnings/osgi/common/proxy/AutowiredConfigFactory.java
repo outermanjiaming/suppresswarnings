@@ -3,18 +3,19 @@ package com.suppresswarnings.osgi.common.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Properties;
+
+import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class AutowiredConfigFactory implements InvocationHandler {
-	Properties properties;
+	Parameter parameter;
 	
-	public Object create(Properties para, Class<?> t){
-		this.properties = para;
+	public Object create(Parameter parameter, Class<?> t){
+		this.parameter = parameter;
 		return Proxy.newProxyInstance(t.getClassLoader(), new Class[]{t}, this);
 	}
 	
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		String property = properties.getProperty(method.getName());
+		String property = parameter.getParameter(method.getName());
 		if (property == null)
 			return (null);
 
@@ -30,6 +31,8 @@ public class AutowiredConfigFactory implements InvocationHandler {
 				return (Float.valueOf(property));
 			else if (returns.equals(boolean.class))
 				return (Boolean.valueOf(property));
+		} else if(String[].class.equals(returns)) {
+			return parameter.getParameters(method.getName());
 		}
 		return property;
 	}

@@ -4,10 +4,19 @@ Bundle-Name: LevelDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.leveldb
 Bundle-Version: 0.0.3.osgi
 Bundle-Vendor: LIJIAMING
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.io,
  org.apache.commons.logging,
  org.slf4j
-Service-Component: OSGI-INF/provider.xml
 Bundle-ActivationPolicy: lazy
-Export-Package: com.suppresswarnings.osgi.leveldb
+Export-Package: com.leveldb.common,
+ com.leveldb.common.comparator,
+ com.leveldb.common.db,
+ com.leveldb.common.db.util,
+ com.leveldb.common.file,
+ com.leveldb.common.log,
+ com.leveldb.common.options,
+ com.leveldb.common.table,
+ com.leveldb.common.version,
+ com.leveldb.util,
+ com.suppresswarnings.osgi.leveldb,
+ de.jarnbjo.jsnappy
