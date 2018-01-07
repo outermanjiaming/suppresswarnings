@@ -52,7 +52,7 @@ public class UserService implements HTTPService {
 			if(user == null) {
 				return FAIL;
 			}
-			accountService.lastLogin(user);
+			accountService.lastLogin(user, ip);
 			String token = tokenService.create(user);
 			return token;
 		} else if(KEY.Register.name().equals(action)) {
@@ -63,6 +63,51 @@ public class UserService implements HTTPService {
 			}
 			String token = tokenService.create(user);
 			return token;
+		} else if(KEY.Invite.name().equals(action)) {
+			String token = parameter.getParameter(KEY.Token.name());
+			if(token == null) {
+				logger.info("token is null");
+				return FAIL;
+			}
+			String valid = tokenService.valid(token);
+			if(valid == null) {
+				logger.info("token is invalid");
+				return FAIL;
+			}
+			String uidttl = tokenService.check(token);
+			if(uidttl == null) {
+				logger.info("token is expired");
+				return FAIL;
+			}
+			String uid = uidttl.split(":")[0];
+			User user = User.oldUser(uid);
+			String inviteCode = accountService.invite(user);
+			if(inviteCode == null) {
+				logger.info("fail to invite");
+				return FAIL;
+			}
+			return inviteCode;
+		} else if(KEY.Invited.name().equals(action)) {
+			String token = parameter.getParameter(KEY.Token.name());
+			String invite = parameter.getParameter(KEY.Invite.name());
+			if(token == null || invite == null) {
+				return FAIL;
+			}
+			String valid = tokenService.valid(token);
+			if(valid == null) {
+				return FAIL;
+			}
+			String uidttl = tokenService.check(token);
+			if(uidttl == null) {
+				return FAIL;
+			}
+			String uid = uidttl.split(":")[0];
+			User userB = User.oldUser(uid);
+			String inviteCode = accountService.invited(invite, userB);
+			if(inviteCode == null) {
+				return FAIL;
+			}
+			return inviteCode;
 		}
 		return OK;
 	}

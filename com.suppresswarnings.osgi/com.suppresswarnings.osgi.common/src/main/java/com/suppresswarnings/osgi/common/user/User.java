@@ -35,6 +35,9 @@ public class User {
 		map.put("user", user.toString());
 		final int NCPU = Runtime.getRuntime().availableProcessors();
 		System.out.println(NCPU);
+		
+		String invite = user.inviteCode();
+		System.out.println(invite);
 	}
 	
 	public void set(KEY key, String value) {
@@ -91,6 +94,22 @@ public class User {
 		Random random = new Random();
 		DecimalFormat format = new DecimalFormat(HEAD_UID);
 		return format.format(random.nextInt(9999)) + Long.toHexString(System.currentTimeMillis());
+	}
+	
+	/**
+	 * TODO we can increase the random number one by one to replace this.
+	 * r(9999) + r(char) + HEAD(uid)
+	 * @param uid
+	 * @return
+	 */
+	public String inviteCode() {
+		StringBuffer inviteCode = new StringBuffer();
+		Random random = new Random();
+		
+		inviteCode.append(random.nextInt(9999));
+		inviteCode.append((char) (random.nextInt(26) + 'A'));
+		inviteCode.append(uid.subSequence(0, HEAD_UID.length()));
+		return inviteCode.toString();
 	}
 	
 	@Override

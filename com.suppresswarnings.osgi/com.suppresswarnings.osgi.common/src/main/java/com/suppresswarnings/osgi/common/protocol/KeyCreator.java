@@ -2,6 +2,7 @@ package com.suppresswarnings.osgi.common.protocol;
 
 public class KeyCreator {
 	public static String format = "%s:%s:%s:%s:%s";
+	public static String userformat = "%s:%s:%s:%s";
 	/**
 	 * the format of the key
 	 * @param version Version.Vn
@@ -12,6 +13,18 @@ public class KeyCreator {
 	 */
 	public static String key(String version, String identity, Enum<?> e, String complementary){
 		return String.format(format, version, identity, e.getClass().getSimpleName(), e.ordinal(), complementary);
+	}
+	
+	/**
+	 * uid:x:n-value
+	 * 
+	 * @param version
+	 * @param identity
+	 * @param e
+	 * @return
+	 */
+	public static String key(String version, String identity, Enum<?> e){
+		return String.format(userformat, version, identity, e.getClass().getSimpleName(), e.ordinal());
 	}
 	
 	public static String counter(String version, String identity, Enum<?> e){
