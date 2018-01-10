@@ -30,7 +30,7 @@ public class Layer implements Serializable {
 			cells[size] = bias;
 		}
 		for(int i=0;i<size;i++) {
-			cells[i] = new Cell(type, i, level, Activation.Sigmoid);
+			cells[i] = new Cell(type, i, level, Activation.ReLU);
 		}
 	}
 	
