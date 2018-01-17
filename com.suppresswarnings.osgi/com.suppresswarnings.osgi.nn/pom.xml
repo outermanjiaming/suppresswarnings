@@ -7,10 +7,5 @@
   </parent>
   <artifactId>com.suppresswarnings.osgi.nn</artifactId>
   <dependencies>
-  	<dependency>
-       <groupId>org.jblas</groupId>
-       <artifactId>jblas</artifactId>
-       <version>1.2.4</version>
-    </dependency>
   </dependencies>
 </project>
