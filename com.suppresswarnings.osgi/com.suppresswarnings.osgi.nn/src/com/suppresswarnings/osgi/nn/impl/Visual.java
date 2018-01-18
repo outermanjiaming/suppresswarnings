@@ -37,7 +37,7 @@ public class Visual extends JFrame {
 	}
 	public static void main(String[] args) throws Exception {
 		int size = 3;
-		int all = 10000;
+		int all = 100000;
 		NN nn = (NN) Util.deserialize(serializeTo);//new NN(size, size, new int[]{10});//
 		Visual show = new Visual("Visual Of Neuro");
 		NNPanel bgp = new NNPanel(nn);
