@@ -5,10 +5,10 @@ import java.util.function.Predicate;
 public class Context implements Predicate<String> {
 	String username;
 	String passcode;
-	State state = State.S0;
+	S state = S.S0;
 	
 	public boolean authentic() {
-		return state == State.Final;
+		return state == S.Final;
 	}
 
 	@Override

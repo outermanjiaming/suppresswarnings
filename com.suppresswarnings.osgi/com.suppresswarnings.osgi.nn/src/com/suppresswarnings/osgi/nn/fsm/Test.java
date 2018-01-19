@@ -18,5 +18,8 @@ public class Test {
 		boolean x = Stream.generate(shell).anyMatch(context);
 		System.out.println(x);
 		System.out.println(context);
+		
 	}
+	
+	
 }
