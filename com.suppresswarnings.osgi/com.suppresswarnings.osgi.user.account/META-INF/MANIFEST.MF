@@ -10,3 +10,4 @@ Import-Package: com.leveldb.common.db,
  com.suppresswarnings.osgi.user,
  org.slf4j;version="1.7.2"
 Service-Component: OSGI-INF/component.xml
+Export-Package: com.suppresswarnings.osgi.user.account

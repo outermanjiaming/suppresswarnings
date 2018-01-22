@@ -7,6 +7,8 @@ Import-Package: com.leveldb.common.db,
  com.suppresswarnings.osgi.common.protocol,
  com.suppresswarnings.osgi.common.user,
  com.suppresswarnings.osgi.leveldb,
+ com.suppresswarnings.osgi.nn.fsm,
  com.suppresswarnings.osgi.user,
  org.slf4j;version="1.7.2"
 Service-Component: OSGI-INF/component.xml
+Export-Package: com.suppresswarnings.osgi.user.token
