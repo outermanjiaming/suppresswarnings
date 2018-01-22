@@ -14,7 +14,7 @@ var cmd = function() {
 		if(current == cmdtxt) {
 			$('#cmdinput').val('');
 		}
-		$("#msg").append( "<li style='list-style-type:none;'> "+ index +" Successful Request!" + window.token + "</li>");
+		$("#msg").append( "<li style='list-style-type:none;'> "+ index +" <a href='"+server.protocol + server.host+"'> Successful Request!</a>" + window.token + "</li>");
 		$("#msg").scrollTop($("#msg")[0].scrollHeight);
 		server.action('user.http?action=Login');
 		$("#panelLogin").slideDown();
