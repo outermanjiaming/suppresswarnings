@@ -6,4 +6,5 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>com.suppresswarnings.osgi.leveldb</artifactId>
+  <groupId>com.suppresswarnings.osgi</groupId>
 </project>

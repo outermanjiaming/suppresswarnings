@@ -8,9 +8,9 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.suppresswarnings.osgi</groupId>
-  <artifactId>com.suppresswarnings.osgi.ner</artifactId>
+  <artifactId>com.suppresswarnings.osgi.interaction</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>com.suppresswarnings.osgi.ner</name>
+  <name>com.suppresswarnings.osgi.interaction</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
