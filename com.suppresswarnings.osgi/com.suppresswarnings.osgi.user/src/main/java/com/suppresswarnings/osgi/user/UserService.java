@@ -1,5 +1,8 @@
 package com.suppresswarnings.osgi.user;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.common.protocol.KEY;
@@ -11,12 +14,14 @@ import com.suppresswarnings.osgi.common.user.TokenService;
 import com.suppresswarnings.osgi.common.user.User;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
+import com.suppresswarnings.osgi.nn.fsm.State;
 
 public class UserService implements HTTPService {
 	public static final String FAIL = "fail";
 	public static final String OK = "ok";
 	public static final String name = "user.http";
 	private org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	private Map<String, State> stateMap = new HashMap<String,State>();
 	private AccountService accountService;
 	private TokenService tokenService;
 	

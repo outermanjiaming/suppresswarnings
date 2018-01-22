@@ -2,9 +2,10 @@ package com.suppresswarnings.osgi.nn.fsm;
 
 public interface S extends State {
 	S S0 = new S() {
+		public String name(){return "S";}
 		@Override
 		public void accept(String in, Context context) {
-			System.out.println("输入'login'登录");
+			System.out.println("enter 'login' to log on");
 		}
 
 		@Override
@@ -15,7 +16,7 @@ public interface S extends State {
 		}
 	};
 	S S1 = new S() {
-
+		public String name(){return "S1";}
 		@Override
 		public void accept(String in, Context context) {
 			System.out.println("Username: ");
@@ -29,6 +30,7 @@ public interface S extends State {
 		}
 	};
 	S S1F = new S() {
+		public String name(){return "S1F";}
 		int tried = 0;
 
 		@Override
@@ -49,15 +51,16 @@ public interface S extends State {
 		}
 	};
 	S S2 = new S() {
+		public String name(){return "S2";}
 		@Override
 		public void accept(String in, Context context) {
-			context.username = in;
+			context.put("username", in);
 			System.out.println("Passcode: ");
 		}
 
 		@Override
 		public S to(String in, Context context) {
-			String auth = "passcode" + context.username;
+			String auth = "passcode" + context.get("username");
 			if (auth.equals(in)) {
 				return Final;
 			}
@@ -65,6 +68,7 @@ public interface S extends State {
 		}
 	};
 	S S2F = new S() {
+		public String name(){return "S2F";}
 		int tried = 0;
 
 		@Override
@@ -74,7 +78,7 @@ public interface S extends State {
 
 		@Override
 		public S to(String in, Context context) {
-			String auth = "passcode" + context.username;
+			String auth = "passcode" + context.get("username");
 			if (auth.equals(in)) {
 				return Final;
 			}
@@ -87,16 +91,16 @@ public interface S extends State {
 		}
 	};
 	S Final = new S() {
-		public String toString(){return "Final";}
+		public String name(){return "Final";}
 		boolean authorized = false;
 
 		@Override
 		public void accept(String in, Context context) {
 			if (!authorized) {
-				context.passcode = in;
+				context.put("passcode", in);
 				authorized = true;
 			}
-			System.out.println(context.username + ": Authorized");
+			System.out.println(context.get("username") + ": Authorized");
 		}
 
 		@Override
