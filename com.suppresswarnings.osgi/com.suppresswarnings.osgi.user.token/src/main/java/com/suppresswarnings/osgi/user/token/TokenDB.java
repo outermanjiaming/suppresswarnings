@@ -1,8 +1,6 @@
 package com.suppresswarnings.osgi.user.token;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -86,14 +84,11 @@ public class TokenDB implements TokenService {
 		if(token == null || token.length() < HEAD_TOKEN.length() + 10) {
 			return null;
 		}
-		String hex = token.substring(HEAD_TOKEN.length());
-		long time = Long.parseLong(hex, 16);
-		long valid = time + VALID_MILLIS;
-		if(valid < System.currentTimeMillis()) {
+		long ttl = createTime(token) + VALID_MILLIS - System.currentTimeMillis();
+		if(ttl < 0) {
 			return null;
 		}
-		SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss.SS");
-		return format.format(new Date(valid));
+		return "TTL:" + ttl;
 	}
 
 	public static String randomToken(){
