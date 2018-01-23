@@ -15,4 +15,4 @@ Export-Package: com.suppresswarnings.osgi.nn,
  com.suppresswarnings.osgi.nn.other,
  com.suppresswarnings.osgi.nn.parellel,
  com.suppresswarnings.osgi.nn.rnn
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

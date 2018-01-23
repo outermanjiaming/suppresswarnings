@@ -8,4 +8,6 @@
   <artifactId>com.suppresswarnings.osgi.nn</artifactId>
   <dependencies>
   </dependencies>
+  <groupId>com.suppresswarnings.osgi</groupId>
+  <version>0.0.1.osgi</version>
 </project>
