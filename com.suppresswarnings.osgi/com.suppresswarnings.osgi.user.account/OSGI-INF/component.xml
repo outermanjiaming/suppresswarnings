@@ -2,6 +2,6 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" modified="modified" name="com.suppresswarnings.osgi.user.account">
    <implementation class="com.suppresswarnings.osgi.user.account.AccountDB"/>
    <service>
-      <provide interface="com.suppresswarnings.osgi.common.user.AccountService"/>
+      <provide interface="com.suppresswarnings.osgi.user.AccountService"/>
    </service>
 </scr:component>

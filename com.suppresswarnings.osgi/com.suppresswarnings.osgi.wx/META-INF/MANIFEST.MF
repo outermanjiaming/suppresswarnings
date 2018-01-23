@@ -6,6 +6,9 @@ Bundle-Version: 2018.1.23.osgi
 Export-Package: com.suppresswarnings.osgi.wx
 Import-Package: com.suppresswarnings.osgi.network.http,
  com.suppresswarnings.osgi.user,
+ org.apache.http.client.fluent;version="4.5.3",
  org.slf4j;version="1.7.7"
 Bundle-Vendor: LIJIAMING
 Service-Component: OSGI-INF/component.xml
+Bundle-ClassPath: libs/commons-codec-1.9.jar,
+ .
