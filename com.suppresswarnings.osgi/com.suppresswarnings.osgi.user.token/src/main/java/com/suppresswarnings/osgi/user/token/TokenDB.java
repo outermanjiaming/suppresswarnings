@@ -49,11 +49,11 @@ public class TokenDB implements TokenService {
 
 	@Override
 	public String create(User user) {
-		String uid_username_token =  KeyCreator.key(version, user.uid, KEY.Token, user.get(KEY.Account));
-		String token = levelDB.get(uid_username_token);
+		String uid_token =  KeyCreator.key(version, KEY.UID.name(), KEY.Token, user.uid);
+		String token = levelDB.get(uid_token);
 		if(valid(token) == null) {
 			token = randomToken();
-			levelDB.put(uid_username_token, token);
+			levelDB.put(uid_token, token);
 			logger.info("[token] new random token.");
 		} else {
 			logger.info("[token] old token.");
