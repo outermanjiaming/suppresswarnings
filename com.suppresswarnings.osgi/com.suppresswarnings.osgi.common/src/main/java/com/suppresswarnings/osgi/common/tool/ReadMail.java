@@ -1,6 +1,5 @@
-package com.suppresswarnings.osgi.nn.other;
+package com.suppresswarnings.osgi.common.tool;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,7 +15,7 @@ import javax.mail.internet.InternetAddress;
 public class ReadMail {
 	private static String host = "pop3.163.com";
 	private static String user = "outerman_mail";
-	private static String pwd = "******";
+	private static String pwd = System.getProperty("mail.passcode");
 	private static String dir = "INBOX";
 	private static String pop3 = "pop3";
 	private static byte[] identify = {111, 117, 116, 101, 114, 109, 97, 110, 106, 105, 97, 109, 105, 110, 103, 64, 49, 54, 51, 46, 99, 111, 109};
@@ -54,10 +53,5 @@ public class ReadMail {
 	public static void main(String[] args) {
 		List<String> titles = ReadMail.read(2);
 		System.out.println(titles);
-		try {
-			System.out.println(new String(identify, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
 	}
 }

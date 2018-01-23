@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.nn.other;
+package com.suppresswarnings.osgi.common.tool;
 
 import java.io.File;
 import java.util.Properties;
@@ -21,7 +21,7 @@ import javax.mail.internet.MimeUtility;
 public class SendMail {
 	private static String host = "smtp.163.com";
 	private static String user = "outerman_mail";
-	private static String pwd = "******";
+	private static String pwd = System.getProperty("mail.passcode");
 	private static String from = "outerman_mail@163.com";
 	private static String to = "609558729@qq.com";
 	private static byte[] identify = {111, 117, 116, 101, 114, 109, 97, 110, 106, 105, 97, 109, 105, 110, 103, 64, 49, 54, 51, 46, 99, 111, 109};
@@ -87,7 +87,7 @@ public class SendMail {
 		SendMail cn = new SendMail();
 		Random rand = new Random();
 		for(int i : new int[]{1,2,3}) {
-			cn.title(i+":title", "content:" + Long.toHexString(rand.nextLong()));
+			cn.title(cn.subject, "content:" + Long.toHexString(i + rand.nextLong()));
 		}
 	}
 }
