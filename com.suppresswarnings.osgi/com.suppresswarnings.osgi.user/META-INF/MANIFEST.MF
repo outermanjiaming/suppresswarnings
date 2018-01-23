@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: User
 Bundle-SymbolicName: com.suppresswarnings.osgi.user
-Bundle-Version: 1.0.0.osgi
+Bundle-Version: 2018.1.23.osgi
 Export-Package: com.suppresswarnings.osgi.user
-Import-Package: com.suppresswarnings.osgi.common.protocol,
- com.suppresswarnings.osgi.common.proxy,
- com.suppresswarnings.osgi.common.user,
- com.suppresswarnings.osgi.leveldb,
+Bundle-ClassPath: libs/javax.activation-1.1.0.v201105071233.jar,
+ libs/javax.mail-1.5.0.jar,
+ libs/javax-ssl-1.1.0.jar,
+ .
+Import-Package: com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.network.http,
- com.suppresswarnings.osgi.nn.fsm,
  org.slf4j;version="1.7.2"
 Service-Component: OSGI-INF/component.xml
+Bundle-Vendor: LIJIAMING

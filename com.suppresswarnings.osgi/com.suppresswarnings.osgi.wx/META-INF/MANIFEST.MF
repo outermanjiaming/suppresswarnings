@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Wx
+Bundle-SymbolicName: com.suppresswarnings.osgi.wx
+Bundle-Version: 2018.1.23.osgi
+Export-Package: com.suppresswarnings.osgi.wx
+Import-Package: com.suppresswarnings.osgi.network.http,
+ com.suppresswarnings.osgi.user,
+ org.slf4j;version="1.7.7"
+Bundle-Vendor: LIJIAMING
+Service-Component: OSGI-INF/component.xml

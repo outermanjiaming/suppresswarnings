@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AccountDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.user.account
-Bundle-Version: 1.0.0.osgi
+Bundle-Version: 2018.1.23.osgi
 Import-Package: com.leveldb.common.db,
- com.suppresswarnings.osgi.common.protocol,
- com.suppresswarnings.osgi.common.user,
  com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.user,
  org.slf4j;version="1.7.2"
 Service-Component: OSGI-INF/component.xml
 Export-Package: com.suppresswarnings.osgi.user.account
+Bundle-Vendor: LIJIAMING

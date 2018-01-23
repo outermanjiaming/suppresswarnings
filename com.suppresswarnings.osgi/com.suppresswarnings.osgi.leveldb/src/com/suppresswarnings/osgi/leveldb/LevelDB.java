@@ -12,8 +12,8 @@ public interface LevelDB {
 	public int destroy(String dbname);
 	public int put(String key, String value);
 	public int put(String key, byte[] value);
-	public void list(String start, long limit, BiConsumer<String, String> consumer);
+	public int del(String key);
 	public String get(String key);
 	public byte[] read(String key);
-	
+	public void list(String start, long limit, BiConsumer<String, String> consumer);
 }

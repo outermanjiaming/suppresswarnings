@@ -18,5 +18,6 @@
       
       <module>com.suppresswarnings.osgi.user.token</module>
       <module>com.suppresswarnings.osgi.interaction</module>
+      <module>com.suppresswarnings.osgi.wx</module>
   </modules>
 </project>

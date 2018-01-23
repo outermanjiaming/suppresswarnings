@@ -2,14 +2,14 @@ package com.suppresswarnings.osgi.user.account;
 
 import org.slf4j.LoggerFactory;
 
-import com.suppresswarnings.osgi.common.protocol.KEY;
-import com.suppresswarnings.osgi.common.protocol.KeyCreator;
-import com.suppresswarnings.osgi.common.protocol.Step;
-import com.suppresswarnings.osgi.common.protocol.Version;
-import com.suppresswarnings.osgi.common.user.AccountService;
-import com.suppresswarnings.osgi.common.user.Login;
-import com.suppresswarnings.osgi.common.user.Register;
-import com.suppresswarnings.osgi.common.user.User;
+import com.suppresswarnings.osgi.user.KEY;
+import com.suppresswarnings.osgi.user.KeyCreator;
+import com.suppresswarnings.osgi.user.Step;
+import com.suppresswarnings.osgi.user.Version;
+import com.suppresswarnings.osgi.user.AccountService;
+import com.suppresswarnings.osgi.user.Login;
+import com.suppresswarnings.osgi.user.Register;
+import com.suppresswarnings.osgi.user.User;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 /**
  * user operations on account

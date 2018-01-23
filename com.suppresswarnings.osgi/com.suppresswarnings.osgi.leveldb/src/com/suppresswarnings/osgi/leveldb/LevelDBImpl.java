@@ -61,6 +61,13 @@ public class LevelDBImpl implements LevelDB {
 	}
 
 	@Override
+	public int del(String key) {
+		Status s = db_.Delete(new WriteOptions(), new Slice(key));
+		if(s.ok()) return OK;
+		return 0;
+	}
+	
+	@Override
 	public byte[] read(String key) {
 		Status status = new Status();
 		ReadOptions roption = new ReadOptions();
