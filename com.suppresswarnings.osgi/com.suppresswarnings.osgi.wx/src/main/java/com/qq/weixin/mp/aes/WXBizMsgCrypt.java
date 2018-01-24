@@ -277,8 +277,6 @@ public class WXBizMsgCrypt {
 	public String verifyUrl(String msgSignature, String timeStamp, String nonce, String echoStr)
 			throws AesException {
 		String signature = SHA1.getSHA1(token, timeStamp, nonce, "");
-System.out.println(signature);
-System.out.println(msgSignature);
 		if (!signature.equals(msgSignature)) {
 			throw new AesException(AesException.ValidateSignatureError);
 		}
