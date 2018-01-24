@@ -56,7 +56,7 @@ public class Program {
 		System.out.println("解密后明文: " + result2);
 		
 		WXBizMsgCrypt tok = new WXBizMsgCrypt("lijiaming2018123", "2a6mVPNhf1iNxJMCXoZUomUrS323MVzsSHkpAn4ZwWp", "wx1f95008283948d0b");
-		String s = tok.verifyUrl("cb2710132e0d0bd96d5da3324028123e037d4a59", "1516769848", "989129435", "ot2GL05lU3rpJnJ7Hf_HTVjrozgk");
+		String s = tok.verifyUrl("698a6821cf0562c72ac298cdf802ce39c189d549", "1516797745", "2057561", "ot2GL05lU3rpJnJ7Hf_HTVjrozgk");
 		System.out.println(s);
 		
 	}

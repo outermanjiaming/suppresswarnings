@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Format {
+	public Format(){}
+	public Format(String[] rules) {
+		for(String rule : rules) {
+			compile(rule);
+		}
+	}
 	boolean debug = false;
 	Map<Integer,Node> normal = new HashMap<Integer,Node>();
 	Map<Integer,Node> keyfirst = new HashMap<Integer,Node>();

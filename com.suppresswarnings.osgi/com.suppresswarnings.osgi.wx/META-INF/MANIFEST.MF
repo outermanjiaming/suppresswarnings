@@ -4,7 +4,8 @@ Bundle-Name: Wx
 Bundle-SymbolicName: com.suppresswarnings.osgi.wx
 Bundle-Version: 2018.1.24.osgi
 Export-Package: com.suppresswarnings.osgi.wx
-Import-Package: com.suppresswarnings.osgi.network.http,
+Import-Package: com.suppresswarnings.osgi.alone,
+ com.suppresswarnings.osgi.network.http,
  com.suppresswarnings.osgi.user,
  org.apache.http.client.fluent;version="4.5.3",
  org.slf4j;version="1.7.7"
