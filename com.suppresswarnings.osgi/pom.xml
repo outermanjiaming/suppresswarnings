@@ -13,11 +13,12 @@
 	  <module>com.suppresswarnings.osgi.leveldb</module>
 	  <module>com.suppresswarnings.osgi.ner</module>
 	  <module>com.suppresswarnings.osgi.user</module>
-	  <module>com.suppresswarnings.osgi.common</module>
+	  
       <module>com.suppresswarnings.osgi.user.account</module>
       
       <module>com.suppresswarnings.osgi.user.token</module>
-      <module>com.suppresswarnings.osgi.interaction</module>
+      
       <module>com.suppresswarnings.osgi.wx</module>
+      <module>com.suppresswarnings.osgi.alone</module>
   </modules>
 </project>

@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Alone
+Bundle-SymbolicName: com.suppresswarnings.osgi.alone
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.suppresswarnings.osgi.alone
