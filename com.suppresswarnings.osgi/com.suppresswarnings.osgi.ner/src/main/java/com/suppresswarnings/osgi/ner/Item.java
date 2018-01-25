@@ -2,7 +2,7 @@ package com.suppresswarnings.osgi.ner;
 
 public class Item {
 
-	int id;
+	private int id;
 	String key;
 	String value;
 	
@@ -19,6 +19,7 @@ public class Item {
 		this.value = v;
 		return this;
 	}
+	public int id(){return id;}
 	public String key(){return key;}
 	public String value(){return value;}
 	@Override

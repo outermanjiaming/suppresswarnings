@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Format;
 import com.suppresswarnings.osgi.alone.Format.KeyValue;
+import com.suppresswarnings.osgi.ner.API;
+import com.suppresswarnings.osgi.ner.Item;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 import com.suppresswarnings.osgi.user.SendMail;
@@ -41,7 +43,7 @@ public class WXService implements HTTPService {
 	public static final String[] secret = {"lijiaming2018123", "2a6mVPNhf1iNxJMCXoZUomUrS323MVzsSHkpAn4ZwWp", "wx1f95008283948d0b"};
 	private org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	private Format format = new Format(msgFormat);
-	
+	private API api = new API(System.getenv("HB_HOME") + "/quiz.ner");
 	@Override
 	public String getName() {
 		return name;
@@ -77,9 +79,15 @@ public class WXService implements HTTPService {
 			if("text".equals(kv.value())) {
 				WXtext wxtext = new WXtext();
 				wxtext.init(kvs);
-				return reply(openid, "(success) " + wxtext.Content);
+				String text = wxtext.Content;
+				Item[] items = api.ner(text);
+				QuizContext context = new QuizContext();
+				for(Item it : items) {
+					context.test(it.key());
+				}
+				return reply(openid, "AI: " + context.output());
 			}
-			return reply(openid, "(success) I'm glad you're interested in us");
+			return reply(openid, "I'm glad you're interested in us, but I can't resolve " + types.get(kv.value()));
 		}
 		return "success";
 	}
@@ -88,8 +96,6 @@ public class WXService implements HTTPService {
 		return String.format(xml, to, ""+time, msg);
 	}
 	public static void main(String[] args) {
-//		SendMail cn = new SendMail();
-//		cn.title("msg from wx: ", "test");
 		Format format = new Format(msgFormat);
 		List<KeyValue> kvs = format.matches("<xml><ToUserName><![CDATA[gh_a1fe05b98706]]></ToUserName><FromUserName><![CDATA[ot2GL05lU3rpJnJ7Hf_HTVjrozgk]]></FromUserName><CreateTime>1516794211</CreateTime><MsgType><![CDATA[location]]></MsgType><Location_X>22.374340</Location_X><Location_Y>113.562973</Location_Y><Scale>16</Scale><Label><![CDATA[魅族科技研发分部(珠海市香洲区)]]></Label><MsgId>6514581531430798690</MsgId></xml>");//"<xml><ToUserName><![CDATA[gh_a1fe05b98706]]></ToUserName><FromUserName><![CDATA[ot2GL05lU3rpJnJ7Hf_HTVjrozgk]]></FromUserName><CreateTime>1516794660</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[http://139.199.104.224/]]></Content><MsgId>6514583459871114725</MsgId></xml>");
 		System.out.println(kvs.get(msgTypeIndex));

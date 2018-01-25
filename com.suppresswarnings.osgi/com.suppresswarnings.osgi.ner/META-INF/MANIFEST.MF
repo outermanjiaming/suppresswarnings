@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LevelDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.ner
-Bundle-Version: 0.0.1.osgi
+Bundle-Version: 2018.1.25.osgi
 Bundle-Vendor: LIJIAMING
 Export-Package: com.suppresswarnings.osgi.ner,
  edu.stanford.nlp.classify,
@@ -37,8 +37,6 @@ Export-Package: com.suppresswarnings.osgi.ner,
  edu.stanford.nlp.util,
  edu.stanford.nlp.util.concurrent,
  edu.stanford.nlp.util.logging
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.io,
  org.apache.commons.logging,
  org.slf4j
-Bundle-ActivationPolicy: lazy
