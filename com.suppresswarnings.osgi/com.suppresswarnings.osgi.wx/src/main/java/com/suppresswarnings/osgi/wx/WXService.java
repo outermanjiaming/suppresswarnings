@@ -18,10 +18,23 @@ import com.suppresswarnings.osgi.user.SendMail;
 
 public class WXService implements HTTPService {
 	public static final String[] keys = {
-			"ToUserName","FromUserName","CreateTime", "MsgType","MediaId","Content","MsgId","PicUrl","Location_X","Location_Y", "Scale", "Label", "Recognition"
+			"ToUserName",
+			"FromUserName",
+			"CreateTime", 
+			"MsgType",
+			"MediaId",
+			"Content",
+			"MsgId",
+			"PicUrl",
+			"Location_X",
+			"Location_Y", 
+			"Scale", 
+			"Label", 
+			"Recognition"
 	};
 	public static final String[] values = {
-			"gh_a1fe05b98706","ot2GL05lU3rpJnJ7Hf_HTVjrozgk"
+			"gh_a1fe05b98706",
+			"ot2GL05lU3rpJnJ7Hf_HTVjrozgk"
 	};
 	public static final Map<String, String> types = new HashMap<String,String>();
 	static {
