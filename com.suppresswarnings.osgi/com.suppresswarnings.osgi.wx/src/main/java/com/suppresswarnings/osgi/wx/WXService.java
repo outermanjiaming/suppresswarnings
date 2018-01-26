@@ -42,6 +42,7 @@ public class WXService implements HTTPService {
 		types.put("location", "位置");
 		types.put("voice", "语音");
 		types.put("text", "文字");
+		types.put("subscribe", "关注");
 	}
 	public static final int msgTypeIndex = 3;
 	public static final String name = "wx.http";
@@ -53,7 +54,11 @@ public class WXService implements HTTPService {
 		"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><PicUrl><![CDATA[{PicUrl}]]></PicUrl><MsgId>{MsgId}</MsgId><MediaId><![CDATA[{MediaId}]]></MediaId></xml>",
 		"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Location_X>{Location_X}</Location_X><Location_Y>{Location_Y}</Location_Y><Scale>{Scale}</Scale><Label><![CDATA[{Label}]]></Label><MsgId>{MsgId}</MsgId></xml>"
 	};
-	public static final String[] secret = {"lijiaming2018123", "2a6mVPNhf1iNxJMCXoZUomUrS323MVzsSHkpAn4ZwWp", "wx1f95008283948d0b"};
+	public static final String[] secret = {
+			"lijiaming2018123", 
+			"2a6mVPNhf1iNxJMCXoZUomUrS323MVzsSHkpAn4ZwWp", 
+			"wx1f95008283948d0b"
+	};
 	private org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	private Format format = new Format(msgFormat);
 	private API api = new API(System.getenv("HB_HOME") + "/quiz.ner");
