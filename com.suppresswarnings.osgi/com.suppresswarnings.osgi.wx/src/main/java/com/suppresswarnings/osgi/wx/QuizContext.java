@@ -16,12 +16,12 @@ public class QuizContext extends Context<List<String>> {
 	}
 	@Override
 	public void accept(String t) {
-		context.add(t);
+		content.add(t);
 		output = t;
 	}
 	@Override
 	public String toString() {
-		return "QuizContext [context=" + context + ", state=" + state.name() + "]";
+		return "QuizContext [content=" + content + ", state=" + state.name() + "]";
 	}
 	public String output(){
 		return output;

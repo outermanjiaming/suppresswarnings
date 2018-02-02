@@ -14,11 +14,11 @@ import java.util.function.Predicate;
  * @param <T>
  */
 public abstract class Context<T> implements Predicate<String>, Consumer<String> {
-	public T context;
+	public T content;
 	public State state;
 	public Context(State init, T ctx){
 		this.state = init;
-		this.context = ctx;
+		this.content = ctx;
 	}
 	@Override
 	public boolean test(String in) {

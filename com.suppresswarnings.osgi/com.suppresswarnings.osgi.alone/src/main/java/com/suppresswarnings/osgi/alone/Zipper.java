@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.user;
+package com.suppresswarnings.osgi.alone;
 
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;

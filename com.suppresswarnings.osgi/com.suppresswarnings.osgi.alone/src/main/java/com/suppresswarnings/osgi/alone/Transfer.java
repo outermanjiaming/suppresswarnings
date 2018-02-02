@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.user;
+package com.suppresswarnings.osgi.alone;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
