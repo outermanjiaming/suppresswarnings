@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -19,16 +20,17 @@ import com.suppresswarnings.osgi.nn.Network;
 import com.suppresswarnings.osgi.nn.Util;
 
 public class AutoJump {
-	public static final String serializeTo = "D:/tmp/jump/jump20.ser";
+	public static final String serializeTo = "D:/tmp/jump/newjump.ser";
 	public static final String adb = "C:/Users/lijiaming/AppData/Local/Android/Sdk/platform-tools/adb.exe";
 	public final static double[] yes = {1,0};
 	public final static double[] no = {0,1};
 	public static final double confidence = 0.9;
 	public static final int epochs = 10000;
 	public static Network nn;
+	public static Func func = new Func();
 	
 	public static void main(String[] args) throws Exception {
-		collect();//autojump();
+		autojump();//collect();//
 	}
 	
 	public static void collect() {
@@ -57,11 +59,11 @@ public class AutoJump {
 		int times = 0;
 		while(true) {
 			times ++;
-			long wait = 1200;
+			long wait = 1280;
 			TimeUnit.MILLISECONDS.sleep(wait);
 			File newfile = new File(serializeTo);
 			if(old < newfile.lastModified()){
-				System.out.println("[update] ------------------------------------------------------------------------ " + old + " --> " + newfile.lastModified());
+				System.out.println("[update] ------------------------------------------------------------------------ " + (old - newfile.lastModified()) + "ms");
 				old = newfile.lastModified();
 				nn = (Network)Util.deserialize(serializeTo);
 			}
@@ -79,11 +81,10 @@ public class AutoJump {
 			int[][] data = readImage(new File(file));
 			final int[] jumper = new int[2];
 			int[] block = new int[2];
-			downstair(data, 4, block);
-			Func func = new Func();
-			StreamSupport.stream(new Supply(data, 100, 240, 10, 10), false)
+			
+			Optional<Piece> found = StreamSupport.stream(new Supply(data, 100, 240, 10, 10), false)
 			.filter(f100x240 -> {
-				if(f100x240.getY() + 100 < block[0]) return false;
+				if(f100x240.getY() < 500) return false;
 				
 				List<Double> list = StreamSupport.stream(new Supply(f100x240.getData(), 20, 20, 20, 20), false)
 				.map(f20x20 -> new Supply(f20x20.getData(), 10, 10, 10, 10))
@@ -101,11 +102,23 @@ public class AutoJump {
 					jumper[0] =f100x240.x;
 					jumper[1] =f100x240.y;
 					System.out.println("jumper found:("+ f100x240.x + "," + f100x240.y + ") == " +  y[0]);
+					int[][] piece = f100x240.getData();
+					for(int xx =0;xx<piece.length;xx++) {
+						for(int yy=0;yy<piece[xx].length;yy++) {
+							data[xx + f100x240.x][yy + f100x240.y] = piece[0][yy];
+						}
+					}
 					return true;
 				}
 				return false;
 			})
 			.findFirst();
+			
+			if(!found.isPresent()) {
+				System.out.println("jumper not found!");
+			}
+			downstair(data, 4, block);
+			
 			long duration = function(jumper, block);
 			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "200", "200", "202", "202", "" + duration});
 			swipescreen.waitFor();
@@ -123,12 +136,11 @@ public class AutoJump {
 		int w = jumper[0] - (block[0] + 50);
 		int h = jumper[1] - (block[1] + 40);
 		double x = Math.sqrt(w * w + h * h) / 520;
-		return (long)(x * x * 260 + 260 * x + 260);
+		return (long)(- x * x * x * 0.5 + x* x * 40 + x * 580 + 145);
 	}
 	
 	public static void decide(File file, String dir) {
 		int[][] data = readImage(file);
-		Func func = new Func();
 		StreamSupport.stream(new Supply(data, 100,240,10,10), false)
 		.forEach(f100x240 ->{
 			List<Double> e = StreamSupport.stream(new Supply(f100x240.data, 20, 20, 20, 20), false)
@@ -150,29 +162,21 @@ public class AutoJump {
 		});
 	}
 
-	public static List<List<Integer>> slide(File file) {
-		List<List<Integer>> list = new ArrayList<List<Integer>>();
+	public static List<List<Double>> slide(File file) {
+		List<List<Double>> list = new ArrayList<List<Double>>();
 		int[][] data = readImage(file);
 		StreamSupport.stream(new Supply(data, 100,240,10,10), false)
 		.map(f100x240 -> new Supply(f100x240.getData(), 20, 20, 20, 20))
 		.forEach(supply20x20 -> {
-			List<Integer> e = StreamSupport.stream(supply20x20, false)
+			List<Double> e = StreamSupport.stream(supply20x20, false)
 			.map(f20x20 -> new Supply(f20x20.getData(), 10, 10, 10, 10))
 			.map(supply10x10 -> StreamSupport.stream(supply10x10, false)
-					.map(f10x10 -> {
-						int[][] d10x10 = f10x10.getData();
-						int sum = 0;
-						for(int i=0;i<d10x10.length;i++) {
-							for(int j=0;j<d10x10[0].length;j++) {
-								sum += d10x10[i][j];
-							}
-						}
-						return sum / 100;
-					})
+					.map(func)
+					.flatMap(lst -> lst.stream())
 					.collect(Collectors.toList())
 				)
-				.flatMap(f4x4 -> f4x4.stream())
-				.collect(Collectors.toList());
+			.flatMap(lst -> lst.stream())
+			.collect(Collectors.toList());
 			list.add(e);
 		});
 		return list;
@@ -447,8 +451,8 @@ class Func implements Function<Piece, List<Double>>{
 		}
 		result.add(sum / size);
 		result.add(r * 1.0 / size);
-		result.add(g * 1.0  / size);
-		result.add(b * 1.0  / size);
+		result.add(g * 1.0 / size);
+		result.add(b * 1.0 / size);
 		return result;
 	}
 }
