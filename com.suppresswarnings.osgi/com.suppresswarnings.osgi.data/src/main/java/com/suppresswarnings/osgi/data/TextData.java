@@ -1,9 +1,14 @@
 package com.suppresswarnings.osgi.data;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TextData {
+public class TextData implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6334542727674973374L;
 	public static final String extraSpliter = ";";
 	//1615a70b02a || 1517640805250
 	String createTime;
@@ -74,7 +79,7 @@ public class TextData {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
 		Date date = new Date(time);
 		System.out.println(format.format(date));
-		String current = Long.toHexString(time);
+		String current = ""+time;
 		System.out.println(current);
 		return current;
 	}
