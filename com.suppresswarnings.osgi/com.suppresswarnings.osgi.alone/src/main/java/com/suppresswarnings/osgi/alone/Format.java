@@ -15,6 +15,14 @@ public class Format {
 	boolean debug = false;
 	Map<Integer,Node> normal = new HashMap<Integer,Node>();
 	Map<Integer,Node> keyfirst = new HashMap<Integer,Node>();
+	
+	public static void main(String[] args) {
+		Format f = new Format();
+		f.compile("{Version}:{uid}:{Attr}:{Index}={value}");
+		List<KeyValue> result = f.matches("V1:012311355a323c3dc:Data:Index=V1:Data:1514325634132:01252:-12435133");
+		System.out.println(result);
+	}
+	
 	public void compile(String template) {
 		if(template == null || template.length() <= 2) return;
 		int index = template.lastIndexOf(Node.end);

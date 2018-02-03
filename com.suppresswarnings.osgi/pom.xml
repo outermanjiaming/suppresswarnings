@@ -20,5 +20,6 @@
       
       <module>com.suppresswarnings.osgi.wx</module>
       <module>com.suppresswarnings.osgi.alone</module>
+      <module>com.suppresswarnings.osgi.data</module>
   </modules>
 </project>
