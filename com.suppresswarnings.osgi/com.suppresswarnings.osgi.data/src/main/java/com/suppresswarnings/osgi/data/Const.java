@@ -3,6 +3,8 @@ package com.suppresswarnings.osgi.data;
 import java.util.concurrent.TimeUnit;
 
 public interface Const {
+	String delimiter = ".";
+	String data = "Data";
 	/**
 	 * collection or question or classify or reply or produce or unknown
 	 * @author lijiaming

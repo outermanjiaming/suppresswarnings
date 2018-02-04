@@ -16,7 +16,7 @@ public class TokenDB implements TokenService {
 	static final long VALID_MILLIS = TimeUnit.HOURS.toMillis(2);
 	static final String HEAD_TOKEN = "0000000";
 	static final String version = Version.V1;
-	static final String delimiter = ";";
+	static final String delimiter = ":";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	static final String dbname = "/token";
 	

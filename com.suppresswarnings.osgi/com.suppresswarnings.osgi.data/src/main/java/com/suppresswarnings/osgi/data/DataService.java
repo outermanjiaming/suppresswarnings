@@ -1,14 +1,11 @@
 package com.suppresswarnings.osgi.data;
 
-import java.util.Spliterator;
-import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 
 public interface DataService {
-	//create a textdata into database, return a callback function which you can get a reply from
-	public Future<String> create(String uuid, String attribute, String value);
-	public Future<String> complement(TextData data);
-	public Spliterator<TextData> getAllMyData(String uid, String...strings);
-	public Spliterator<TextData> getDataByQuestion(String question, String...strings);
-	public Spliterator<TextData> getDataByClassify(String classify, String...strings);
-	public Spliterator<TextData> getDataByPeriod(String start, String end);
+	public int save(String key, String value);
+	public int unknown(String uid, String value);
+	public int answer(String uid, String question, String value);
+	public int classify(String uid, String classify, String value);
+	public void listSome(String start, long limit, BiConsumer<String, String> consumer);
 }

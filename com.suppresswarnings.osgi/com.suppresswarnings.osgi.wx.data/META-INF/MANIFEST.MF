@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Data
+Bundle-SymbolicName: com.suppresswarnings.osgi.wx.data
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.suppresswarnings.osgi.wx.data
+Import-Package: com.suppresswarnings.osgi.data,
+ com.suppresswarnings.osgi.leveldb,
+ com.suppresswarnings.osgi.user,
+ org.slf4j;version="1.7.2"
+Service-Component: OSGI-INF/component.xml
