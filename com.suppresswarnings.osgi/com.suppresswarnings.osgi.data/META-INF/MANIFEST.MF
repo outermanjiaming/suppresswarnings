@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Data
+Bundle-SymbolicName: com.suppresswarnings.osgi.data
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.suppresswarnings.osgi.data

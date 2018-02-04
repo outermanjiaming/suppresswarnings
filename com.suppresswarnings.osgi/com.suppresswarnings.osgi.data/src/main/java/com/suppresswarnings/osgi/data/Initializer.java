@@ -1,5 +1,5 @@
 package com.suppresswarnings.osgi.data;
 
-public interface Initializer {
-	public void init(Counter counter);
+public interface Initializer<T> {
+	public void init(T object);
 }

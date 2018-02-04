@@ -95,9 +95,22 @@ public class WXService implements HTTPService {
 				cn.title("[note] wx msg structure not match", kvs.toString());
 			}
 			if("text".equals(kv.value())) {
-				WXtext wxtext = new WXtext();
-				wxtext.init(kvs);
-				String text = wxtext.Content;
+				WXtext value = new WXtext();
+				value.init(kvs);
+				String text = value.Content;
+				Item[] items = api.ner(text);
+				QuizContext context = new QuizContext();
+				for(Item it : items) {
+					context.test(it.key());
+				}
+				return reply(openid, "AI: " + context.output());
+			} else if("voice".equals(kv.value())) {
+				WXvoice value = new WXvoice();
+				value.init(kvs);
+				String text = value.Recognition;
+				if(text == null || text.length() < 1) {
+					return reply(openid, "FAIL: pardon me?");
+				}
 				Item[] items = api.ner(text);
 				QuizContext context = new QuizContext();
 				for(Item it : items) {

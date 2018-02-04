@@ -15,7 +15,7 @@ public class Counter {
 	Map<String, AtomicInteger> userCounter = new ConcurrentHashMap<String, AtomicInteger>();
 	Map<String, Long> ttl = new ConcurrentHashMap<String, Long>();
 	
-	public void init(Initializer init) {
+	public void init(Initializer<Counter> init) {
 		init.init(this);
 	}
 	public void ttl(String key, long timeToLive) {

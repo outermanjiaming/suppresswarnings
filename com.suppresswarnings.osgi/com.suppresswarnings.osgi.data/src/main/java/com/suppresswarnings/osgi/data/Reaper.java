@@ -1,6 +1,7 @@
 package com.suppresswarnings.osgi.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Reaper {
@@ -9,5 +10,7 @@ public class Reaper {
 	public void add(TTL one) {
 		ttl.add(one);
 	}
-	
+	public void sort(){
+		Collections.sort(ttl);
+	}
 }
