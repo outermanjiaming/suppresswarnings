@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.user.KEY;
-import com.suppresswarnings.osgi.user.KeyCreator;
 import com.suppresswarnings.osgi.user.Version;
 import com.suppresswarnings.osgi.user.TokenService;
 import com.suppresswarnings.osgi.user.User;
@@ -17,6 +16,7 @@ public class TokenDB implements TokenService {
 	static final long VALID_MILLIS = TimeUnit.HOURS.toMillis(2);
 	static final String HEAD_TOKEN = "0000000";
 	static final String version = Version.V1;
+	static final String delimiter = ";";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	static final String dbname = "/token";
 	
@@ -49,7 +49,7 @@ public class TokenDB implements TokenService {
 
 	@Override
 	public String create(User user) {
-		String uid_token =  KeyCreator.key(version, KEY.UID.name(), KEY.Token, user.uid);
+		String uid_token = String.join(delimiter, version, user.uid, KEY.Token.name());
 		String token = levelDB.get(uid_token);
 		if(valid(token) == null) {
 			token = randomToken();
@@ -59,7 +59,7 @@ public class TokenDB implements TokenService {
 			logger.info("[token] old token.");
 		}
 		
-		String token_uid =  KeyCreator.key(version, KEY.Token.name(), KEY.UID, token);
+		String token_uid = String.join(delimiter, version, KEY.Token.name(), KEY.UID.name(), token);
 		levelDB.put(token_uid, user.uid);
 		user.set(KEY.Token, token);
 		return token;
@@ -67,7 +67,7 @@ public class TokenDB implements TokenService {
 
 	@Override
 	public String check(String token) {
-		String token_uid = KeyCreator.key(version, KEY.Token.name(), KEY.UID, token);
+		String token_uid = String.join(delimiter, version, KEY.Token.name(), KEY.UID.name(), token);
 		String uid = levelDB.get(token_uid);
 		if(uid == null) {
 			return null;

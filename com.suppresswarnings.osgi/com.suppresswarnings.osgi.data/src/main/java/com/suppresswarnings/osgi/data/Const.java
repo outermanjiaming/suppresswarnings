@@ -21,4 +21,9 @@ public interface Const {
 		long userReply = TimeUnit.MINUTES.toMillis(20);
 		long setThePaper = TimeUnit.MINUTES.toMillis(120);
 	}
+	
+	public interface CounterName {
+		String data = "Data";
+		String type = "Type";
+	}
 }

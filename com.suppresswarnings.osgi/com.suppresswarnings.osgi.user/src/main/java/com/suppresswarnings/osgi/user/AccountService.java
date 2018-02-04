@@ -1,5 +1,20 @@
 package com.suppresswarnings.osgi.user;
 
+/**
+ * key principle:
+ * attr: a KEY
+ * getwhat: a KEY
+ * what: a value by the key
+ * value: an argument
+ * 0.version:attr:getwhat:args
+ * 		e.g. V1:Invite:A03ed4F
+ * 1.version:owner:attr
+ * 		e.g. V1:lijiaming:Token
+ * 2.version:by[attr:...]:getwhat:[args:...], 
+ * 		e.g. V1:Account:Passwd:UID:lijiaming:ifsef84ru28394r@fas#as&
+ * @author lijiaming
+ *
+ */
 public interface AccountService {
 
 	/**
