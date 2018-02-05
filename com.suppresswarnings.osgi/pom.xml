@@ -22,5 +22,6 @@
       <module>com.suppresswarnings.osgi.alone</module>
       <module>com.suppresswarnings.osgi.data</module>
       <module>com.suppresswarnings.osgi.wx.data</module>
+      <module>com.suppresswarnings.osgi.command</module>
   </modules>
 </project>

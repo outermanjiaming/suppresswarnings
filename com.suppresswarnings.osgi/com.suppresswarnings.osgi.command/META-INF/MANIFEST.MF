@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.suppresswarnings.osgi.command
+Bundle-SymbolicName: com.suppresswarnings.osgi.command
+Bundle-Version: 2018.2.5.osgi
+Export-Package: com.suppresswarnings.osgi.command
+Bundle-Vendor: LIJIAMING
+Import-Package: com.suppresswarnings.osgi.data,
+ org.eclipse.osgi.framework.console;version="1.1.0",
+ org.osgi.framework,
+ org.slf4j;version="1.7.2"
+Service-Component: OSGI-INF/component.xml
