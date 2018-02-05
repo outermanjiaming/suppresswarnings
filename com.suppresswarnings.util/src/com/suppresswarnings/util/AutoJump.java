@@ -1,12 +1,16 @@
 package com.suppresswarnings.util;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Spliterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -15,6 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import com.suppresswarnings.osgi.nn.Network;
 import com.suppresswarnings.osgi.nn.Util;
@@ -28,15 +34,116 @@ public class AutoJump {
 	public static final int epochs = 10000;
 	public static Network nn;
 	public static Func func = new Func();
+	public static int index = 0;
 	
 	public static void main(String[] args) throws Exception {
-		autojump();//collect();//
+		show();//collect();//autojump();//
+	}
+	
+	public static void show(){
+		JFrame frame = new JFrame("show jumper");
+		Visual bgp = new Visual();
+		nn = (Network) Util.deserialize(serializeTo);
+		String dir = "D:/files/java8/workspace/jump/";
+		File folder = new File(dir);
+		String[] files = folder.list(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String name) {
+				if(name.endsWith("png")) return true;
+				return false;
+			}
+		});
+		
+		frame.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("clicked ...");
+				File file = new File(dir, files[index]);
+				int[][] data = readImage(file);
+				
+				bgp.init(data);
+				frame.repaint();
+				System.out.println("paint ...");
+			
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						Random rand = new Random();
+						System.out.println("finding ...");
+						Optional<Piece> opt = StreamSupport.stream(new Supply(data, 100,240,10,10), false)
+						.peek(f100x240 ->{
+							if(rand.nextDouble() > 0.7) {
+								return;
+							}
+							List<Double> x = StreamSupport.stream(new Supply(f100x240.data, 20, 20, 20, 20), false)
+									.map(f20x20 -> new Supply(f20x20.data, 10, 10, 10, 10))
+									.map(p10x10 -> StreamSupport.stream(p10x10, false)
+											.map(func)
+											.flatMap(lst -> lst.stream())
+											.collect(Collectors.toList())
+										)
+									.flatMap(lst -> lst.stream())
+									.collect(Collectors.toList());
+							Data d = new Data(x, no);
+							double[] y = nn.test(d.x);
+							bgp.find(f100x240, yes(y));
+							frame.repaint();
+						}).filter(piece -> {
+							List<Double> x = StreamSupport.stream(new Supply(piece.data, 20, 20, 20, 20), false)
+									.map(f20x20 -> new Supply(f20x20.data, 10, 10, 10, 10))
+									.map(p10x10 -> StreamSupport.stream(p10x10, false)
+											.map(func)
+											.flatMap(lst -> lst.stream())
+											.collect(Collectors.toList())
+										)
+									.flatMap(lst -> lst.stream())
+									.collect(Collectors.toList());
+							Data d = new Data(x, no);
+							double[] y = nn.test(d.x);
+							if(yes(y) && y[0] > 0.98) return true;
+							return false;
+						}).findAny();
+						
+						if(opt.isPresent()) {
+							bgp.find(opt.get(), true);
+							frame.repaint();
+						}
+					}
+				}).start();
+				
+				index ++;
+			}
+		});
+		
+		frame.getContentPane().add(bgp);
+		frame.setSize(1080, 1290);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	public static void collect() {
 		nn = (Network) Util.deserialize(serializeTo);
 		String dir = "D:/files/java8/workspace/jump/";
-		String save = "D:/tmp/jump/block/collect/";
+		String save = "D:/tmp/jump/collect/";
 		File folder = new File(dir);
 		String[] files = folder.list(new FilenameFilter() {
 			
@@ -53,38 +160,30 @@ public class AutoJump {
 	}
 	
 	public static void autojump() throws Exception {
-		File nnfile = new File(serializeTo);
-		long old = nnfile.lastModified();
 		nn = (Network) Util.deserialize(serializeTo);
 		int times = 0;
 		while(true) {
 			times ++;
 			long wait = 1280;
 			TimeUnit.MILLISECONDS.sleep(wait);
-			File newfile = new File(serializeTo);
-			if(old < newfile.lastModified()){
-				System.out.println("[update] ------------------------------------------------------------------------ " + (old - newfile.lastModified()) + "ms");
-				old = newfile.lastModified();
-				nn = (Network)Util.deserialize(serializeTo);
-			}
-			
 			String name = "p" + System.currentTimeMillis() + ".png";
 			String shot = "/sdcard/" + name;
 			System.out.println(wait + "\t[jump] =================="+times+"================ start: " + name);
 			
 			Process screenshot = Runtime.getRuntime().exec(new String[]{adb, "shell", "/system/bin/screencap", "-p", shot});
 			screenshot.waitFor();
+			
 			Process pullimage = Runtime.getRuntime().exec(new String[]{adb, "pull", shot, name});
 			pullimage.waitFor();
-			String file = name;
+			
 			TimeUnit.MILLISECONDS.sleep(20);
-			int[][] data = readImage(new File(file));
+			int[][] data = readImage(new File(name));
 			final int[] jumper = new int[2];
 			int[] block = new int[2];
 			
 			Optional<Piece> found = StreamSupport.stream(new Supply(data, 100, 240, 10, 10), false)
 			.filter(f100x240 -> {
-				if(f100x240.getY() < 500) return false;
+				if(f100x240.getY() < 480) return false;
 				
 				List<Double> list = StreamSupport.stream(new Supply(f100x240.getData(), 20, 20, 20, 20), false)
 				.map(f20x20 -> new Supply(f20x20.getData(), 10, 10, 10, 10))
@@ -120,7 +219,7 @@ public class AutoJump {
 			downstair(data, 4, block);
 			
 			long duration = function(jumper, block);
-			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "200", "200", "202", "202", "" + duration});
+			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "400", "1585", "402", "1587", "" + duration});
 			swipescreen.waitFor();
 			System.err.println(block[0] + ","+ block[1] + "," + jumper[0] + "," + jumper[1] + "," + duration);
 		}
@@ -190,7 +289,7 @@ public class AutoJump {
 	public static void downstair(int[][] data, int stepy, int[] xy) {
 		int w = data.length;
 		int h = data[0].length;
-		for(int i=300;i<h;i+=stepy) {
+		for(int i=480;i<h;i+=stepy) {
 			int[][] line = new int[w][stepy];
 			for(int k=0;k<stepy;k++) {
 				for(int j =0;j<w;j++) {
@@ -465,5 +564,75 @@ class Data{
 			x[i] = list.get(i);
 		}
 		y = target;
+	}
+}
+
+class Visual extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3458154783143268354L;
+	int[][] image;
+	int w;
+	int h;
+	int[][] jump;
+	int width = 100;
+	int height = 240;
+	int startx = 0;
+	int starty = 0;
+	boolean yeah = false;
+	public Visual(){
+		super();
+	}
+	public void init(int[][] img) {
+		this.image = img;
+		this.w = img.length;
+		this.h = img[0].length;
+	}
+	public void find(Piece jumper, boolean yes) {
+		this.yeah = yes;
+		this.jump = jumper.data;
+		this.startx = jumper.x;
+		this.starty = jumper.y;
+//		this.height = jumper.data.length;
+//		this.width = jumper.data[0].length;
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		if(image == null) {
+			return;
+		}
+		BufferedImage nbi = new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);  
+	    for (int x = 0; x < w; x++) {
+	        for (int y = 0; y < h; y++) {
+	        	int b = image[x][y];
+	        	nbi.setRGB(x, y, b);
+	        }
+	    }
+	    if(startx + width >= w) {
+	    	return;
+	    }
+	    if(starty + height >= h) {
+	    	return;
+	    }
+	    
+	    int rgb = Color.BLACK.getRGB();
+	    if(yeah) rgb = Color.RED.getRGB();
+	   
+	    for(int i=0;i<width;i++) {
+	    	nbi.setRGB(startx+i, starty, rgb);
+	    }
+	    for(int j=0;j<height;j++) {
+	    	nbi.setRGB(startx, starty + j, rgb);
+	    }
+	    for(int i=0;i<width;i++) {
+	    	nbi.setRGB(startx+i, starty + height, rgb);
+	    }
+	    for(int j=0;j<height;j++) {
+	    	nbi.setRGB(startx + width, starty + j, rgb);
+	    }
+	    g.drawImage(nbi, 0, 0, w, h, null);
 	}
 }
