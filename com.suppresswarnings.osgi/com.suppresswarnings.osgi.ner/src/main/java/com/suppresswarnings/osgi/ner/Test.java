@@ -9,7 +9,7 @@ public class Test {
 //		Train.train("D:/files/todo/company/ner/quiz.tag_tsv", "D:/files/todo/company/ner/quiz.ner");
 		//3.model -> API
 		API api = new API("D:/files/todo/company/ner/quiz.ner");
-		String text = "NO";
+		String text = "你好，请出题";
 		Item[] items = api.ner(text);
 		for(Item it : items) {
 			System.out.println(it.id() + ":" + it.toString());

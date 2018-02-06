@@ -30,7 +30,7 @@ public class ExampleContent {
 		return false;
 	}
 	public boolean checkPasswd(String passwd) {
-		if(usr_pwd.get(username).equals(passwd)) return true;
+		if(username != null && usr_pwd.get(username).equals(passwd)) return true;
 		return false;
 	}
 	@Override

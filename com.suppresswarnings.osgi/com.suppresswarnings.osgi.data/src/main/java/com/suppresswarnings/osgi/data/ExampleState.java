@@ -4,6 +4,11 @@ public interface ExampleState extends State<ExampleContent>{
 
 	ExampleState S0 = new ExampleState(){
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5944501582121800681L;
+
 		@Override
 		public String name() {
 			return "initial state";
@@ -22,6 +27,11 @@ public interface ExampleState extends State<ExampleContent>{
 		}};
 	ExampleState S1 = new ExampleState(){
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -126119282585619926L;
+
 		@Override
 		public String name() {
 			return "S1(start login)";
@@ -39,6 +49,10 @@ public interface ExampleState extends State<ExampleContent>{
 			return S1F;
 		}};
 	ExampleState S1F = new ExampleState(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4987184559097336635L;
 		final int max = 3;
 		int tried = 0;
 		@Override
@@ -64,6 +78,11 @@ public interface ExampleState extends State<ExampleContent>{
 		}};
 	ExampleState S2 = new ExampleState(){
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4116966909654587392L;
+
 		@Override
 		public String name() {
 			return "S2(username ok, enter passcode)";
@@ -83,6 +102,10 @@ public interface ExampleState extends State<ExampleContent>{
 			return S2F;
 		}};
 	ExampleState S2F = new ExampleState(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4029889747169188917L;
 		final int max = 3;
 		int tried = 0;
 		@Override
@@ -109,6 +132,11 @@ public interface ExampleState extends State<ExampleContent>{
 		}};
 		
 		ExampleState Final = new ExampleState(){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -3896374555858794910L;
 
 			@Override
 			public String name() {

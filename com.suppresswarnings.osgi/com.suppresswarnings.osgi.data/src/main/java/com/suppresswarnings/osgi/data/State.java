@@ -1,5 +1,6 @@
 package com.suppresswarnings.osgi.data;
 
+import java.io.Serializable;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -13,6 +14,6 @@ import java.util.function.BiFunction;
  *
  * @param <T>
  */
-public interface State<T> extends BiConsumer<String, T>, BiFunction<String, T, State<T>> {
+public interface State<T> extends Serializable, BiConsumer<String, T>, BiFunction<String, T, State<T>> {
 	public String name();
 }
