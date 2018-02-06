@@ -31,22 +31,22 @@ public class AccountDB implements AccountService {
 	public void activate() {
 		if(this.levelDB == null) {
 			this.levelDB = new LevelDBImpl(dbname);
-			logger.info(this.getClass() + " create.");
+			logger.info("[account] create.");
 		}
-		logger.info(this.getClass() + " activate.");
+		logger.info("[account] activate.");
 	}
 
 	public void deactivate() {
 		if(this.levelDB != null) {
 			this.levelDB.close();
-			logger.info(this.getClass() + " close.");
+			logger.info("[account] close.");
 		}
 		this.levelDB = null;
-		logger.info(this.getClass() + " deactivate.");
+		logger.info("[account] deactivate.");
 	}
 
 	public void modified() {
-		logger.info(this.getClass() + " modified.");
+		logger.info("[account] modified.");
 	}
 	
 	@Override

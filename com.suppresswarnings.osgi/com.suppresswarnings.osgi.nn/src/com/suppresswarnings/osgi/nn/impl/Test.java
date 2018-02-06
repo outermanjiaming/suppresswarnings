@@ -15,7 +15,7 @@ public class Test {
 //		};
 		double[][] inputs = matrix;//{{1,0},{0,0},{1,1},{0,1}};
 		double[][] outputs = matrix;//{{1},{0},{0},{1}};
-		NN nn = new NN(5, 5, new int[]{10});//(NN) Util.deserialize(serializeTo);//
+		NN nn = (NN) Util.deserialize(serializeTo);//new NN(5, 5, new int[]{10});//
 		
 		System.out.println(nn);
 		int count = 0;
@@ -30,7 +30,7 @@ public class Test {
 			all ++;
 			if(!right) {
 				Util.print(target);
-				System.out.println(" <> ");
+				System.out.print(" <> ");
 				Util.print(output);
 				System.out.println();
 				System.out.println();
@@ -56,7 +56,7 @@ public class Test {
 				if(error < 1e-8) break;
 			}
 		}
-		System.out.println("Accuracy: "+ accuracy);
+		System.out.println("Accuracy: "+ accuracy + " = " + count + " / " + all);
 		if(train) Util.serialize(nn, serializeTo);
 	}
 }

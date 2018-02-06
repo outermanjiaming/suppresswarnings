@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.suppresswarnings.osgi.command
 Bundle-SymbolicName: com.suppresswarnings.osgi.command
-Bundle-Version: 2018.2.5.osgi
+Bundle-Version: 2018.2.6.osgi
 Export-Package: com.suppresswarnings.osgi.command
 Bundle-Vendor: LIJIAMING
 Import-Package: com.suppresswarnings.osgi.data,

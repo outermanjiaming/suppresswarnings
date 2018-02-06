@@ -29,22 +29,22 @@ public class TokenDB implements TokenService {
 	public void activate() {
 		if(this.levelDB == null) {
 			this.levelDB = new LevelDBImpl(dbname);
-			logger.info(this.getClass() + " create.");
+			logger.info("[token] create.");
 		}
-		logger.info(this.getClass() + " activate.");
+		logger.info("[token] activate.");
 	}
 
 	public void deactivate() {
 		if(this.levelDB != null) {
 			this.levelDB.close();
-			logger.info(this.getClass() + " close.");
+			logger.info("[token] close.");
 		}
 		this.levelDB = null;
-		logger.info(this.getClass() + " deactivate.");
+		logger.info("[token] deactivate.");
 	}
 
 	public void modified() {
-		logger.info(this.getClass() + " modified.");
+		logger.info("[token] modified.");
 	}
 
 	@Override
