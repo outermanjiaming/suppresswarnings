@@ -43,6 +43,8 @@ public class AutoJump {
 	public static void show(){
 		JFrame frame = new JFrame("show jumper");
 		Visual bgp = new Visual();
+		int startx = 220;
+		int starty = 660;
 		nn = (Network) Util.deserialize(serializeTo);
 		String dir = "D:/files/java8/workspace/jump/";
 		File folder = new File(dir);
@@ -89,7 +91,7 @@ public class AutoJump {
 					public void run() {
 						Random rand = new Random();
 						System.out.println("finding ...");
-						Optional<Piece> opt = StreamSupport.stream(new Supply(data, 100,240,10,10), false)
+						Optional<Piece> opt = StreamSupport.stream(new Supply(data, 100,240,10,10, startx, starty), false)
 						.peek(f100x240 ->{
 							if(rand.nextDouble() > 0.7) {
 								return;
@@ -476,7 +478,20 @@ class Supply implements Spliterator<Piece> {
 	int h;
 	int[][] data;
 	transient int size;
-
+	public Supply(int[][] data, int width, int height, int stepx, int stepy, int startx, int starty) {
+		this.data = data;
+		this.width = width;
+		this.height = height;
+		this.stepx = stepx;
+		this.stepy = stepy;
+		this.startx = startx;
+		this.starty = starty;
+		this.w = data.length;
+		this.h = data[0].length;
+		int m = ((w - width) / stepx + 1);
+		int n = ((h - height) / stepy + 1);
+		this.size = m * n;
+	}
 	public Supply(int[][] data, int width, int height, int stepx, int stepy) {
 		this.data = data;
 		this.width = width;
