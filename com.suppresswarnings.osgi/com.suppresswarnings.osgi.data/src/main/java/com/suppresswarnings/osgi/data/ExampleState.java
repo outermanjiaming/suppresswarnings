@@ -15,7 +15,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			System.out.println("enter 'login':");
+			u.println("enter 'login':");
 		}
 
 		@Override
@@ -23,6 +23,11 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 			if ("login".equals(t))
 				return S1;
 			return S0;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
 		}};
 	ExampleState S1 = new ExampleState(){
 
@@ -38,7 +43,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			System.out.println("enter your username:");
+			u.println("enter your username:");
 		}
 
 		@Override
@@ -46,6 +51,11 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 			if (u.content.checkExist(t))
 				return S2;
 			return S1F;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
 		}};
 	ExampleState S1F = new ExampleState(){
 		/**
@@ -61,7 +71,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			System.out.println("Try again(" + (max - tried) + "): ");
+			u.println("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -74,6 +84,11 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 			}
 			tried ++;
 			return S1F;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
 		}};
 	ExampleState S2 = new ExampleState(){
 
@@ -90,7 +105,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
 			u.content.setUsername(t);
-			System.out.println("enter your Passcode: ");
+			u.println("enter your Passcode: ");
 		}
 
 		@Override
@@ -99,6 +114,11 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 				return Final;
 			}
 			return S2F;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
 		}};
 	ExampleState S2F = new ExampleState(){
 		/**
@@ -114,7 +134,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			System.out.println("Try again(" + (max - tried) + "): ");
+			u.println("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -128,6 +148,11 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 			}
 			tried++;
 			return S2F;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
 		}};
 		
 		ExampleState Final = new ExampleState(){
@@ -147,11 +172,19 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 				if(!u.content.auth()) {
 					u.content.setPasscode(t);
 					u.content.loginOK();
+					u.println("Congratuations!");
+				} else {
+					u.println("You've already login");
 				}
 			}
 
 			@Override
 			public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
 				return Final;
+			}
+
+			@Override
+			public boolean finish() {
+				return true;
 			}};
 }

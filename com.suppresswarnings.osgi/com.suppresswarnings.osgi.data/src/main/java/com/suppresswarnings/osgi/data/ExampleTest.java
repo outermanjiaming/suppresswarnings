@@ -24,18 +24,22 @@ public class ExampleTest {
 			
 			@Override
 			public void accept(String t, Context<ExampleContent> u) {
-				System.out.println(t + " = " + u.content.username);
+				u.println(t + " = " + u.content.username);
 			}
 			
 			@Override
 			public String name() {
 				return "hahaha this what";
 			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
 		};
 		
 		Context<?> context     = new ExampleContext(content, init);
 		boolean x = Stream.generate(shell).anyMatch(context);
-		System.out.println(x);
-		System.out.println(context);
+		System.out.println(x + " ==> " + context.output());
 	}
 }
