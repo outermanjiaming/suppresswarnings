@@ -1,7 +1,5 @@
 package com.suppresswarnings.osgi.data;
 
-import java.util.Date;
-
 public class TTL implements Comparable<TTL> {
 	long ttl;
 	String key;
@@ -40,11 +38,17 @@ public class TTL implements Comparable<TTL> {
 	
 	@Override
 	public String toString() {
-		return "[" + key + " ("+new Date(ttl)+")]";
+		return "[" + key + " ("+ (marked() ? "######" : (ttl - System.currentTimeMillis())+"ms")+")]";
 	}
 	
 	@Override
 	public int compareTo(TTL o) {
 		return Long.compare(this.ttl, o.ttl);
+	}
+	public void mark() {
+		this.ttl = Long.MIN_VALUE;
+	}
+	public boolean marked(){
+		return this.ttl == Long.MIN_VALUE;
 	}
 }

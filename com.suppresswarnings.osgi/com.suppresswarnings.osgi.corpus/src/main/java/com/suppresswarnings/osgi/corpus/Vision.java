@@ -31,7 +31,7 @@ public class Vision extends JPanel {
 			long left = e.ttl() - now;
 			String key;
 			Color color = g.getColor();
-			if(left < 0) {
+			if(e.marked()) {
 				g.setColor(Color.RED);
 				key = "########";
 			} else {

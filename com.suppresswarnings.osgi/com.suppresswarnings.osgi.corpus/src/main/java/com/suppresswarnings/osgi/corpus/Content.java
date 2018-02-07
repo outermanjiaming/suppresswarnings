@@ -20,6 +20,7 @@ public class Content implements Runnable {
 	LinkedBlockingDeque<TTL> ttl = new LinkedBlockingDeque<TTL>(100000);
 	Map<String, String> cacheString = new ConcurrentHashMap<String, String>();
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();
+	Map<String, TTL> keepAlive = new ConcurrentHashMap<String, TTL>();
 	DataService dataService;
 	public void set(String name, byte[] bytes) {
 		cacheBytes.put(name, bytes);
@@ -28,17 +29,20 @@ public class Content implements Runnable {
 		cacheString.put(name, value);
 	}
 	public void setx(String name, byte[] bytes, long timeToLiveMillis) {
-		cacheBytes.put(name, bytes);
 		expire(name, timeToLiveMillis);
+		cacheBytes.put(name, bytes);
 	}
 	public void setx(String name, String value, long timeToLiveMillis) {
-		cacheString.put(name, value);
 		expire(name, timeToLiveMillis);
+		cacheString.put(name, value);
 	}
-	public void expire(String name, long timeToLiveMillis) {
+	private void expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
-		ttl.add(e);
+		if(ttl.contains(e)) {
+			ttl.remove(e);
+		}
+		ttl.offer(e);
 	}
 	
 	public void clear(){
@@ -46,13 +50,18 @@ public class Content implements Runnable {
 		System.out.println("[content] clean TTL("+ttl.size()+"): " + ttl);
 		ttl.removeIf(out -> {
 			if(out.ttl() < now) {
-				System.out.println("[content] remove key: " + out.key());
-				cacheString.remove(out.key());
-				cacheBytes.remove(out.key());
-				return true;
+				if(out.marked()) {
+					System.out.println("[content] remove key: " + out.key());
+					cacheString.remove(out.key());
+					cacheBytes.remove(out.key());
+					return true;
+				} else {
+					out.mark();
+				}
 			}
 			return false;
 		});
+		System.out.println("[content] clean TTL("+ttl.size()+"): " + ttl);
 	}
 	
 	public static void main(String[] args) {
@@ -76,7 +85,7 @@ public class Content implements Runnable {
 			@Override
 			public void run() {
 				Random random = new Random();
-				int r = random.nextInt(15000);
+				int r = random.nextInt(5000);
 				content.setx("key" + r, "value"+r, r);
 			}
 		}, 200, 1400, TimeUnit.MILLISECONDS);
