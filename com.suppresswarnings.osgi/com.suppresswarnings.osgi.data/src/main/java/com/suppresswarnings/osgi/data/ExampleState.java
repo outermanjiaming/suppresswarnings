@@ -1,7 +1,6 @@
 package com.suppresswarnings.osgi.data;
 
-public interface ExampleState extends State<ExampleContent>{
-
+public interface ExampleState extends State<Context<ExampleContent>>{
 	ExampleState S0 = new ExampleState(){
 
 		/**
@@ -15,12 +14,12 @@ public interface ExampleState extends State<ExampleContent>{
 		}
 
 		@Override
-		public void accept(String t, ExampleContent u) {
+		public void accept(String t, Context<ExampleContent> u) {
 			System.out.println("enter 'login':");
 		}
 
 		@Override
-		public State<ExampleContent> apply(String t, ExampleContent u) {
+		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
 			if ("login".equals(t))
 				return S1;
 			return S0;
@@ -38,13 +37,13 @@ public interface ExampleState extends State<ExampleContent>{
 		}
 
 		@Override
-		public void accept(String t, ExampleContent u) {
+		public void accept(String t, Context<ExampleContent> u) {
 			System.out.println("enter your username:");
 		}
 
 		@Override
-		public State<ExampleContent> apply(String t, ExampleContent u) {
-			if (u.checkExist(t))
+		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
+			if (u.content.checkExist(t))
 				return S2;
 			return S1F;
 		}};
@@ -61,13 +60,13 @@ public interface ExampleState extends State<ExampleContent>{
 		}
 
 		@Override
-		public void accept(String t, ExampleContent u) {
+		public void accept(String t, Context<ExampleContent> u) {
 			System.out.println("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
-		public State<ExampleContent> apply(String t, ExampleContent u) {
-			if (u.checkExist(t))
+		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
+			if (u.content.checkExist(t))
 				return S2;
 			if (tried > 1) {
 				tried = 0;
@@ -89,14 +88,14 @@ public interface ExampleState extends State<ExampleContent>{
 		}
 
 		@Override
-		public void accept(String t, ExampleContent u) {
-			u.setUsername(t);
+		public void accept(String t, Context<ExampleContent> u) {
+			u.content.setUsername(t);
 			System.out.println("enter your Passcode: ");
 		}
 
 		@Override
-		public State<ExampleContent> apply(String t, ExampleContent u) {
-			if (u.checkPasswd(t)) {
+		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
+			if (u.content.checkPasswd(t)) {
 				return Final;
 			}
 			return S2F;
@@ -114,13 +113,13 @@ public interface ExampleState extends State<ExampleContent>{
 		}
 
 		@Override
-		public void accept(String t, ExampleContent u) {
+		public void accept(String t, Context<ExampleContent> u) {
 			System.out.println("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
-		public State<ExampleContent> apply(String t, ExampleContent u) {
-			if(u.checkPasswd(t)) {
+		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
+			if(u.content.checkPasswd(t)) {
 				return Final;
 			}
 			if (tried > 1) {
@@ -144,15 +143,15 @@ public interface ExampleState extends State<ExampleContent>{
 			}
 
 			@Override
-			public void accept(String t, ExampleContent u) {
-				if(!u.auth()) {
-					u.setPasscode(t);
-					u.loginOK();
+			public void accept(String t, Context<ExampleContent> u) {
+				if(!u.content.auth()) {
+					u.content.setPasscode(t);
+					u.content.loginOK();
 				}
 			}
 
 			@Override
-			public State<ExampleContent> apply(String t, ExampleContent u) {
+			public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
 				return Final;
 			}};
 }

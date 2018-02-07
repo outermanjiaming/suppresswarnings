@@ -10,8 +10,8 @@ import java.util.function.Predicate;
  */
 public abstract class Context<T> implements Predicate<String> {
 	T content;
-	State<T> state;
-	public Context(T ctx, State<T> s) {
+	State<Context<T>> state;
+	public Context(T ctx, State<Context<T>> s) {
 		this.content = ctx;
 		this.state = s;
 	}
