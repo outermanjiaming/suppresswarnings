@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: User
 Bundle-SymbolicName: com.suppresswarnings.osgi.user
-Bundle-Version: 2018.1.23.osgi
+Bundle-Version: 2018.2.4.osgi
 Export-Package: com.suppresswarnings.osgi.user
 Bundle-ClassPath: libs/javax.activation-1.1.0.v201105071233.jar,
  libs/javax.mail-1.5.0.jar,

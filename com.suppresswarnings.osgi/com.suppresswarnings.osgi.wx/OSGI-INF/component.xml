@@ -4,4 +4,5 @@
    <service>
       <provide interface="com.suppresswarnings.osgi.network.http.HTTPService"/>
    </service>
+   <reference bind="data" cardinality="0..1" interface="com.suppresswarnings.osgi.data.DataService" name="com.suppresswarnings.osgi.wx.data" policy="dynamic" unbind="clearData"/>
 </scr:component>
