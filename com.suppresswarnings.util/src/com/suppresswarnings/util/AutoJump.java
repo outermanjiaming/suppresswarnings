@@ -32,19 +32,19 @@ public class AutoJump {
 	public final static double[] no = {0,1};
 	public static final double confidence = 0.9;
 	public static final int epochs = 10000;
+	public static int startx = 220;
+	public static int starty = 660;
 	public static Network nn;
 	public static Func func = new Func();
 	public static int index = 0;
 	
 	public static void main(String[] args) throws Exception {
-		show();//collect();//autojump();//
+		collect();//autojump();//show();//
 	}
 	
 	public static void show(){
 		JFrame frame = new JFrame("show jumper");
 		Visual bgp = new Visual();
-		int startx = 220;
-		int starty = 660;
 		nn = (Network) Util.deserialize(serializeTo);
 		String dir = "D:/files/java8/workspace/jump/";
 		File folder = new File(dir);
@@ -144,14 +144,14 @@ public class AutoJump {
 	
 	public static void collect() {
 		nn = (Network) Util.deserialize(serializeTo);
-		String dir = "D:/files/java8/workspace/jump/";
+		String dir = "D:/tmp/jump/fail/";
 		String save = "D:/tmp/jump/collect/";
 		File folder = new File(dir);
 		String[] files = folder.list(new FilenameFilter() {
 			
 			@Override
 			public boolean accept(File dir, String name) {
-				if(name.endsWith("png")) return true;
+				if(name.endsWith("jpg")) return true;
 				return false;
 			}
 		});
@@ -242,7 +242,7 @@ public class AutoJump {
 	
 	public static void decide(File file, String dir) {
 		int[][] data = readImage(file);
-		StreamSupport.stream(new Supply(data, 100,240,10,10), false)
+		StreamSupport.stream(new Supply(data, 100,240,10,10, startx, starty), false)
 		.forEach(f100x240 ->{
 			List<Double> e = StreamSupport.stream(new Supply(f100x240.data, 20, 20, 20, 20), false)
 					.map(f20x20 -> new Supply(f20x20.data, 10, 10, 10, 10))
@@ -257,8 +257,6 @@ public class AutoJump {
 			double[] y = nn.test(d.x);
 			if(yes(y) && y[0] > 0.95) {
 				printImage(f100x240.getData(), dir + "yes/" + file.getName() + f100x240.x + "_" + f100x240.y + ".jpg");
-			} else {
-				//printImage(f100x240.getData(), dir + "no/" + file.getName() + f100x240.x + "_" + f100x240.y  + ".jpg");
 			}
 		});
 	}

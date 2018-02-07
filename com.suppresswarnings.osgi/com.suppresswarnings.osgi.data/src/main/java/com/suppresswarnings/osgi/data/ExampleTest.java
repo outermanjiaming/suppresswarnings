@@ -32,7 +32,8 @@ public class ExampleTest {
 				return "hahaha this what";
 			}
 		};
-		ExampleContext context     = new ExampleContext(content, init);
+		
+		Context<?> context     = new ExampleContext(content, init);
 		boolean x = Stream.generate(shell).anyMatch(context);
 		System.out.println(x);
 		System.out.println(context);

@@ -62,6 +62,8 @@ public class WXService implements HTTPService {
 	private org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	private Format format = new Format(msgFormat);
 	private API api = new API(System.getenv("HB_HOME") + "/quiz.ner");
+	
+	
 	@Override
 	public String getName() {
 		return name;
