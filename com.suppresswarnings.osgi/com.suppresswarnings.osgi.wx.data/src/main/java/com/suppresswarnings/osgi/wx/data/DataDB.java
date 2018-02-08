@@ -5,10 +5,10 @@ import java.util.function.BiConsumer;
 
 import org.slf4j.LoggerFactory;
 
+import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
-import com.suppresswarnings.osgi.user.Version;
 
 /**
  * collect data and store it

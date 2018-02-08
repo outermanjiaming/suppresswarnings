@@ -7,9 +7,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.user.KEY;
-import com.suppresswarnings.osgi.user.Version;
 import com.suppresswarnings.osgi.user.TokenService;
 import com.suppresswarnings.osgi.user.User;
+import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 
 public class TokenDB implements TokenService {

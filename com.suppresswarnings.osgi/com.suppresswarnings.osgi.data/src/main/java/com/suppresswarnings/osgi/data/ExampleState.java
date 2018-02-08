@@ -1,5 +1,8 @@
 package com.suppresswarnings.osgi.data;
 
+import com.suppresswarnings.osgi.alone.Context;
+import com.suppresswarnings.osgi.alone.State;
+
 public interface ExampleState extends State<Context<ExampleContent>>{
 	ExampleState S0 = new ExampleState(){
 
@@ -48,7 +51,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
-			if (u.content.checkExist(t))
+			if (u.content().checkExist(t))
 				return S2;
 			return S1F;
 		}
@@ -76,7 +79,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
-			if (u.content.checkExist(t))
+			if (u.content().checkExist(t))
 				return S2;
 			if (tried > 1) {
 				tried = 0;
@@ -104,13 +107,13 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			u.content.setUsername(t);
+			u.content().setUsername(t);
 			u.println("enter your Passcode: ");
 		}
 
 		@Override
 		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
-			if (u.content.checkPasswd(t)) {
+			if (u.content().checkPasswd(t)) {
 				return Final;
 			}
 			return S2F;
@@ -139,7 +142,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public State<Context<ExampleContent>> apply(String t, Context<ExampleContent> u) {
-			if(u.content.checkPasswd(t)) {
+			if(u.content().checkPasswd(t)) {
 				return Final;
 			}
 			if (tried > 1) {
@@ -169,9 +172,9 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 			@Override
 			public void accept(String t, Context<ExampleContent> u) {
-				if(!u.content.auth()) {
-					u.content.setPasscode(t);
-					u.content.loginOK();
+				if(!u.content().auth()) {
+					u.content().setPasscode(t);
+					u.content().loginOK();
 					u.println("Congratuations!");
 				} else {
 					u.println("You've already login");

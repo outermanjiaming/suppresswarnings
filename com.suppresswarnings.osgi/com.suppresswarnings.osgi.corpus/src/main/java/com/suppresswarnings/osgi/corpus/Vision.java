@@ -25,6 +25,7 @@ public class Vision extends JPanel {
 		int i = 80;
 		int j = 50;
 		n = 0;
+		g.drawString("keepAlive: " + content.keepAlive.size(), 20, 20);
 		LinkedBlockingDeque<TTL> ttl = content.ttl;
 		ttl.stream().forEach(e -> {
 			long now = System.currentTimeMillis();

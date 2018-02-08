@@ -4,6 +4,7 @@ Bundle-Name: TokenDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.user.token
 Bundle-Version: 2018.1.23.osgi
 Import-Package: com.leveldb.common.db,
+ com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.user,
  org.slf4j;version="1.7.2"

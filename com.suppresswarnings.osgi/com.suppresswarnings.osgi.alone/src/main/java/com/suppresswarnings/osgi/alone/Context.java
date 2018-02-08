@@ -1,30 +1,37 @@
 package com.suppresswarnings.osgi.alone;
 
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Context holds the information over the whole conversation.
- * It feeds with String and push transfer the State, 
- * And the new State consumes the String, it may call the Context to accept informations.
- * If the new State is Final, return true.
- * 
+ * Context with state, holds a content to make decision
  * @author lijiaming
  *
  * @param <T>
  */
-public abstract class Context<T> implements Predicate<String>, Consumer<String> {
-	public T content;
-	public State state;
-	public Context(State init, T ctx){
-		this.state = init;
+public abstract class Context<T> implements Predicate<String> {
+	T content;
+	State<Context<T>> state;
+	String output;
+	public Context(T ctx, State<Context<T>> s) {
 		this.content = ctx;
+		this.state = s;
+	}
+	public T content() {
+		return content;
+	}
+	public String output() {
+		return output;
+	}
+	public void println(String string) {
+		this.output = string;
+	}
+	public State<Context<T>> state(){
+		return state;
 	}
 	@Override
-	public boolean test(String in) {
-		state = state.to(in, this);
-		state.accept(in, this);
-		return state == State.Final;
+	public boolean test(String t) {
+		state = state.apply(t, this);
+		state.accept(t, this);
+		return state.finish();
 	}
-	
 }

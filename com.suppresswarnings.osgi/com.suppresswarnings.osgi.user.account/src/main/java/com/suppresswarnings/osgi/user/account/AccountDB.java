@@ -3,12 +3,12 @@ package com.suppresswarnings.osgi.user.account;
 import org.slf4j.LoggerFactory;
 import com.suppresswarnings.osgi.user.KEY;
 import com.suppresswarnings.osgi.user.Step;
-import com.suppresswarnings.osgi.user.Version;
 import com.suppresswarnings.osgi.user.AccountService;
 import com.suppresswarnings.osgi.user.Counter;
 import com.suppresswarnings.osgi.user.Login;
 import com.suppresswarnings.osgi.user.Register;
 import com.suppresswarnings.osgi.user.User;
+import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 /**
  * user operations on account

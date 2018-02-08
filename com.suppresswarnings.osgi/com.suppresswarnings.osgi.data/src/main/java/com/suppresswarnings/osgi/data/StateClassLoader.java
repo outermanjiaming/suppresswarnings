@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.suppresswarnings.osgi.alone.State;
+
 public class StateClassLoader extends ClassLoader {
 	public StateClassLoader(ClassLoader parent) {
 		super(parent);

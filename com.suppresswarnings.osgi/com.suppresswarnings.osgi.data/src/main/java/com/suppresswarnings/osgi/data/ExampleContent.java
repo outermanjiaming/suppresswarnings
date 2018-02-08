@@ -3,7 +3,11 @@ package com.suppresswarnings.osgi.data;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExampleContent {
+public class ExampleContent extends AbsContent {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6507244109759742167L;
 	private static final Map<String, String> usr_pwd = new ConcurrentHashMap<String, String>();
 	public ExampleContent() {
 		usr_pwd.put("lijiaming", "123456");

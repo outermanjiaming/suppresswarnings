@@ -8,7 +8,7 @@ import com.suppresswarnings.osgi.ner.Item;
 public class Test {
 
 	public static void main(String[] args) {
-		QuizContext ctx = new QuizContext(QuizS.S1);
+		QuizContext ctx = new QuizContext();
 //		Shell shell = new Shell();
 		boolean x = Stream.of("ASK","YES","QUIZ", "$$").anyMatch(ctx);
 		System.out.println(x);
@@ -16,7 +16,7 @@ public class Test {
 		System.out.println(ctx.output());
 		
 		API api = new API("D:/files/todo/company/ner/quiz.ner");
-		Item[] items = api.ner("请问您可以给我出题吗");
+		Item[] items = api.ner("我真的现在想做题了。");
 		QuizContext context = new QuizContext();
 		for(Item it : items) {
 			System.out.print(it);

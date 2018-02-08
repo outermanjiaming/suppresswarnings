@@ -2,8 +2,8 @@ package com.suppresswarnings.osgi.corpus;
 
 import java.io.IOException;
 
-import com.suppresswarnings.osgi.data.Context;
-import com.suppresswarnings.osgi.data.State;
+import com.suppresswarnings.osgi.alone.Context;
+import com.suppresswarnings.osgi.alone.State;
 import com.suppresswarnings.osgi.data.StateClassLoader;
 
 public interface WXState {

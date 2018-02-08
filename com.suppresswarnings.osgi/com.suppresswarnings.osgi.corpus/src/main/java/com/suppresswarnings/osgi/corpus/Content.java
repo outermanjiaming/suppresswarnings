@@ -12,12 +12,24 @@ import javax.swing.JFrame;
 
 import org.slf4j.LoggerFactory;
 
+import com.suppresswarnings.osgi.alone.Context;
+import com.suppresswarnings.osgi.data.AbsContent;
 import com.suppresswarnings.osgi.data.DataService;
 import com.suppresswarnings.osgi.data.TTL;
 
-public class Content implements Runnable {
+/**
+ * Content with TTL
+ * @author lijiaming
+ *
+ */
+public class Content extends AbsContent implements Runnable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8841351499573607963L;
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	LinkedBlockingDeque<TTL> ttl = new LinkedBlockingDeque<TTL>(100000);
+	Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	Map<String, String> cacheString = new ConcurrentHashMap<String, String>();
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();
 	Map<String, TTL> keepAlive = new ConcurrentHashMap<String, TTL>();
@@ -39,38 +51,56 @@ public class Content implements Runnable {
 	private void expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
-		if(ttl.contains(e)) {
-			ttl.remove(e);
+		TTL old = keepAlive.remove(name);
+		if(old != null) {
+			if(old.marked()) {
+				ttl.remove(old);
+				ttl.offer(e);
+			} else {
+				if(old.ttl() < e.ttl()) {
+					ttl.remove(old);
+					ttl.offer(e);
+				}
+				//don't offer this TTL since it is still short than old one
+			}
+		} else {
+			ttl.offer(e);
 		}
-		ttl.offer(e);
 	}
 	
 	public void clear(){
 		long now = System.currentTimeMillis();
-		System.out.println("[content] clean TTL("+ttl.size()+"): " + ttl);
+		logger.info("[content] clean TTL("+ttl.size()+"): " + ttl);
 		ttl.removeIf(out -> {
 			if(out.ttl() < now) {
 				if(out.marked()) {
-					System.out.println("[content] remove key: " + out.key());
+					logger.info("[content] remove key: " + out.key());
 					cacheString.remove(out.key());
 					cacheBytes.remove(out.key());
+					keepAlive.remove(out.key());
 					return true;
 				} else {
 					out.mark();
+					keepAlive.put(out.key(), out);
 				}
 			}
 			return false;
 		});
-		System.out.println("[content] clean TTL("+ttl.size()+"): " + ttl);
+		logger.info("[content] clean TTL("+ttl.size()+"): " + ttl);
 	}
 	
+	public Context<?> get(String openid) {
+		return contexts.get(openid);
+	}
+	public void put(String openid, Context<?> context) {
+		contexts.put(openid, context);
+	}
+	
+	public void init(){
+		
+	}
 	public static void main(String[] args) {
 		Content content = new Content();
-		content.set("a", new byte[1]);
-		content.expire("a", 5000);
-		content.set("b", new byte[1]);
-		content.expire("b", 3);
-		content.setx("c", new byte[1], 10000);
 		JFrame frame = new JFrame("content");
 		frame.setSize(250, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
