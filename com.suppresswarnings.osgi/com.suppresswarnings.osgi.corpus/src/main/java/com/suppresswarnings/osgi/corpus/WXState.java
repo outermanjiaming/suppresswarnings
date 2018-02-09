@@ -4,7 +4,7 @@ import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
 
 public interface WXState {
-	State<Context<Content>> init = new State<Context<Content>>(){
+	State<Context<WXService>> init = new State<Context<WXService>>(){
 
 		/**
 		 * 
@@ -12,13 +12,13 @@ public interface WXState {
 		private static final long serialVersionUID = -6996218717545604237L;
 
 		@Override
-		public void accept(String t, Context<Content> u) {
+		public void accept(String t, Context<WXService> u) {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public State<Context<Content>> apply(String t, Context<Content> u) {
+		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			return login;
 		}
 
@@ -33,7 +33,7 @@ public interface WXState {
 			// TODO Auto-generated method stub
 			return false;
 		}};
-	State<Context<Content>> login = new State<Context<Content>>(){
+	State<Context<WXService>> login = new State<Context<WXService>>(){
 
 		/**
 		 * 
@@ -41,13 +41,13 @@ public interface WXState {
 		private static final long serialVersionUID = -5776284883438797671L;
 
 		@Override
-		public void accept(String t, Context<Content> u) {
+		public void accept(String t, Context<WXService> u) {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public State<Context<Content>> apply(String t, Context<Content> u) {
+		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			return answerQuiz;
 		}
 
@@ -62,7 +62,7 @@ public interface WXState {
 			// TODO Auto-generated method stub
 			return false;
 		}};
-	State<Context<Content>> answerQuiz = new State<Context<Content>>(){
+	State<Context<WXService>> answerQuiz = new State<Context<WXService>>(){
 
 		/**
 		 * 
@@ -70,13 +70,13 @@ public interface WXState {
 		private static final long serialVersionUID = 2331875505998021648L;
 
 		@Override
-		public void accept(String t, Context<Content> u) {
+		public void accept(String t, Context<WXService> u) {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public State<Context<Content>> apply(String t, Context<Content> u) {
+		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			return setThePaper;
 		}
 
@@ -91,7 +91,7 @@ public interface WXState {
 			// TODO Auto-generated method stub
 			return false;
 		}};
-	State<Context<Content>> setThePaper = new State<Context<Content>>(){
+	State<Context<WXService>> setThePaper = new State<Context<WXService>>(){
 
 		/**
 		 * 
@@ -99,13 +99,13 @@ public interface WXState {
 		private static final long serialVersionUID = -3205749336390343569L;
 
 		@Override
-		public void accept(String t, Context<Content> u) {
+		public void accept(String t, Context<WXService> u) {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public State<Context<Content>> apply(String t, Context<Content> u) {
+		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			return init;
 		}
 
