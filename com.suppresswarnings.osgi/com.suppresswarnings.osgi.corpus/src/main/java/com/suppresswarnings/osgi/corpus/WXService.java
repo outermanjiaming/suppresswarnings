@@ -32,21 +32,44 @@ import com.suppresswarnings.osgi.user.TokenService;
 public class WXService implements HTTPService, Runnable {
 	public static final String SUCCESS = "success";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	long startup = System.currentTimeMillis();
+	long initdone = 0;
 	Format format = new Format(Const.WXmsg.msgFormat);
+	/**
+	 * for each openid, we keep a context for a period time to save memory
+	 */
 	Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
+	/**
+	 * in some case, we maybe keep some information for later use, e.g. question(or qid) 
+	 */
 	Map<String, String> cacheString = new ConcurrentHashMap<String, String>();
+	/**
+	 * we maybe keep some class bytes here, for instance, State
+	 */
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();
 	Map<String, TTL> keepAlive = new ConcurrentHashMap<String, TTL>();
+	/**
+	 * for those Map above, we clear some of the keys according to this ttl list
+	 */
 	LinkedBlockingQueue<TTL> ttl = new LinkedBlockingQueue<TTL>(100000);
 	/**
 	 * 1.counter of openid(if not exist, add one and save it)
 	 * 2.counter of data{a.counter for all data, b.counter for kind of data, c.counter for question data}
+	 * NOTE: user counter do not cache in memory, we'd better not use counter for user, we use timestamp instead
 	 */
 	Map<String, AtomicInteger> counter = new ConcurrentHashMap<String, AtomicInteger>();
 	/**
 	 * 1.persist AtomicInteger Map
+	 * 2.run ttl clear
+	 * 3.report the status periodic(map size, Min-Max)
 	 */
 	ScheduledExecutorService schedule = Executors.newScheduledThreadPool(3);
+	/**
+	 * 1.create account
+	 * 2.add information
+	 * 3.check uid(no need for WX)
+	 * 
+	 */
 	AccountService accountService;
 	TokenService tokenService;
 	DataService dataService;
