@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +38,15 @@ public class WXService implements HTTPService, Runnable {
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();
 	Map<String, TTL> keepAlive = new ConcurrentHashMap<String, TTL>();
 	LinkedBlockingQueue<TTL> ttl = new LinkedBlockingQueue<TTL>(100000);
+	/**
+	 * 1.counter of openid(if not exist, add one and save it)
+	 * 2.counter of data{a.counter for all data, b.counter for kind of data, c.counter for question data}
+	 */
+	Map<String, AtomicInteger> counter = new ConcurrentHashMap<String, AtomicInteger>();
+	/**
+	 * 1.persist AtomicInteger Map
+	 */
+	ScheduledExecutorService schedule = Executors.newScheduledThreadPool(3);
 	AccountService accountService;
 	TokenService tokenService;
 	DataService dataService;
