@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 public interface Const {
 	String delimiter = ".";
 	String data = "Data";
+	String count= "Count";
+	String user = "User";
 	/**
 	 * collection or question or classify or reply or produce or unknown
 	 * @author lijiaming

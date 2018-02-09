@@ -4,11 +4,11 @@ import org.slf4j.LoggerFactory;
 import com.suppresswarnings.osgi.user.KEY;
 import com.suppresswarnings.osgi.user.Step;
 import com.suppresswarnings.osgi.user.AccountService;
-import com.suppresswarnings.osgi.user.Counter;
 import com.suppresswarnings.osgi.user.Login;
 import com.suppresswarnings.osgi.user.Register;
 import com.suppresswarnings.osgi.user.User;
 import com.suppresswarnings.osgi.alone.Version;
+import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 /**
  * user operations on account
@@ -21,11 +21,9 @@ public class AccountDB implements AccountService {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	static final String dbname = "/account";
 	LevelDBImpl levelDB;
-	Counter counter;
 
 	public AccountDB() {
 		this.levelDB = new LevelDBImpl(dbname);
-		this.counter = Counter.getInstance();
 	}
 
 	public void activate() {
@@ -122,7 +120,7 @@ public class AccountDB implements AccountService {
 		logger.info("[account] register " + String.valueOf(user));
 		return user;
 	}
-
+	
 	//A --invite--> B
 	@Override
 	public String invite(final User userA) {
@@ -190,6 +188,48 @@ public class AccountDB implements AccountService {
 		//means invite code was done
 		levelDB.put(uidByInvite, Step.Done.name() + uidA);
 		return invite;
+	}
+
+	@Override
+	public LevelDB leveldb() {
+		return levelDB;
+	}
+
+	@Override
+	public boolean exist(String username) {
+		String uidByAccount  = String.join(delimiter, version, KEY.Account.name(), KEY.UID.name(), username);
+		String existUid = levelDB.get(uidByAccount);
+		if(existUid == null) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String login(String username, String passcode) {
+		String uidByUsernamePasscode = String.join(delimiter, version, KEY.Account.name(), KEY.Passwd.name(), username, passcode);
+		String uid = levelDB.get(uidByUsernamePasscode);
+		if(uid == null) {
+			return null;
+		}
+		return uid;
+	}
+
+	@Override
+	public boolean register(String username, String passcode, String openid) {
+		String uidByUsername         = String.join(delimiter, version, KEY.Account.name(), KEY.UID.name(), username);
+		String existUid = levelDB.get(uidByUsername);
+		if(existUid == null) {
+			return false;
+		}
+		String uidByUsernamePasscode = String.join(delimiter, version, KEY.Account.name(), KEY.Passwd.name(), KEY.UID.name(), username, passcode);
+		levelDB.put(uidByUsernamePasscode, openid);
+		//2.set passwd in uid ( get passwd by uid <- get uid by token no matter if it expired)
+		String passcodeByUID = String.join(delimiter, version, openid, KEY.Passwd.name());
+		levelDB.put(passcodeByUID, passcode);
+		//3.set exsit check in account:""
+		levelDB.put(uidByUsername, openid);
+		return true;
 	}
 	
 }

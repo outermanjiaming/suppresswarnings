@@ -1,5 +1,7 @@
 package com.suppresswarnings.osgi.user;
 
+import com.suppresswarnings.osgi.leveldb.LevelDB;
+
 /**
  * key principle:
  * attr: a KEY
@@ -17,6 +19,9 @@ package com.suppresswarnings.osgi.user;
  */
 public interface AccountService {
 
+	public boolean exist(String username);
+	public String login(String username, String passcode);
+	public boolean register(String username, String passcode, String openid);
 	/**
 	 * 1.check args
 	 * 2.check exist
@@ -50,4 +55,5 @@ public interface AccountService {
 	 * @return
 	 */
 	public String invited(String invite, final User user);
+	public LevelDB leveldb();
 }

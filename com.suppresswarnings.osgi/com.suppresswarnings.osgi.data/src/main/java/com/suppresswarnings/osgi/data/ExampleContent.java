@@ -3,6 +3,8 @@ package com.suppresswarnings.osgi.data;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.suppresswarnings.osgi.alone.AbsContent;
+
 public class ExampleContent extends AbsContent {
 	/**
 	 * 

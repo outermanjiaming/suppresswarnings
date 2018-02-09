@@ -18,12 +18,10 @@ import com.suppresswarnings.osgi.alone.Format;
 import com.suppresswarnings.osgi.alone.Format.KeyValue;
 import com.suppresswarnings.osgi.alone.SendMail;
 import com.suppresswarnings.osgi.alone.State;
+import com.suppresswarnings.osgi.alone.TTL;
+import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
-import com.suppresswarnings.osgi.data.ExampleContent;
-import com.suppresswarnings.osgi.data.ExampleContext;
-import com.suppresswarnings.osgi.data.ExampleState;
-import com.suppresswarnings.osgi.data.TTL;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 import com.suppresswarnings.osgi.user.AccountService;
@@ -47,7 +45,10 @@ public class WXService implements HTTPService, Runnable {
 	 * we maybe keep some class bytes here, for instance, State
 	 */
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();
-	Map<String, TTL> keepAlive = new ConcurrentHashMap<String, TTL>();
+	/**
+	 * 
+	 */
+	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
 	/**
 	 * for those Map above, we clear some of the keys according to this ttl list
 	 */
@@ -58,6 +59,11 @@ public class WXService implements HTTPService, Runnable {
 	 * NOTE: user counter do not cache in memory, we'd better not use counter for user, we use timestamp instead
 	 */
 	Map<String, AtomicInteger> counter = new ConcurrentHashMap<String, AtomicInteger>();
+	String datacounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data);
+	String usercounter = String.join(Const.delimiter, Version.V1, Const.count, Const.user);
+	String questioncounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.question);
+	String classifycounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.classify);
+	String unknowncounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.unknown);
 	/**
 	 * 1.persist AtomicInteger Map
 	 * 2.run ttl clear
@@ -161,7 +167,7 @@ public class WXService implements HTTPService, Runnable {
 			Context<?> context = this.get(openid);
 			if(context == null) {
 				State<Context<WXService>> state = WXState.init;
-				context = new WXContext(this, state);
+				context = new LoginContext(openid, this, state);
 				this.put(openid, context);
 			}
 			boolean finish = context.test(input);
@@ -231,7 +237,7 @@ public class WXService implements HTTPService, Runnable {
 	private void expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
-		TTL old = keepAlive.remove(name);
+		TTL old = secondlife.remove(name);
 		if(old != null) {
 			if(old.marked()) {
 				ttl.remove(old);
@@ -257,11 +263,11 @@ public class WXService implements HTTPService, Runnable {
 					logger.info("[content] remove key: " + out.key());
 					cacheString.remove(out.key());
 					cacheBytes.remove(out.key());
-					keepAlive.remove(out.key());
+					secondlife.remove(out.key());
 					return true;
 				} else {
 					out.mark();
-					keepAlive.put(out.key(), out);
+					secondlife.put(out.key(), out);
 				}
 			}
 			return false;
@@ -287,19 +293,20 @@ public class WXService implements HTTPService, Runnable {
 		clear();
 		logger.info("[content] run clean end: " + (System.currentTimeMillis() - start));
 	}
-	
-	public static void main(String[] args) {
-		WXService se = new WXService();
-		WXContext a = new WXContext(se, WXState.init);
-		ExampleContext b = new ExampleContext(new ExampleContent(), ExampleState.S0);
-		
-		se.put("a", a);
-		se.put("b", b);
-		
-		Context<?> x = se.get("b");
-		boolean y = x.test("final");
-		System.out.println(y);
-		System.out.println(x);
-	}
 
+	public static void main(String[] args) {
+		int status = 1;
+		System.out.println(0+":"+status);
+		int s1 = 1<<1;
+		status |= s1;
+		System.out.println(s1+":"+status);
+		int s2 = 1<<2;
+		status |= s2;
+		System.out.println(s2+":"+status);
+		int s3 = 1<<3;
+		status |= s3;
+		System.out.println(s3+":"+status);
+		status |= s3;
+		System.out.println(s3+":"+status);
+	}
 }

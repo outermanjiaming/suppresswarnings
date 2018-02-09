@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.data;
+package com.suppresswarnings.osgi.alone;
 
 public class TTL implements Comparable<TTL> {
 	long ttl;

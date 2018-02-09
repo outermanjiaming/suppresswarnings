@@ -1,12 +1,10 @@
-package com.suppresswarnings.osgi.data;
+package com.suppresswarnings.osgi.alone;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.suppresswarnings.osgi.alone.State;
 
 public class StateClassLoader extends ClassLoader {
 	public StateClassLoader(ClassLoader parent) {
