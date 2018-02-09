@@ -74,7 +74,7 @@ public class TokenDB implements TokenService {
 		}
 		long ttl = createTime(token) + VALID_MILLIS - System.currentTimeMillis();
 		if(ttl > 0) {
-			return uid + ":" + ttl;
+			return uid;
 		}
 		return null;
 	}
@@ -88,7 +88,7 @@ public class TokenDB implements TokenService {
 		if(ttl < 0) {
 			return null;
 		}
-		return "TTL:" + ttl;
+		return "TTL=" + ttl;
 	}
 
 	public static String randomToken(){

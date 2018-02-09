@@ -14,19 +14,19 @@ public class UserService implements HTTPService {
 	private TokenService tokenService;
 	
 	public void account(AccountService leveldb) {
-		logger.info("init accountService: " + leveldb);
+		logger.info("[user] init accountService: " + leveldb);
 		this.accountService = leveldb;
 	}
 	public void clearAccount(AccountService leveldb){
-		logger.info("release accountService: msg:" + leveldb + " here:" + this.accountService);
+		logger.info("[user] release accountService: msg:" + leveldb + " here:" + this.accountService);
 		this.accountService = null;
 	}
 	public void token(TokenService leveldb) {
-		logger.info("init tokenService: " + leveldb);
+		logger.info("[user] init tokenService: " + leveldb);
 		this.tokenService = leveldb;
 	}
 	public void clearToken(TokenService leveldb){
-		logger.info("release tokenService: msg:" + leveldb + " here:" + this.tokenService);
+		logger.info("[user] release tokenService: msg:" + leveldb + " here:" + this.tokenService);
 		this.tokenService = null;
 	}
 	
@@ -37,7 +37,7 @@ public class UserService implements HTTPService {
 	public String start(Parameter parameter) throws Exception {
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
 		String action = parameter.getParameter("action");
-		logger.info("User ip: "+ ip + ", action: " + action);
+		logger.info("[user] User ip: "+ ip + ", action: " + action);
 		AutowiredConfigFactory factory = new AutowiredConfigFactory();
 		if(KEY.Login.name().equals(action)) {
 			Login args = (Login) factory.create(parameter, Login.class);
@@ -59,24 +59,24 @@ public class UserService implements HTTPService {
 		} else if(KEY.Invite.name().equals(action)) {
 			String token = parameter.getParameter(KEY.Token.name());
 			if(token == null) {
-				logger.info("token is null");
+				logger.info("[user] token is null");
 				return FAIL;
 			}
 			String valid = tokenService.valid(token);
 			if(valid == null) {
-				logger.info("token is invalid");
+				logger.info("[user] token is invalid");
 				return FAIL;
 			}
 			String uidttl = tokenService.check(token);
 			if(uidttl == null) {
-				logger.info("token is expired");
+				logger.info("[user] token is expired");
 				return FAIL;
 			}
 			String uid = uidttl.split(":")[0];
 			User user = User.oldUser(uid);
 			String inviteCode = accountService.invite(user);
 			if(inviteCode == null) {
-				logger.info("fail to invite");
+				logger.info("[user] fail to invite");
 				return FAIL;
 			}
 			return inviteCode;

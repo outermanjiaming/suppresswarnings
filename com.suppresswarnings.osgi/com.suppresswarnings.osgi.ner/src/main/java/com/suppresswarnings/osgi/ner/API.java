@@ -9,7 +9,7 @@ import edu.stanford.nlp.util.Triple;
 
 public class API {
 	AbstractSequenceClassifier<CoreLabel> classifier;
-	String model = "just_put_latest_models_here/jojo_12.0.model";
+	String model = "model.ser";
 	private API(){
 		classifier = CRFClassifier.getClassifierNoExceptions(model);
 	}

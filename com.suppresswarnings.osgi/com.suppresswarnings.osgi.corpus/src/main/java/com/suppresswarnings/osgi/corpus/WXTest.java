@@ -9,7 +9,7 @@ public class WXTest {
 		Content content = new Content();
 		byte[] bytes = Files.readAllBytes(Paths.get("D:/tmp/nono.class"));
 		content.set("nana", bytes);
-		WXContext ctx = new WXContext(content, WXState.s0);
+		WXContext ctx = new WXContext(content, WXState.init);
 		int i = 0;
 		while(true) {
 			boolean finish = ctx.test("inputs");

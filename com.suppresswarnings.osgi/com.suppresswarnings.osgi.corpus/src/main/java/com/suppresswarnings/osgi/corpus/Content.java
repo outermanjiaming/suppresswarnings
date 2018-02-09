@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,7 @@ public class Content extends AbsContent implements Runnable {
 	 */
 	private static final long serialVersionUID = -8841351499573607963L;
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	LinkedBlockingDeque<TTL> ttl = new LinkedBlockingDeque<TTL>(100000);
+	LinkedBlockingQueue<TTL> ttl = new LinkedBlockingQueue<TTL>(100000);
 	Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	Map<String, String> cacheString = new ConcurrentHashMap<String, String>();
 	Map<String, byte[]> cacheBytes = new ConcurrentHashMap<String, byte[]>();

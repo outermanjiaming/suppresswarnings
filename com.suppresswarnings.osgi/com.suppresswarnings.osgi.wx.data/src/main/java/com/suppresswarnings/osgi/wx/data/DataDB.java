@@ -29,22 +29,22 @@ public class DataDB implements DataService {
 	public void activate() {
 		if(this.levelDB == null) {
 			this.levelDB = new LevelDBImpl(dbname);
-			logger.info(this.getClass() + " create.");
+			logger.info("[data] create.");
 		}
-		logger.info(this.getClass() + " activate.");
+		logger.info("[data] activate.");
 	}
 
 	public void deactivate() {
 		if(this.levelDB != null) {
 			this.levelDB.close();
-			logger.info(this.getClass() + " close.");
+			logger.info("[data] close.");
 		}
 		this.levelDB = null;
-		logger.info(this.getClass() + " deactivate.");
+		logger.info("[data] deactivate.");
 	}
 
 	public void modified() {
-		logger.info(this.getClass() + " modified.");
+		logger.info("[data] modified.");
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.suppresswarnings.osgi.corpus;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JPanel;
 
@@ -26,7 +26,7 @@ public class Vision extends JPanel {
 		int j = 50;
 		n = 0;
 		g.drawString("keepAlive: " + content.keepAlive.size(), 20, 20);
-		LinkedBlockingDeque<TTL> ttl = content.ttl;
+		LinkedBlockingQueue<TTL> ttl = content.ttl;
 		ttl.stream().forEach(e -> {
 			long now = System.currentTimeMillis();
 			long left = e.ttl() - now;

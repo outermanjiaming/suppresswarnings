@@ -9,12 +9,12 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Format;
+import com.suppresswarnings.osgi.alone.SendMail;
 import com.suppresswarnings.osgi.alone.Format.KeyValue;
 import com.suppresswarnings.osgi.ner.API;
 import com.suppresswarnings.osgi.ner.Item;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
-import com.suppresswarnings.osgi.user.SendMail;
 
 public class WXService implements HTTPService {
 	public static final String[] keys = {

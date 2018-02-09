@@ -7,4 +7,6 @@ Export-Package: com.suppresswarnings.osgi.corpus
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.data,
  com.suppresswarnings.osgi.network.http,
+ com.suppresswarnings.osgi.user,
  org.slf4j;version="1.7.7"
+Service-Component: OSGI-INF/component.xml
