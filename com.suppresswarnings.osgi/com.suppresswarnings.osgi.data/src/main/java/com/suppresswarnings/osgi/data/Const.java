@@ -9,6 +9,10 @@ public interface Const {
 	String data = "Data";
 	String count= "Count";
 	String user = "User";
+	String yes  = "yes";
+	String no   = "no";
+	String exit = "exit()";
+	String continueTitle = "请问是否继续？yes/no";
 	/**
 	 * collection or question or classify or reply or produce or unknown
 	 * @author lijiaming
@@ -19,8 +23,17 @@ public interface Const {
 		String question   = "question";
 		String classify   = "classify";
 		String reply      = "reply";
-		String produce    = "produce";
+		String setthepapar= "setthepapar";
 		String unknown    = "unknown";
+	}
+	
+	public interface SetThePaper {
+		String question = "question";
+		String answer   = "answer";
+		String keywords = "keywords";
+		String classify = "classify";
+		String[] quiz = {question,answer,keywords,classify};
+		String[] title= {"请输入问题，例如'请回复与电影相关的语句：'","请给出示例回复，例如'最近新上映了一部黑客帝国'","请给出关键词，多个以逗号分隔，如果没有请回复'无'","请输入该问题类别，例如'电影'"};
 	}
 	
 	public interface InteractionTTL {

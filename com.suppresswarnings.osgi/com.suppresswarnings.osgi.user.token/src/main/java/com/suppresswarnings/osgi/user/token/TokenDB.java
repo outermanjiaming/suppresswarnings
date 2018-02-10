@@ -10,6 +10,7 @@ import com.suppresswarnings.osgi.user.KEY;
 import com.suppresswarnings.osgi.user.TokenService;
 import com.suppresswarnings.osgi.user.User;
 import com.suppresswarnings.osgi.alone.Version;
+import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 
 public class TokenDB implements TokenService {
@@ -101,5 +102,22 @@ public class TokenDB implements TokenService {
 		String hex = token.substring(HEAD_TOKEN.length());
 		long time = Long.parseLong(hex, 16);
 		return time;
+	}
+
+	@Override
+	public LevelDB leveldb() {
+		return levelDB;
+	}
+
+	@Override
+	public String token(String openid) {
+		String tokenByOpenid = String.join(delimiter, version, openid, KEY.Token.name());
+		return levelDB.get(tokenByOpenid);
+	}
+
+	@Override
+	public int token(String openid, String token) {
+		String tokenByOpenid = String.join(delimiter, version, openid, KEY.Token.name());
+		return levelDB.put(tokenByOpenid, token);
 	}
 }

@@ -64,6 +64,7 @@ public class WXService implements HTTPService, Runnable {
 	String questioncounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.question);
 	String classifycounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.classify);
 	String unknowncounter = String.join(Const.delimiter, Version.V1, Const.count, Const.data, Const.TextDataType.unknown);
+	String[] counterKeys = {datacounter,usercounter,questioncounter,classifycounter,unknowncounter};
 	/**
 	 * 1.persist AtomicInteger Map
 	 * 2.run ttl clear
@@ -121,8 +122,9 @@ public class WXService implements HTTPService, Runnable {
 		logger.info("[WX] release tokenService: msg:" + leveldb + " here:" + this.tokenService);
 		this.tokenService = null;
 	}
+	
 	@Override
-	public String start(Parameter parameter) throws Exception {
+	public String start(Parameter parameter) {
 		String action = parameter.getParameter("action");
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
 		if(!"WX".equals(action)){
@@ -165,12 +167,12 @@ public class WXService implements HTTPService, Runnable {
 				input = value.Recognition;
 			}
 			
-			Context<?> context = this.get(openid);
+			Context<?> context = this.context(openid);
 			logger.info("[WX] context: " + context);
 			if(context == null) {
 				State<Context<WXService>> state = WXState.init;
 				context = new WXContext(openid, this, state);
-				this.put(openid, context);
+				this.context(openid, context);
 			}
 			logger.info("[WX] context: " + context);
 			boolean finish = context.test(input);
@@ -223,21 +225,32 @@ public class WXService implements HTTPService, Runnable {
 		}
 	}
 	
-	public void set(String name, byte[] bytes) {
+
+	public Context<?> context(String openid) {
+		return contexts.get(openid);
+	}
+	public void context(String openid, Context<?> context) {
+		contexts.put(openid, context);
+	}
+	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
+		expire(openid, timeToLiveMillis);
+		contexts.put(openid, context);
+	}
+	public void bytes(String name, byte[] bytes) {
 		cacheBytes.put(name, bytes);
 	}
-	public void set(String name, String value) {
+	public void value(String name, String value) {
 		cacheString.put(name, value);
 	}
-	public void setx(String name, byte[] bytes, long timeToLiveMillis) {
+	public void bytesx(String name, byte[] bytes, long timeToLiveMillis) {
 		expire(name, timeToLiveMillis);
 		cacheBytes.put(name, bytes);
 	}
-	public void setx(String name, String value, long timeToLiveMillis) {
+	public void valuex(String name, String value, long timeToLiveMillis) {
 		expire(name, timeToLiveMillis);
 		cacheString.put(name, value);
 	}
-	private void expire(String name, long timeToLiveMillis) {
+	public void expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
 		TTL old = secondlife.remove(name);
@@ -276,13 +289,6 @@ public class WXService implements HTTPService, Runnable {
 			return false;
 		});
 		logger.info("[content] clean TTL("+ttl.size()+"): " + ttl);
-	}
-	
-	public Context<?> get(String openid) {
-		return contexts.get(openid);
-	}
-	public void put(String openid, Context<?> context) {
-		contexts.put(openid, context);
 	}
 	
 	public void init(){

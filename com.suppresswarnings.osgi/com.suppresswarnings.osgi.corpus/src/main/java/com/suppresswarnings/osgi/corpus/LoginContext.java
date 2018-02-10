@@ -3,6 +3,11 @@ package com.suppresswarnings.osgi.corpus;
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
 
+/**
+ * each active user has a new LoginContext, period
+ * @author lijiaming
+ *
+ */
 public class LoginContext extends WXContext {
 	String passcode;
 	String username;
@@ -34,5 +39,9 @@ public class LoginContext extends WXContext {
 	}
 	public LoginContext(String openid, WXService ctx, State<Context<WXService>> s) {
 		super(openid, ctx, s);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(WXState.mailRegex.matcher("lijiaming@suppresswarnings.com").matches());
 	}
 }

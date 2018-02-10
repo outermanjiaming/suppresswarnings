@@ -1,5 +1,7 @@
 package com.suppresswarnings.osgi.user;
 
+import com.suppresswarnings.osgi.leveldb.LevelDB;
+
 public interface TokenService {
 	/**
 	 * set token by username, set expire by token.
@@ -19,4 +21,7 @@ public interface TokenService {
 	 * @return
 	 */
 	public String valid(final String token);
+	public LevelDB leveldb();
+	public String token(String openid);
+	public int token(String openid, String token);
 }

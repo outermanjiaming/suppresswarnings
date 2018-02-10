@@ -1,11 +1,15 @@
 package com.suppresswarnings.osgi.corpus;
 
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
 
 public interface WXState {
-	
+	Pattern mailRegex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
 	interface LoginState extends State<Context<WXService>> {
+		long loginExpire = TimeUnit.HOURS.toMillis(2);
 		LoginState S0 = new LoginState() {
 
 			/**
@@ -225,7 +229,7 @@ public interface WXState {
 			if("登录".equals(t)) {
 				State<Context<WXService>> state = LoginState.S1;
 				LoginContext ctx = new LoginContext(openid, u.content(), state);
-				u.content().contexts.put(openid, ctx);
+				u.content().contextx(openid, ctx, LoginState.loginExpire);
 				return state;
 			}
 			return this;
