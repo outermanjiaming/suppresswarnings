@@ -128,7 +128,7 @@ public class WXService implements HTTPService, Runnable {
 		if(!"WX".equals(action)){
 			logger.info("[WX] this request is unusual, IP: "+ip);
 		}
-		
+		logger.info("[WX] request: " + parameter.toString());
 		String msgSignature = parameter.getParameter("signature");
 		String timestamp = parameter.getParameter("timestamp");
 		String nonce = parameter.getParameter("nonce");
@@ -148,6 +148,7 @@ public class WXService implements HTTPService, Runnable {
 			String sms = parameter.getParameter(Parameter.POST_BODY);
 			List<KeyValue> kvs = format.matches(sms);
 			KeyValue kv = kvs.get(Const.WXmsg.msgTypeIndex);
+			logger.info("[WX] check: " + kv.toString());
 			if(!"MsgType".equals(kv.key())) {
 				SendMail cn = new SendMail();
 				cn.title("notes [WX] msg structure not match", kvs.toString());
@@ -165,14 +166,16 @@ public class WXService implements HTTPService, Runnable {
 			}
 			
 			Context<?> context = this.get(openid);
+			logger.info("[WX] context: " + context);
 			if(context == null) {
 				State<Context<WXService>> state = WXState.init;
-				context = new LoginContext(openid, this, state);
+				context = new WXContext(openid, this, state);
 				this.put(openid, context);
 			}
+			logger.info("[WX] context: " + context);
 			boolean finish = context.test(input);
 			if(finish) {
-				System.out.println("this stage finished: " + context.state());
+				logger.info("[WX] this stage finished: " + context.state());
 			} else {
 				return xml(openid, context.output());
 			}
@@ -308,5 +311,8 @@ public class WXService implements HTTPService, Runnable {
 		System.out.println(s3+":"+status);
 		status |= s3;
 		System.out.println(s3+":"+status);
+		WXService service = new WXService();
+		String xml = service.xml("asasasasasa", "fuckit");
+		System.out.println(xml);
 	}
 }

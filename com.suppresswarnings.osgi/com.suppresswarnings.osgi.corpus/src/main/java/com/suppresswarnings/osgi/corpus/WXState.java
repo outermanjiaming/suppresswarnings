@@ -20,7 +20,7 @@ public interface WXState {
 
 			@Override
 			public boolean finish() {
-				return true;
+				return false;
 			}
 
 			@Override
@@ -32,6 +32,8 @@ public interface WXState {
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
 				if ("exit()".equals(t))
 					return WXState.init;
+				else if("login".equals(t))
+					return S1;
 				return this;
 			}
 		};
@@ -221,9 +223,10 @@ public interface WXState {
 			String openid = ((WXContext)u).openid();
 			//TODO use map or ner to decide
 			if("登录".equals(t)) {
-				LoginContext ctx = new LoginContext(openid, u.content(), LoginState.S0);
+				State<Context<WXService>> state = LoginState.S1;
+				LoginContext ctx = new LoginContext(openid, u.content(), state);
 				u.content().contexts.put(openid, ctx);
-				return LoginState.S0;
+				return state;
 			}
 			return this;
 		}

@@ -3,8 +3,7 @@ package com.suppresswarnings.osgi.corpus;
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
 
-public class LoginContext extends Context<WXService> {
-	String openid;
+public class LoginContext extends WXContext {
 	String passcode;
 	String username;
 	boolean auth = false;
@@ -34,7 +33,6 @@ public class LoginContext extends Context<WXService> {
 		return false;
 	}
 	public LoginContext(String openid, WXService ctx, State<Context<WXService>> s) {
-		super(ctx, s);
-		this.openid = openid;
+		super(openid, ctx, s);
 	}
 }
