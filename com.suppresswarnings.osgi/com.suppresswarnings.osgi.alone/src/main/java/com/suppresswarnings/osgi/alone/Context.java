@@ -15,14 +15,22 @@ public abstract class Context<T> implements Predicate<String> {
 	String output;
 	String time;
 	String rand;
-	public Context(T ctx, State<Context<T>> s) {
+	public Context(T ctx) {
 		this.content = ctx;
-		this.state = s;
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
 	}
+	public void init(State<Context<T>> s) {
+		this.state = s;
+	}
 	public T content() {
 		return content;
+	}
+	public String time(){
+		return time;
+	}
+	public String random() {
+		return rand;
 	}
 	public String output() {
 		return output;
@@ -37,6 +45,7 @@ public abstract class Context<T> implements Predicate<String> {
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
 	}
+	public abstract void log(String msg);
 	@Override
 	public boolean test(String t) {
 		state = state.apply(t, this);

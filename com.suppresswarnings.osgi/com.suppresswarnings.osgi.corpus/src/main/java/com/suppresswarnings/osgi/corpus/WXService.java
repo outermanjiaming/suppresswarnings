@@ -171,7 +171,8 @@ public class WXService implements HTTPService, Runnable {
 			logger.info("[WX] context: " + context);
 			if(context == null) {
 				State<Context<WXService>> state = WXState.init;
-				context = new WXContext(openid, this, state);
+				WXContext ctx = new WXContext(openid, this);
+				ctx.init(state);
 				this.context(openid, context);
 			}
 			logger.info("[WX] context: " + context);
