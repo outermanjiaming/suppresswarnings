@@ -44,9 +44,14 @@ public class Commander implements CommandProvider {
 	public void _listmine(CommandInterpreter ci){
 		logger.info("[Commander] list mine data by dataService: " + dataService);
 		String uid = ci.nextArgument();
+		String limit = ci.nextArgument();
+		int limited = 10;
+		if(limit.length() > 0) {
+			limited = Integer.valueOf(limit);
+		}
 		//check uid exists
 		String start = String.join(Const.delimiter, version, Const.data, Const.TextDataType.unknown, uid);
-		dataService.listSome(start, 10, new BiConsumer<String, String>() {
+		dataService.listSome(start, limited, new BiConsumer<String, String>() {
 			
 			@Override
 			public void accept(String t, String u) {
