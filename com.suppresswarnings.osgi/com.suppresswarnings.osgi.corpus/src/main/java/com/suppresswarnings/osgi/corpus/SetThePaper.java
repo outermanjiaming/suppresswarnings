@@ -14,7 +14,7 @@ public class SetThePaper extends WXContext {
 	String answer;
 	String keywords;
 	String classify;
-	public static final String format = "1.问题是【%s】\n2.示例回复是【%s】\n3.关键词是【%s】\n4.类别是【%s】\n"; 
+	public static final String format = "1.问题【%s】\n2.示例【%s】\n3.关键词【%s】\n4.类别【%s】\n"; 
 	public SetThePaper(String openid, WXService ctx) {
 		super(openid, ctx);
 	}
@@ -55,7 +55,34 @@ public class SetThePaper extends WXContext {
 		public boolean finish() {
 			return false;
 		}};
-		
+		State<Context<WXService>> P0F = new State<Context<WXService>>(){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6846950248413795401L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				log("alter P0: " + t);
+				u.println(Const.SetThePaper.title[0]);
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				question = t;
+				return P4F;
+			}
+
+			@Override
+			public String name() {
+				return "修改问题";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}};	
 	State<Context<WXService>> P1 = new State<Context<WXService>>(){
 
 		/**
@@ -84,6 +111,35 @@ public class SetThePaper extends WXContext {
 		public boolean finish() {
 			return false;
 		}};
+		State<Context<WXService>> P1F = new State<Context<WXService>>(){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6468804431168262654L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				log("alter question: " + question + "=" + t);
+				u.println(Const.SetThePaper.title[1]);
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				answer = t;
+				return P4F;
+			}
+
+			@Override
+			public String name() {
+				return "修改回复";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}};
+		
 	State<Context<WXService>> P2 = new State<Context<WXService>>(){
 
 		/**
@@ -112,6 +168,34 @@ public class SetThePaper extends WXContext {
 		public boolean finish() {
 			return false;
 		}};
+		State<Context<WXService>> P2F = new State<Context<WXService>>(){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1283468465948114153L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				log("alter answer: " + answer + "=" + t);
+				u.println(Const.SetThePaper.title[2]);
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				keywords = t;
+				return P4F;
+			}
+
+			@Override
+			public String name() {
+				return "修改关键词";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}};	
 	State<Context<WXService>> P3 = new State<Context<WXService>>(){
 
 		/**
@@ -140,6 +224,34 @@ public class SetThePaper extends WXContext {
 		public boolean finish() {
 			return false;
 		}};
+		State<Context<WXService>> P3F = new State<Context<WXService>>(){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 6857306106971801340L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				log("alter keywords: " + keywords + "=" + t);
+				u.println(Const.SetThePaper.title[3]);			
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				classify = t;
+				return P4F;
+			}
+
+			@Override
+			public String name() {
+				return "修改分类";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}};
 	State<Context<WXService>> P4 = new State<Context<WXService>>(){
 
 		/**
@@ -156,7 +268,13 @@ public class SetThePaper extends WXContext {
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			return Confirm;
+			if(Const.yes.equals(t)) return Finish;
+			if(Const.exit.equals(t)) return WXState.init;
+			if("1".equals(t)) return P0F;
+			if("2".equals(t)) return P1F;
+			if("3".equals(t)) return P2F;
+			if("4".equals(t)) return P3F;
+			return P4;
 		}
 
 		@Override
@@ -168,39 +286,39 @@ public class SetThePaper extends WXContext {
 		public boolean finish() {
 			return false;
 		}};
-	State<Context<WXService>> Confirm = new State<Context<WXService>>(){
+		State<Context<WXService>> P4F = new State<Context<WXService>>(){
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 6857306106971801340L;
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4995876025548080237L;
 
-		@Override
-		public void accept(String t, Context<WXService> u) {
-			u.println(Const.continueTitle);
-		}
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				log("just confirm");
+				u.println(confirm() + "修改请回复数字，确认无误请回复'yes'");
+			}
 
-		@Override
-		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if(Const.yes.equals(t)) return Finish;
-			if(Const.no.equals(t)) return WXState.init;
-			if(Const.exit.equals(t)) return WXState.init;
-			if("1".equals(t)) return P0;
-			if("2".equals(t)) return P1;
-			if("3".equals(t)) return P2;
-			if("4".equals(t)) return P3;
-			return Finish;
-		}
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				if(Const.yes.equals(t)) return Finish;
+				if(Const.exit.equals(t)) return WXState.init;
+				if("1".equals(t)) return P0F;
+				if("2".equals(t)) return P1F;
+				if("3".equals(t)) return P2F;
+				if("4".equals(t)) return P3F;
+				return P4F;
+			}
 
-		@Override
-		public String name() {
-			return "确认";
-		}
+			@Override
+			public String name() {
+				return "分类";
+			}
 
-		@Override
-		public boolean finish() {
-			return false;
-		}};
+			@Override
+			public boolean finish() {
+				return false;
+			}};
 	State<Context<WXService>> Finish = new State<Context<WXService>>(){
 
 		/**
@@ -222,7 +340,8 @@ public class SetThePaper extends WXContext {
 			String kclassify = String.join(Const.delimiter, Version.V1, Const.data, Const.TextDataType.setthepapar, Const.SetThePaper.classify, time(), openid);
 			u.content().dataService.save(kclassify, classify);
 			log("finish, data saved: " + confirm());
-			u.println("本次出题已经完成:" + confirm());
+			u.println("本次出题已经完成:" + confirm() + Const.continueTitle);
+			update();
 		}
 
 		@Override
@@ -239,6 +358,6 @@ public class SetThePaper extends WXContext {
 
 		@Override
 		public boolean finish() {
-			return true;
+			return false;
 		}};
 }

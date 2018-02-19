@@ -6,7 +6,6 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
 
-import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
 
 public class Commander implements CommandProvider {
@@ -43,14 +42,12 @@ public class Commander implements CommandProvider {
 	}
 	public void _listmine(CommandInterpreter ci){
 		logger.info("[Commander] list mine data by dataService: " + dataService);
-		String uid = ci.nextArgument();
+		String start = ci.nextArgument();
 		String limit = ci.nextArgument();
 		int limited = 10;
 		if(limit.length() > 0) {
 			limited = Integer.valueOf(limit);
 		}
-		//check uid exists
-		String start = String.join(Const.delimiter, version, Const.data, Const.TextDataType.unknown, uid);
 		dataService.listSome(start, limited, new BiConsumer<String, String>() {
 			
 			@Override

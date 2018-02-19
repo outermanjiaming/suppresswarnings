@@ -52,4 +52,9 @@ public abstract class Context<T> implements Predicate<String> {
 		state.accept(t, this);
 		return state.finish();
 	}
+	@Override
+	public String toString() {
+		return "Context [content=" + content + ", state=" + state + ", output=" + output + ", time=" + time + ", rand=" + rand + "]";
+	}
+	
 }

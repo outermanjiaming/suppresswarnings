@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Corpus
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus
-Bundle-Version: 2018.2.11.osgi
+Bundle-Version: 2018.2.18.osgi
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.data,
  com.suppresswarnings.osgi.leveldb,

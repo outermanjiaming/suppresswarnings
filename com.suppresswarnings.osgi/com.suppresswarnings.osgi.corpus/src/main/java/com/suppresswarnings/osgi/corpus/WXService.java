@@ -17,7 +17,6 @@ import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.Format;
 import com.suppresswarnings.osgi.alone.Format.KeyValue;
 import com.suppresswarnings.osgi.alone.SendMail;
-import com.suppresswarnings.osgi.alone.State;
 import com.suppresswarnings.osgi.alone.TTL;
 import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.data.Const;
@@ -167,13 +166,13 @@ public class WXService implements HTTPService, Runnable {
 				input = value.Recognition;
 			}
 			
-			Context<?> context = this.context(openid);
+			Context<?> context = context(openid);
 			logger.info("[WX] context: " + context);
 			if(context == null) {
-				State<Context<WXService>> state = WXState.init;
 				WXContext ctx = new WXContext(openid, this);
-				ctx.init(state);
-				this.context(openid, context);
+				ctx.init(WXState.init);
+				context = ctx;
+				contextx(openid, context, Const.InteractionTTL.userReply);
 			}
 			logger.info("[WX] context: " + context);
 			boolean finish = context.test(input);

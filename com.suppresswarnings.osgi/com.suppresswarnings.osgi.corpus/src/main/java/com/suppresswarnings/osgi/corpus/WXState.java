@@ -18,7 +18,7 @@ public interface WXState {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.println("请输入'登录'或者'出试题'：");
+			u.println("新年快乐，狗年旺旺！");
 			u.content().dataService.unknown(((WXContext)u).openid(), t);
 		}
 

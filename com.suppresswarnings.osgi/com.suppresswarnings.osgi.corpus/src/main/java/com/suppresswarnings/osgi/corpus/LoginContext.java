@@ -1,7 +1,5 @@
 package com.suppresswarnings.osgi.corpus;
 
-import java.util.concurrent.TimeUnit;
-
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
 
@@ -47,8 +45,6 @@ public class LoginContext extends WXContext {
 		System.out.println(WXState.mailRegex.matcher("lijiaming@suppresswarnings.com").matches());
 	}
 	
-	
-	long loginExpire = TimeUnit.HOURS.toMillis(2);
 	State<Context<WXService>> S0 = new State<Context<WXService>>() {
 
 		/**
