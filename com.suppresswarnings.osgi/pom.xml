@@ -24,5 +24,6 @@
       <module>com.suppresswarnings.osgi.wx.data</module>
       <module>com.suppresswarnings.osgi.command</module>
       <module>com.suppresswarnings.osgi.corpus</module>
+      <module>com.suppresswarnings.osgi.corpus.register</module>
   </modules>
 </project>

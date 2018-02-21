@@ -18,7 +18,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			u.println("enter 'login':");
+			u.output("enter 'login':");
 		}
 
 		@Override
@@ -46,7 +46,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			u.println("enter your username:");
+			u.output("enter your username:");
 		}
 
 		@Override
@@ -74,7 +74,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			u.println("Try again(" + (max - tried) + "): ");
+			u.output("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -108,7 +108,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
 			u.content().setUsername(t);
-			u.println("enter your Passcode: ");
+			u.output("enter your Passcode: ");
 		}
 
 		@Override
@@ -137,7 +137,7 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 
 		@Override
 		public void accept(String t, Context<ExampleContent> u) {
-			u.println("Try again(" + (max - tried) + "): ");
+			u.output("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -175,9 +175,9 @@ public interface ExampleState extends State<Context<ExampleContent>>{
 				if(!u.content().auth()) {
 					u.content().setPasscode(t);
 					u.content().loginOK();
-					u.println("Congratuations!");
+					u.output("Congratuations!");
 				} else {
-					u.println("You've already login");
+					u.output("You've already login");
 				}
 			}
 

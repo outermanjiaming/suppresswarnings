@@ -79,6 +79,10 @@ public class WXService implements HTTPService, Runnable {
 	AccountService accountService;
 	TokenService tokenService;
 	DataService dataService;
+	/**
+	 * 0..n
+	 */
+	Map<String, ContextFactory> factories = new ConcurrentHashMap<String, ContextFactory>();
 	
 	@Override
 	public String getName() {
@@ -120,6 +124,26 @@ public class WXService implements HTTPService, Runnable {
 	public void clearToken(TokenService leveldb){
 		logger.info("[WX] release tokenService: msg:" + leveldb + " here:" + this.tokenService);
 		this.tokenService = null;
+	}
+	
+	public void factory(ContextFactory factory) {
+		if(factories.containsKey(factory.command())) {
+			logger.warn("[WX] factory exist, replace: " + factory.command());
+		} else {
+			logger.info("[WX] new factory register: " + factory.command());
+		}
+		factories.put(factory.command(), factory);
+	}
+	
+	public void clearFactory(ContextFactory factory) {
+		boolean removed = factories.remove(factory.command(), factory);
+		logger.info("[WX] remove the factory: " + factory.command() + "(" + factory + ") = " + removed);
+	}
+	
+	public ContextFactory command(String command) {
+		ContextFactory found =  factories.get(command);
+		logger.info("[WX] get ContextFactory by command: " + command + ", description: " + found);
+		return found;
 	}
 	
 	@Override
@@ -164,13 +188,15 @@ public class WXService implements HTTPService, Runnable {
 				WXvoice value = new WXvoice();
 				value.init(kvs);
 				input = value.Recognition;
+			} else {
+				return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()));
 			}
 			
 			Context<?> context = context(openid);
-			logger.info("[WX] context: " + context);
 			if(context == null) {
 				WXContext ctx = new WXContext(openid, this);
-				ctx.init(WXState.init);
+				ctx.init(ctx.init);
+				logger.info("[WX] init context: " + ctx + " for openid: " + openid);
 				context = ctx;
 				contextx(openid, context, Const.InteractionTTL.userReply);
 			}
@@ -178,11 +204,9 @@ public class WXService implements HTTPService, Runnable {
 			boolean finish = context.test(input);
 			if(finish) {
 				logger.info("[WX] this stage finished: " + context.state());
-			} else {
-				return xml(openid, context.output());
 			}
-			
-			return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()));
+				
+			return xml(openid, context.output());
 		}
 		
 		

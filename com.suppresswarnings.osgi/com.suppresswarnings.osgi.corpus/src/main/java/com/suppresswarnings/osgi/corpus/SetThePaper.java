@@ -38,7 +38,7 @@ public class SetThePaper extends WXContext {
 		@Override
 		public void accept(String t, Context<WXService> u) {
 			log("P0: " + t);
-			u.println(Const.SetThePaper.title[0]);
+			u.output(Const.SetThePaper.title[0]);
 		}
 
 		@Override
@@ -65,7 +65,7 @@ public class SetThePaper extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				log("alter P0: " + t);
-				u.println(Const.SetThePaper.title[0]);
+				u.output(Const.SetThePaper.title[0]);
 			}
 
 			@Override
@@ -94,7 +94,7 @@ public class SetThePaper extends WXContext {
 		public void accept(String t, Context<WXService> u) {
 			log("question: " + question + "=" + t);
 			SetThePaper.this.question = t;
-			u.println(Const.SetThePaper.title[1]);
+			u.output(Const.SetThePaper.title[1]);
 		}
 
 		@Override
@@ -121,7 +121,7 @@ public class SetThePaper extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				log("alter question: " + question + "=" + t);
-				u.println(Const.SetThePaper.title[1]);
+				u.output(Const.SetThePaper.title[1]);
 			}
 
 			@Override
@@ -151,7 +151,7 @@ public class SetThePaper extends WXContext {
 		public void accept(String t, Context<WXService> u) {
 			log("answer: " + answer + "=" + t);
 			SetThePaper.this.answer = t;
-			u.println(Const.SetThePaper.title[2]);
+			u.output(Const.SetThePaper.title[2]);
 		}
 
 		@Override
@@ -178,7 +178,7 @@ public class SetThePaper extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				log("alter answer: " + answer + "=" + t);
-				u.println(Const.SetThePaper.title[2]);
+				u.output(Const.SetThePaper.title[2]);
 			}
 
 			@Override
@@ -207,7 +207,7 @@ public class SetThePaper extends WXContext {
 		public void accept(String t, Context<WXService> u) {
 			log("keywords: " + keywords + "=" + t);
 			SetThePaper.this.keywords = t;
-			u.println(Const.SetThePaper.title[3]);			
+			u.output(Const.SetThePaper.title[3]);			
 		}
 
 		@Override
@@ -234,7 +234,7 @@ public class SetThePaper extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				log("alter keywords: " + keywords + "=" + t);
-				u.println(Const.SetThePaper.title[3]);			
+				u.output(Const.SetThePaper.title[3]);			
 			}
 
 			@Override
@@ -263,13 +263,13 @@ public class SetThePaper extends WXContext {
 		public void accept(String t, Context<WXService> u) {
 			log("classify: " + classify + "=" + t);
 			SetThePaper.this.classify = t;
-			u.println(confirm() + "修改请回复数字，确认无误请回复'yes'");
+			u.output(confirm() + "修改请回复数字，确认无误请回复'yes'");
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			if(Const.yes.equals(t)) return Finish;
-			if(Const.exit.equals(t)) return WXState.init;
+			if(Const.exit.equals(t)) return init;
 			if("1".equals(t)) return P0F;
 			if("2".equals(t)) return P1F;
 			if("3".equals(t)) return P2F;
@@ -296,13 +296,13 @@ public class SetThePaper extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				log("just confirm");
-				u.println(confirm() + "修改请回复数字，确认无误请回复'yes'");
+				u.output(confirm() + "修改请回复数字，确认无误请回复'yes'");
 			}
 
 			@Override
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
 				if(Const.yes.equals(t)) return Finish;
-				if(Const.exit.equals(t)) return WXState.init;
+				if(Const.exit.equals(t)) return init;
 				if("1".equals(t)) return P0F;
 				if("2".equals(t)) return P1F;
 				if("3".equals(t)) return P2F;
@@ -340,15 +340,14 @@ public class SetThePaper extends WXContext {
 			String kclassify = String.join(Const.delimiter, Version.V1, Const.data, Const.TextDataType.setthepapar, Const.SetThePaper.classify, time(), openid);
 			u.content().dataService.save(kclassify, classify);
 			log("finish, data saved: " + confirm());
-			u.println("本次出题已经完成:" + confirm() + Const.continueTitle);
+			u.output("本次出题已经完成:" + confirm() + Const.continueTitle);
 			update();
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			if(Const.yes.equals(t)) return P0;
-			if(Const.no.equals(t)) return WXState.init;
-			return WXState.init;
+			return init;
 		}
 
 		@Override

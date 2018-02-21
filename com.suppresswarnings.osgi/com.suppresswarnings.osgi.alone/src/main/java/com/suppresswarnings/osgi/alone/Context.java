@@ -35,7 +35,7 @@ public abstract class Context<T> implements Predicate<String> {
 	public String output() {
 		return output;
 	}
-	public void println(String string) {
+	public void output(String string) {
 		this.output = string;
 	}
 	public State<Context<T>> state(){

@@ -7,4 +7,5 @@
    <reference bind="data" cardinality="0..1" interface="com.suppresswarnings.osgi.data.DataService" name="com.suppresswarnings.osgi.wx.data" policy="dynamic" unbind="clearData"/>
    <reference bind="account" cardinality="0..1" interface="com.suppresswarnings.osgi.user.AccountService" name="com.suppresswarnings.osgi.account" policy="dynamic" unbind="clearAccount"/>
    <reference bind="token" cardinality="0..1" interface="com.suppresswarnings.osgi.user.TokenService" name="com.suppresswarnings.osgi.token" policy="dynamic" unbind="clearToken"/>
+   <reference bind="factory" cardinality="0..n" interface="com.suppresswarnings.osgi.corpus.ContextFactory" name="com.suppresswarnings.osgi.factory" policy="dynamic" unbind="clearFactory"/>
 </scr:component>

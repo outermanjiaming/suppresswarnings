@@ -41,10 +41,6 @@ public class LoginContext extends WXContext {
 		super(openid, ctx);
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(WXState.mailRegex.matcher("lijiaming@suppresswarnings.com").matches());
-	}
-	
 	State<Context<WXService>> S0 = new State<Context<WXService>>() {
 
 		/**
@@ -64,13 +60,13 @@ public class LoginContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.println("enter 'login'");
+			u.output("enter 'login'");
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			if ("exit()".equals(t))
-				return WXState.init;
+				return init;
 			else if("login".equals(t))
 				return S1;
 			return this;
@@ -91,7 +87,7 @@ public class LoginContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.println("enter your username:");
+			u.output("enter your username:");
 		}
 
 		@Override
@@ -121,7 +117,7 @@ public class LoginContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.println("Try again(" + (max - tried) + "): ");
+			u.output("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -156,7 +152,7 @@ public class LoginContext extends WXContext {
 		@Override
 		public void accept(String t, Context<WXService> u) {
 			((LoginContext)u).setUsername(t);
-			u.println("enter your Passcode: ");
+			u.output("enter your Passcode: ");
 		}
 
 		@Override
@@ -187,7 +183,7 @@ public class LoginContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.println("Try again(" + (max - tried) + "): ");
+			u.output("Try again(" + (max - tried) + "): ");
 		}
 
 		@Override
@@ -226,9 +222,9 @@ public class LoginContext extends WXContext {
 			if (!((LoginContext)u).auth()) {
 				((LoginContext)u).setPasscode(t);
 				((LoginContext)u).loginOK();
-				u.println("Congratuations!");
+				u.output("Congratuations!");
 			} else {
-				u.println("You've already login");
+				u.output("You've already login");
 			}
 		}
 
