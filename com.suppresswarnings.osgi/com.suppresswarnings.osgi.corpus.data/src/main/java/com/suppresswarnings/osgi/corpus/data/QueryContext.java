@@ -24,7 +24,9 @@ public class QueryContext extends WXContext {
 		one.addRequire(ageR);
 		
 		Stage two = new Stage("email", "请输入你的邮箱：");
+		RequireLength lengthR = new RequireLength(3, 140);
 		RequireEmail emailR = new RequireEmail();
+		two.addRequire(lengthR);
 		two.addRequire(emailR);
 		stages.add(one);
 		stages.add(two);
@@ -40,8 +42,12 @@ public class QueryContext extends WXContext {
 		@Override
 		public void accept(String t, Context<WXService> u) {
 			Stage first = stage();
-			if(first == null) u.output("不存在的");
-			else u.output(first.getTitle());
+			if(first == null) {
+				u.output("不存在的");
+				return;
+			}
+			
+			u.output(first.getTitle());
 		}
 
 		@Override
@@ -99,22 +105,22 @@ public class QueryContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			if(index >= stages.size()) {
-				u.output("恭喜你所有任务已经完成");
-			} else {
-				Stage stage = stage();
-				stage.setValue(t);
-				if(stage.agree()) {
-					index ++;
-					stage = stage();
-					if(stage != null) {
-						u.output("信息已经记录，下一条：\n" + stage.getTitle());
-					} else {
-						u.output("信息已经记录");
-					}
+			Stage stage = stage();
+			if(stage == null) {
+				u.output("不存在的");
+				return;
+			}
+			stage.setValue(t);
+			if(stage.agree()) {
+				index ++;
+				stage = stage();
+				if(stage != null) {
+					u.output("信息已经记录，下一条：\n" + stage.getTitle());
 				} else {
-					u.output("数据不正确，请重试：\n" + stage.getTitle());
+					u.output("恭喜你所有任务已经完成");
 				}
+			} else {
+				u.output("数据不正确，请重试：\n" + stage.getTitle());
 			}
 		}
 		
@@ -122,7 +128,7 @@ public class QueryContext extends WXContext {
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			if(index >= stages.size()) {
-				return end;
+				return init;
 			}
 			return this;
 		}

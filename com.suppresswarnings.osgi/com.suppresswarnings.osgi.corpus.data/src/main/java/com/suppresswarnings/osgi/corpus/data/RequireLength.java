@@ -1,11 +1,11 @@
 package com.suppresswarnings.osgi.corpus.data;
 
-public class RequireMinMax extends RequireChain {
-	public static final String desc = "数值int类型，取值范围[min, max], 闭区间";
+public class RequireLength extends RequireChain {
+	public static final String desc = "长度int类型，取值范围[min, max], 闭区间";
 	int min;
 	int max;
-	public RequireMinMax(){}
-	public RequireMinMax(int min, int max) {
+	public RequireLength(){}
+	public RequireLength(int min, int max) {
 		this.min = min;
 		this.max = max;
 	}
@@ -32,18 +32,11 @@ public class RequireMinMax extends RequireChain {
 
 	@Override
 	public boolean agree(String value) {
-		int var = Integer.valueOf(value);
+		int var = value.length();
 		if(var > max || var < min) {
 			return false;
 		}
 		return true;
 	}
 
-	public static void main(String[] args) {
-		try {
-			System.out.println(Integer.valueOf("a"));
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-	}
 }
