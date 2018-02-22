@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.suppresswarnings.osgi.corpus.data">
+   <implementation class="com.suppresswarnings.osgi.corpus.data.QueryContextFactory"/>
+   <service>
+      <provide interface="com.suppresswarnings.osgi.corpus.ContextFactory"/>
+   </service>
+</scr:component>

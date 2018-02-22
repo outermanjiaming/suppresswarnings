@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Register
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus.register
 Bundle-Version: 2018.2.20.osgi
+Bundle-Vendor: LIJIAMING
 Export-Package: com.suppresswarnings.osgi.corpus.register
+Service-Component: OSGI-INF/component.xml
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.corpus,
  org.slf4j;version="1.7.7"
-Bundle-Vendor: LIJIAMING
-Service-Component: OSGI-INF/component.xml
