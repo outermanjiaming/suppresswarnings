@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: User
 Bundle-SymbolicName: com.suppresswarnings.osgi.user
-Bundle-Version: 2018.2.11.osgi
+Bundle-Version: 2018.2.21.osgi
 Export-Package: com.suppresswarnings.osgi.user
 Import-Package: com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.network.http,

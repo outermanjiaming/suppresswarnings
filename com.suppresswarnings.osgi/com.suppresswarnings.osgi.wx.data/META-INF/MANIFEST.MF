@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Data
 Bundle-SymbolicName: com.suppresswarnings.osgi.wx.data
-Bundle-Version: 2018.2.11.osgi
+Bundle-Version: 2018.2.21.osgi
 Export-Package: com.suppresswarnings.osgi.wx.data
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.data,

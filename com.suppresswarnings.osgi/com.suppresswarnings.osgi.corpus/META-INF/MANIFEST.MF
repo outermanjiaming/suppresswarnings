@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Corpus
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus
-Bundle-Version: 2018.2.20.osgi
+Bundle-Version: 2018.2.21.osgi
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.data,
  com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.network.http,
  com.suppresswarnings.osgi.user,
+ org.eclipse.osgi.framework.console;version="1.1.0",
  org.slf4j;version="1.7.7"
 Service-Component: OSGI-INF/component.xml
 Bundle-Vendor: LIJIAMING

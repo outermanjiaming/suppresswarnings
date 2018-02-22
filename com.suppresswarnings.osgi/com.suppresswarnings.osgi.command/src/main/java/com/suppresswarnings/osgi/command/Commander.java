@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.data.DataService;
 
+@Deprecated
 public class Commander implements CommandProvider {
 	DataService dataService;
 	String version = "001";

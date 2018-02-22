@@ -17,7 +17,7 @@ import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
  */
 public class AccountDB implements AccountService {
 	static final String version = Version.V1;
-	static final String delimiter = ";";
+	static final String delimiter = ".";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	static final String dbname = "/account";
 	LevelDBImpl levelDB;
@@ -154,7 +154,13 @@ public class AccountDB implements AccountService {
 			if(uidA == null) {
 				String inviteByUid = String.join(delimiter, version, userA.uid, KEY.Invite.name());
 				levelDB.put(uidByInvite, userA.uid);
-				levelDB.put(inviteByUid, invite);
+				String exist = levelDB.get(inviteByUid);
+				if(exist != null) {
+					logger.info("[invite] exist: " + exist);
+					levelDB.put(inviteByUid, invite + delimiter + exist);
+				} else {
+					levelDB.put(inviteByUid, invite);
+				}
 				userA.set(KEY.Invite, invite);
 				logger.info("[invite] success: " + invite + " count: " + count);
 				break;
@@ -179,12 +185,13 @@ public class AccountDB implements AccountService {
 			logger.info("[invited] invite code was done: " + invite);
 			return null;
 		}
-		String invitedByUid = String.join(delimiter, version, userB.uid, KEY.Invited.name(), KEY.UID.name());
-		String inviteByUid = String.join(delimiter, version, uidA, KEY.Invite.name(), KEY.UID.name());
+		String invitedByUid = String.join(delimiter, version, userB.uid, KEY.Invited.name(), uidA);
+		String inviteByUid = String.join(delimiter, version, uidA, KEY.Invite.name(), userB.uid);
+		String time = "" + System.currentTimeMillis();
 		//means uidB invited by uidA
-		levelDB.put(invitedByUid, uidA);
+		levelDB.put(invitedByUid, time);
 		//means uidA invite uidB
-		levelDB.put(inviteByUid, userB.uid);
+		levelDB.put(inviteByUid, time);
 		//means invite code was done
 		levelDB.put(uidByInvite, Step.Done.name() + uidA);
 		return invite;
@@ -217,7 +224,7 @@ public class AccountDB implements AccountService {
 
 	@Override
 	public boolean register(String username, String passcode, String openid) {
-		String uidByUsername         = String.join(delimiter, version, KEY.Account.name(), KEY.UID.name(), username);
+		String uidByUsername = String.join(delimiter, version, KEY.Account.name(), KEY.UID.name(), username);
 		String existUid = levelDB.get(uidByUsername);
 		if(existUid == null) {
 			return false;

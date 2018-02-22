@@ -8,7 +8,6 @@ public interface Const {
 	String delimiter = ".";
 	String data = "Data";
 	String count= "Count";
-	String user = "User";
 	String yes  = "yes";
 	String no   = "no";
 	String exit = "exit()";
@@ -35,10 +34,11 @@ public interface Const {
 		String[] quiz = {question,answer,keywords,classify};
 		String[] title= {"请输入问题，例如'请回复与电影相关的语句：'","请给出示例回复，例如'最近新上映了一部黑客帝国'","请给出关键词，多个以逗号分隔，如果没有请回复'无'","请输入该问题类别，例如'电影'"};
 	}
-	
+
 	public interface InteractionTTL {
 		long userReply = TimeUnit.MINUTES.toMillis(20);
 		long setThePaper = TimeUnit.MINUTES.toMillis(120);
+		long clearCache = TimeUnit.MINUTES.toMillis(60);
 	}
 	
 	public interface CounterName {

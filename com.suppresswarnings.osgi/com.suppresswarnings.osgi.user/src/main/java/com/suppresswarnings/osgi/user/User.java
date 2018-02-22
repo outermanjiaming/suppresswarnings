@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 001:lijiaming:KEY:7:123123
@@ -17,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class User {
 	public static final String HEAD_UID = "00000";
 	public final String uid;
-	Map<String, String> attributs = new ConcurrentHashMap<String, String>();
+	Map<String, String> attributs = new HashMap<String, String>();
 	
 	public static void main(String[] args) {
 		User user = User.inviteUser("AOC032");
@@ -96,19 +95,18 @@ public class User {
 	}
 	
 	/**
-	 * TODO we can increase the random number one by one to replace this.
-	 * r(9999) + r(char) + HEAD(uid)
+	 * r(10) + r(char) + HEAD(uid)
 	 * @param uid
 	 * @return
 	 */
 	public String inviteCode() {
 		StringBuffer inviteCode = new StringBuffer();
 		Random random = new Random();
-		
-		inviteCode.append(random.nextInt(9999));
+		inviteCode.append(random.nextInt(10));
 		inviteCode.append((char) (random.nextInt(26) + 'A'));
-		inviteCode.append(uid.subSequence(0, HEAD_UID.length()));
-		return inviteCode.toString();
+		int start = random.nextInt(uid.length() - HEAD_UID.length());
+		inviteCode.append(uid.subSequence(start, start + HEAD_UID.length()));
+		return inviteCode.toString().toUpperCase();
 	}
 	
 	@Override

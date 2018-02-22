@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
+import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 
 /**
@@ -65,12 +66,19 @@ public class DataDB implements DataService {
 	@Override
 	public int answer(String uid, String question, String value) {
 		// TODO Auto-generated method stub
+		logger.info("[Data] answer not implemented");
 		return 0;
 	}
 	@Override
 	public int classify(String uid, String classify, String value) {
 		// TODO Auto-generated method stub
+		logger.info("[Data] classify not implemented");
 		return 0;
+	}
+
+	@Override
+	public LevelDB leveldb() {
+		return levelDB;
 	}
 
 }
