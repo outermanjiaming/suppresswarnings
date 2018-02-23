@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.corpus.data;
+package com.suppresswarnings.osgi.corpus;
 
 import java.util.regex.Pattern;
 

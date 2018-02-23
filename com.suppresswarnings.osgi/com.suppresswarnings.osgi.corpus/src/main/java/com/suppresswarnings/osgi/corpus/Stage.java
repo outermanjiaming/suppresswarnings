@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.corpus.data;
+package com.suppresswarnings.osgi.corpus;
 
 public class Stage {
 	String key;

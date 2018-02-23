@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.corpus.data;
+package com.suppresswarnings.osgi.corpus;
 
 public class RequireMinMax extends RequireChain {
 	public static final String desc = "数值int类型，取值范围[min, max], 闭区间";

@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.corpus.data;
+package com.suppresswarnings.osgi.corpus;
 
 public class RequireLength extends RequireChain {
 	public static final String desc = "长度int类型，取值范围[min, max], 闭区间";

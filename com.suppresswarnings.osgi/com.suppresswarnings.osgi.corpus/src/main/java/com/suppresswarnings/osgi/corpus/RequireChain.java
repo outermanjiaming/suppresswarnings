@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.corpus.data;
+package com.suppresswarnings.osgi.corpus;
 
 public abstract class RequireChain {
 	public abstract String desc();

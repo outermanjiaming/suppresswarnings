@@ -1,9 +1,11 @@
 package com.suppresswarnings.osgi.corpus;
 
 import java.security.MessageDigest;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,6 +32,7 @@ import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 import com.suppresswarnings.osgi.user.AccountService;
 import com.suppresswarnings.osgi.user.KEY;
+import com.suppresswarnings.osgi.user.Step;
 import com.suppresswarnings.osgi.user.TokenService;
 import com.suppresswarnings.osgi.user.User;
 
@@ -38,6 +41,8 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	long startup = System.currentTimeMillis();
 	long initdone = 0;
+	Random rand = new Random();
+	DecimalFormat format6number = new DecimalFormat("000000");
 	Format format = new Format(Const.WXmsg.msgFormat);
 	/**
 	 * for each openid, we keep a context for a period time to save memory
@@ -87,6 +92,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	TokenService tokenService;
 	DataService dataService;
 	LevelDB leveldb;
+	
 	/**
 	 * 0..n
 	 */
@@ -149,7 +155,6 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		}
 		factories.put(factory.command(), factory);
 	}
-	
 	public void clearFactory(ContextFactory factory) {
 		boolean removed = factories.remove(factory.command(), factory);
 		logger.info("[WX] remove the factory: " + factory.command() + "(" + factory + ") = " + removed);
@@ -161,36 +166,57 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		return found;
 	}
 	
-	public String register(String openid, String invite) {
+	public String register(String openid, String invite, Context<?> context) {
 		LevelDB db = accountService.leveldb();
 		String exist = String.join(Const.delimiter, Version.V1, KEY.Account.name(), openid);
 		String uid = db.get(exist);
 		if(uid != null) {
-			return "用户已经存在了";
+			context.output("用户已经存在了");
+			return null;
 		}
 		
-		User user = new User(openid);
-		String result = accountService.invited(invite, user);
-		if(result == null) {
-			return "邀请码无法使用";
+		String uidByInvite = String.join(Const.delimiter, Version.V1, KEY.Invite.name(), KEY.UID.name(), invite);
+		String uidA = db.get(uidByInvite);
+		if(uidA == null) {
+			logger.info("[invited] invite code not exist: " + invite);
+			context.output("邀请码不存在");
+			return null;
+		} else if(uidA.startsWith(Step.Done.name())) {
+			logger.info("[invited] invite code was done: " + invite);
+			context.output("邀请码已失效");
+			return null;
 		}
+		String invitedByUid = String.join(Const.delimiter, Version.V1, openid, KEY.Invited.name(), uidA);
+		String inviteByUid = String.join(Const.delimiter, Version.V1, uidA, KEY.Invite.name(), openid);
+		String time = "" + System.currentTimeMillis();
+		
 		String limitByUid = String.join(Const.delimiter, Version.V1, openid, KEY.Invite.name(), KEY.Limit.name());
 		String header = String.join(Const.delimiter, Version.V1, KEY.Account.name());
 		AtomicInteger ucounter = counter(db, usercounter, header);
 		String key =  header + Const.delimiter + ucounter.getAndIncrement();
 		
+		db.put(invitedByUid, time);
+		db.put(inviteByUid, time);
+		db.put(uidByInvite, Step.Done.name() + "$" + uidA);
 		db.put(key, openid);
 		db.put(exist, "" + System.currentTimeMillis());
 		db.put(limitByUid, "3");
 		logger.info("[WX] register openid: " + key + " = " + openid);
 		return SUCCESS;
 	}
-	
-	public String invite(String openid) {
+	public String kaptcha(String email) {
+		String code = format6number.format(rand.nextInt(1000000));
+		SendMail mail = new SendMail(email);
+		mail.title("[SuppressWarnings] Verify Code", code);
+		return code;
+	}
+	public String invite(String openid, String email) {
 		User user = new User(openid);
 		String invite = accountService.invite(user);
-		SendMail mail = new SendMail();
-		mail.title("[SuppressWarnings] Invite Code", invite);
+		if(invite != null) {
+			SendMail mail = new SendMail(email);
+			mail.title("[SuppressWarnings] Invite Code", invite);
+		}
 		return invite;
 	}
 	

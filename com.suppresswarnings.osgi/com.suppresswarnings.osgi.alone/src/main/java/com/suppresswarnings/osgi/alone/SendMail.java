@@ -21,15 +21,19 @@ import javax.mail.internet.MimeUtility;
 import org.slf4j.LoggerFactory;
 
 public class SendMail {
-	private static String host = "smtp.163.com";
-	private static String user = "outerman_mail";
-	private static String pwd = System.getProperty("mail.passcode");
-	private static String from = "outerman_mail@163.com";
-	private static String to = "609558729@qq.com";
-	private static byte[] identify = {111, 117, 116, 101, 114, 109, 97, 110, 106, 105, 97, 109, 105, 110, 103, 64, 49, 54, 51, 46, 99, 111, 109};
+	private static final String host = "smtp.163.com";
+	private static final String user = "outerman_mail";
+	private static final String pwd = System.getProperty("mail.passcode");
+	private static final String from = "outerman_mail@163.com";
+	private String to = null;
+	private static final byte[] identify = {111, 117, 116, 101, 114, 109, 97, 110, 106, 105, 97, 109, 105, 110, 103, 64, 49, 54, 51, 46, 99, 111, 109};
 	private static String smtp = "smtp";
 	private String subject = "SuppressWarnings";
 	private static org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	public SendMail(){}
+	public SendMail(String sendTo) {
+		this.to = sendTo;
+	}
 	public void title(String subject, String content) {
 		logger.info("to send mail");
 		try {
@@ -40,7 +44,9 @@ public class SendMail {
 			session.setDebug(false);
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			if(to != null) {
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			}
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(new String(identify, "UTF-8")));
 			message.setSubject(subject);
 			message.setText(content);
@@ -60,6 +66,7 @@ public class SendMail {
 	
 	public void multipart(String content, String attachment) {
 		try {
+			if(to == null) return;
 			if(attachment == null) return;
 			File affix = new File(attachment);
 			if (!affix.exists()) return;

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Alone
 Bundle-SymbolicName: com.suppresswarnings.osgi.alone
-Bundle-Version: 2018.2.20.osgi
+Bundle-Version: 2018.2.23.osgi
 Export-Package: com.suppresswarnings.osgi.alone
 Bundle-ClassPath: libs/core-3.3.0.jar,
  libs/javax-ssl-1.1.0.jar,

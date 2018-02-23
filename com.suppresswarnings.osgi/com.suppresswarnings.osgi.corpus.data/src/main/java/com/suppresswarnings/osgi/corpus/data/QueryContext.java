@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
+import com.suppresswarnings.osgi.corpus.RequireEmail;
+import com.suppresswarnings.osgi.corpus.RequireLength;
+import com.suppresswarnings.osgi.corpus.RequireMinMax;
+import com.suppresswarnings.osgi.corpus.Stage;
 import com.suppresswarnings.osgi.corpus.WXContext;
 import com.suppresswarnings.osgi.corpus.WXService;
 

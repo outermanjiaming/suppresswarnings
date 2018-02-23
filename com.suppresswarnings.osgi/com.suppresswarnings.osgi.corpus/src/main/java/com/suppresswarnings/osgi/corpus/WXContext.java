@@ -22,7 +22,41 @@ public class WXContext extends Context<WXService> {
 	public void log(String msg) {
 		logger.info("[WXContext] " + msg);
 	}
-	
+	public State<Context<WXService>> tryAgain(int times, String prompt, State<Context<WXService>> from, State<Context<WXService>> to) {
+		return new State<Context<WXService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5956897883051354629L;
+			int tried = times;
+			
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				output("(剩余"+tried+"次)"+prompt);
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				if(tried < 1) {
+					tried = times;
+					return to;
+				}
+				tried --;
+				return from.apply(t, u);
+			}
+
+			@Override
+			public String name() {
+				return "重试";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+	}
 	public State<Context<WXService>> init = new State<Context<WXService>>(){
 
 		/**
