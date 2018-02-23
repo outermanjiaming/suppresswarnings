@@ -1,5 +1,8 @@
 package com.suppresswarnings.osgi.corpus.register;
 
+import java.text.DecimalFormat;
+import java.util.Random;
+
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Context;
@@ -12,8 +15,166 @@ public class RegisterContext extends WXContext {
 	int type;
 	String email;
 	String inviteCode;
+	Random rand = new Random();
+	DecimalFormat format = new DecimalFormat("0000");
+	String code = null;
+	State<Context<WXService>> p0, p1, p2, p3, finish;
 	public RegisterContext(String openid, WXService ctx) {
 		super(openid, ctx);
+		
+		p0 = new State<Context<WXService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2774499166678852821L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				u.output("注册成为不同类型的用户：1.游客，2.用户（邮箱），3.领导（邀请码），请回复数字：");
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				type = Integer.valueOf(t);
+				if("1".equals(t)) return p1;
+				if("2".equals(t)) return p2;
+				if("3".equals(t)) return p3;
+				return this;
+			}
+
+			@Override
+			public String name() {
+				return null;
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		p1 = new State<Context<WXService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 789106111555582891L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				u.output("请问怎么称呼您？");
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				log("[lijiaming]需要记录该用户的名字-openid" + openid() + "-" + t);
+				//regular process: if not ok, go to fix it, else move to next state
+				return finish;
+			}
+
+			@Override
+			public String name() {
+				return null;
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		p2 = new State<Context<WXService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 3678629729364336623L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				u.output("请输入您的邮箱：");
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				//regular process: if not ok, go to fix it, else move to next state
+				code = format.format(rand.nextInt(10000));
+				log("[lijiaming]发送验证码到邮箱，下一步对比验证码。" + code + " -> " + t);
+				return finish;
+			}
+
+			@Override
+			public String name() {
+				return null;
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
+		p3 = new State<Context<WXService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2700676692412417289L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				u.output("请输入邀请码：");
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				//check invite code, if used or not exist, prompt it. else register it.
+				log("[lijiaming]邀请码->openid：" + t + " -> " + openid());
+				return finish;
+			}
+
+			@Override
+			public String name() {
+				return null;
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
+		finish = new State<Context<WXService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6720551759514120192L;
+
+			@Override
+			public void accept(String t, Context<WXService> u) {
+				u.output("注册完成，您的类型是：" + type);
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				return init;
+			}
+
+			@Override
+			public String name() {
+				return null;
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		init(p0);
 	}
 
 	@Override
@@ -21,105 +182,6 @@ public class RegisterContext extends WXContext {
 		logger.info("[Register] " + msg);
 	}
 	
-	State<Context<WXService>> R0 = new State<Context<WXService>>(){
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -42020084619924710L;
-		@Override
-		public void accept(String t, Context<WXService> u) {
-			u.output("请输入邀请码：");
-		}
-
-		@Override
-		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			return R1;
-		}
-
-		@Override
-		public String name() {
-			return "注册";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
-	State<Context<WXService>> R1 = new State<Context<WXService>>(){
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -5001268758009417564L;
-		int tried = 3;
-		String invite = null;
-		@Override
-		public void accept(String t, Context<WXService> u) {
-			String result = u.content().register(openid(), t);
-			if("success".equals(result)) {
-				invite = t;
-				u.output("邀请码有效。\n请问怎么称呼您？");
-			} else {
-				u.output(result + "，可以输入exit()退出或重试" + tried + "次");
-			}
-		}
-
-		@Override
-		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if(invite == null) {
-				if("exit()".equals(t)) {
-					return init;
-				}
-				if(tried <= 1) {
-					tried = 3;
-					return init;
-				}
-				tried --;
-				return this;
-			}
-			return R2;
-		}
-
-		@Override
-		public String name() {
-			return "invite";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-	};
 	
-	State<Context<WXService>> R2 = new State<Context<WXService>>(){
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 3678629729364336623L;
-
-		@Override
-		public void accept(String t, Context<WXService> u) {
-			log("just log it: " + t);
-			u.output("注册成功！");
-		}
-
-		@Override
-		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			return init;
-		}
-
-		@Override
-		public String name() {
-			return "done";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
 	
 }

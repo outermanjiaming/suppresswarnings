@@ -219,9 +219,9 @@ public class LoginContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			if (!((LoginContext)u).auth()) {
-				((LoginContext)u).setPasscode(t);
-				((LoginContext)u).loginOK();
+			if (!auth()) {
+				setPasscode(t);
+				loginOK();
 				u.output("Congratuations!");
 			} else {
 				u.output("You've already login");

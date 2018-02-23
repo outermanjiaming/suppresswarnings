@@ -330,7 +330,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		contexts.put(openid, context);
 	}
 	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
-		expire(openid, timeToLiveMillis);
+		expire(openid+"-C", timeToLiveMillis);
 		contexts.put(openid, context);
 	}
 	public void bytes(String name, byte[] bytes) {
@@ -340,17 +340,18 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		cacheString.put(name, value);
 	}
 	public void bytesx(String name, byte[] bytes, long timeToLiveMillis) {
-		expire(name, timeToLiveMillis);
+		expire(name+"-B", timeToLiveMillis);
 		cacheBytes.put(name, bytes);
 	}
 	public void valuex(String name, String value, long timeToLiveMillis) {
-		expire(name, timeToLiveMillis);
+		expire(name+"-V", timeToLiveMillis);
 		cacheString.put(name, value);
 	}
 	public void expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
 		TTL old = secondlife.remove(name);
+		logger.info("[WX] expire exist for " + name + " = " + old);
 		if(old != null) {
 			if(old.marked()) {
 				ttl.remove(old);

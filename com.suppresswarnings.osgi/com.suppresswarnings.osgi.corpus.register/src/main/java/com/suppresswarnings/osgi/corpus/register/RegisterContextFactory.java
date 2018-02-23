@@ -13,7 +13,6 @@ public class RegisterContextFactory implements ContextFactory {
 	@Override
 	public Context<WXService> getInstance(String openid, WXService content) {
 		RegisterContext context = new RegisterContext(openid, content);
-		context.init(context.R0);
 		return context;
 	}
 
