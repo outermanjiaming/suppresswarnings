@@ -168,19 +168,21 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		if(uid != null) {
 			return "用户已经存在了";
 		}
-		String header = String.join(Const.delimiter, Version.V1, KEY.Account.name());
-		AtomicInteger ucounter = counter(db, usercounter, header);
-		String key =  header + Const.delimiter + ucounter.getAndIncrement();
-		db.put(key, openid);
-		db.put(exist, "" + System.currentTimeMillis());
+		
 		User user = new User(openid);
 		String result = accountService.invited(invite, user);
 		if(result == null) {
 			return "邀请码无法使用";
 		}
 		String limitByUid = String.join(Const.delimiter, Version.V1, openid, KEY.Invite.name(), KEY.Limit.name());
+		String header = String.join(Const.delimiter, Version.V1, KEY.Account.name());
+		AtomicInteger ucounter = counter(db, usercounter, header);
+		String key =  header + Const.delimiter + ucounter.getAndIncrement();
+		
+		db.put(key, openid);
+		db.put(exist, "" + System.currentTimeMillis());
 		db.put(limitByUid, "3");
-		logger.info("[WX] save openid: " + key + " = " + openid);
+		logger.info("[WX] register openid: " + key + " = " + openid);
 		return SUCCESS;
 	}
 	
@@ -196,14 +198,12 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		AtomicInteger pointer = counter.get(name);
 		if(pointer == null) {
 			String counterInDB = db.get(name);
-			if(counterInDB == null) {
-				pointer = new AtomicInteger(1);
-			} else {
-				pointer = new AtomicInteger(Integer.parseInt(counterInDB));
+			int current = 1;
+			if(counterInDB != null) {
+				current = Integer.parseInt(counterInDB);
 			}
 			
 			do{
-				int current = pointer.getAndIncrement();
 				String check = header + Const.delimiter + current;
 				String value = db.get(check);
 				logger.info("[WX] check: " + check + " = " + value);
@@ -211,8 +211,10 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 					db.put(name, ""+current);
 					break;
 				}
+				current ++;
 			} while(true);
 			
+			pointer = new AtomicInteger(current);
 			counter.put(name, pointer);
 		}
 		return pointer;

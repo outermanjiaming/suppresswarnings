@@ -61,13 +61,16 @@ public class RegisterContext extends WXContext {
 				invite = t;
 				u.output("邀请码有效。\n请问怎么称呼您？");
 			} else {
-				u.output("邀请码无效(还可以重试" + tried + "次)");
+				u.output(result + "，可以输入exit()退出或重试" + tried + "次");
 			}
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			if(invite == null) {
+				if("exit()".equals(t)) {
+					return init;
+				}
 				if(tried <= 1) {
 					tried = 3;
 					return init;

@@ -19,6 +19,10 @@ public class QueryContext extends WXContext {
 	}
 	public QueryContext(String openid, WXService ctx) {
 		super(openid, ctx);
+		ready();
+	}
+	public void ready(){
+		stages.clear();
 		Stage one = new Stage("age", "你几岁了？");
 		RequireMinMax ageR = new RequireMinMax(1, 140);
 		one.addRequire(ageR);
@@ -31,7 +35,6 @@ public class QueryContext extends WXContext {
 		stages.add(one);
 		stages.add(two);
 	}
-	
 	State<Context<WXService>> start = new State<Context<WXService>>(){
 
 		/**
@@ -78,11 +81,16 @@ public class QueryContext extends WXContext {
 			for(Stage stage : stages) {
 				log(stage.toString());
 			}
-			u.output("任务完成，进入待机状态");
+			u.output("任务完成，请问是否继续？yes/no");
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
+			if("yes".equals(t)) {
+				update();
+				ready();
+				return start;
+			}
 			return init;
 		}
 
@@ -117,7 +125,7 @@ public class QueryContext extends WXContext {
 				if(stage != null) {
 					u.output("信息已经记录，下一条：\n" + stage.getTitle());
 				} else {
-					u.output("恭喜你所有任务已经完成");
+					u.output("不存在的");
 				}
 			} else {
 				u.output("数据不正确，请重试：\n" + stage.getTitle());
@@ -127,8 +135,8 @@ public class QueryContext extends WXContext {
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if(index >= stages.size()) {
-				return init;
+			if(index >= stages.size() - 1) {
+				return end;
 			}
 			return this;
 		}
