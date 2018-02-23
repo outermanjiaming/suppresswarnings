@@ -32,14 +32,18 @@ public class WXContext extends Context<WXService> {
 			
 			@Override
 			public void accept(String t, Context<WXService> u) {
-				output("(剩余"+tried+"次)"+prompt);
+				if(tried < 1) {
+					to.accept(t, u);
+				} else { 
+					output("(剩余"+tried+"次)"+prompt);
+				}
 			}
 
 			@Override
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
 				if(tried < 1) {
 					tried = times;
-					return to;
+					return to.apply(t, u);
 				}
 				tried --;
 				return from.apply(t, u);
