@@ -69,41 +69,6 @@ public class QueryContext extends WXContext {
 			return false;
 		}};
 	
-	State<Context<WXService>> end = new State<Context<WXService>>(){
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 6779162430810222883L;
-
-		@Override
-		public void accept(String t, Context<WXService> u) {
-			for(Stage stage : stages) {
-				log(stage.toString());
-			}
-			u.output("任务完成，请问是否继续？yes/no");
-		}
-
-		@Override
-		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if("yes".equals(t)) {
-				update();
-				ready();
-				return start;
-			}
-			return init;
-		}
-
-		@Override
-		public String name() {
-			return "end";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}};
-	
 	State<Context<WXService>> chain = new State<Context<WXService>>(){
 
 		/**
@@ -125,7 +90,7 @@ public class QueryContext extends WXContext {
 				if(stage != null) {
 					u.output("信息已经记录，下一条：\n" + stage.getTitle());
 				} else {
-					u.output("不存在的");
+					u.output("信息记录完成：" + stages);
 				}
 			} else {
 				u.output("数据不正确，请重试：\n" + stage.getTitle());
@@ -135,8 +100,8 @@ public class QueryContext extends WXContext {
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if(index >= stages.size() - 1) {
-				return end;
+			if(index >= stages.size()) {
+				return init;
 			}
 			return this;
 		}
