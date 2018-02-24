@@ -13,3 +13,4 @@ Import-Package: com.suppresswarnings.osgi.alone,
 Service-Component: OSGI-INF/component.xml
 Bundle-Vendor: LIJIAMING
 Export-Package: com.suppresswarnings.osgi.corpus
+Bundle-ActivationPolicy: lazy
