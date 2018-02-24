@@ -64,9 +64,17 @@ public class Stage {
 		return require;
 	}
 
-	public void addRequire(RequireChain require) {
-		if(this.require == null) this.require = require;
-		else this.require.next = require;
+	public RequireChain andRequire(RequireChain require) {
+		if(this.require == null) {
+			this.require = require;
+		} else {
+			RequireChain node = this.require;
+			while(node.next != null) {
+				node = node.next;
+			}
+			node.next = require;
+		}
+		return require;
 	}
 
 	@Override

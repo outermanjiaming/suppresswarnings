@@ -29,13 +29,12 @@ public class QueryContext extends WXContext {
 		stages.clear();
 		Stage one = new Stage("age", "你几岁了？");
 		RequireMinMax ageR = new RequireMinMax(1, 140);
-		one.addRequire(ageR);
+		one.andRequire(ageR);
 		
 		Stage two = new Stage("email", "请输入你的邮箱：");
 		RequireLength lengthR = new RequireLength(5, 24);
 		RequireEmail emailR = new RequireEmail();
-		two.addRequire(lengthR);
-		two.addRequire(emailR);
+		two.andRequire(lengthR).and(emailR);
 		stages.add(one);
 		stages.add(two);
 	}

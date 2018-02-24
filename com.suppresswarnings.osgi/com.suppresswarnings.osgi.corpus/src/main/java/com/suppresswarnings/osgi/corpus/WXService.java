@@ -390,6 +390,12 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 				//don't offer this TTL since it is still short than old one
 			}
 		} else {
+			ttl.removeIf(out -> {
+				if(out.equals(e) && out.ttl() < e.ttl()) {
+					return true;
+				}
+				return false;
+			});
 			ttl.offer(e);
 		}
 	}
