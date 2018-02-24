@@ -1,7 +1,6 @@
 package com.suppresswarnings.osgi.corpus;
 
 public class RequireMinMax extends RequireChain {
-	public static final String desc = "数值int类型，取值范围[min, max], 闭区间";
 	int min;
 	int max;
 	public RequireMinMax(){}
@@ -27,7 +26,9 @@ public class RequireMinMax extends RequireChain {
 
 	@Override
 	public String desc() {
-		return desc;
+		String minV = (min == Integer.MIN_VALUE) ? "(-∞": "[" + min;
+		String maxV = (max == Integer.MAX_VALUE) ? "+∞)": max + "]";
+		return "数字类型，取值范围"+minV+", "+maxV;
 	}
 
 	@Override
@@ -37,13 +38,5 @@ public class RequireMinMax extends RequireChain {
 			return false;
 		}
 		return true;
-	}
-
-	public static void main(String[] args) {
-		try {
-			System.out.println(Integer.valueOf("a"));
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
 	}
 }

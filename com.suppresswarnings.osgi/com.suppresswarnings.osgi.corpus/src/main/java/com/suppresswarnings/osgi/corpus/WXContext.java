@@ -9,6 +9,7 @@ import com.suppresswarnings.osgi.data.Const;
 public class WXContext extends Context<WXService> {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	String openid;
+	
 	public WXContext(String openid, WXService ctx) {
 		super(ctx);
 		this.openid = openid;
@@ -61,6 +62,35 @@ public class WXContext extends Context<WXService> {
 			
 		};
 	}
+	
+	public State<Context<WXService>> fail = new State<Context<WXService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5869050323055999637L;
+
+		@Override
+		public void accept(String t, Context<WXService> u) {
+			output("操作失败，请稍后再来一次！");
+			//TODO log this openid and why
+		}
+
+		@Override
+		public State<Context<WXService>> apply(String t, Context<WXService> u) {
+			return init.apply(t, u);
+		}
+
+		@Override
+		public String name() {
+			return "fail";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
 	public State<Context<WXService>> init = new State<Context<WXService>>(){
 
 		/**

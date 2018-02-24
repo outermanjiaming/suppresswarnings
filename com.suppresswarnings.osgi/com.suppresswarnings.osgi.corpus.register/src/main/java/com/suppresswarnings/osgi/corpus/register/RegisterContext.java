@@ -17,8 +17,8 @@ public class RegisterContext extends WXContext {
 	String email;
 	String inviteCode;
 	String code = null;
-	public static final String r0 = "注册失败，请稍后再试吧。", l0 = "恭喜恭喜，您的邀请码有效！", u0 = "恭喜恭喜，您的邮箱验证通过了！", f0 = "注册完成", e0 = "验证码已经发送至您的邮箱，请查收并输入验证码：", q0 = "注册成为不同类型的用户：1.游客，2.用户（邮箱），3.领导（邀请码），请回复数字：", q1 = "请问怎么称呼您？", q1f = "名称不合格，请输入正确的名字：", q2="请输入您的邮箱：", q2f = "邮箱错误，请输入正确的邮箱：", q3 = "请输入邀请码：", q3f = "邀请码错误，请输入正确的邀请码：", q4 = "", q5 = "";
-	final State<Context<WXService>> p0, p1, p1try, visitor, user, leader, emailCode, p2, p2try, p3, p3try, fail;
+	public static final String l0 = "恭喜恭喜，您的邀请码有效！", u0 = "恭喜恭喜，您的邮箱验证通过了！", f0 = "注册完成", e0 = "验证码已经发送至您的邮箱，请查收并输入验证码：", q0 = "注册成为不同类型的用户：1.游客，2.用户（邮箱），3.领导（邀请码），请回复数字：", q1 = "请问怎么称呼您？", q1f = "名称不合格，请输入正确的名字：", q2="请输入您的邮箱：", q2f = "邮箱错误，请输入正确的邮箱：", q3 = "请输入邀请码：", q3f = "邀请码错误，请输入正确的邀请码：", q4 = "", q5 = "";
+	final State<Context<WXService>> p0, p1, p1try, visitor, user, leader, emailCode, p2, p2try, p3, p3try;
 	public RegisterContext(String openid, WXService ctx) {
 		super(openid, ctx);
 		visitor = new State<Context<WXService>>() {
@@ -100,33 +100,6 @@ public class RegisterContext extends WXContext {
 			public boolean finish() {
 				return false;
 			}};
-		fail = new State<Context<WXService>>() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 5869050323055999637L;
-
-			@Override
-			public void accept(String t, Context<WXService> u) {
-				output(r0);
-			}
-
-			@Override
-			public State<Context<WXService>> apply(String t, Context<WXService> u) {
-				return init;
-			}
-
-			@Override
-			public String name() {
-				return null;
-			}
-
-			@Override
-			public boolean finish() {
-				return false;
-			}
-		};
 		p0 = new State<Context<WXService>>() {
 
 			/**

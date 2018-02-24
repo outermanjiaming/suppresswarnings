@@ -32,7 +32,7 @@ public class QueryContext extends WXContext {
 		one.addRequire(ageR);
 		
 		Stage two = new Stage("email", "请输入你的邮箱：");
-		RequireLength lengthR = new RequireLength(3, 140);
+		RequireLength lengthR = new RequireLength(5, 24);
 		RequireEmail emailR = new RequireEmail();
 		two.addRequire(lengthR);
 		two.addRequire(emailR);
@@ -74,7 +74,7 @@ public class QueryContext extends WXContext {
 		}};
 	
 	State<Context<WXService>> chain = new State<Context<WXService>>(){
-
+		int tried = 3;
 		/**
 		 * 
 		 */
@@ -84,11 +84,13 @@ public class QueryContext extends WXContext {
 		public void accept(String t, Context<WXService> u) {
 			Stage stage = stage();
 			if(stage == null) {
+				tried = 3;
 				u.output("不存在的");
 				return;
 			}
 			stage.setValue(t);
 			if(stage.agree()) {
+				tried = 3;
 				index ++;
 				stage = stage();
 				if(stage != null) {
@@ -97,16 +99,26 @@ public class QueryContext extends WXContext {
 					u.output("信息记录完成：" + stages);
 				}
 			} else {
-				u.output("数据不正确，请重试：\n" + stage.getTitle());
+				if(tried < 1) {
+					fail.accept(t, u);
+				} else { 
+					output(stage.error() +"，请重试("+tried+")：\n" + stage.getTitle());
+				}
+				
 			}
 		}
 		
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
+			if(tried < 1) {
+				tried = 3;
+				return fail.apply(t, u);
+			}
 			if(index >= stages.size()) {
 				return init;
 			}
+			tried --;
 			return this;
 		}
 

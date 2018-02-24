@@ -1,12 +1,11 @@
 package com.suppresswarnings.osgi.corpus;
 
 public class RequireLength extends RequireChain {
-	public static final String desc = "长度int类型，取值范围[min, max], 闭区间";
 	int min;
 	int max;
 	public RequireLength(){}
 	public RequireLength(int min, int max) {
-		this.min = min;
+		this.min = min < 0 ? 0 : min;
 		this.max = max;
 	}
 	public int getMin() {
@@ -27,7 +26,9 @@ public class RequireLength extends RequireChain {
 
 	@Override
 	public String desc() {
-		return desc;
+		String minV = (min < 0) ? "(0": "[" + min;
+		String maxV = (max == Integer.MAX_VALUE) ? "+∞)": max + "]";
+		return "字符类型，长度范围"+minV+", "+maxV;
 	}
 
 	@Override

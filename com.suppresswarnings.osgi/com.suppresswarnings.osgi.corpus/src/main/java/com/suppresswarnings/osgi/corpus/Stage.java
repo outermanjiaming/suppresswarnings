@@ -4,6 +4,7 @@ public class Stage {
 	String key;
 	String title;
 	String value;
+	StringBuffer error = new StringBuffer();
 	RequireChain require;
 	public Stage(){}
 	public Stage(String key, String title) {
@@ -11,24 +12,30 @@ public class Stage {
 		this.title = title;
 	}
 	public boolean agree(){
+		error.setLength(0);
 		if(value == null) {
+			error.append("不能为null");
 			return false;
 		}
 		try {
 			RequireChain node = require;
 			while(node != null) {
 				if(!node.agree(value)) {
+					error.append("要求：" + node.desc());
 					return false;
 				}
 				node = node.next;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			error.append("检查时异常");
 			return false;
 		}
 		return true;
 	}
-
+	public String error(){
+		return error.toString();
+	}
 	public String getKey() {
 		return key;
 	}
