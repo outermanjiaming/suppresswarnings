@@ -69,6 +69,7 @@ public class QuizContext extends WXContext {
 				}
 				stage.setValue(t);
 				if(stage.agree()) {
+					//TODO save it to data
 					tried = 3;
 					index ++;
 					stage = stage();
@@ -115,9 +116,11 @@ public class QuizContext extends WXContext {
 	}
 	
 	public QuizContext next(Stage stage){
-		stages.add(stage);
+		this.stages.add(stage);
 		return this;
 	}
 	
-	
+	public void stages(List<Stage> stages){
+		this.stages.addAll(stages);
+	}
 }

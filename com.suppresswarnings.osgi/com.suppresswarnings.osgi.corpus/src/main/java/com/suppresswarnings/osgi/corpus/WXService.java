@@ -187,19 +187,23 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			return null;
 		}
 		String invitedByUid = String.join(Const.delimiter, Version.V1, openid, KEY.Invited.name(), uidA);
-		String inviteByUid = String.join(Const.delimiter, Version.V1, uidA, KEY.Invite.name(), openid);
-		String time = "" + System.currentTimeMillis();
+		String inviteByUid = String.join(Const.delimiter, Version.V1, uidA, KEY.Invite.name(), invite);
 		
 		String limitByUid = String.join(Const.delimiter, Version.V1, openid, KEY.Invite.name(), KEY.Limit.name());
 		String header = String.join(Const.delimiter, Version.V1, KEY.Account.name());
 		AtomicInteger ucounter = counter(db, usercounter, header);
 		String key =  header + Const.delimiter + ucounter.getAndIncrement();
-		
-		db.put(invitedByUid, time);
-		db.put(inviteByUid, time);
+		//openid invited by uidA at currentTime
+		db.put(invitedByUid, "" + System.currentTimeMillis());
+		//uidA use <invite> invite openid
+		db.put(inviteByUid, openid);
+		//<invite> was done
 		db.put(uidByInvite, Step.Done.name() + "$" + uidA);
+		//new openid
 		db.put(key, openid);
+		//exist openid
 		db.put(exist, "" + System.currentTimeMillis());
+		//limit of invite for openid
 		db.put(limitByUid, "3");
 		logger.info("[WX] register openid: " + key + " = " + openid);
 		return SUCCESS;
