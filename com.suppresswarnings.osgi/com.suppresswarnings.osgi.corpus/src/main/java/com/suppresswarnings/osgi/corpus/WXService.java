@@ -146,6 +146,16 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		logger.info("[WX] release tokenService: msg:" + leveldb + " here:" + this.tokenService);
 		this.tokenService = null;
 	}
+
+	public int saveToData(String key, String value) {
+		return dataService.leveldb().put(key, value);
+	}
+	public int saveToToken(String key, String value) {
+		return tokenService.leveldb().put(key, value);
+	}
+	public int saveToAccount(String key, String value) {
+		return accountService.leveldb().put(key, value);
+	}
 	
 	public void factory(ContextFactory factory) {
 		if(factories.containsKey(factory.command())) {
@@ -521,5 +531,4 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			}
 		});
 	}
-	
 }

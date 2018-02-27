@@ -12,9 +12,7 @@ public class QueryContextFactory implements ContextFactory {
 	String description = "询问并记录数据：年龄和邮箱";
 	@Override
 	public Context<WXService> getInstance(String openid, WXService content) {
-		QueryContext context = new QueryContext(openid, content);
-		context.init(context.start);
-		return context;
+		return new QueryContext(openid, content);
 	}
 	@Override
 	public String command() {

@@ -1,5 +1,7 @@
 package com.suppresswarnings.osgi.corpus;
 
+import java.util.function.BiConsumer;
+
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Context;
@@ -7,6 +9,7 @@ import com.suppresswarnings.osgi.alone.State;
 import com.suppresswarnings.osgi.data.Const;
 
 public class WXContext extends Context<WXService> {
+	public static final String exit = "exit()";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	String openid;
 	
@@ -42,7 +45,47 @@ public class WXContext extends Context<WXService> {
 
 			@Override
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				if(tried < 1 || exit.equals(t)) {
+					tried = times;
+					return to.apply(t, u);
+				}
+				tried --;
+				return from.apply(t, u);
+			}
+
+			@Override
+			public String name() {
+				return "重试";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+	}
+	
+	public State<Context<WXService>> tryAgain(int times, BiConsumer<String, Context<WXService>> accept, State<Context<WXService>> from, State<Context<WXService>> to) {
+		return new State<Context<WXService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5956897883051354629L;
+			int tried = times;
+			
+			@Override
+			public void accept(String t, Context<WXService> u) {
 				if(tried < 1) {
+					to.accept(t, u);
+				} else { 
+					accept.accept(t, u);
+				}
+			}
+
+			@Override
+			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				if(tried < 1 || exit.equals(t)) {
 					tried = times;
 					return to.apply(t, u);
 				}
@@ -142,5 +185,6 @@ public class WXContext extends Context<WXService> {
 		@Override
 		public boolean finish() {
 			return false;
-		}};
+		}
+	};
 }
