@@ -85,6 +85,8 @@ public class RegisterContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
+				String key = String.join(Const.delimiter, Version.V1, openid(), "Leader");
+				u.content().saveToAccount(key, time());
 				output(l0 + q2);
 			}
 

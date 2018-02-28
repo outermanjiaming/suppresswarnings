@@ -224,9 +224,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		//new openid
 		db.put(key, openid);
 		//exist openid
-		String time = "" + System.currentTimeMillis();
-		db.put(exist, time);
-		db.put(leader, time);
+		db.put(exist, context.time());
 		//limit of invite for openid
 		db.put(limitByUid, "3");
 		logger.info("[WX] register openid: " + key + " = " + openid);
