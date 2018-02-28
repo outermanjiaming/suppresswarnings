@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Corpus
-Bundle-SymbolicName: com.suppresswarnings.osgi.corpus;singleton:=true
-Bundle-Version: 2018.2.27.osgi
+Bundle-SymbolicName: com.suppresswarnings.osgi.corpus
+Bundle-Version: 2018.2.28.osgi
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.data,
  com.suppresswarnings.osgi.leveldb,
@@ -13,4 +13,3 @@ Import-Package: com.suppresswarnings.osgi.alone,
 Service-Component: OSGI-INF/component.xml
 Bundle-Vendor: LIJIAMING
 Export-Package: com.suppresswarnings.osgi.corpus
-Bundle-ActivationPolicy: lazy

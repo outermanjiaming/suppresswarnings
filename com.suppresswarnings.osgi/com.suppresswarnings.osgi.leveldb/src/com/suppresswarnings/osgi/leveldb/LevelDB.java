@@ -1,5 +1,6 @@
 package com.suppresswarnings.osgi.leveldb;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 public interface LevelDB {
@@ -16,4 +17,5 @@ public interface LevelDB {
 	public String get(String key);
 	public byte[] read(String key);
 	public void list(String start, long limit, BiConsumer<String, String> consumer);
+	public String page(String head, String start, AtomicBoolean stop, long limit, BiConsumer<String, String> consumer);
 }

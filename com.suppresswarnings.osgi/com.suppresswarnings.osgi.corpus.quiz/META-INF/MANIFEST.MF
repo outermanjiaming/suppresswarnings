@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Quiz
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus.quiz
-Bundle-Version: 2018.2.24.osgi
+Bundle-Version: 2018.2.28.osgi
 Export-Package: com.suppresswarnings.osgi.corpus.quiz
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.corpus

@@ -165,6 +165,11 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	public String getFromToken(String key) {
 		return tokenService.leveldb().get(key);
 	}
+	public String pageOfQuestion(int limit, String start, BiConsumer<String, String> keyvalue) {
+		String head = String.join(Const.delimiter, Version.V1, Const.data, Const.TextDataType.setthepapar, Const.SetThePaper.question);
+		if(start == null) head = start;
+		return dataService.leveldb().page(head, start, null, limit, keyvalue);
+	}
 	public void factory(ContextFactory factory) {
 		if(factories.containsKey(factory.command())) {
 			logger.warn("[WX] factory exist, replace: " + factory.command());
@@ -395,6 +400,9 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	}
 	public void value(String name, String value) {
 		cacheString.put(name, value);
+	}
+	public String value(String name) {
+		return cacheString.get(name);
 	}
 	public void bytesx(String name, byte[] bytes, long timeToLiveMillis) {
 		expire(name+"-B", timeToLiveMillis);

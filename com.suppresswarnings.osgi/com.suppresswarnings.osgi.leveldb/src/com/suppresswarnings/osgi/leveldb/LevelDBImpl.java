@@ -1,5 +1,6 @@
 package com.suppresswarnings.osgi.leveldb;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 import org.slf4j.LoggerFactory;
@@ -135,11 +136,31 @@ public class LevelDBImpl implements LevelDB {
 		long count = 0;
 		for(itr.Seek(new Slice(start));itr.Valid() && count < limit; itr.Next()) {
 			consumer.accept(itr.key().toString(), itr.value().toString());
-			count++;
+			++count;
 		}
 	}
 	
-
+	@Override
+	public String page(String head, String start, AtomicBoolean stop, long limit, BiConsumer<String, String> consumer) {
+		Iterator itr = db_.NewIterator(new ReadOptions());
+		long count = 0;
+		String now = start;
+		for(itr.Seek(new Slice(start));itr.Valid() && count < limit; itr.Next()) {
+			String key = itr.key().toString();
+			if(stop != null && stop.get()) {
+				logger.info("[leveldb] early stop while reading key: " + key + " stop: " + stop);
+				break;
+			}
+			if(key == null || !key.startsWith(head)) {
+				logger.info("[leveldb] early stop while reading key: " + key + " head: " + head);
+				break;
+			}
+			now = key;
+			consumer.accept(now, itr.value().toString());
+			++count;
+		}
+		return now;
+	}
 	public boolean inited() {
 		return inited;
 	}
@@ -153,5 +174,6 @@ public class LevelDBImpl implements LevelDB {
 	public String toString() {
 		return "LevelDBImpl ["+inited+", dbname_=" + dbname_ + ", db_=" + db_ + "]";
 	}
+
 	
 }

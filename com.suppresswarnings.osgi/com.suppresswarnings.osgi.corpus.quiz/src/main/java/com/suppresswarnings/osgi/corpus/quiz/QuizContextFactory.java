@@ -7,7 +7,6 @@ import com.suppresswarnings.osgi.corpus.ContextFactory;
 import com.suppresswarnings.osgi.corpus.QuizContext;
 import com.suppresswarnings.osgi.corpus.RequireChain;
 import com.suppresswarnings.osgi.corpus.RequireLength;
-import com.suppresswarnings.osgi.corpus.Stage;
 import com.suppresswarnings.osgi.corpus.WXService;
 
 public class QuizContextFactory implements ContextFactory {
@@ -17,16 +16,6 @@ public class QuizContextFactory implements ContextFactory {
 	@Override
 	public Context<WXService> getInstance(String openid, WXService content) {
 		QuizContext context = new QuizContext(openid, content);
-		Stage one = new Stage("ancestor", "请问人类的祖先是什么？");
-		one.andRequire(length20);
-		
-		Stage two = new Stage("color", "人类的肤色有哪几种？");
-		two.andRequire(length140);
-		
-		Stage three = new Stage("language", "你会哪几种语言？");
-		three.andRequire(length140);
-		
-		context.next(one).next(two).next(three);
 		return context;
 	}
 
