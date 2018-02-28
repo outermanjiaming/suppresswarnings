@@ -14,20 +14,20 @@ public class QuizContext extends WXContext {
 	List<Stage> stages = new ArrayList<Stage>();
 	int index;
 	State<Context<WXService>> start, next;
-	BiConsumer<Stage, WXContext> eachConsumer = new BiConsumer<Stage, WXContext>(){
+	BiConsumer<Stage, Context<WXService>> eachConsumer = new BiConsumer<Stage, Context<WXService>>(){
 
 		@Override
-		public void accept(Stage t, WXContext u) {
-			String key = String.join(Const.delimiter, Version.V1, Const.TextDataType.reply, t.getKey(), u.time(), u.openid());
+		public void accept(Stage t, Context<WXService> u) {
+			String key = String.join(Const.delimiter, Version.V1, Const.TextDataType.reply, t.getKey(), u.time(), ((WXContext)u).openid());
 			u.content().saveToData(key, t.getValue());
 			u.update();
 			u.log("[eachConsumer] save to data: " + key);
 		}
 	};
-	BiConsumer<List<Stage>, WXContext> listConsumer =  new BiConsumer<List<Stage>, WXContext>(){
+	BiConsumer<List<Stage>, Context<WXService>> listConsumer =  new BiConsumer<List<Stage>, Context<WXService>>(){
 
 		@Override
-		public void accept(List<Stage> t, WXContext u) {
+		public void accept(List<Stage> t, Context<WXService> u) {
 			u.log("[listConsumer] stages size: " + t.size());
 		}
 	};
@@ -37,13 +37,14 @@ public class QuizContext extends WXContext {
 		}
 		return null;
 	}
-	public QuizContext(BiConsumer<Stage, WXContext> eachConsumer, BiConsumer<List<Stage>, WXContext> listConsumer, String openid, WXService ctx) {
+	public QuizContext(BiConsumer<Stage, Context<WXService>> eachConsumer, BiConsumer<List<Stage>, Context<WXService>> listConsumer, String openid, WXService ctx) {
 		this(openid, ctx);
 		if(eachConsumer != null) this.eachConsumer = eachConsumer;
 		if(listConsumer != null) this.listConsumer = listConsumer;
 	}
 	public QuizContext(String openid, WXService ctx) {
 		super(openid, ctx);
+		log("[lijiaming] init QuizContext");
 		start = new State<Context<WXService>>(){
 
 			/**
@@ -95,14 +96,14 @@ public class QuizContext extends WXContext {
 				}
 				stage.setValue(t);
 				if(stage.agree()) {
-					eachConsumer.accept(stage, QuizContext.this);
+					eachConsumer.accept(stage, u);
 					tried = 3;
 					index ++;
 					stage = stage();
 					if(stage != null) {
 						u.output("信息已经记录，下一条：\n" + stage.getTitle());
 					} else {
-						listConsumer.accept(stages, QuizContext.this);
+						listConsumer.accept(stages, u);
 						u.output("信息记录完成：" + stages);
 					}
 				} else {
@@ -140,13 +141,14 @@ public class QuizContext extends WXContext {
 			}
 		};
 		
-		
+		log("[lijiaming] start to init stages");
 		String name = openid + "-question-start";
 		String begin = ctx.value(name);
 		begin = ctx.pageOfQuestion(10, begin, new BiConsumer<String,String>(){
 
 			@Override
 			public void accept(String key, String title) {
+				log("[lijiaming] get a question: " + title);
 				Stage stage = new Stage(key, title);
 				next(stage);
 			}});

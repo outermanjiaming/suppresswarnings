@@ -167,7 +167,9 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	}
 	public String pageOfQuestion(int limit, String start, BiConsumer<String, String> keyvalue) {
 		String head = String.join(Const.delimiter, Version.V1, Const.data, Const.TextDataType.setthepapar, Const.SetThePaper.question);
-		if(start == null) head = start;
+		if(start == null) {
+			start = head;
+		}
 		return dataService.leveldb().page(head, start, null, limit, keyvalue);
 	}
 	public void factory(ContextFactory factory) {
