@@ -156,7 +156,15 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	public int saveToAccount(String key, String value) {
 		return accountService.leveldb().put(key, value);
 	}
-	
+	public String getFromAccount(String key) {
+		return accountService.leveldb().get(key);
+	}
+	public String getFromData(String key) {
+		return dataService.leveldb().get(key);
+	}
+	public String getFromToken(String key) {
+		return tokenService.leveldb().get(key);
+	}
 	public void factory(ContextFactory factory) {
 		if(factories.containsKey(factory.command())) {
 			logger.warn("[WX] factory exist, replace: " + factory.command());
@@ -176,15 +184,19 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		return found;
 	}
 	
-	public String register(String openid, String invite, Context<?> context) {
+	public String registerLeader(String openid, String invite, Context<?> context) {
 		LevelDB db = accountService.leveldb();
 		String exist = String.join(Const.delimiter, Version.V1, KEY.Account.name(), openid);
 		String uid = db.get(exist);
 		if(uid != null) {
-			context.output("用户已经存在了");
+			logger.info("[WX] register, openid exist: " + uid + " openid: " + openid);
+		}
+		String leader = String.join(Const.delimiter, Version.V1, "Leader", openid);
+		String ret = db.get(leader);
+		if(ret != null) {
+			context.output("已经注册过该类型用户");
 			return null;
 		}
-		
 		String uidByInvite = String.join(Const.delimiter, Version.V1, KEY.Invite.name(), KEY.UID.name(), invite);
 		String uidA = db.get(uidByInvite);
 		if(uidA == null) {
@@ -212,7 +224,9 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		//new openid
 		db.put(key, openid);
 		//exist openid
-		db.put(exist, "" + System.currentTimeMillis());
+		String time = "" + System.currentTimeMillis();
+		db.put(exist, time);
+		db.put(leader, time);
 		//limit of invite for openid
 		db.put(limitByUid, "3");
 		logger.info("[WX] register openid: " + key + " = " + openid);
@@ -224,7 +238,12 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		mail.title("[SuppressWarnings] Verify Code", code);
 		return code;
 	}
-	public String invite(String openid, String email) {
+	public String invite(String openid, String email, Context<?> context) {
+		String leader = String.join(Const.delimiter, Version.V1, "Leader", openid);
+		String ret = accountService.leveldb().get(leader);
+		if(ret == null) {
+			context.output("只有Leader用户才可以邀请");
+		}
 		User user = new User(openid);
 		String invite = accountService.invite(user);
 		if(invite != null) {
@@ -531,4 +550,5 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			}
 		});
 	}
+
 }

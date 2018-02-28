@@ -1,14 +1,12 @@
-package com.suppresswarnings.osgi.corpus.register;
+package com.suppresswarnings.osgi.corpus;
 
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
-import com.suppresswarnings.osgi.corpus.RequireChain;
-import com.suppresswarnings.osgi.corpus.RequireEmail;
-import com.suppresswarnings.osgi.corpus.RequireLength;
-import com.suppresswarnings.osgi.corpus.WXContext;
-import com.suppresswarnings.osgi.corpus.WXService;
+import com.suppresswarnings.osgi.alone.Version;
+import com.suppresswarnings.osgi.data.Const;
+import com.suppresswarnings.osgi.user.KEY;
 
 public class RegisterContext extends WXContext {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
@@ -31,6 +29,8 @@ public class RegisterContext extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				name = t;
+				String key = String.join(Const.delimiter, Version.V1, openid(), KEY.Name.name());
+				u.content().saveToAccount(key, name);
 				output(f0);
 			}
 
@@ -57,6 +57,8 @@ public class RegisterContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
+				String key = String.join(Const.delimiter, Version.V1, openid(), "Email");
+				u.content().saveToAccount(key, email);
 				output(u0 + q1);
 			}
 
@@ -248,7 +250,8 @@ public class RegisterContext extends WXContext {
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
 				//check invite code, if used or not exist, prompt it. else register it.
 				log("[lijiaming]邀请码->openid：" + t + " -> " + openid());
-				if("8B88888".equals(t)){
+				String result = content().registerLeader(openid(), t, u);
+				if(WXService.SUCCESS.equals(result)){
 					return leader;
 				}
 				return p3try;
