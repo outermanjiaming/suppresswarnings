@@ -448,6 +448,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			if(out.ttl() < now) {
 				if(out.marked()) {
 					logger.info("[content] remove key: " + out.key());
+					contexts.remove(out.key());
 					cacheString.remove(out.key());
 					cacheBytes.remove(out.key());
 					secondlife.remove(out.key());
