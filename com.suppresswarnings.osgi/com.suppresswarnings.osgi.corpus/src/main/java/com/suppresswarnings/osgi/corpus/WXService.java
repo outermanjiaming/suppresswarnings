@@ -108,6 +108,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	}
 
 	public void deactivate() {
+		schedule.shutdown();
 		logger.info("[WX] deactivate.");
 	}
 
@@ -394,7 +395,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		contexts.put(openid, context);
 	}
 	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
-		expire(openid+"-C", timeToLiveMillis);
+		expire(openid+"==C", timeToLiveMillis);
 		contexts.put(openid, context);
 	}
 	public void bytes(String name, byte[] bytes) {
@@ -407,11 +408,11 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		return cacheString.get(name);
 	}
 	public void bytesx(String name, byte[] bytes, long timeToLiveMillis) {
-		expire(name+"-B", timeToLiveMillis);
+		expire(name+"==B", timeToLiveMillis);
 		cacheBytes.put(name, bytes);
 	}
 	public void valuex(String name, String value, long timeToLiveMillis) {
-		expire(name+"-V", timeToLiveMillis);
+		expire(name+"==V", timeToLiveMillis);
 		cacheString.put(name, value);
 	}
 	public void expire(String name, long timeToLiveMillis) {
@@ -449,16 +450,16 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 				if(out.marked()) {
 					logger.info("[content] remove key: " + out.key());
 					secondlife.remove(out.key());
-					String[] key = out.key().split("-");
-					String name = key[0];
-					if(key.length > 1){
+					String[] key = out.key().split("==");
+					if(key.length == 2){
+						String name = key[0];
 						if("C".equals(key[1])) contexts.remove(name);
 						else if ("V".equals(key[1])) cacheString.remove(name);
 						else if("B".equals(key[1])) cacheBytes.remove(name);
 					} else {
-						contexts.remove(name);
-						cacheString.remove(name);
-						cacheBytes.remove(name);
+						contexts.remove(out.key());
+						cacheString.remove(out.key());
+						cacheBytes.remove(out.key());
 					}
 					return true;
 				} else {
