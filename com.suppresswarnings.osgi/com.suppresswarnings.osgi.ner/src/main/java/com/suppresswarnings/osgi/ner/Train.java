@@ -225,7 +225,7 @@ public class Train {
 			tsv(args[0]);
 			train(args[1], args[2]);
 			
-			tsv("D:/files/work/text/hotel/hotel_20170525.txt12");
+//			tsv("D:/files/work/text/hotel/hotel_20170525.txt12");
 //			train("D:/files/work/text/hotel/hotel_20170525.txt12_tsv", "D:/files/work/text/hotel/hotel_11.9.model");
 //			optimize("D:/files/work/text/hotel/hotel_20170525.txt", 11, 0);
 		} catch (Exception e) {
