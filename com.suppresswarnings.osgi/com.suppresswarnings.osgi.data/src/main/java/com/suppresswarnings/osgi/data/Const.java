@@ -36,9 +36,9 @@ public interface Const {
 	}
 
 	public interface InteractionTTL {
-		long userReply = TimeUnit.MINUTES.toMillis(20);
-		long setThePaper = TimeUnit.MINUTES.toMillis(120);
-		long clearCache = TimeUnit.MINUTES.toMillis(60);
+		long userReply = TimeUnit.MINUTES.toMillis(3);
+		long setThePaper = TimeUnit.MINUTES.toMillis(5);
+		long clearCache = TimeUnit.MINUTES.toMillis(2);
 	}
 	
 	public interface CounterName {

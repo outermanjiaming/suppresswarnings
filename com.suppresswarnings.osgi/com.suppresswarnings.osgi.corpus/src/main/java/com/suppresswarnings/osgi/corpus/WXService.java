@@ -448,10 +448,18 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			if(out.ttl() < now) {
 				if(out.marked()) {
 					logger.info("[content] remove key: " + out.key());
-					contexts.remove(out.key());
-					cacheString.remove(out.key());
-					cacheBytes.remove(out.key());
 					secondlife.remove(out.key());
+					String[] key = out.key().split("-");
+					String name = key[0];
+					if(key.length > 1){
+						if("C".equals(key[1])) contexts.remove(name);
+						else if ("V".equals(key[1])) cacheString.remove(name);
+						else if("B".equals(key[1])) cacheBytes.remove(name);
+					} else {
+						contexts.remove(name);
+						cacheString.remove(name);
+						cacheBytes.remove(name);
+					}
 					return true;
 				} else {
 					out.mark();
@@ -525,6 +533,9 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			if("clear".equals(arg)) {
 				ci.println("[WX Command] secret command: " + arg);
 				clear();
+			} else if("watch".equals(arg)) {
+				contexts.entrySet().forEach(entry -> ci.println("[WX Command] contexts:" + entry.toString()));
+				cacheString.entrySet().forEach(entry -> ci.println("[WX Command] cacheString:" + entry.toString()));
 			}
 		}
 		ci.println("[WX Command] use " + leveldb);
