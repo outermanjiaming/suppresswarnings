@@ -326,6 +326,17 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 				WXvoice value = new WXvoice();
 				value.init(kvs);
 				input = value.Recognition;
+			} else if("event".equals(kv.value())) {
+				KeyValue event = kvs.get(Const.WXmsg.msgTypeIndex + 1);
+				if(!"event".equals(event.key())) {
+					return xml(openid, Const.WXmsg.reply[1] + Const.WXmsg.types.get(kv.value()));
+				}
+				if("subscribe".equals(event.value())) {
+					return xml(openid, "欢迎你来到素朴网联。");
+				}
+				if("unsubscribe".equals(event.value())) {
+					return xml(openid, "这里永远欢迎你再来。");
+				}
 			} else {
 				return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()));
 			}
@@ -506,6 +517,8 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		WXService service = new WXService();
 		String xml = service.xml("asasasasasa", "fuckit");
 		System.out.println(xml);
+		List<KeyValue> keyValues = service.format.matches("<xml><ToUserName><![CDATA[gh_a1fe05b98706]]></ToUserName><FromUserName><![CDATA[ot2GL01Rav4JRoRiKMMLPB74Nw7g]]></FromUserName><CreateTime>1520064812</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[subscribe]]></Event><EventKey><![CDATA[qrscene_12]]></EventKey></xml>");
+		System.out.println(keyValues);
 	}
 
 	@Override

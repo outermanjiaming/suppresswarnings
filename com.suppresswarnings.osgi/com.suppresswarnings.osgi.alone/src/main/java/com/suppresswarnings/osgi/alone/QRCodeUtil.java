@@ -9,19 +9,21 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.DecodeHintType;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.LuminanceSource;
+import com.google.zxing.MultiFormatReader;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
@@ -62,8 +64,11 @@ public class QRCodeUtil {
 			image.getRGB(0, 0, w, h, pixels, 0, w);
 			LuminanceSource source = new RGBLuminanceSource(w, h, pixels);
 			BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-			QRCodeReader reader = new QRCodeReader();
-			Result result = reader.decode(bitmap);
+			Map<DecodeHintType,Object> hints = new LinkedHashMap<DecodeHintType,Object>();
+			hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+			hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+			hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
+			Result result = new MultiFormatReader().decode(bitmap, hints);
 			return result.getText();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -72,8 +77,8 @@ public class QRCodeUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		createQrCode(new FileOutputStream(new File("d:/tmp/10x10x10.jpg")), "01234567891234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901000", 1, "JPEG");
-		String text = readQrCode(new FileInputStream(new File("d:/tmp/10x10x10.jpg")));
+		createQrCode(new FileOutputStream(new File("/Users/lijiaming/Downloads/lijiaming.jpg")), "http://weixin.qq.com/r/YSi9pVHE8AyPrRXG931z", 1, "JPEG");
+		String text = readQrCode(new FileInputStream(new File("/Users/lijiaming/Downloads/qrcode_for_gh_a1fe05b98706_258.jpg")));
 		System.out.println(text);
 	}
 

@@ -76,7 +76,8 @@ public interface Const {
 				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><MediaId><![CDATA[{MediaId}]]></MediaId><Format><![CDATA[{Format}]]></Format><MsgId>{MsgId}</MsgId><Recognition><![CDATA[{Recognition}]]></Recognition></xml>",
 				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Content><![CDATA[{Content}]]></Content><MsgId>{MsgId}</MsgId></xml>",
 				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><PicUrl><![CDATA[{PicUrl}]]></PicUrl><MsgId>{MsgId}</MsgId><MediaId><![CDATA[{MediaId}]]></MediaId></xml>",
-				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Location_X>{Location_X}</Location_X><Location_Y>{Location_Y}</Location_Y><Scale>{Scale}</Scale><Label><![CDATA[{Label}]]></Label><MsgId>{MsgId}</MsgId></xml>"
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Location_X>{Location_X}</Location_X><Location_Y>{Location_Y}</Location_Y><Scale>{Scale}</Scale><Label><![CDATA[{Label}]]></Label><MsgId>{MsgId}</MsgId></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Event><![CDATA[{event}]]></Event><EventKey><![CDATA[{EventKey}]]></EventKey></xml>"
 		};
 		
 		String[] secret = {
@@ -96,14 +97,16 @@ public interface Const {
 				put("location",  "位置");
 				put("voice",     "语音");
 				put("text",      "文字");
+				put("event",      "事件");
 				put("subscribe", "关注");
+				put("unsubscribe", "取消关注");
 			}
 		};
 
 		String[] reply = {
-				"签名不太对，不给处理。",
-				"格式不太对，不能处理。",
-				"类型不太对，不会处理。"
+				"签名不对不处理：",
+				"格式不对不处理：",
+				"该类型不会处理："
 		};
 	}
 }
