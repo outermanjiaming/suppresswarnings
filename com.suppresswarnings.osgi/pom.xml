@@ -13,12 +13,9 @@
 	  <module>com.suppresswarnings.osgi.leveldb</module>
 	  <module>com.suppresswarnings.osgi.ner</module>
 	  <module>com.suppresswarnings.osgi.user</module>
-	  
       <module>com.suppresswarnings.osgi.user.account</module>
-      
       <module>com.suppresswarnings.osgi.user.token</module>
-      
-      <module>com.suppresswarnings.osgi.wx</module>
+      <module>com.suppresswarnings.osgi.raspberrypi</module>
       <module>com.suppresswarnings.osgi.alone</module>
       <module>com.suppresswarnings.osgi.data</module>
       <module>com.suppresswarnings.osgi.wx.data</module>

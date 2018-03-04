@@ -8,19 +8,10 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.suppresswarnings.osgi</groupId>
-  <artifactId>com.suppresswarnings.osgi.wx</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>com.suppresswarnings.osgi.wx</name>
+  <artifactId>com.suppresswarnings.osgi.raspberrypi</artifactId>
+  <name>com.suppresswarnings.osgi.raspberrypi</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>
