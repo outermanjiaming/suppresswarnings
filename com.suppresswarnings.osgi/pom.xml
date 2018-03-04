@@ -24,5 +24,6 @@
       <module>com.suppresswarnings.osgi.corpus.register</module>
       <module>com.suppresswarnings.osgi.corpus.data</module>
       <module>com.suppresswarnings.osgi.corpus.quiz</module>
+      <module>com.suppresswarnings.osgi.corpus.pi</module>
   </modules>
 </project>
