@@ -39,7 +39,7 @@ public class AutoJump {
 	public static int index = 0;
 	
 	public static void main(String[] args) throws Exception {
-		collect();//autojump();//show();//
+		autojump();//show();//collect();//
 	}
 	
 	public static void show(){
@@ -183,7 +183,7 @@ public class AutoJump {
 			final int[] jumper = new int[2];
 			int[] block = new int[2];
 			
-			Optional<Piece> found = StreamSupport.stream(new Supply(data, 100, 240, 10, 10), false)
+			Optional<Piece> found = StreamSupport.stream(new Supply(data, 100, 240, 10, 10, startx, starty), false)
 			.filter(f100x240 -> {
 				if(f100x240.getY() < 480) return false;
 				
@@ -199,7 +199,7 @@ public class AutoJump {
 				
 				Data input = new Data(list, yes);
 				double[] y = nn.test(input.x);
-				if(yes(y) && jumper[0] == 0) {
+				if(yes(y) && y[0] > confidence && jumper[0] == 0) {
 					jumper[0] =f100x240.x;
 					jumper[1] =f100x240.y;
 					System.out.println("jumper found:("+ f100x240.x + "," + f100x240.y + ") == " +  y[0]);
@@ -220,7 +220,7 @@ public class AutoJump {
 			}
 			downstair(data, 4, block);
 			
-			long duration = function(jumper, block);
+			long duration = function(block, jumper);
 			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "400", "1585", "402", "1587", "" + duration});
 			swipescreen.waitFor();
 			System.err.println(block[0] + ","+ block[1] + "," + jumper[0] + "," + jumper[1] + "," + duration);
@@ -233,11 +233,11 @@ public class AutoJump {
 		return false;
 	}
 	
-	public static long function(int[] jumper, int[] block) {
-		int w = jumper[0] - (block[0] + 50);
-		int h = jumper[1] - (block[1] + 40);
+	public static long function(int[] block, int[] jumper) {
+		int w = block[0] - (jumper[0] + 50);
+		int h = block[1] - (jumper[1] + 40);
 		double x = Math.sqrt(w * w + h * h) / 520;
-		return (long)(- x * x * x * 0.5 + x* x * 40 + x * 580 + 145);
+		return (long)(- x * x * x * 0.5 + x* x * 55 + x * 600 + 110);
 	}
 	
 	public static void decide(File file, String dir) {
