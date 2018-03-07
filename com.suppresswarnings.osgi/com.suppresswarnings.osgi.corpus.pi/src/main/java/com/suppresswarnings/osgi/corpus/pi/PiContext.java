@@ -1,5 +1,7 @@
 package com.suppresswarnings.osgi.corpus.pi;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
@@ -7,7 +9,7 @@ import com.suppresswarnings.osgi.corpus.WXContext;
 import com.suppresswarnings.osgi.corpus.WXService;
 
 public class PiContext extends WXContext {
-	State<Context<WXService>> pi0, tryAgain, query, generate, done;
+	State<Context<WXService>> pi0, tryAgain, query, refresh, generate, done;
 	public PiContext(String openid, WXService ctx) {
 		super(openid, ctx);
 		pi0 = new State<Context<WXService>>(){
@@ -19,7 +21,7 @@ public class PiContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
-				u.output("输入'查询'则显示你的树莓派最近上报的数据\n输入'生成'则显示上报所需的token\n输入'exit()'退出（通用命令s）");
+				u.output("输入'查询'则显示你的树莓派最近上报的数据\n输入'生成'则显示上报所需的token\n输入'exit()'退出（通用命令）");
 			}
 
 			@Override
@@ -79,7 +81,13 @@ public class PiContext extends WXContext {
 					output("你的树莓派上报的数据为null, stamp: " + stamp);
 					return;
 				}
-				output("这是你的树莓派在" + stamp + "上报的数据：" + value);
+				long report = Long.valueOf(stamp);
+				if(System.currentTimeMillis() - report > TimeUnit.HOURS.toMillis(6)) {
+					output("你的树莓派最近没有上报，可以输入'刷新'");
+					return;
+				}
+				SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+				output("这是你的树莓派在" + format.format(new Date(report)) + "上报的数据：\n" + value );
 				lasttime = System.currentTimeMillis();
 				return;
 			}
@@ -87,11 +95,8 @@ public class PiContext extends WXContext {
 			@Override
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
 				if("生成".equals(t)) return generate;
-				if(times < 1) {
-					times = 3;
-					return init;
-				}
-				--times;
+				if("刷新".equals(t)) return refresh;
+				if("exit()".equals(t)) return init;
 				return done;
 			}
 
@@ -104,6 +109,7 @@ public class PiContext extends WXContext {
 			public boolean finish() {
 				return false;
 			}};
+		refresh = tryAgain(1, query, query, init);
 		generate = new State<Context<WXService>>(){
 
 			/**
@@ -131,6 +137,7 @@ public class PiContext extends WXContext {
 
 			@Override
 			public State<Context<WXService>> apply(String t, Context<WXService> u) {
+				if("exit()".equals(t)) return init;
 				return done;
 			}
 

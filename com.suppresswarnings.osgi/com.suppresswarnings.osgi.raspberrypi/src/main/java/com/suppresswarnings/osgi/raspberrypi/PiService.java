@@ -97,7 +97,7 @@ public class PiService implements HTTPService {
 			return RESULT[1];
 		}
 		String requestip= arg0.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
-		if(requestip == null || requestip.length() > 16) {
+		if(requestip == null || requestip.length() > 32) {
 			return RESULT[1];
 		}
 		String last = String.format(STRING[1], variable);
