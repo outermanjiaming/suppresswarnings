@@ -1,10 +1,8 @@
-package com.suppresswarnings.osgi.nn.cnn;
+package com.suppresswarnings.osgi.neuralnetwork;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
-
-import com.suppresswarnings.osgi.nn.Util;
 
 public class Saver implements Runnable {
 	Serializable network;

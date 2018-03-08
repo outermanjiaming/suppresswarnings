@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.nn.impl;
+package com.suppresswarnings.osgi.neuralnetwork;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,16 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
-import com.suppresswarnings.osgi.nn.PointMatrix;
-import com.suppresswarnings.osgi.nn.Util;
-import com.suppresswarnings.osgi.nn.cnn.Clock;
-import com.suppresswarnings.osgi.nn.cnn.Data;
-import com.suppresswarnings.osgi.nn.cnn.DescendLayer;
-import com.suppresswarnings.osgi.nn.cnn.Digit;
-import com.suppresswarnings.osgi.nn.cnn.MNIST;
-import com.suppresswarnings.osgi.nn.cnn.Row;
-import com.suppresswarnings.osgi.nn.cnn.Saver;
-
 public class TestMnist implements Serializable {
 	/**
 	 * 
@@ -26,10 +16,11 @@ public class TestMnist implements Serializable {
 	DescendLayer descendLayer = new DescendLayer();
 	PointMatrix pm;
 	PointMatrix view;
+	double best = Integer.MAX_VALUE;
 	public static int batch = 2048;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "D:/lijiaming/digit.nn.softplus";
+	public static String serializeTo = "D:/lijiaming/digit.nn.relu";
 	public NN init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
@@ -108,23 +99,21 @@ public class TestMnist implements Serializable {
 		ReentrantLock lock = new ReentrantLock(true);
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 		Predicate<Serializable> p = new Predicate<Serializable>() {
-			double last = network.error;
+			double last = best;
 			@Override
 			public boolean test(Serializable t) {
 				NN nn = (NN)t;
 				double now = nn.last();
-				if(now < last) return true;
+				if(now < last) {
+					last = now;
+					return true;
+				}
+				System.out.println(now + " > " + last);
 				return false;
 			}
 		};
 		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", p), 35, 85, TimeUnit.SECONDS);
 		System.out.println(network);
-//		try {
-//			PrintStream err = new PrintStream(serializeTo + ".err");
-//			System.setErr(err);
-//		} catch (Exception e1) {
-//			e1.printStackTrace();
-//		}
 		int position = 0;
 		while(run) {
 			if(position + batch >= mnist.size()) {
@@ -245,8 +234,9 @@ public class TestMnist implements Serializable {
 	}
 
 	public static void main(String[] args) throws Exception {
+//		TestMnist.init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
 		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
-		test.test(nn);
+		test.train(nn);
 	}
 }

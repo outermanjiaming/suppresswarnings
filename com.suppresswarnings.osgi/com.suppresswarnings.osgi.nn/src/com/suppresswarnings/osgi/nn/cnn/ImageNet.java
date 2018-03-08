@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 
 import com.suppresswarnings.osgi.nn.Network;
 import com.suppresswarnings.osgi.nn.PointMatrix;
@@ -87,7 +88,17 @@ public class ImageNet implements Serializable {
 		}
 		ReentrantLock lock = new ReentrantLock(true);
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", 100), 70, 130, TimeUnit.SECONDS);
+		Predicate<Serializable> p = new Predicate<Serializable>() {
+			double last = network.error();
+			@Override
+			public boolean test(Serializable t) {
+				Network nn = (Network)t;
+				double now = nn.last();
+				if(now < last) return true;
+				return false;
+			}
+		};
+		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", p), 70, 130, TimeUnit.SECONDS);
 		System.out.println(network);
 		int counter = 0;
 		int step = 100000;
