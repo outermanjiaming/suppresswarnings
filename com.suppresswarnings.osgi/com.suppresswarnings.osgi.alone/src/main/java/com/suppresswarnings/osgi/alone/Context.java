@@ -48,7 +48,9 @@ public abstract class Context<T> implements Predicate<String> {
 	public abstract void log(String msg);
 	@Override
 	public boolean test(String t) {
+		log(random() + "<-state:" + state);
 		state = state.apply(t, this);
+		log(random() + "->state:" + state);
 		state.accept(t, this);
 		return state.finish();
 	}

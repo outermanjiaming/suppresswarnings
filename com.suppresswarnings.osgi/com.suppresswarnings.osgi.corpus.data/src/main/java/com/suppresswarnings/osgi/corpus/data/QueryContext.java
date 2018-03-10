@@ -57,7 +57,7 @@ public class QueryContext extends WXContext {
 			
 		};
 		
-		chain = tryAgain(100, save, start, init);
+		chain = tryAgain(3, save, start, init);
 		init(start);
 	}
 	

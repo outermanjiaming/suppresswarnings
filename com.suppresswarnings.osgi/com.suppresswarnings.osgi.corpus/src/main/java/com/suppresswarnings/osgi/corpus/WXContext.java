@@ -21,7 +21,15 @@ public class WXContext extends Context<WXService> {
 	public String openid(){
 		return openid;
 	}
-
+	public boolean yes(String input, String expect) {
+		if(expect == input) return true;
+		if(input == null) return false;
+		if(expect != null && expect.equals(input)) return true;
+		//TODO ner check yes
+		String yes = input.trim() + " ";
+		if("好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ".contains(yes)) return true;
+		return false;
+	}
 	@Override
 	public void log(String msg) {
 		logger.info("[WXContext] " + msg);

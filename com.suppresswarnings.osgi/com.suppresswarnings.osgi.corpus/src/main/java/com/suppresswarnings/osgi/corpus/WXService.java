@@ -354,7 +354,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			if(finish) {
 				logger.info("[WX] this stage finished: " + context.state());
 			}
-				
+			
 			return xml(openid, context.output());
 		}
 		

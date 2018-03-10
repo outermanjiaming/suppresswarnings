@@ -26,5 +26,6 @@
       <module>com.suppresswarnings.osgi.corpus.quiz</module>
       <module>com.suppresswarnings.osgi.corpus.pi</module>
       <module>com.suppresswarnings.osgi.neuralnetwork</module>
+      <module>com.suppresswarnings.osgi.corpus.invite</module>
   </modules>
 </project>
