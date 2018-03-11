@@ -53,41 +53,41 @@ public class PiContext extends WXContext {
 			@Override
 			public void accept(String t, Context<WXService> u) {
 				if(times < 1) {
-					output("不能查询太多次，请稍后再输入'我的树莓派'。");
+					u.output("不能查询太多次，请稍后再输入'我的树莓派'。");
 					return;
 				}
 				
 				long gap = System.currentTimeMillis() - lasttime;
 				if(gap < TimeUnit.MINUTES.toMillis(2)) {
-					output("不能太频繁，请在2分钟之后再试试。");
+					u.output("不能太频繁，请在2分钟之后再试试。");
 					return;
 				}
 				
 				String key = "001.RaspberryPi." + openid();
 				String token = u.content().getFromToken(key);
 				if(token == null) {
-					output("你还没有生成token，输入'生成'");
+					u.output("你还没有生成token，输入'生成'");
 					return;
 				}
 				String last = "001.Token.RaspberryPi." + token;
 				String stamp = u.content().getFromToken(last);
 				if(stamp == null) {
-					output("你的树莓派还没有上报IP，token: " + token);
+					u.output("你的树莓派还没有上报IP，token: " + token);
 					return;
 				}
 				String ipconfig = "001.IP.RaspberryPi." + token + "." + stamp;
 				String value = u.content().getFromToken(ipconfig);
 				if(value == null) {
-					output("你的树莓派上报的数据为null, stamp: " + stamp);
+					u.output("你的树莓派上报的数据为null, stamp: " + stamp);
 					return;
 				}
 				long report = Long.valueOf(stamp);
 				if(System.currentTimeMillis() - report > TimeUnit.HOURS.toMillis(6)) {
-					output("你的树莓派最近没有上报，可以输入'刷新'");
+					u.output("你的树莓派最近没有上报，可以输入'刷新'");
 					return;
 				}
 				SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
-				output("这是你的树莓派在" + format.format(new Date(report)) + "上报的数据：\n" + value );
+				u.output("这是你的树莓派在" + format.format(new Date(report)) + "上报的数据：\n" + value );
 				lasttime = System.currentTimeMillis();
 				return;
 			}
@@ -122,7 +122,7 @@ public class PiContext extends WXContext {
 				String map = "001.RaspberryPi." + openid();
 				String exist = u.content().getFromToken(map);
 				if(exist != null) {
-					output("你的token已经存在: " + exist);
+					u.output("你的token已经存在: " + exist);
 					return;
 				}
 				String token = random() + openid().substring(5);
@@ -132,7 +132,7 @@ public class PiContext extends WXContext {
 				u.content().saveToToken(limit, "10");
 				u.content().saveToToken(uid, openid());
 				u.content().saveToToken(map, token);
-				output("（请根据攻略使用）这是你的token：" + token);
+				u.output("（请根据攻略使用）这是你的token：" + token);
 			}
 
 			@Override
@@ -159,7 +159,7 @@ public class PiContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
-				output("请根据http://SuppressWarnings.com/walkthrough/raspberrypi查看使用攻略。");
+				u.output("请根据http://SuppressWarnings.com/walkthrough/raspberrypi查看使用攻略。");
 			}
 
 			@Override

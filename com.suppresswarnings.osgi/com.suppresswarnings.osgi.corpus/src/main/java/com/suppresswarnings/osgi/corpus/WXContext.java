@@ -47,7 +47,7 @@ public class WXContext extends Context<WXService> {
 				if(tried < 1) {
 					to.accept(t, u);
 				} else { 
-					output("(剩余"+tried+"次)"+prompt);
+					u.output("(剩余"+tried+"次)"+prompt);
 				}
 			}
 
@@ -123,7 +123,7 @@ public class WXContext extends Context<WXService> {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			output("操作失败，请稍后再来一次！");
+			u.output("操作失败，请稍后再来一次！");
 			//TODO log this openid and why
 		}
 

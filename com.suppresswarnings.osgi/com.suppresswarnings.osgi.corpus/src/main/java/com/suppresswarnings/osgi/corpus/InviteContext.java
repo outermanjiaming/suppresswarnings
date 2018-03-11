@@ -54,10 +54,10 @@ public class InviteContext extends WXContext {
 				String key = String.join(Const.delimiter, Version.V1, openid(), KEY.Invite.name());
 				String invite = content().getFromAccount(key);
 				if(invite == null) {
-					output("当前没有邀请码");
+					u.output("当前没有邀请码");
 					return;
 				}
-				output(invite);
+				u.output(invite);
 			}
 
 			@Override
@@ -88,20 +88,20 @@ public class InviteContext extends WXContext {
 				String value = content().getFromAccount(limit);
 				if(value == null) {
 					failed = -1;
-					output("不好意思，你的邀请名额用完了");
+					u.output("不好意思，你的邀请名额用完了");
 					return;
 				}
 				String leader = String.join(Const.delimiter, Version.V1, "Leader", openid);
 				String valid = content().getFromAccount(leader);
 				if(valid == null) {
 					failed = -2;
-					output("目前只有Leader用户才可以邀请");
+					u.output("目前只有Leader用户才可以邀请");
 					return;
 				}
 				
 				int left = Integer.valueOf(value);
 				if(left > 0) {
-					output(msg4left(left) + "，你确定使用一个邀请名额吗？（是/否）");
+					u.output(msg4left(left) + "，你确定使用一个邀请名额吗？（是/否）");
 					return;
 				}
 			}
@@ -135,10 +135,10 @@ public class InviteContext extends WXContext {
 				String invite = content().accountService.invite(user);
 				if(invite == null) {
 					failed = -3;
-					output("邀请失败，请联系你的Leader");
+					u.output("邀请失败，请联系你的Leader");
 					return;
 				}
-				output(invite);
+				u.output(invite);
 			}
 
 			@Override
@@ -169,7 +169,7 @@ public class InviteContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
-				output("请将邀请码给你的朋友，使用方法请查看攻略http://suppresswarnings.com/walkthrough/invite");
+				u.output("请将邀请码给你的朋友，使用方法请查看攻略http://suppresswarnings.com/walkthrough/invite");
 			}
 
 			@Override

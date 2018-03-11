@@ -31,7 +31,7 @@ public class RegisterContext extends WXContext {
 				name = t;
 				String key = String.join(Const.delimiter, Version.V1, openid(), KEY.Name.name());
 				u.content().saveToAccount(key, name);
-				output(f0);
+				u.output(f0);
 			}
 
 			@Override
@@ -59,7 +59,7 @@ public class RegisterContext extends WXContext {
 			public void accept(String t, Context<WXService> u) {
 				String key = String.join(Const.delimiter, Version.V1, openid(), "Email");
 				u.content().saveToAccount(key, email);
-				output(u0 + q1);
+				u.output(u0 + q1);
 			}
 
 			@Override
@@ -87,7 +87,7 @@ public class RegisterContext extends WXContext {
 			public void accept(String t, Context<WXService> u) {
 				String key = String.join(Const.delimiter, Version.V1, openid(), "Leader");
 				u.content().saveToAccount(key, time());
-				output(l0 + q2);
+				u.output(l0 + q2);
 			}
 
 			@Override
@@ -180,7 +180,7 @@ public class RegisterContext extends WXContext {
 			public void accept(String t, Context<WXService> u) {
 				email = t;
 				code = content().kaptcha(email);
-				output(e0);
+				u.output(e0);
 			}
 
 			@Override

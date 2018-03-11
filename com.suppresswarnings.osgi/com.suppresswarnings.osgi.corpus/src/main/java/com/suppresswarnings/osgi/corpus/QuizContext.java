@@ -110,7 +110,7 @@ public class QuizContext extends WXContext {
 					if(tried < 1) {
 						fail.accept(t, u);
 					} else { 
-						output(stage.error() +"，请重试("+tried+")：\n" + stage.getTitle());
+						u.output(stage.error() +"，请重试("+tried+")：\n" + stage.getTitle());
 					}
 					
 				}
