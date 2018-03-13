@@ -30,7 +30,7 @@ public class Cell implements Serializable {
 	int downCounter;
 	int upCounter;
 	double momentum = 0.8;
-	double learningRate = 0.001;
+	double learningRate = 0.00001;
 	public Cell(int type, int index, int level, Activation fx){
 		this.type = type;
 		this.index = index;

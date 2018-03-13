@@ -3,7 +3,7 @@ package com.suppresswarnings.osgi.nn.impl;
 import java.io.Serializable;
 
 /**
- * 有向图的边
+ * 鏈夊悜鍥剧殑杈�
  * @author lijiaming
  *
  */

@@ -21,16 +21,19 @@ public class Layer implements Serializable {
 		this.type = type;
 		this.level = level;
 		this.size = size;
+		Activation fx = Activation.ReLU;
 		if(type == Cell.TYPE_OUTPUT) {
 			cells = new Cell[size];
+			fx = Activation.Sigmoid;
 		} else {
 			cells = new Cell[size + 1];
 			Cell bias = new Cell(Cell.TYPE_BIAS, size, level, Activation.ReLU);;
 			bias.assign(1);
 			cells[size] = bias;
 		}
+		
 		for(int i=0;i<size;i++) {
-			cells[i] = new Cell(type, i, level, Activation.ReLU);
+			cells[i] = new Cell(type, i, level, fx);
 		}
 	}
 	
