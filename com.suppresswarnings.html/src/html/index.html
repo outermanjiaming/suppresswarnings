@@ -5,11 +5,13 @@
 <title>素朴网联</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <meta charset="utf-8">
-<meta name="description" content="website of suppresswarnings, AKA SuppressWarnings">
+<meta name="description" content="">
 <meta name="author" content="SuppressWarnings">
 
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
 <script src="js/suppresswarnings.js"></script>
 
 <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -18,57 +20,52 @@
 <link rel="icon" href="favicon.ico" />
 <style>
 body {
-	padding-top: 5rem;
+  padding-top: 5rem;
 }
-
 .note {
-	padding: 3rem 1.5rem;
-	text-align: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.middle {
+  text-align : center;
+}
+.icon { 
+    display: inline-block; 
+    width:20px; height:20px; 
+    background: url(delete.png) no-repeat center; 
+    white-space:nowrap; 
+    letter-spacing: -1em; 
+    text-indent: -99em; 
+    color: transparent;
+    *text-indent: 0;
+    *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '\3000');
+}
+.icon:before { 
+    content: '\3000'; 
 }
 </style>
 </head>
-<body>
-	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-bottom">
-		<a class="navbar-brand" href="#"><span class="oi oi-dollar"></span></a>
-	</nav>
-	<div role="main" class="container">
-		<div id="msg" class="form-control" style="overflow:scroll; width:100%; height:200px;"></div>
-		<div id="panelcmd" class="input-group input-group-sm">
-			<input id="cmdinput" type="search" class="form-control" placeholder="请输入任何指令"/>
-			<button id="cmdbtn" type="submit" class="input-group-btn">确定</button>
-		</div>
-		<div id="panelLogin" class="form-control" style="display: none;width:100%; height:200px;">
-			<form class="form-horizontal" role="form">
-			  <div class="form-group">
-			  	<ul><li>登录才是正事</li></ul>
-			  </div>
-			  <div class="form-group">
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" id="username" placeholder="用户名">
-			    </div>
-			  </div>
-			  <div class="form-group">
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" id="passcode" placeholder="密码">
-			    </div>
-			  </div>
-			  <div class="form-group">
-			    <div class="col-sm-offset-2 col-sm-10">
-			      <button id="btnlogin" type="button" class="form-control btn btn-default">登录</button>
-			    </div>
-			  </div>
-			</form>
-		</div>
-		<div class="note">
-			<h2>
-				<span class="oi oi-dollar"></span>uppressWarnings
-			</h2>
-			<p class="lead">
-				We're Coming Soon<br />
-				Please Stay Tuned For <br> 
-				A Playable Place.
-			</p>
-		</div>
-	</div>
-</body>
+  <body>
+   
+    <main role="main" class="container">
+
+      <div class="note">
+        <h2><span class="oi oi-dollar"></span>uppressWarnings</h2>
+        <span id="root"></span>
+      </div>
+
+    </main>
+    
+   
+   <nav class="navbar navbar-expand-md navbar-drak bg-dark fixed-bottom middle">
+    <div class="container">
+     <div class="col-xs-12"><span>联系方式:<a href="mailto:lijiaming@suppresswarnings.com">lijiaming@suppresswarnings.com</a></span>
+     <br/>
+     <span>联系地址:珠海市高新区 人才公寓1栋2802室</span>
+     <br/>
+     <span><a href="http://suppresswarnings.com/">素朴网联</a></span></div>
+     <div style="width:300px;margin:0 auto; padding:20px 0;"><a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44049102496289" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="beian.png" class="icon" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">粤公网安备 44049102496289号</p></a></div>
+    </div>
+   </nav>
+  </body>
 </html>
