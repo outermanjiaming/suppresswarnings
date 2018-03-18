@@ -1,4 +1,7 @@
-ReactDOM.render(
-  <h1>Welcome Home</h1>,
-  document.getElementById('root')
-);
+$(document).ready(function(){
+	$("#root").html("Welcome Home")
+
+　　$("#root").click(function(){ 
+　　　　 $("#root").html("Nothing Happens")
+　　}); 
+}); 
