@@ -104,7 +104,7 @@ public class QuizContext extends WXContext {
 						u.output("信息已经记录，下一条：\n" + stage.getTitle());
 					} else {
 						listConsumer.accept(stages, u);
-						u.output("信息记录完成：" + stages);
+						u.output("信息记录完成：" + stages.size());
 					}
 				} else {
 					if(tried < 1) {
@@ -144,7 +144,7 @@ public class QuizContext extends WXContext {
 		log("[lijiaming] start to init stages");
 		String name = openid + "-question-start";
 		String begin = ctx.value(name);
-		begin = ctx.pageOfQuestion(10, begin, new BiConsumer<String,String>(){
+		begin = ctx.pageOfQuestion(3, begin, new BiConsumer<String,String>(){
 
 			@Override
 			public void accept(String key, String title) {
