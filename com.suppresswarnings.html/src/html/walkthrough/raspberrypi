@@ -1,0 +1,9 @@
+<h2>This is the walkthrough for raspberrypi report local IP automatically</h2>
+<p>1.首先确保你的树莓派可以自动联网</p>
+<p>2.关注'SuppressWarnings'订阅号，输入'我的树莓派'然后按指示'生成'var</p>
+<p>3.在rc.local中写上报的脚本：
+<code>
+curl "http://suppresswarnings.com/pi.http?action=raspberrypi&var=$var&ip=$IP"
+</code>
+</p>
+<p>4.进入'SuppressWarnings'订阅号，输入'我的树莓派'然后按指示'查询'最新IP</p>
