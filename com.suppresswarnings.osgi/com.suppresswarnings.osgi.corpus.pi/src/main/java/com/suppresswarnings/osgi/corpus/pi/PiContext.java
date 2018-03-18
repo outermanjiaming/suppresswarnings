@@ -159,7 +159,7 @@ public class PiContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<WXService> u) {
-				u.output("请根据http://SuppressWarnings.com/walkthrough/raspberrypi查看使用攻略。");
+				u.output("请根据http://SuppressWarnings.com/walkthrough/raspberrypi.html查看使用攻略。");
 			}
 
 			@Override
