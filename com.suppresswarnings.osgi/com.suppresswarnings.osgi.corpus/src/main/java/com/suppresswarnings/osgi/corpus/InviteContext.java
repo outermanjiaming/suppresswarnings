@@ -122,8 +122,14 @@ public class InviteContext extends WXContext {
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
-			if(yes(t, "是")) return invite;
-			return fail;
+			if(failed < 0) {
+				failed = 0;
+				return fail;
+			}
+			if(yes(t, "是")) {
+				return invite;
+			}
+			return init;
 		}
 
 		@Override
