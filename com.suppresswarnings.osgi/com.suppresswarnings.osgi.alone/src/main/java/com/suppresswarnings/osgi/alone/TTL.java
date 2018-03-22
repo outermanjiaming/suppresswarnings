@@ -1,3 +1,12 @@
+/**
+ * 
+ *       # # $
+ *       #   #
+ *       # # #
+ * 
+ *  SuppressWarnings
+ * 
+ */
 package com.suppresswarnings.osgi.alone;
 
 public class TTL implements Comparable<TTL> {

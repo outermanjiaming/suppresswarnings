@@ -1,3 +1,12 @@
+/**
+ * 
+ *       # # $
+ *       #   #
+ *       # # #
+ * 
+ *  SuppressWarnings
+ * 
+ */
 package com.suppresswarnings.osgi.alone;
 
 import java.awt.Color;

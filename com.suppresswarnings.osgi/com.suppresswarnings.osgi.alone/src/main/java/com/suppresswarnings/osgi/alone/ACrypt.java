@@ -1,3 +1,12 @@
+/**
+ * 
+ *       # # $
+ *       #   #
+ *       # # #
+ * 
+ *  SuppressWarnings
+ * 
+ */
 package com.suppresswarnings.osgi.alone;
 
 import java.io.UnsupportedEncodingException;
@@ -40,7 +49,7 @@ public class ACrypt {
 			throw new RuntimeException(e);
 		}
 	}
-	public static String encrypt(String passwd) {
+	public static String store(String passwd) {
 		if(passwd == null || passwd.length() > bound) {
 			throw new RuntimeException(message);
 		}
@@ -57,7 +66,7 @@ public class ACrypt {
 		buff.append(dollar).append(version).append(dollar).append(salt).append(crypt);
 		return buff.toString();
 	}
-	public static boolean decrypt(String passwd, String hash) {
+	public static boolean check(String passwd, String hash) {
 		if(passwd == null || passwd.length() > bound) {
 			throw new RuntimeException(message);
 		}
@@ -76,8 +85,8 @@ public class ACrypt {
 		return buff.toString().equals(hash);
 	}
 	public static void main(String[] args) {
-			String hash = encrypt("a");
+			String hash = store("a");
 			System.out.println(hash);
-			System.out.println(decrypt("1234", "$1$e9dcf408d86dc4bb38ef64102e1b95279c42db985"));
+			System.out.println(check("1234", "$1$e9dcf408d86dc4bb38ef64102e1b95279c42db985"));
 	}
 }
