@@ -9,7 +9,7 @@ import com.suppresswarnings.osgi.corpus.WXService;
 
 public class RegisterContextFactory implements ContextFactory {
 	long ttl = TimeUnit.MINUTES.toMillis(20);
-	String command = "注册";
+	String command = "我要注册";
 	String description = "注册成为不同类型的用户：\n1.游客，\n2.用户（邮箱），\n3.领导（邀请码）\n请输入数字：";
 	@Override
 	public Context<WXService> getInstance(String openid, WXService content) {

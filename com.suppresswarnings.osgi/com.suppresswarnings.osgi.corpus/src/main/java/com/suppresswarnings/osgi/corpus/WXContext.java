@@ -167,6 +167,8 @@ public class WXContext extends Context<WXService> {
 				u.content().saveToAccount(keyLast, TimeUtil.getTimeString(System.currentTimeMillis()));
 				if(name != null) {
 					u.output(name + "你好。");
+				} else {
+					u.output("你还没有设置名字，可以输入'我要注册'试试。");
 				}
 			} else {
 				u.output("会采用神经网络和CRF算法来决定回复什么内容");
