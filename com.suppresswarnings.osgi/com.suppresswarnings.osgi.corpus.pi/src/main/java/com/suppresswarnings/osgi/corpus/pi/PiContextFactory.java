@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.corpus.ContextFactory;
+import com.suppresswarnings.osgi.corpus.PiContext;
 import com.suppresswarnings.osgi.corpus.WXService;
 
 public class PiContextFactory implements ContextFactory {

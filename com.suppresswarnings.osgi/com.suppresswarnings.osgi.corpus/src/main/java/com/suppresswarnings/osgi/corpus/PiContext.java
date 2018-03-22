@@ -1,12 +1,10 @@
-package com.suppresswarnings.osgi.corpus.pi;
+package com.suppresswarnings.osgi.corpus;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
-import com.suppresswarnings.osgi.corpus.WXContext;
-import com.suppresswarnings.osgi.corpus.WXService;
 
 public class PiContext extends WXContext {
 	State<Context<WXService>> pi0, tryAgain, query, refresh, generate, done;

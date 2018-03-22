@@ -46,7 +46,10 @@ public class TimeUtil {
 	public static long getRealTime(long leftMillis) {
 		return CountDown - leftMillis;
 	}
-	public static String getTimeString(long leftMillis) {
-		return new SimpleDateFormat(TimeFormat).format(new Date(getRealTime(leftMillis)));
+	public static String getTimeString(long timeMillis) {
+		return new SimpleDateFormat(TimeFormat).format(new Date(timeMillis));
+	}
+	public static String getTimeStringByLeft(long leftMillis) {
+		return getTimeString(getRealTime(leftMillis));
 	}
 }

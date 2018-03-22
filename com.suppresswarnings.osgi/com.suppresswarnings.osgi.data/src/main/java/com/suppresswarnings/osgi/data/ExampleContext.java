@@ -8,7 +8,16 @@ public class ExampleContext extends Context<ExampleContent> {
 		super(content);
 	}
 
+	
+	@Override
+	public void output(String string) {
+		super.output(string);
+		System.err.println("[Example] " + string);
+	}
+
+
 	@Override
 	public void log(String msg) {
+		System.out.println("[Example] " + msg);
 	}
 }

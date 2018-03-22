@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.osgi.alone.Context;
 import com.suppresswarnings.osgi.alone.State;
+import com.suppresswarnings.osgi.alone.TimeUtil;
+import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.data.Const;
+import com.suppresswarnings.osgi.user.KEY;
 
 public class WXContext extends Context<WXService> {
 	public static final String exit = "exit()";
@@ -143,7 +146,8 @@ public class WXContext extends Context<WXService> {
 		}
 	};
 	public State<Context<WXService>> init = new State<Context<WXService>>(){
-
+		boolean inited = false;
+		
 		/**
 		 * 
 		 */
@@ -151,28 +155,43 @@ public class WXContext extends Context<WXService> {
 
 		@Override
 		public void accept(String t, Context<WXService> u) {
-			u.output("新年快乐，狗年旺旺！");
-			u.content().dataService.unknown(((WXContext)u).openid(), t);
+			if(!inited) {
+				inited = true;
+				String name = u.content().getFromAccount(String.join(Const.delimiter, Version.V1, openid(), KEY.Name.name()));
+				String keyLast = String.join(Const.delimiter, Version.V1, openid(), "Last");
+				String last = u.content().getFromAccount(keyLast);
+				if(last != null) {
+					String keyLasts = String.join(Const.delimiter, Version.V1, openid(), "Last", ""+TimeUtil.getNowLeft());
+					u.content().saveToAccount(keyLasts, last);
+				}
+				u.content().saveToAccount(keyLast, TimeUtil.getTimeString(System.currentTimeMillis()));
+				if(name != null) {
+					u.output(name + "你好。");
+				}
+			} else {
+				u.output("会采用神经网络和CRF算法来决定回复什么内容");
+				u.content().dataService.unknown(((WXContext)u).openid(), t);
+			}
 		}
 
 		@Override
 		public State<Context<WXService>> apply(String t, Context<WXService> u) {
 			String openid = ((WXContext)u).openid();
+			WXService content = u.content();
 			
 			if("登录".equals(t)) {
-				LoginContext ctx = new LoginContext(openid, u.content());
+				LoginContext ctx = new LoginContext(openid, content);
 				ctx.init(ctx.S0);
 				u.content().contextx(openid, ctx, Const.InteractionTTL.userReply);
 				return ctx.S0;
 			}
 			if("出试题".equals(t)) {
-				SetThePaper ctx = new SetThePaper(openid, u.content());
+				SetThePaper ctx = new SetThePaper(openid, content);
 				ctx.init(ctx.P0);
 				u.content().contextx(openid, ctx, Const.InteractionTTL.setThePaper);
 				return ctx.P0;
 			}
 			//TODO use map or ner to decide
-			WXService content = u.content();
 			ContextFactory factory = content.command(t);
 			if(factory != null) {
 				Context<WXService> context = factory.getInstance(openid, content);
