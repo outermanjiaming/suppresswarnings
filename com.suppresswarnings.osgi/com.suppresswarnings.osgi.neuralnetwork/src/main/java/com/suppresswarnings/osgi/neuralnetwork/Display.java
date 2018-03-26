@@ -1,4 +1,4 @@
-package com.suppresswarnings.osgi.nn.impl;
+package com.suppresswarnings.osgi.neuralnetwork;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,23 +10,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.suppresswarnings.osgi.nn.LossFunction;
-import com.suppresswarnings.osgi.nn.Util;
-
-public class Visual extends JFrame {
+public class Display extends JFrame {
 
 	/**
 	 * 
@@ -38,16 +30,12 @@ public class Visual extends JFrame {
 	public void confirm(long v) {
 		this.confirm = v;
 	}
-	public Visual(String string) {
+	public Display(String string) {
 		super(string);
-	}
-	public static void main2(String[] args) throws IOException {
-		double x = Files.lines(Paths.get("linyu2.V3.DA")).count();
-		System.out.println(x);
 	}
 	
 	public static double convert(double origin) {
-		return origin / 10.0d;
+		return origin;
 	}
 	
 	public boolean predict(NN nn, double[] x, int label) {
@@ -59,10 +47,10 @@ public class Visual extends JFrame {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		int size = 4;
+		int size = 5;
 		int sizey= 3;
 		NN nn = (NN) Util.deserialize(serializeTo);//new NN(size, sizey, new int[]{8});//  
-		Visual show = new Visual("Visual Of Neuro");
+		Display show = new Display("Display Of Neuro");
 		NNPanel bgp = new NNPanel(nn);
 		JTextField text = new JTextField(50);
 		JButton btn = new JButton("Input");
@@ -77,40 +65,6 @@ public class Visual extends JFrame {
 		show.setVisible(true);
 		show.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		List<double[]> list = Files.lines(Paths.get("iris_test.csv")).skip(1).map(line -> {
-			String[] argv = line.split(",");
-			double[] value= new double[argv.length];
-			for(int i=0;i<argv.length;i++) {
-				String v = argv[i];
-				value[i] = Double.valueOf(v);
-			}
-			return value;
-		}).collect(Collectors.toList());
-		
-		int all = list.size();
-		
-		double[][] matrix = new double[all][size];
-		double[][] targets= new double[all][sizey];
-		int right = 0;
-		for(int i=0;i<all;i++) {
-			double[] value = list.get(i);
-			System.out.println("[lijiaming] target: "+ Arrays.toString(value));
-			double[] inputx = new double[size];
-			int n=0;
-			for(;n<size;n++) {
-				inputx[n] = convert(value[n]);
-			}
-			int label = (int) value[n];
-			
-			if(show.predict(nn, inputx, label)) right ++;
-			
-			double[] inputy = new double[sizey];
-			inputy[label] = 1.0;
-			
-			matrix[i] = inputx;
-			targets[i]= inputy;
-		}
-		show.setTitle("Correct: " + right + " / " + all);
 		btn.addActionListener(new ActionListener() {
 			
 			@Override
@@ -130,12 +84,11 @@ public class Visual extends JFrame {
 				for(;i<x.length;i++) {
 					x[i] = convert(Double.parseDouble(arg[i]));
 				}
-				int label = (int)Double.parseDouble(arg[i]);
-				boolean correct = show.predict(nn, x, label);
-				Util.print(x);
-				System.out.println();
+
+				nn.forward(x);
+				
 				show.repaint();
-				show.setTitle("[" + show.confirm + "] correct <" + correct + ">");
+				show.setTitle("[" + show.confirm + "] correct <" + nn.error + ">");
 				text.setText("");
 			}
 		});
@@ -146,20 +99,13 @@ public class Visual extends JFrame {
 				temp += e.getWheelRotation();
 				max += temp;
 				show.setTitle("["+show.confirm+"] Click to confirm: "+max);
-				double[][] matrix = Util.random(1, size);
-				double[] x = matrix[0];
-				double[] y = new double[sizey];
+				double[] x = Util.random(1, size)[0];
+				
 				nn.forward(x);
-				double[] output = nn.output();
-				double error = LossFunction.MSE.f(output, y);
-				boolean right = error < 0.000001;
-				Util.print(x);
-				System.out.println(" <" + right + "> ");
-				Util.print(output);
-				System.out.println();
+				
 				System.out.println();
 				show.repaint();
-				show.setTitle("[" + show.confirm + "]" + right);
+				show.setTitle("[" + show.confirm + "]");
 		      }
 		});
 		
@@ -176,30 +122,7 @@ public class Visual extends JFrame {
 					@Override
 					public void run() {
 						System.out.println("start: " + show.confirm);
-						boolean b = true;
-						while(show.confirm -- > 0) {
-							for(int i=0;i<all;i++) {
-								double[] x = matrix[i];
-								double[] y = targets[i];
-								if(b) {
-									System.out.print("[lijiaming] target: ");Util.print(y);System.out.println();
-								}
-								nn.forward(x);
-								nn.loss(y);
-								nn.backprop(nn.gradients);
-								
-							}
-							b = false;
-							double error = nn.error;
-							nn.clear();
-							if(show.confirm % 10 == 0) {
-								show.repaint();
-								show.setTitle("[" + show.confirm + "] Total:" + error);
-							}
-							if(error < 1e-10) break;
-						}
 						show.repaint();
-						Util.serialize(nn, serializeTo);
 						System.out.println("end: " + nn.toString());
 					}
 				}).start();
