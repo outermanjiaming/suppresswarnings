@@ -1,6 +1,7 @@
 package com.suppresswarnings.osgi.neuralnetwork;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,7 +18,7 @@ public class TestMnist implements Serializable {
 	PointMatrix pm;
 	PointMatrix view;
 	double best = Integer.MAX_VALUE;
-	public static int batch = 2048;
+	public static int batch = 1000;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
 	public static String serializeTo = "D:/lijiaming/digit.nn.relu";
@@ -36,8 +37,7 @@ public class TestMnist implements Serializable {
 		double[] input = this.descendLayer.descend(v);
 		NN network = new NN(input.length, output, new int[]{27});
 		network.forward(input);
-		network.loss(digit.label);
-		network.clear();
+		network.backprop(digit.label);
 		return network;
 	}
 	public void test(NN network) {
@@ -88,7 +88,7 @@ public class TestMnist implements Serializable {
 		}
 	}
 	
-	public void train(NN network) {
+	public void train(AI network) {
 		Data data = new Data();
 		MNIST mnist = new MNIST(MNIST.TYPE_TRAIN);
 		mnist.init();
@@ -115,6 +115,7 @@ public class TestMnist implements Serializable {
 		executorService.scheduleAtFixedRate(new Saver(lock, "train", network, serializeTo+".nn", p), 35, 85, TimeUnit.SECONDS);
 		System.out.println(network);
 		int position = 0;
+		List<Row> failed = new ArrayList<Row>();
 		while(run) {
 			if(position + batch >= mnist.size()) {
 				position = 0;
@@ -131,6 +132,16 @@ public class TestMnist implements Serializable {
 				double[] output = digit.label;
 				data.put(new Row(names[Util.argmax(output)], input, output));
 			}
+			for(int i=0;i<failed.size();i++) {
+				Row row = failed.get(i);
+				double[] result = network.test(row.getFeature());
+				int t = Util.argmax(row.getTarget());
+				int r = Util.argmax(result);
+				if(t!=r) {
+					data.put(row);
+				}
+			}
+			failed.clear();
 			if(epoch % 10 == 0) {
 				clock.start("test");
 				int count = 0;
@@ -151,13 +162,17 @@ public class TestMnist implements Serializable {
 				
 				for(int i=0;i<testdata.size();i++) {
 					Row row = testdata.get(i);
-					network.forward(row.getFeature());
-					double[] result = network.output();
+					double[] result = network.test(row.getFeature());
 					int t = Util.argmax(row.getTarget());
 					int r = Util.argmax(result);
-					if(t==r) right++;
+					if(t==r) {
+						right++;
+					} else {
+						failed.add(row);
+					}
 					count ++;
 				}
+				testdata.clear();
 				clock.end("test");
 				long time = clock.get("test");
 				accuracy = (double)right / count;
@@ -176,36 +191,13 @@ public class TestMnist implements Serializable {
 					double error = 0;
 					for(int n=0;n<size;n++) {
 						Row r = data.get(n);
-						network.forward(r.getFeature());
-						network.loss(r.getTarget());
-						network.backprop(network.gradients);
-						error += network.error;
-						network.clear();
+						error += network.train(r.getFeature(), r.getTarget());
 					}
 					error = error/batch;
 					System.err.println(epoch + " E: " + error);
-					network.setLast(error);
-					if(error < 0.000001) {
+					if(error < 0.001) {
 						break;
 					}
-					
-//					under below doesn't work.
-////					for(int n=0;n<size;n++) {
-////						Row r = data.get(n);
-////						network.forward(r.getFeature());
-////						network.loss(r.getTarget());
-////					}
-////					double[] dEdYj = network.dEdYj();
-////					for(int n=0;n<size;n++) {
-////						Row r = data.get(n);
-////						network.forward(r.getFeature());
-////						network.backprop(dEdYj);
-////					}
-////					
-////					double error = network.error;
-////					System.err.println(epoch + " E: " + error);
-////					network.clear();
-					
 				} finally {
 					lock.unlock();
 				}
@@ -236,7 +228,7 @@ public class TestMnist implements Serializable {
 	public static void main(String[] args) throws Exception {
 //		TestMnist.init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
-		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
+		AI nn = (NN) Util.deserialize(serializeTo + ".nn");
 		test.train(nn);
 	}
 }

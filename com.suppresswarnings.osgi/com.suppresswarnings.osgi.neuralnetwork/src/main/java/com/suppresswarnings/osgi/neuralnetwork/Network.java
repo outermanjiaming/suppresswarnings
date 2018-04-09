@@ -5,7 +5,7 @@ import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Random;
 
-public class Network implements Serializable, Closeable {
+public class Network implements AI, Serializable, Closeable {
 
 	/**
 	 * 
@@ -16,10 +16,12 @@ public class Network implements Serializable, Closeable {
 	Node[] biases;
 	Node[] outputs;
 	Node[][] network;
-	double lastErr = Double.MAX_VALUE;
-	double error;
+	double error = 0;
 	double momentum = 0.8d;
 	double learningRate = 0.015d;
+	int step = 0;
+	int max = 10000000;
+	double tolerate = 0.001;
 	public Network(int input, int[] hidden, int output, double momentum, double learningRate) {
 		this.learningRate = learningRate;
 		this.momentum = momentum;
@@ -74,28 +76,6 @@ public class Network implements Serializable, Closeable {
 		return r;
 	}
 	
-	public double train(double[] input, double[] target){
-		for(int i=0;i<inputs.length;i++) {
-			inputs[i].assign(input[i]);
-		}
-		forward();
-		backward(target);
-		return error;
-	}
-	
-	public double[] test(double[] input){
-		for(int i=0;i<inputs.length;i++) {
-			inputs[i].assign(input[i]);
-		}
-		forward();
-		double[] result = new double[outputs.length];
-		for(int i=0;i<outputs.length;i++) {
-			Node o = outputs[i];
-			result[i] = o.value();
-		}
-		return result;
-	}
-	
 	public double[] output(){
 		double[] result = new double[outputs.length];
 		for(int i=0;i<outputs.length;i++) {
@@ -112,29 +92,24 @@ public class Network implements Serializable, Closeable {
 			node.forward();
 		}
 	}
-	public void backward(double[] targets){
+	public double backward(double[] targets){
+		double mse = 0;
 		for(int i=0;i<targets.length;i++) {
 			Node o = outputs[i];
 			double target = targets[i];
 			double err = target - o.value();
-			error += 0.5d * err * err;
+			mse += 0.5d * err * err;
 			o.gradient(err);
 		}
-	}
-	public void clear() {
-		if(error != 0) lastErr = error;
-		error = 0;	
-	}
-	public double error() {
-		return error;
+		return mse;
 	}
 	public double last(){
-		return lastErr;
+		return error;
 	}
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("Network[(bias=").append(biases.length).append(",error=").append(lastErr).append(",momentum=").append(momentum).append(",learningRate=").append(learningRate).append(") ");
+		sb.append("Network[(bias=").append(biases.length).append(",error=").append(error).append(",momentum=").append(momentum).append(",learningRate=").append(learningRate).append(") ");
 		for(Node[] nodes : network) {
 			sb.append(nodes.length).append(" - ");
 		}
@@ -179,5 +154,47 @@ public class Network implements Serializable, Closeable {
 				network[i][j] = null;
 			}
 		}
+	}
+	
+	@Override
+	public double train(double[] input, double[] target){
+		for(int i=0;i<inputs.length;i++) {
+			inputs[i].assign(input[i]);
+		}
+		forward();
+		return backward(target);
+	}
+	
+	@Override
+	public double[] test(double[] input){
+		for(int i=0;i<inputs.length;i++) {
+			inputs[i].assign(input[i]);
+		}
+		forward();
+		double[] result = new double[outputs.length];
+		for(int i=0;i<outputs.length;i++) {
+			Node o = outputs[i];
+			result[i] = o.value();
+		}
+		return result;
+	}
+	
+	@Override
+	public void train(double[][] inputs, double[][] outputs) {
+		int size = inputs.length;
+		while(step ++ < max) {
+			double err = 0;
+			for(int i=0;i<size;i++) {
+				err += train(inputs[i], outputs[i]);
+			}
+			System.out.println(step + "\tErr: " + err);
+			if(err < tolerate) {
+				break;
+			}
+		}
+	}
+	@Override
+	public void last(double error) {
+		this.error = error;
 	}
 }

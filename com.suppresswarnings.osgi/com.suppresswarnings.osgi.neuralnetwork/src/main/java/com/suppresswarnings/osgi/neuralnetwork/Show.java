@@ -33,7 +33,7 @@ public class Show extends JFrame {
 		MNIST mnist = new MNIST(MNIST.TYPE_TEST);
 		mnist.init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
-		NN nn = (NN) Util.deserialize(serializeTo + ".nn");
+		AI nn = (NN) Util.deserialize(serializeTo + ".nn");
 		show.addMouseWheelListener(new MouseWheelListener() {
 			int position = 0;
 			@Override
@@ -65,8 +65,7 @@ public class Show extends JFrame {
 				test.pm.feedMatrix(digit.data, PointMatrix.TYPE_CONVOLUTION);
 				double[][] v = test.view.normalizeAndTake();
 				double[] input = test.descendLayer.descend(v);
-				nn.forward(input);
-				double[] result = nn.output();
+				double[] result = nn.test(input);
 				int r = Util.argmax(result);
 				int t = Util.argmax(digit.label);
 				boolean right = (r == t);

@@ -18,4 +18,5 @@ public class Row {
 	public String getFile() {
 		return file;
 	}
+	
 }

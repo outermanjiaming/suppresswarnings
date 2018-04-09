@@ -48,7 +48,6 @@ public class Display extends JFrame {
 	
 	public static void main(String[] args) throws Exception {
 		int size = 5;
-		int sizey= 3;
 		NN nn = (NN) Util.deserialize(serializeTo);//new NN(size, sizey, new int[]{8});//  
 		Display show = new Display("Display Of Neuro");
 		NNPanel bgp = new NNPanel(nn);
@@ -88,7 +87,7 @@ public class Display extends JFrame {
 				nn.forward(x);
 				
 				show.repaint();
-				show.setTitle("[" + show.confirm + "] correct <" + nn.error + ">");
+				show.setTitle("[" + show.confirm + "] correct <" + nn + ">");
 				text.setText("");
 			}
 		});

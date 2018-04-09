@@ -9,8 +9,8 @@ public enum Activation {
 		}
 
 		@Override
-		public double d(double x) {
-			return x * (1.0d - x);
+		public double d(double y) {
+			return y * (1.0d - y);
 		}
 	},Tanh {
 		@Override
@@ -19,8 +19,8 @@ public enum Activation {
 		}
 
 		@Override
-		public double d(double x) {
-			return 1.0d - (x * x);
+		public double d(double y) {
+			return 1.0d - (y * y);
 		}
 	},ReLU {
 		double a = 0.0001d;
@@ -30,8 +30,8 @@ public enum Activation {
 		}
 
 		@Override
-		public double d(double x) {
-			return x > 0 ? 1 : a;
+		public double d(double y) {
+			return y > 0 ? 1 : a;
 		}
 	},SoftPlus {
 		@Override
@@ -40,10 +40,10 @@ public enum Activation {
 		}
 
 		@Override
-		public double d(double x) {
-			return 1.0d / (1.0d + Math.exp(-x));
+		public double d(double y) {
+			return 1.0d / (1.0d + Math.exp(-y));
 		}
 	};
 	public abstract double f(double x);
-	public abstract double d(double x);
+	public abstract double d(double y);
 }

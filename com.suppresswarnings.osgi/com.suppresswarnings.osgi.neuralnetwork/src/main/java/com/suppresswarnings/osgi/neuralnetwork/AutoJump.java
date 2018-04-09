@@ -27,7 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class AutoJump {
-	public static final String serializeTo = "D:/tmp/jump/jumper.ser";
+	public static final String serializeTo = "D:/tmp/jump/autojumper.nn.ser";
 	public static final String[] yesno = {"D:/tmp/jump/yes/", "D:/tmp/jump/no/"};
 	public static final String adb = "C:/Users/lijiaming/AppData/Local/Android/Sdk/platform-tools/adb.exe";
 	public final static double[] yes = {1,0};
@@ -36,12 +36,12 @@ public class AutoJump {
 	public static final int epochs = 10000;
 	public static int startx = 220;
 	public static int starty = 660;
-	public static Network nn;
+	public static AI nn;
 	public static Func func = new Func();
 	public static int index = 0;
-	
+	public static Random rand = new Random();
 	public static void main(String[] args) throws Exception {
-		autojump();//show();//collect();//train();//
+		show();//decide(new File("p1523238626151.png"), "D:/tmp/collect/");//collect();//train();//autojump();//
 	}
 	
 	public static void train() throws Exception {
@@ -52,8 +52,8 @@ public class AutoJump {
 		.map(path -> slide(path.toFile()))
 		.flatMap(list -> list.stream())
 		.forEach(arr -> {
-			D D = new D(arr, yes);
-			all.add(D);
+			D d = new D(arr, yes);
+			all.add(d);
 		});
 		
 		Files.list(Paths.get(yesno[1]))
@@ -61,29 +61,29 @@ public class AutoJump {
 		.map(path -> slide(path.toFile()))
 		.flatMap(list -> list.stream())
 		.forEach(arr -> {
-			D D = new D(arr, no);
-			all.add(D);
+			D d = new D(arr, no);
+			all.add(d);
 		});
 		
 		
 		Collections.shuffle(all);
 		File file = new File(serializeTo);
-		Network nn = null;
+		NN nn = null;
 		if(file.exists()) {
-			nn = (Network)Util.deserialize(serializeTo);
+			nn = (NN)Util.deserialize(serializeTo);
 		} else {
-			nn = new Network(959, new int[]{30}, 2, 0.8, 0.0015);
-			nn.fullConnect();
+			nn = new NN(959, 2, new int[]{30});
 		}
 		System.out.println(nn.toString());
 		for(int n=0;n<epochs;n++) {
-			nn.clear();
+			double error = 0;
 			for(int i=0;i<all.size();i++) {
 				D D = all.get(i);
-				nn.train(D.x, D.y);
+				nn.forward(D.x);
+				error += nn.backprop(D.y);
 			}
-			System.out.println(serializeTo + "\t" + n + "\tTotal Error: " + nn.error());
-			if(nn.error() < 1e-8) break;
+			System.out.println(serializeTo + "\t" + n + "\tTotal Error: " + error);
+			if(error < 1e-4) break;
 			if(n % 100 == 0) Util.serialize(nn, serializeTo);
 		}
 		
@@ -93,7 +93,7 @@ public class AutoJump {
 	public static void show(){
 		JFrame frame = new JFrame("show jumper");
 		Visual bgp = new Visual();
-		nn = (Network) Util.deserialize(serializeTo);
+		nn = (NN) Util.deserialize(serializeTo);
 		String dir = "D:/files/java8/workspace/jump/";
 		File folder = new File(dir);
 		String[] files = folder.list(new FilenameFilter() {
@@ -126,6 +126,7 @@ public class AutoJump {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("clicked ...");
+				index = rand.nextInt(files.length);
 				File file = new File(dir, files[index]);
 				int[][] D = readImage(file);
 				
@@ -137,15 +138,11 @@ public class AutoJump {
 					
 					@Override
 					public void run() {
-						Random rand = new Random();
 						System.out.println("finding ...");
 						Optional<Piece> opt = StreamSupport.stream(new Supply(D, 100,240,10,10, startx, starty), false)
-						.peek(f100x240 ->{
-							if(rand.nextDouble() > 0.7) {
-								return;
-							}
-							List<Double> x = StreamSupport.stream(new Supply(f100x240.D, 20, 20, 20, 20), false)
-									.map(f20x20 -> new Supply(f20x20.D, 10, 10, 10, 10))
+						.filter(piece -> {
+							List<Double> x = StreamSupport.stream(new Supply(piece.d, 20, 20, 20, 20), false)
+									.map(f20x20 -> new Supply(f20x20.d, 10, 10, 10, 10))
 									.map(p10x10 -> StreamSupport.stream(p10x10, false)
 											.map(func)
 											.flatMap(lst -> lst.stream())
@@ -155,21 +152,7 @@ public class AutoJump {
 									.collect(Collectors.toList());
 							D d = new D(x, no);
 							double[] y = nn.test(d.x);
-							bgp.find(f100x240, yes(y));
-							frame.repaint();
-						}).filter(piece -> {
-							List<Double> x = StreamSupport.stream(new Supply(piece.D, 20, 20, 20, 20), false)
-									.map(f20x20 -> new Supply(f20x20.D, 10, 10, 10, 10))
-									.map(p10x10 -> StreamSupport.stream(p10x10, false)
-											.map(func)
-											.flatMap(lst -> lst.stream())
-											.collect(Collectors.toList())
-										)
-									.flatMap(lst -> lst.stream())
-									.collect(Collectors.toList());
-							D d = new D(x, no);
-							double[] y = nn.test(d.x);
-							if(yes(y) && y[0] > 0.98) return true;
+							if(yes(y) && y[0] > 0.9) return true;
 							return false;
 						}).findAny();
 						
@@ -179,8 +162,6 @@ public class AutoJump {
 						}
 					}
 				}).start();
-				
-				index ++;
 			}
 		});
 		
@@ -191,15 +172,15 @@ public class AutoJump {
 	}
 	
 	public static void collect() {
-		nn = (Network) Util.deserialize(serializeTo);
-		String dir = "D:/tmp/jump/fail/";
+		nn = (NN) Util.deserialize(serializeTo);
+		String dir = "D:\\files\\todo\\company\\github\\suppresswarnings\\com.suppresswarnings.osgi\\com.suppresswarnings.osgi.neuralnetwork\\";
 		String save = "D:/tmp/jump/collect/";
 		File folder = new File(dir);
 		String[] files = folder.list(new FilenameFilter() {
 			
 			@Override
 			public boolean accept(File dir, String name) {
-				if(name.endsWith("jpg")) return true;
+				if(name.endsWith("png") && name.startsWith("p")) return true;
 				return false;
 			}
 		});
@@ -210,7 +191,7 @@ public class AutoJump {
 	}
 	
 	public static void autojump() throws Exception {
-		nn = (Network) Util.deserialize(serializeTo);
+		nn = (NN) Util.deserialize(serializeTo);
 		int times = 0;
 		while(true) {
 			times ++;
@@ -245,8 +226,8 @@ public class AutoJump {
 				.flatMap(lst -> lst.stream())
 				.collect(Collectors.toList());
 				
-				D input = new D(list, yes);
-				double[] y = nn.test(input.x);
+				D d = new D(list, yes);
+				double[] y = nn.test(d.x);
 				if(yes(y) && y[0] > confidence && jumper[0] == 0) {
 					jumper[0] =f100x240.x;
 					jumper[1] =f100x240.y;
@@ -269,7 +250,7 @@ public class AutoJump {
 			downstair(D, 4, block);
 			
 			long duration = function(block, jumper);
-			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "400", "1585", "402", "1587", "" + duration});
+			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "525", "1583", "525", "1585", "" + duration});
 			swipescreen.waitFor();
 			System.err.println(block[0] + ","+ block[1] + "," + jumper[0] + "," + jumper[1] + "," + duration);
 		}
@@ -289,11 +270,14 @@ public class AutoJump {
 	}
 	
 	public static void decide(File file, String dir) {
+		if(nn == null) {
+			nn = (NN) Util.deserialize(serializeTo);
+		}
 		int[][] D = readImage(file);
 		StreamSupport.stream(new Supply(D, 100,240,10,10, startx, starty), false)
 		.forEach(f100x240 ->{
-			List<Double> e = StreamSupport.stream(new Supply(f100x240.D, 20, 20, 20, 20), false)
-					.map(f20x20 -> new Supply(f20x20.D, 10, 10, 10, 10))
+			List<Double> e = StreamSupport.stream(new Supply(f100x240.d, 20, 20, 20, 20), false)
+					.map(f20x20 -> new Supply(f20x20.d, 10, 10, 10, 10))
 					.map(p10x10 -> StreamSupport.stream(p10x10, false)
 							.map(func)
 							.flatMap(lst -> lst.stream())
@@ -303,7 +287,7 @@ public class AutoJump {
 					.collect(Collectors.toList());
 			D d = new D(e, no);
 			double[] y = nn.test(d.x);
-			if(yes(y) && y[0] > 0.95) {
+			if(yes(y) && y[0] > 0.65) {
 				printImage(f100x240.getD(), dir + "yes/" + file.getName() + f100x240.x + "_" + f100x240.y + ".jpg");
 			}
 		});
@@ -489,20 +473,20 @@ public class AutoJump {
 }
 
 class Piece {
-	int[][] D;
+	int[][] d;
 	int x;
 	int y;
 	
-	public Piece(int[][] D, int x, int y) {
-		this.D = D;
+	public Piece(int[][] data, int x, int y) {
+		this.d = data;
 		this.x = x;
 		this.y = y;
 	}
 	public int[][] getD() {
-		return D;
+		return d;
 	}
-	public void setD(int[][] D) {
-		this.D = D;
+	public void setD(int[][] data) {
+		this.d = data;
 	}
 	public int getX() {
 		return x;
@@ -589,7 +573,7 @@ class Func implements Function<Piece, List<Double>>{
 
 	@Override
 	public List<Double> apply(Piece d) {
-		int[][] t = d.D;
+		int[][] t = d.d;
 		List<Double> result = new ArrayList<Double>();
 		int w = t.length;
 		int h = t[0].length;
@@ -652,7 +636,7 @@ class Visual extends JPanel {
 	}
 	public void find(Piece jumper, boolean yes) {
 		this.yeah = yes;
-		this.jump = jumper.D;
+		this.jump = jumper.d;
 		this.startx = jumper.x;
 		this.starty = jumper.y;
 //		this.height = jumper.D.length;

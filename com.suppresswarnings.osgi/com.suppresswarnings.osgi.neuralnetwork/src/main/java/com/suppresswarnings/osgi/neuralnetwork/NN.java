@@ -10,7 +10,7 @@ import java.util.List;
  * @author lijiaming
  *
  */
-public class NN implements Serializable {
+public class NN implements AI, Serializable {
 	/**
 	 * 
 	 */
@@ -19,14 +19,12 @@ public class NN implements Serializable {
 	Layer input;
 	Layer output;
 	LossFunction loss = LossFunction.MSE;
-	double error;
-	double lastErr;
-	double[] gradients;
-	int count = 0;
 	int inputSize;
 	int outputSize;
 	int[] hiddenSize;
-	
+	int max = 10000000;
+	double tolerate = 0.001;
+	double error = 0;
 	/**
 	 * for unlinked layers
 	 * @param inputSize
@@ -50,7 +48,6 @@ public class NN implements Serializable {
 		}
 		this.output = new Layer(Cell.TYPE_OUTPUT, outputSize, level++);
 		linker.link(this.output);
-		this.gradients = new double[this.output.size];
 		linker = null;
 	}
 
@@ -63,7 +60,9 @@ public class NN implements Serializable {
 		this.output.forward();
 	}
 	
-	public void backprop(double[] dEdYj){
+	public double backprop(double[] target){
+		double[] output = output();
+		double[] dEdYj = loss.d(output, target);
 		this.output.gradient(dEdYj);
 		
 		for(Layer layer : hiddenLayer) {
@@ -72,38 +71,13 @@ public class NN implements Serializable {
 		}
 		
 		this.input.backprop();
+		return loss.f(output, target);
 	}
 	
 	public double[] output(){
 		return this.output.value();
 	}
 	
-	public void loss(double[] target) {
-		double[] output = output();
-		this.error += loss.f(output, target);
-		double[] gradient = loss.d(output, target);
-		count ++;
-		for(int i=0;i<gradient.length;i++) {
-			this.gradients[i] += gradient[i];
-		}
-	}
-	
-	public double[] dEdYj(){
-		double[] dEdYj = new double[gradients.length];
-		for(int i=0;i<gradients.length;i++) {
-			dEdYj[i] = gradients[i] / count;
-		}
-		return dEdYj;
-	}
-	
-	public void clear(){
-		this.lastErr = this.error;
-		this.error = 0;
-		this.count = 0;
-		for(int i=0;i<this.gradients.length;i++) {
-			this.gradients[i] = 0;
-		}
-	}
 	
 	@Override
 	public String toString() {
@@ -116,12 +90,43 @@ public class NN implements Serializable {
 		builder.append("]");
 		return builder.toString();
 	}
-	public void setLast(double last) {
-		this.lastErr = last;
+
+	@Override
+	public void train(double[][] inputs, double[][] outputs) {
+		int size = inputs.length;
+		int step = 0;
+		while(step ++ < max) {
+			double err = 0;
+			for(int i=0;i<size;i++) {
+				err += train(inputs[i], outputs[i]);
+			}
+			System.out.println(step + "\tErr: " + err);
+			if(err < tolerate) {
+				break;
+			}
+		}
 	}
+
+	@Override
+	public double train(double[] input, double[] output) {
+		forward(input);
+		return backprop(output);
+	}
+
+	@Override
+	public double[] test(double[] input) {
+		forward(input);
+		return output();
+	}
+
+
+	@Override
 	public double last() {
-		if(lastErr == 0) lastErr = error;
-		return lastErr;
+		return error;
 	}
 	
+	@Override
+	public void last(double error) {
+		this.error = error;
+	}
 }

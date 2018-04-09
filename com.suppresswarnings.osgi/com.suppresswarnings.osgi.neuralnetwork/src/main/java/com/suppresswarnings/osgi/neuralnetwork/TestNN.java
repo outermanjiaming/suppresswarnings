@@ -13,7 +13,7 @@ public class TestNN {
 	public static String serializeTo = "D:/lijiaming/random.nn.024";
 	public static void main(String[] args) {
 //		NN nn = new NN(5, 3, new int[] {10});
-		NN nn = (NN) Util.deserialize(serializeTo);
+		AI nn = (NN) Util.deserialize(serializeTo);
 		int step = 0;
 		int epoch = 100000;
 		int size = 1000;
@@ -27,11 +27,7 @@ public class TestNN {
 			for(int i=0;i<size;i++) { 
 				double[] input = inputs[i];
 				double[] output = get024(inputs[i]);
-				nn.forward(input);
-				nn.loss(output);
-				error += nn.error;
-				nn.backprop(nn.gradients);
-				nn.clear();
+				error += nn.train(input, output);
 			}
 			System.out.println(error);
 			if(error < 1e-10) break;
