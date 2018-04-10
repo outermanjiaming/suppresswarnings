@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -68,19 +69,20 @@ public class AutoJump {
 		
 		Collections.shuffle(all);
 		File file = new File(serializeTo);
-		NN nn = null;
+		AI nn = null;
 		if(file.exists()) {
-			nn = (NN)Util.deserialize(serializeTo);
+			nn = (AI)Util.deserialize(serializeTo);
 		} else {
-			nn = new NN(959, 2, new int[]{30});
+			Network temp = new Network(959, new int[]{30, 10}, 2, 0.01, 0.0001);
+			temp.fullConnect();
+			nn = temp;
 		}
 		System.out.println(nn.toString());
 		for(int n=0;n<epochs;n++) {
 			double error = 0;
 			for(int i=0;i<all.size();i++) {
 				D D = all.get(i);
-				nn.forward(D.x);
-				error += nn.backprop(D.y);
+				error += nn.train(D.x, D.y);
 			}
 			System.out.println(serializeTo + "\t" + n + "\tTotal Error: " + error);
 			if(error < 1e-4) break;
@@ -93,7 +95,7 @@ public class AutoJump {
 	public static void show(){
 		JFrame frame = new JFrame("show jumper");
 		Visual bgp = new Visual();
-		nn = (NN) Util.deserialize(serializeTo);
+		nn = (AI) Util.deserialize(serializeTo);
 		String dir = "D:/files/java8/workspace/jump/";
 		File folder = new File(dir);
 		String[] files = folder.list(new FilenameFilter() {
@@ -106,7 +108,7 @@ public class AutoJump {
 		});
 		
 		frame.addMouseListener(new MouseListener() {
-			
+			boolean running = false;
 			@Override
 			public void mouseReleased(MouseEvent e) {
 			}
@@ -126,11 +128,20 @@ public class AutoJump {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("clicked ...");
+				
+				if(running) {
+					frame.setTitle("Still finding");
+					frame.repaint();
+					return;
+				}
+				running = true;
 				index = rand.nextInt(files.length);
 				File file = new File(dir, files[index]);
 				int[][] D = readImage(file);
 				
 				bgp.init(D);
+				
+				frame.setTitle("Start finding");
 				frame.repaint();
 				System.out.println("paint ...");
 			
@@ -139,6 +150,7 @@ public class AutoJump {
 					@Override
 					public void run() {
 						System.out.println("finding ...");
+						long start = System.currentTimeMillis();
 						Optional<Piece> opt = StreamSupport.stream(new Supply(D, 100,240,10,10, startx, starty), false)
 						.filter(piece -> {
 							List<Double> x = StreamSupport.stream(new Supply(piece.d, 20, 20, 20, 20), false)
@@ -152,27 +164,34 @@ public class AutoJump {
 									.collect(Collectors.toList());
 							D d = new D(x, no);
 							double[] y = nn.test(d.x);
-							if(yes(y) && y[0] > 0.9) return true;
+							if(yes(y) && y[0] > 0.8) return true;
 							return false;
 						}).findAny();
-						
+						long stop = System.currentTimeMillis();
+						String time = (stop - start) + "ms";
+						String found = " No";
 						if(opt.isPresent()) {
+							found = " Yes";
 							bgp.find(opt.get(), true);
-							frame.repaint();
 						}
+						frame.setTitle(time + found);
+						frame.repaint();
+						running = false;
 					}
 				}).start();
 			}
 		});
 		
+		ImageIcon icon = new ImageIcon("index.png");
+		frame.setIconImage(icon.getImage()); 
 		frame.getContentPane().add(bgp);
-		frame.setSize(1080, 1290);
+		frame.setSize(480, 860);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	public static void collect() {
-		nn = (NN) Util.deserialize(serializeTo);
+		nn = (AI) Util.deserialize(serializeTo);
 		String dir = "D:\\files\\todo\\company\\github\\suppresswarnings\\com.suppresswarnings.osgi\\com.suppresswarnings.osgi.neuralnetwork\\";
 		String save = "D:/tmp/jump/collect/";
 		File folder = new File(dir);
@@ -191,7 +210,7 @@ public class AutoJump {
 	}
 	
 	public static void autojump() throws Exception {
-		nn = (NN) Util.deserialize(serializeTo);
+		nn = (AI) Util.deserialize(serializeTo);
 		int times = 0;
 		while(true) {
 			times ++;
@@ -271,7 +290,7 @@ public class AutoJump {
 	
 	public static void decide(File file, String dir) {
 		if(nn == null) {
-			nn = (NN) Util.deserialize(serializeTo);
+			nn = (AI) Util.deserialize(serializeTo);
 		}
 		int[][] D = readImage(file);
 		StreamSupport.stream(new Supply(D, 100,240,10,10, startx, starty), false)
@@ -633,6 +652,7 @@ class Visual extends JPanel {
 		this.image = img;
 		this.w = img.length;
 		this.h = img[0].length;
+		this.yeah = false;
 	}
 	public void find(Piece jumper, boolean yes) {
 		this.yeah = yes;
@@ -663,21 +683,25 @@ class Visual extends JPanel {
 	    	return;
 	    }
 	    
-	    int rgb = Color.BLACK.getRGB();
-	    if(yeah) rgb = Color.RED.getRGB();
+	    if(yeah) {
+	    	int rgb = Color.RED.getRGB();
+	    	for(int i=0;i<width;i++) {
+		    	nbi.setRGB(startx+i, starty, rgb);
+		    	nbi.setRGB(startx+i, starty+1, rgb);
+		    	nbi.setRGB(startx+i, starty+2, rgb);
+		    	nbi.setRGB(startx+i, starty+3, rgb);
+		    	nbi.setRGB(startx+i, starty+4, rgb);
+		    	nbi.setRGB(startx+i, starty+5, rgb);
+		    	nbi.setRGB(startx+i, starty+6, rgb);
+		    }
+		    for(int j=0;j<height;j++) {
+		    	nbi.setRGB(startx, starty + j, rgb);
+		    	nbi.setRGB(startx+1, starty + j, rgb);
+		    	nbi.setRGB(startx+2, starty + j, rgb);
+		    	nbi.setRGB(startx+3, starty + j, rgb);
+		    }
+	    }
 	   
-	    for(int i=0;i<width;i++) {
-	    	nbi.setRGB(startx+i, starty, rgb);
-	    }
-	    for(int j=0;j<height;j++) {
-	    	nbi.setRGB(startx, starty + j, rgb);
-	    }
-	    for(int i=0;i<width;i++) {
-	    	nbi.setRGB(startx+i, starty + height, rgb);
-	    }
-	    for(int j=0;j<height;j++) {
-	    	nbi.setRGB(startx + width, starty + j, rgb);
-	    }
-	    g.drawImage(nbi, 0, 0, w, h, null);
+	    g.drawImage(nbi, 0, 0, this.getWidth(), this.getHeight(), null);
 	}
 }

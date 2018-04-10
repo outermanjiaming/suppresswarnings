@@ -54,7 +54,8 @@ public class NN implements AI, Serializable {
 	public void forward(double[] x){
 		this.input.assign(x);
 		this.input.forward();
-		for(Layer layer : hiddenLayer) {
+		for(int i=0;i<hiddenLayer.size();i++) {
+			Layer layer = hiddenLayer.get(i);
 			layer.forward();
 		}
 		this.output.forward();
@@ -65,7 +66,8 @@ public class NN implements AI, Serializable {
 		double[] dEdYj = loss.d(output, target);
 		this.output.gradient(dEdYj);
 		
-		for(Layer layer : hiddenLayer) {
+		for(int i=hiddenLayer.size()-1;i>=0;i--) {
+			Layer layer = hiddenLayer.get(i);
 			double[] dEdYi = layer.backprop();
 			layer.gradient(dEdYi);
 		}

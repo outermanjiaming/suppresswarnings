@@ -1,11 +1,10 @@
 package com.suppresswarnings.osgi.neuralnetwork;
 
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Random;
 
-public class Network implements AI, Serializable, Closeable {
+public class Network implements AI, Serializable {
 
 	/**
 	 * 
@@ -142,18 +141,6 @@ public class Network implements AI, Serializable, Closeable {
 		}
 		int outputLevel = network.length - 1;
 		network[outputLevel] = output;
-	}
-	
-	/**
-	 * remember to connect before train.
-	 */
-	@Override
-	public void close() {
-		for(int i=0;i<network.length;i++) {
-			for(int j=0;j<network[i].length;j++) {
-				network[i][j] = null;
-			}
-		}
 	}
 	
 	@Override

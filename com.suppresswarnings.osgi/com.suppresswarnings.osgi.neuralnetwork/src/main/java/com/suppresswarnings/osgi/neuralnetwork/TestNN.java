@@ -10,18 +10,22 @@
 package com.suppresswarnings.osgi.neuralnetwork;
 
 public class TestNN {
-	public static String serializeTo = "D:/lijiaming/random.nn.024";
+	public static String serializeTo = "D:/lijiaming/NN.dnn.024";
 	public static void main(String[] args) {
-//		NN nn = new NN(5, 3, new int[] {10});
-		AI nn = (NN) Util.deserialize(serializeTo);
+//		Network nn = new Network(5, new int[] {5, 5}, 3, 0.0, 0.0001);
+//		nn.fullConnect();
+		//NN nn = new NN(5, 3, new int[] {5, 5});
+		AI nn = (AI) Util.deserialize(serializeTo);
 		int step = 0;
-		int epoch = 100000;
+		int epoch = 10000000;
 		int size = 1000;
 		double[][] inputs = Util.random(size, 5);
 		
 		Util.print(inputs[1]);
 		System.out.println();
 		Util.print(get024(inputs[1]));
+		System.out.println();
+		
 		while(step < epoch) {
 			double error = 0;
 			for(int i=0;i<size;i++) { 
@@ -30,7 +34,7 @@ public class TestNN {
 				error += nn.train(input, output);
 			}
 			System.out.println(error);
-			if(error < 1e-10) break;
+			if(error < 1e-4) break;
 			step ++;
 		}
 		System.out.println(nn.toString());

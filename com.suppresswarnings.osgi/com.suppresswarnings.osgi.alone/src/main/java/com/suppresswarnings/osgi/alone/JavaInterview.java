@@ -30,7 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class JavaInterview {
 
 	public static void main(String[] args) throws Exception {
-		testNIO();
+		testStream();
+	}
+	public static void testStream() {
+		"Hello World!".chars().forEach(System.out::print);
 	}
 	public static void testHashcode() {
 		String str = "new Object()";

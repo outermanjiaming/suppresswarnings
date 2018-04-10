@@ -22,7 +22,7 @@ public class TestMnist implements Serializable {
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
 	public static String serializeTo = "D:/lijiaming/digit.nn.relu";
-	public NN init(Digit digit, int output) {
+	public AI init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
 		double[][] mask = Util.random(2,2);
@@ -219,7 +219,7 @@ public class TestMnist implements Serializable {
 		Util.print(digit.label);
 		mnist.close();
 		TestMnist test = new TestMnist();
-		NN nn = test.init(digit, 10);
+		AI nn = test.init(digit, 10);
 		Util.serialize(test, serializeTo);
 		Util.serialize(nn, serializeTo + ".nn");
 		
