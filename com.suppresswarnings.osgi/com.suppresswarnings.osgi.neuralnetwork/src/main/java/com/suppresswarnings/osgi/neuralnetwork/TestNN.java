@@ -14,10 +14,10 @@ public class TestNN {
 	public static void main(String[] args) {
 //		Network nn = new Network(5, new int[] {5, 5}, 3, 0.0, 0.0001);
 //		nn.fullConnect();
-		//NN nn = new NN(5, 3, new int[] {5, 5});
+//		NN nn = new NN(5, 3, new int[] {7, 5});
 		AI nn = (AI) Util.deserialize(serializeTo);
 		int step = 0;
-		int epoch = 10000000;
+		int epoch = 10;
 		int size = 1000;
 		double[][] inputs = Util.random(size, 5);
 		

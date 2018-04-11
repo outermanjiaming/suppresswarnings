@@ -24,8 +24,8 @@ public class Display extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -7962556170449642969L;
-	public static String serializeTo = "D:/lijiaming/random.nn.024";
-	public static long max = 100000000;
+	public static String serializeTo = "D:/lijiaming/NN.dnn.024";
+	public static int max = 10000;
 	public long confirm = 10000;
 	public void confirm(long v) {
 		this.confirm = v;
@@ -53,7 +53,7 @@ public class Display extends JFrame {
 		NNPanel bgp = new NNPanel(nn);
 		JTextField text = new JTextField(50);
 		JButton btn = new JButton("Input");
-		show.setSize(1080, 950);
+		show.setSize(1600, 900);
 		show.setLayout(new BorderLayout());
 		show.getContentPane().add(bgp, BorderLayout.CENTER);
 		JPanel panel = new JPanel();
@@ -97,18 +97,18 @@ public class Display extends JFrame {
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				temp += e.getWheelRotation();
 				max += temp;
-				show.setTitle("["+show.confirm+"] Click to confirm: "+max);
-				double[] x = Util.random(1, size)[0];
 				
+				double[] x = Util.random(1, size)[0];
 				nn.forward(x);
 				
 				System.out.println();
+				show.setTitle("Predicting... " + max);
 				show.repaint();
-				show.setTitle("[" + show.confirm + "]");
 		      }
 		});
 		
 		show.addMouseListener(new MouseListener() {
+			boolean running = false;
 			@Override public void mouseReleased(MouseEvent e) {}
 			@Override public void mousePressed(MouseEvent e) {}
 			@Override public void mouseExited(MouseEvent e) {}
@@ -116,20 +116,56 @@ public class Display extends JFrame {
 	      	@Override
 			public void mouseClicked(MouseEvent e) {
 				show.confirm(max);
+				if(running) return;
+				running = true;
 				new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
 						System.out.println("start: " + show.confirm);
+						int step = 0;
+						int epoch = max;
+						int size = 1000;
+						double[][] inputs = Util.random(size, 5);
+						
+						Util.print(inputs[1]);
+						System.out.println();
+						Util.print(get024(inputs[1]));
+						System.out.println();
+						
+						while(step < epoch) {
+							double error = 0;
+							for(int i=0;i<size;i++) { 
+								double[] input = inputs[i];
+								double[] output = get024(inputs[i]);
+								error += nn.train(input, output);
+							}
+							System.out.println(error);
+							if(error < 1e-4) break;
+							step ++;
+							if(step % 100 == 0) {
+								show.setTitle("Training... " + step + " / " + epoch + " Err: " + error);
+								show.repaint();
+							}
+						}
+						System.out.println(nn.toString());
+						Util.serialize(nn, serializeTo);
 						show.repaint();
 						System.out.println("end: " + nn.toString());
+						running = false;
 					}
 				}).start();
 				
 			}  
 		});  
 	}
-
+	public static double[] get024(double[] len5) {
+		double[] len3 = new double[3];
+		len3[0] = (len5[0] + len5[1]) / 2;
+		len3[1] = len5[2];
+		len3[2] = (len5[3] + len5[4]) / 2;
+		return len3;
+	}
 }
 
 class NNPanel extends JPanel {

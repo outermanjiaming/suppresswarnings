@@ -28,7 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class AutoJump {
-	public static final String serializeTo = "D:/tmp/jump/autojumper.nn.ser";
+	public static final String serializeTo = "D:/tmp/jump/autojumper.dnn.nn";
 	public static final String[] yesno = {"D:/tmp/jump/yes/", "D:/tmp/jump/no/"};
 	public static final String adb = "C:/Users/lijiaming/AppData/Local/Android/Sdk/platform-tools/adb.exe";
 	public final static double[] yes = {1,0};
@@ -38,7 +38,7 @@ public class AutoJump {
 	public static int startx = 220;
 	public static int starty = 660;
 	public static AI nn;
-	public static Func func = new Func();
+	public static Capture func = new Capture();
 	public static int index = 0;
 	public static Random rand = new Random();
 	public static void main(String[] args) throws Exception {
@@ -73,8 +73,9 @@ public class AutoJump {
 		if(file.exists()) {
 			nn = (AI)Util.deserialize(serializeTo);
 		} else {
-			Network temp = new Network(959, new int[]{30, 10}, 2, 0.01, 0.0001);
-			temp.fullConnect();
+//			Network temp = new Network(959, new int[]{30, 10}, 2, 0.8, 0.001);
+//			temp.fullConnect();
+			NN temp = new NN(959, 2, new int[] {30, 10});
 			nn = temp;
 		}
 		System.out.println(nn.toString());
@@ -269,7 +270,7 @@ public class AutoJump {
 			downstair(D, 4, block);
 			
 			long duration = function(block, jumper);
-			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "525", "1583", "525", "1585", "" + duration});
+			Process swipescreen = Runtime.getRuntime().exec(new String[]{adb, "shell", "input", "touchscreen", "swipe", "600", "1600", "605", "1605", "" + duration});
 			swipescreen.waitFor();
 			System.err.println(block[0] + ","+ block[1] + "," + jumper[0] + "," + jumper[1] + "," + duration);
 		}
@@ -588,7 +589,7 @@ class Supply implements Spliterator<Piece> {
 	}
 	
 }
-class Func implements Function<Piece, List<Double>>{
+class Capture implements Function<Piece, List<Double>>{
 
 	@Override
 	public List<Double> apply(Piece d) {

@@ -18,10 +18,10 @@ public class TestMnist implements Serializable {
 	PointMatrix pm;
 	PointMatrix view;
 	double best = Integer.MAX_VALUE;
-	public static int batch = 1000;
+	public static int batch = 60000;
 	public static Clock clock = new Clock();
 	public static String[] names = {"0","1","2","3","4","5","6","7","8","9"};
-	public static String serializeTo = "D:/lijiaming/digit.nn.relu";
+	public static String serializeTo = "D:/lijiaming/digit.dnn.relu";
 	public AI init(Digit digit, int output) {
 		double[][] image = digit.data;
 		this.pm = new PointMatrix(image.length, image[0].length, 1.0);
@@ -35,12 +35,11 @@ public class TestMnist implements Serializable {
 		System.out.println();
 		Util.print(v);
 		double[] input = this.descendLayer.descend(v);
-		NN network = new NN(input.length, output, new int[]{27});
-		network.forward(input);
-		network.backprop(digit.label);
+		NN network = new NN(input.length, output, new int[]{57, 27});
+		network.train(input, digit.label);
 		return network;
 	}
-	public void test(NN network) {
+	public void test(AI network) {
 		MNIST mnist = new MNIST(MNIST.TYPE_TEST);
 		mnist.init();
 		double accuracy = 0;
@@ -53,8 +52,7 @@ public class TestMnist implements Serializable {
 			double[][] v = this.view.normalizeAndTake();
 			double[] input = this.descendLayer.descend(v);
 			double[] output = digit.label;
-			network.forward(input);
-			double[] result = network.output();
+			double[] result = network.test(input);
 			int t = Util.argmax(output);
 			int r = Util.argmax(result);
 			if(t==r) right++;
@@ -195,6 +193,7 @@ public class TestMnist implements Serializable {
 					}
 					error = error/batch;
 					System.err.println(epoch + " E: " + error);
+					network.last(error);
 					if(error < 0.001) {
 						break;
 					}
@@ -229,6 +228,6 @@ public class TestMnist implements Serializable {
 //		TestMnist.init();
 		TestMnist test = (TestMnist) Util.deserialize(serializeTo);
 		AI nn = (NN) Util.deserialize(serializeTo + ".nn");
-		test.train(nn);
+		test.test(nn);
 	}
 }

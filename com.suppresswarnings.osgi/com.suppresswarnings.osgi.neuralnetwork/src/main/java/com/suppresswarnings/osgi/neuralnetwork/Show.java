@@ -18,7 +18,7 @@ public class Show extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 6491242556168785338L;
-	public static String serializeTo = "D:/lijiaming/digit.nn.relu";
+	public static String serializeTo = "D:/lijiaming/digit.dnn.relu";
 	public Show(String string) {
 		super(string);
 	}
