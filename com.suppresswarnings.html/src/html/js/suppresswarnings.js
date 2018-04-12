@@ -16,6 +16,8 @@
     $("#" + "svg_"+ids[index%8]).css("stroke","#5cb85c");
     if(index<limited) {
       setTimeout("red()", 100);
+    } else {
+      $("#"+"svg_ur").css("stroke","pink");
     }
     index++;
   }
@@ -28,12 +30,16 @@
 	  },
 	  success: function( result ) {
 	    $( container ).html( "<pre>" + result + "</pre>" );
+	  },
+	  error: function( xhr, result, obj ) {
+	    $( container ).html( "<pre><span>天哪，不见了</span><br/>" + result + "</pre>" );
 	  }
 	});
   }
   $(document).ready(function(){
     green();
-    
+    var main =  $("#main")
+    gethtml("welcome.html", main)
     $(".navbar-brand").click(function(){
       if(limited <= 0) {
         index = 0
@@ -42,5 +48,17 @@
       } else {
         limited = 0;
       }
+    });
+    
+    $(".business").click(function(){
+        gethtml("business.html", main)
+    });
+    
+    $(".aboutus").click(function(){
+        gethtml("aboutus.html", main)
+    });
+    
+    $(".raspberrypi").click(function(){
+      gethtml("walkthrough/raspberrypi.html", main)
     });
   }); 
