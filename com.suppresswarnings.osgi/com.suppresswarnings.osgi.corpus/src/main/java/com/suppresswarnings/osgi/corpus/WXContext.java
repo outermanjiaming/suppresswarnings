@@ -147,6 +147,7 @@ public class WXContext extends Context<WXService> {
 	};
 	public State<Context<WXService>> init = new State<Context<WXService>>(){
 		boolean inited = false;
+		String commands = null;
 		
 		/**
 		 * 
@@ -157,6 +158,7 @@ public class WXContext extends Context<WXService> {
 		public void accept(String t, Context<WXService> u) {
 			if(!inited) {
 				inited = true;
+				commands = u.content().factories.keySet().toString();
 				String name = u.content().getFromAccount(String.join(Const.delimiter, Version.V1, openid(), KEY.Name.name()));
 				String keyLast = String.join(Const.delimiter, Version.V1, openid(), "Last");
 				String last = u.content().getFromAccount(keyLast);
@@ -171,7 +173,7 @@ public class WXContext extends Context<WXService> {
 					u.output("你还没有设置名字，可以输入'我要注册'试试。");
 				}
 			} else {
-				u.output("会采用神经网络和CRF算法来决定回复什么内容");
+				u.output("现在我只会这些操作："+commands+"，如果你会写代码，欢迎开发新的操作并申请上线，提供给更多人使用。");
 				u.content().dataService.unknown(((WXContext)u).openid(), t);
 			}
 		}
