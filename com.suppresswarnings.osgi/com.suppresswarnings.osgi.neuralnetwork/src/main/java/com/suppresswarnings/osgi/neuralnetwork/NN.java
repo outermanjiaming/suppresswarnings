@@ -131,4 +131,11 @@ public class NN implements AI, Serializable {
 	public void last(double error) {
 		this.error = error;
 	}
+
+	@Override
+	public double[] layer(int layerIndexWhereInputIs0) {
+		if(layerIndexWhereInputIs0 == 0) return input.value();
+		if(layerIndexWhereInputIs0 > hiddenLayer.size()) return output.value();
+		return hiddenLayer.get(layerIndexWhereInputIs0 - 1).value();
+	}
 }

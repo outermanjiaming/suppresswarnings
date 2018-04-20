@@ -267,12 +267,16 @@ public class Util {
 	}
 	public static double print(double[] array) {
 		double max = 0;
+		int index = 0;
 		for(int i=0;i<array.length;i++){
 			double v = array[i];
-			if(v > max) max = v;
+			if(v > max) {
+				max = v;
+				index = i;
+			}
 			System.out.print(" " + format.format(v));
 		}
-		System.out.print(" MAX=" + format.format(max));
+		System.out.print(" MAX=" + format.format(max) + " : " + index);
 		return max;
 	}
 	public static void print(double[][] matrix) {

@@ -231,4 +231,10 @@ public class OnePiece implements AI, Serializable {
 	public void last(double error) {
 		this.error = error;
 	}
+	@Override
+	public double[] layer(int layerIndexWhereInputIs0) {
+		if(layerIndexWhereInputIs0 == 0) return x;
+		if(layerIndexWhereInputIs0 == 1) return yi;
+		return yj;
+	}
 }

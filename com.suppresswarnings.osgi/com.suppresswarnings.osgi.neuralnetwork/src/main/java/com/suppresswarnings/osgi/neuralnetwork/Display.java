@@ -24,7 +24,7 @@ public class Display extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -7962556170449642969L;
-	public static String serializeTo = "D:/lijiaming/NN.dnn.024";
+	public static String serializeTo = "D:/files/todo/Symbol2Vec.autoencode";
 	public static int max = 10000;
 	public long confirm = 10000;
 	public void confirm(long v) {
@@ -47,7 +47,7 @@ public class Display extends JFrame {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		int size = 5;
+		int size = 103;
 		NN nn = (NN) Util.deserialize(serializeTo);//new NN(size, sizey, new int[]{8});//  
 		Display show = new Display("Display Of Neuro");
 		NNPanel bgp = new NNPanel(nn);

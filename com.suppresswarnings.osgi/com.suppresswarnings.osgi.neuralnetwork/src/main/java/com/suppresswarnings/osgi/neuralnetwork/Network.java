@@ -184,4 +184,15 @@ public class Network implements AI, Serializable {
 	public void last(double error) {
 		this.error = error;
 	}
+	
+	@Override
+	public double[] layer(int layerIndexWhereInputIs0) {
+		Node[] nodes = network[layerIndexWhereInputIs0];
+		double[] result = new double[nodes.length];
+		for(int i=0;i<nodes.length;i++) {
+			Node o = nodes[i];
+			result[i] = o.value();
+		}
+		return result;
+	}
 }
