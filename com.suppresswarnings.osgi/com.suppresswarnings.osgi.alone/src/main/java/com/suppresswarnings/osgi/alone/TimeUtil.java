@@ -27,8 +27,8 @@ import java.util.Date;
  */
 @SuppressWarnings({"all", "2028/04/07 00:00:00.000", "1838649600000"})
 public class TimeUtil {
-	public static final String TimeFormat = "yyyy/MM/dd hh:mm:ss";
-	public static final String TenYears = "2028/04/07 00:00:00.000";
+	public static final String TimeFormat = "yyyy/MM/dd HH:mm:ss";
+	public static final String TenYears = "2028/04/07 00:00:00";
 	public static final long CountDown = 1838649600000L;
 	
 	public static void main(String[] args) throws ParseException {
