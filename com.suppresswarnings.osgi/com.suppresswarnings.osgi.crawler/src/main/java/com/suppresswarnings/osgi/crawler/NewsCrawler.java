@@ -9,7 +9,10 @@
  */
 package com.suppresswarnings.osgi.crawler;
 
+import java.util.Iterator;
+
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.model.Page;
@@ -21,11 +24,13 @@ import cn.edu.hfut.dmic.webcollector.plugin.berkeley.BreadthCrawler;
  *
  */
 public class NewsCrawler extends BreadthCrawler {
-    public NewsCrawler(String crawlPath, boolean autoParse) {
-		super(crawlPath, autoParse);
+	Jobs jobs;
+    public NewsCrawler(Jobs jobs) {
+		super(jobs.getName(), true);
+		this.jobs = jobs;
 		setResumable(true);
-		addSeed("https://www.newscientist.com/article/2166741-watch-robots-assemble-a-flat-pack-ikea-chair-in-just-9-minutes/");
-        addRegex("https:\\/\\/www\\.newscientist\\.com\\/article\\/.+");
+		addSeed(jobs.getSeed());
+        addRegex(jobs.getRegex());
         getConf().setExecuteInterval(1000);
         setThreads(16);
 	}
@@ -33,17 +38,27 @@ public class NewsCrawler extends BreadthCrawler {
 	public static void main( String[] args ) throws Exception 
     {
         System.out.println( "Hello Crawler!" );
-        NewsCrawler crawler = new NewsCrawler("crawler", true);
+        Jobs jobs = new Jobs("jianshu-crawler", "https://www.jianshu.com/p/82d81319ad69", "https:\\/\\/www\\.jianshu\\.com\\/p\\/.+", "h1[class=title]");
+//        Jobs jobs = new Jobs("meizu-crawler", "https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats%20(URL:%20https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats)", "https:\\/\\/bbs\\.meizu\\.cn\\/thread.+", "td[class=t_f]");
+//        Jobs jobs = new Jobs("meizu-forum", "https://bbs.meizu.cn/forum-22-1.html", "https:\\/\\/bbs\\.meizu\\.cn\\/forum.+", "a[class=xst gv]");
+        NewsCrawler crawler = new NewsCrawler(jobs);
         crawler.start(3);
-    }
+    } 
 
 	@Override
 	public void visit(Page page, CrawlDatums arg1) {
-		if (page.matchUrl("https:\\/\\/www\\.newscientist\\.com\\/article\\/.+")) {
-			Element e = page.select("h1[class=article-title]").first();
-			if(e == null) return;
-            String title = e.text();
-            System.err.println("[================================LIJIAMING================================]: " + title);
+		if (page.matchUrl(jobs.getRegex())) {
+			Elements e = page.select(jobs.getSelect());
+			if(e == null) {
+				System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Empty");
+				return;
+			}
+			Iterator<Element> itr = e.iterator();
+			while(itr.hasNext()) {
+				Element one = itr.next();
+	            String title = one.text();
+	            System.err.println("[================================LIJIAMING================================]: " + title);
+			}
         }
 	}
 }
