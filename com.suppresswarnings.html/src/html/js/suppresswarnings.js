@@ -50,15 +50,19 @@
       }
     });
     
-    $(".business").click(function(){
+    $("li.business").click(function(){
         gethtml("business.html", main)
     });
     
-    $(".aboutus").click(function(){
+    $("li.card").click(function(){
+        gethtml("card.html", main)
+    });
+    
+    $("li.aboutus").click(function(){
         gethtml("aboutus.html", main)
     });
     
-    $(".raspberrypi").click(function(){
+    $("li.raspberrypi").click(function(){
       gethtml("walkthrough/raspberrypi.html", main)
     });
   }); 
