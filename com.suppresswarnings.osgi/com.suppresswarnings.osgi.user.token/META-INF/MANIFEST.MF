@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TokenDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.user.token
-Bundle-Version: 2018.2.21.osgi
+Bundle-Version: 2018.5.3.osgi
 Import-Package: com.leveldb.common.db,
  com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.leveldb,

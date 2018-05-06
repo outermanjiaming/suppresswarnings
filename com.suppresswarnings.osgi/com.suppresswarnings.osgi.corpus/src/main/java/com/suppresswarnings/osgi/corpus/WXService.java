@@ -25,6 +25,8 @@ import com.suppresswarnings.osgi.alone.Format.KeyValue;
 import com.suppresswarnings.osgi.alone.SendMail;
 import com.suppresswarnings.osgi.alone.TTL;
 import com.suppresswarnings.osgi.alone.Version;
+import com.suppresswarnings.osgi.corpus.backup.Server;
+import com.suppresswarnings.osgi.corpus.backup.WhichDB;
 import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
@@ -40,7 +42,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	public static final String SUCCESS = "success";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	long startup = System.currentTimeMillis();
-	long initdone = 0;
+	int initdone = 0;
 	Random rand = new Random();
 	DecimalFormat format6number = new DecimalFormat("000000");
 	Format format = new Format(Const.WXmsg.msgFormat);
@@ -92,6 +94,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	TokenService tokenService;
 	DataService dataService;
 	LevelDB leveldb;
+	Server serverBackup;
 	
 	/**
 	 * 0..n
@@ -290,6 +293,16 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
 		if(!"WX".equals(action)){
 			logger.info("[WX] this request is unusual, IP: "+ip);
+			if("backup".equals(action)) {
+				if(serverBackup != null) {
+					String which = parameter.getParameter("which");
+					String from  = parameter.getParameter("from");
+					String capacity = parameter.getParameter("capacity");
+					boolean accept = serverBackup.newAgent(WhichDB.valueOf(which), from, Long.valueOf(capacity));
+					return Boolean.toString(accept);
+				}
+				return "false";
+			}
 		}
 		logger.info("[WX] request: " + parameter.toString());
 		String msgSignature = parameter.getParameter("signature");
@@ -455,7 +468,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	
 	public void clear(){
 		long now = System.currentTimeMillis();
-		logger.info("[content] clean TTL("+ttl.size()+"): " + ttl);
+		logger.info("[content] start clean TTL("+ttl.size()+")");
 		ttl.removeIf(out -> {
 			if(out.ttl() < now) {
 				if(out.marked()) {
@@ -480,24 +493,44 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			}
 			return false;
 		});
-		logger.info("[content] clean TTL("+ttl.size()+"): " + ttl);
+		logger.info("[content] after clean TTL("+ttl.size()+")");
 	}
 	
 	public void init(){
 		if(initdone == 7) {
+			initdone = 0;
 			logger.info("[content] init start.");
 			schedule.scheduleWithFixedDelay(this, Const.InteractionTTL.clearCache, Const.InteractionTTL.clearCache, TimeUnit.MILLISECONDS);
+			logger.info("[content] start server backup");
+			serverBackup = new Server(accountService.leveldb().getDBname(), dataService.leveldb().getDBname(), tokenService.leveldb().getDBname());
+			try {
+				serverBackup.working();
+			} catch (Exception e) {
+				logger.error("[content] server backup fail to work", e);
+			}
 		} else {
 			logger.info("[content] requirements not met");
 		}
 	}
 	
+	
+	final int maxSuppress = 100;
+	int currentSuppress = 0;
+	
 	@Override
 	public void run() {
-		long start = System.currentTimeMillis();
-		logger.info("[content] run clean start");
-		clear();
-		logger.info("[content] run clean end: " + (System.currentTimeMillis() - start));
+		if(ttl.size() > 0) {
+			long start = System.currentTimeMillis();
+			logger.info("[content] run clean start");
+			clear();
+			logger.info("[content] run clean end: " + (System.currentTimeMillis() - start));
+		} else {
+			if(currentSuppress >= maxSuppress) {
+				currentSuppress = 0;
+				logger.info("[content] no need clean: " + ttl.size());
+			}
+			++currentSuppress;
+		}
 	}
 
 	public static void main(String[] args) {

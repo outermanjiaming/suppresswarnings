@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Register
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus.register
-Bundle-Version: 2018.3.22.osgi
+Bundle-Version: 2018.5.3.osgi
 Bundle-Vendor: LIJIAMING
 Export-Package: com.suppresswarnings.osgi.corpus.register
 Service-Component: OSGI-INF/component.xml

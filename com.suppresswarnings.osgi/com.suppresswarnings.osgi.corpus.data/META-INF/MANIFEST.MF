@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Data
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus.data
-Bundle-Version: 2018.3.2.osgi
+Bundle-Version: 2018.5.3.osgi
 Export-Package: com.suppresswarnings.osgi.corpus.data
 Import-Package: com.suppresswarnings.osgi.alone,
  com.suppresswarnings.osgi.corpus,

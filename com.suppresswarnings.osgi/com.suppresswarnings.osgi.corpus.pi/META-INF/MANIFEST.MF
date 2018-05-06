@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Pi
 Bundle-SymbolicName: com.suppresswarnings.osgi.corpus.pi
-Bundle-Version: 2018.3.22.osgi
+Bundle-Version: 2018.5.3.osgi
 Export-Package: com.suppresswarnings.osgi.corpus.pi
 Import-Package: com.suppresswarnings.osgi.alone,
   com.suppresswarnings.osgi.corpus

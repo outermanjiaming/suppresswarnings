@@ -40,8 +40,8 @@ public class NewsCrawler extends BreadthCrawler {
         System.out.println( "Hello Crawler!" );
 //        Jobs jobs = new Jobs("jianshu-crawler", "https://www.jianshu.com/p/82d81319ad69", "https:\\/\\/www\\.jianshu\\.com\\/p\\/.+", "h1[class=title]");
 //        Jobs jobs = new Jobs("meizu-crawler", "https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats%20(URL:%20https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats)", "https:\\/\\/bbs\\.meizu\\.cn\\/thread.+", "td[class=t_f]");
-//        Jobs jobs = new Jobs("meizu-forum", "https://bbs.meizu.cn/forum-22-1.html", "https:\\/\\/bbs\\.meizu\\.cn\\/forum.+", "a[class=xst gv]");
-        Jobs jobs = new Jobs("csdn-crawler", "https://blog.csdn.net/dQCFKyQDXYm3F8rB0/article/details/79990871", "https:\\/\\/blog\\.csdn\\.net\\/.*\\/article\\/details\\/.*", "h1[class=csdn_top]");
+        Jobs jobs = new Jobs("meizu-forum", "https://bbs.meizu.cn/forum-22-1.html", "https:\\/\\/bbs\\.meizu\\.cn\\/forum.+", "a[class=xst gv]");
+//        Jobs jobs = new Jobs("csdn-crawler", "https://blog.csdn.net/dQCFKyQDXYm3F8rB0/article/details/79990871", "https:\\/\\/blog\\.csdn\\.net\\/.*\\/article\\/details\\/.*", "h1[class=csdn_top]");
         NewsCrawler crawler = new NewsCrawler(jobs);
         crawler.start(3);
     } 

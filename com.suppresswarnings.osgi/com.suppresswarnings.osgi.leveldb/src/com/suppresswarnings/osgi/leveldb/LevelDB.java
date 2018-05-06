@@ -8,6 +8,8 @@ public interface LevelDB {
 	public int OK = 1;
 	public int FAIL = 400;
 	public int EXCEPTION = 500;
+	public String getDBname();
+	public boolean inited();
 	public int init(String dbname, boolean create_if_missing);
 	public void close();
 	public int destroy(String dbname);

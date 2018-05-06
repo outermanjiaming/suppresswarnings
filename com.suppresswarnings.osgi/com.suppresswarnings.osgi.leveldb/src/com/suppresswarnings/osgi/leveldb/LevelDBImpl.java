@@ -161,9 +161,11 @@ public class LevelDBImpl implements LevelDB {
 		}
 		return now;
 	}
+	@Override
 	public boolean inited() {
 		return inited;
 	}
+	@Override
 	public String getDBname() {
 		return dbname_;
 	}
@@ -174,6 +176,4 @@ public class LevelDBImpl implements LevelDB {
 	public String toString() {
 		return "LevelDBImpl ["+inited+", dbname_=" + dbname_ + ", db_=" + db_ + "]";
 	}
-
-	
 }
