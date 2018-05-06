@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +75,7 @@ public class SSLSocket implements Runnable {
 				long size = file.length();
 				capacity = capacity - size;
 				capable = capacity > 0;
-				logger.info("[SSLSocket] is agent capable ? " + from + " = " + capable);
+				logger.info("[SSLSocket] " + capable + "\tcapable = " + capacity + ", from = " + from);
 				//get which, from, name
 				String key = String.join(",", which.name(), from, name);
 				String existLastModified = notebook.get(key);
@@ -88,7 +87,7 @@ public class SSLSocket implements Runnable {
 					long existModifiedTime = Long.parseLong(existLastModified);
 					mustdo = (existModifiedTime < lastModified);
 				}
-				logger.info("[SSLSocket] " + key + " lastModified: " + lastModified + " == " + existLastModified + ", must do = " + mustdo);
+				logger.info("[SSLSocket] " + mustdo + "\tlastModified: " + lastModified + " == " + existLastModified + " " + key);
 				if(mustdo) {
 					long start = System.currentTimeMillis();
 					OutputStream os = socket.getOutputStream();
@@ -113,7 +112,7 @@ public class SSLSocket implements Runnable {
 			        fis.close();
 			        srcChannel.close();
 			        long time = System.currentTimeMillis() - start;
-			        logger.info("[SSLSocket] " + msg + " COST: " + time + "ms == " + TimeUnit.MILLISECONDS.toSeconds(time) + "s");
+			        logger.info("[SSLSocket] " + msg + " COST: " + time + "ms");
 				}
 				logger.info("[SSLSocket] " + key + " finished");
 			}

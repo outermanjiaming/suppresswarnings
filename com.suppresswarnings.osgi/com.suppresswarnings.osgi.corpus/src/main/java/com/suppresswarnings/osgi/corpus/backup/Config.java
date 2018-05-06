@@ -12,7 +12,8 @@ package com.suppresswarnings.osgi.corpus.backup;
 import java.util.concurrent.TimeUnit;
 
 public interface Config {
-	String closeGate = "CLOSE\n";
+	String endLine = "\n";
+	String closeGate = "CLOSE";
 	String defaultServerSslPort = "6616";
 	String keyServerSslPort = "server.ssl.port";
 	String serverConfigFilePath = "/root/osgi/conf/server.properties";

@@ -73,19 +73,12 @@ public class Server {
 		String sslPorts = config.getProperty(Config.keyServerSslPort, Config.defaultServerSslPort);
 		sslPort = Integer.parseInt(sslPorts);
 	    logger.info("[Server] sslPorts: " + sslPort);
-	    long start = System.currentTimeMillis();
-//	    System.setProperty("javax.net.debug", "ssl,handshake");
+	    //System.setProperty("javax.net.debug", "ssl,handshake");
 	    System.setProperty("javax.net.ssl.keyStore", config.getProperty("javax.net.ssl.keyStore"));
         System.setProperty("javax.net.ssl.trustStore", config.getProperty("javax.net.ssl.trustStore"));
         System.setProperty("javax.net.ssl.keyStorePassword", config.getProperty("javax.net.ssl.keyStorePassword"));    
         System.setProperty("javax.net.ssl.trustStorePassword",config.getProperty("javax.net.ssl.trustStorePassword"));
         logger.info("[Server] getDefault:" + sslPorts);
-        ServerSocketFactory factory = SSLServerSocketFactory.getDefault();  
-	    logger.info("[Server] createServerSocket:" + sslPorts);
-		serverSocket = (SSLServerSocket) factory.createServerSocket(sslPort);   
-	    serverSocket.setNeedClientAuth(true);
-	    long time = System.currentTimeMillis() - start;
-	    logger.info("[Server] server socket prepared: " + time + "ms");
 	    status = new Status<Server>(this);
 	    schedule = new ScheduledThreadPoolExecutor(7, new ThreadFactory() {
 			int thread = 0;
@@ -114,9 +107,18 @@ public class Server {
 						logger.info("[Server accept] gate opened already");
 						return;
 					}
-					logger.info("[Server accept] working start accepting");
 					status.busy();
+					long start = System.currentTimeMillis();
+					ServerSocketFactory factory = SSLServerSocketFactory.getDefault();  
+				    logger.info("[Server accept] createServerSocket:" + sslPorts);
+					serverSocket = (SSLServerSocket) factory.createServerSocket(sslPort);   
+				    serverSocket.setNeedClientAuth(true);
+				    long time = System.currentTimeMillis() - start;
+				    logger.info("[Server accept] server socket prepared: " + time + "ms");
 					Socket socket = serverSocket.accept();
+					logger.info("[Server accept] accept socket: " + socket);
+					serverSocket.close();
+					serverSocket = null;
 					status.rest();
 					//1.read from,capacity,WhichDB
 					String knock = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8")).readLine();
@@ -146,7 +148,7 @@ public class Server {
 				}
 			}
 		};
-	    schedule.execute(accept);
+	    //TODO won't accept until agent asked for, schedule.execute(accept);
 	    logger.info("[Server] working accept created and executed");
 	    schedule.scheduleAtFixedRate(new Runnable() {
 			
@@ -206,6 +208,7 @@ public class Server {
 				    Socket close = factory.createSocket("127.0.0.1", sslPort);
 				    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(close.getOutputStream(),"UTF-8"));    
 			        out.write(Config.closeGate);
+			        out.write(Config.endLine);
 			        out.flush();
 			        close.close();
 			        logger.info("[Server] close gate by itself");
