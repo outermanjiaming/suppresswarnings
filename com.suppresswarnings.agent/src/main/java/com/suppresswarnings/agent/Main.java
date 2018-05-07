@@ -20,16 +20,14 @@ import rx.Subscriber;
 
 public class Main {
 	public static void main(String[] args) {
-		String which = "backup";
-		String identity  = "MacBook";
 		Properties config = new Properties();
 		try {
 			config.load(new FileInputStream("agent.properties"));
-			config.setProperty("agent.backup.which", which);
-			config.setProperty("agent.backup.identity", identity);
 		} catch (Exception e) {
 			System.out.println("fail to load agent.properties: " + e.getMessage());
 		}
+		String which = config.getProperty("agent.backup.which", "backup");
+		String identity = config.getProperty("agent.backup.identity", "identity");
 		Agent agent = new Agent(config);
 		OkHttpClient.Builder builder = new OkHttpClient
 				.Builder()
