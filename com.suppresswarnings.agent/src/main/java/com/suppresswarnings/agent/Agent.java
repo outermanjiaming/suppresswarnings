@@ -12,7 +12,6 @@ package com.suppresswarnings.agent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,19 +37,14 @@ public class Agent {
 	public static void log(String msg) {
 		System.out.println("[Agent] " + msg);
 	}
-	public Agent(String which) {
-		this.which = which;
-		Properties config = new Properties();
-		try {
-			config.load(new FileInputStream("agent.properties"));
-		} catch (Exception e) {
-			log("fail to load agent.properties: " + e.getMessage());
-		}
+	public Agent(Properties config) {
 		System.setProperty("javax.net.ssl.keyStore", config.getProperty("javax.net.ssl.keyStore"));
         System.setProperty("javax.net.ssl.trustStore", config.getProperty("javax.net.ssl.trustStore"));
         System.setProperty("javax.net.ssl.keyStorePassword", config.getProperty("javax.net.ssl.keyStorePassword"));    
         System.setProperty("javax.net.ssl.trustStorePassword",config.getProperty("javax.net.ssl.trustStorePassword"));
-        this.folder = config.getProperty("agent.backup.folder");
+        
+		this.which = config.getProperty("agent.backup.which");
+		this.folder = config.getProperty("agent.backup.folder");
         this.identity = config.getProperty("agent.backup.identity");
         this.server = config.getProperty("server.ssl.ip");
         String port = config.getProperty("server.ssl.port");
@@ -77,9 +71,9 @@ public class Agent {
         while(!sslsocket.isClosed()) {
 	        BufferedReader in = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 	        String msg = in.readLine();
-	        log("===================== receive Log: <" + msg + "> =====================");
+	        log("===================== receive Log: " + msg);
 	        if(msg == null) {
-	        	log("no more message");
+	        	log("file none");
 	        	break;
 	        }
 	        String[] argv = msg.split(",");
@@ -98,7 +92,7 @@ public class Agent {
 	        FileChannel saveTo = fos.getChannel();
 	        int read = 0;
 	        while(channel.read(buffer) != -1) {
-	        	log("read data = "+buffer.position());
+	        	log("data size: "+buffer.position());
 	        	read += buffer.position();
 	        	buffer.flip();
 	        	while(buffer.hasRemaining()) {
@@ -106,7 +100,6 @@ public class Agent {
 	        	}
 	        	buffer.clear();
 	        	if(read >= length) {
-	        		log("leave it for next file");
 	        		break;
 	        	}
 	        }

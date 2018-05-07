@@ -11,6 +11,7 @@ package com.suppresswarnings.osgi.corpus.backup;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 
-public class Server {
+public class Server implements Closeable {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	SSLServerSocket serverSocket;
 	LevelDB notebook;
@@ -184,39 +185,53 @@ public class Server {
 			logger.info("[Server] new agent already exist");
 			return false;
 		}
+		
 		if(status.busy) {
-			logger.info("[Server] new agent gate opened to accept");
+			logger.info("[Server] new agent ready to accept");
 		} else {
 			schedule.execute(accept);
-		}
-		schedule.schedule(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					SSLSocket exist = getAgentAlive(which, from);
-					if(exist != null) {
-						logger.info("[Server] close gate no need to do: still none");
-						return;
+			schedule.schedule(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						SSLSocket exist = getAgentAlive(which, from);
+						if(exist != null) {
+							logger.info("[Server] close gate no need to do: still none");
+							return;
+						}
+						if(!status.busy) {
+							logger.info("[Server] close gate no need to do: already accepted");
+							return;
+						}
+						logger.info("[Server] close gate connect to server and close it");
+						SocketFactory factory = SSLSocketFactory.getDefault();
+					    Socket close = factory.createSocket("127.0.0.1", sslPort);
+					    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(close.getOutputStream(),"UTF-8"));    
+				        out.write(Config.closeGate);
+				        out.write(Config.endLine);
+				        out.flush();
+				        close.close();
+				        logger.info("[Server] close gate by itself");
+					} catch (Exception e) {
+						logger.info("[Server] close gate stop server socket from waiting");
 					}
-					if(!status.busy) {
-						logger.info("[Server] close gate no need to do: already accepted");
-						return;
-					}
-					logger.info("[Server] close gate connect to server and close it");
-					SocketFactory factory = SSLSocketFactory.getDefault();
-				    Socket close = factory.createSocket("127.0.0.1", sslPort);
-				    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(close.getOutputStream(),"UTF-8"));    
-			        out.write(Config.closeGate);
-			        out.write(Config.endLine);
-			        out.flush();
-			        close.close();
-			        logger.info("[Server] close gate by itself");
-				} catch (Exception e) {
-					logger.info("[Server] close gate stop server socket from waiting");
 				}
-			}
-		}, Config.timeWaitUntilAcceptedMillis, TimeUnit.MILLISECONDS);
+			}, Config.timeWaitUntilAcceptedMillis, TimeUnit.MILLISECONDS);
+		}
 		return true;
+	}
+	@Override
+	public void close() {
+		try {
+			if(schedule != null) schedule.shutdownNow();
+			if(serverSocket != null) serverSocket.close();
+			if(notebook != null) notebook.close();
+			if(agentPool != null) agentPool.shutdownNow();
+			if(sslSockets != null) sslSockets.clear();
+			if(sources != null) sources.clear();
+		} catch (Exception e) {
+			logger.error("[Server] close Exception", e);
+		}
 	}
 }

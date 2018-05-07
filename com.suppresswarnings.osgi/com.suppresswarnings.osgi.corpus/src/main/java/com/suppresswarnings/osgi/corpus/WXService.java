@@ -111,7 +111,19 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 	}
 
 	public void deactivate() {
-		schedule.shutdown();
+		if(schedule != null) schedule.shutdownNow();
+		if(serverBackup != null) serverBackup.close();
+		ttl.clear();
+		contexts.clear();
+		cacheString.clear();
+		cacheBytes.clear();
+		secondlife.clear();
+		counter.clear();
+		factories.clear();
+		accountService = null;
+		tokenService = null;
+		dataService = null;
+		leveldb = null;
 		logger.info("[WX] deactivate.");
 	}
 
@@ -506,6 +518,7 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			try {
 				serverBackup.working();
 			} catch (Exception e) {
+				serverBackup.close();
 				logger.error("[content] server backup fail to work", e);
 			}
 		} else {
