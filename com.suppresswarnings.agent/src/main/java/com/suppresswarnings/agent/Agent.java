@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -72,7 +73,7 @@ public class Agent {
 	        BufferedReader in = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 	        String msg = in.readLine();
 	        log("===================== receive Log: " + msg);
-	        if(msg == null) {
+	        if(msg == null || "CLOSE".equals(msg)) {
 	        	log("file none");
 	        	break;
 	        }
@@ -81,6 +82,7 @@ public class Agent {
 	        String name = argv[2];
 	        File backup = new File(parent, name);
 	        if(!backup.exists()) {
+	        	backup.getParentFile().mkdirs();
 	        	backup.createNewFile();
 	        }
 	        if(length <= 0) {
@@ -110,5 +112,15 @@ public class Agent {
 		return System.currentTimeMillis() - start;
 	}
 	
-	
+	public static void main(String[] args) {
+		File parent = new File("/Users/lijiaming/Codes/SuppressWarnings/tmp/");
+		File son = new File(parent, "bak/son/file.log");
+		try {
+			System.out.println(son.getParentFile().mkdirs());
+			boolean b = son.createNewFile();
+			System.out.println(b);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

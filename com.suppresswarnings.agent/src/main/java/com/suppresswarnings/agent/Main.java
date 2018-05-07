@@ -10,22 +10,18 @@
 package com.suppresswarnings.agent;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import rx.Subscriber;
 
 public class Main {
 	public static void main(String[] args) {
-		String which = "Data";
-		String identity  = "raspberry-4";
+		String which = "backup";
+		String identity  = "MacBook";
 		Properties config = new Properties();
 		try {
 			config.load(new FileInputStream("agent.properties"));

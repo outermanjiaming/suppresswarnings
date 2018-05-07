@@ -26,7 +26,6 @@ import com.suppresswarnings.osgi.alone.SendMail;
 import com.suppresswarnings.osgi.alone.TTL;
 import com.suppresswarnings.osgi.alone.Version;
 import com.suppresswarnings.osgi.corpus.backup.Server;
-import com.suppresswarnings.osgi.corpus.backup.WhichDB;
 import com.suppresswarnings.osgi.data.Const;
 import com.suppresswarnings.osgi.data.DataService;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
@@ -307,10 +306,9 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			logger.info("[WX] this request is unusual, IP: "+ip);
 			if("backup".equals(action)) {
 				if(serverBackup != null) {
-					String which = parameter.getParameter("which");
 					String from  = parameter.getParameter("from");
 					String capacity = parameter.getParameter("capacity");
-					boolean accept = serverBackup.newAgent(WhichDB.valueOf(which), from, Long.valueOf(capacity));
+					boolean accept = serverBackup.newAgent(from, Long.valueOf(capacity));
 					return Boolean.toString(accept);
 				}
 				return "false";
@@ -588,6 +586,8 @@ public class WXService implements HTTPService, Runnable, CommandProvider {
 			leveldb = accountService.leveldb();
 		} else if ("token".equals(arg)) {
 			leveldb = tokenService.leveldb();
+		} else if("notebook".equals(arg)){
+			leveldb = serverBackup.leveldb();
 		} else {
 			ci.println("[WX Command] ignore: " + arg);
 			if("clear".equals(arg)) {

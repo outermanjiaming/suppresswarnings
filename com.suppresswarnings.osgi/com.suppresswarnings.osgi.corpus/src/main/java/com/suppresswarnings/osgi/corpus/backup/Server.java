@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,21 +42,18 @@ public class Server implements Closeable {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	SSLServerSocket serverSocket;
 	LevelDB notebook;
-	EnumMap<WhichDB, ArrayList<SSLSocket>> sslSockets;
-	EnumMap<WhichDB, String> sources;
+	List<SSLSocket> sslSockets;
 	Properties config;
 	Status<Server> status;
 	ScheduledExecutorService schedule;
 	ExecutorService agentPool;
 	Runnable accept;
 	int sslPort;
-	
+	public LevelDB leveldb(){
+		return notebook;
+	}
 	public Server(String account, String data, String token) {
-		sslSockets = new EnumMap<WhichDB, ArrayList<SSLSocket>>(WhichDB.class);
-		sources = new EnumMap<WhichDB, String>(WhichDB.class);
-		sources.put(WhichDB.Account, account);
-		sources.put(WhichDB.Data, data);
-		sources.put(WhichDB.Token, token);
+		sslSockets = new ArrayList<SSLSocket>();
 		notebook = new LevelDBImpl(Config.notebook);
 	}
 	/**
@@ -139,9 +136,7 @@ public class Server implements Closeable {
 						logger.info("[Server accept] wrong knock");
 						return;
 					}
-					WhichDB which = WhichDB.valueOf(identity[2]);
-					String source = sources.get(which);
-					SSLSocket agent = new SSLSocket(notebook, source, socket, identity[0], Long.valueOf(identity[1]), which);
+					SSLSocket agent = new SSLSocket(notebook, identity[2], socket, identity[0], Long.valueOf(identity[1]));
 					agentPool.execute(agent);
 					logger.info("[Server] new agent executed: " + agent.toString());
 				} catch (Exception e) {
@@ -165,13 +160,8 @@ public class Server implements Closeable {
 	    logger.info("[Server] schedule running");
 	}
 	
-	public SSLSocket getAgentAlive(WhichDB which, String from) {
-		ArrayList<SSLSocket> sockets = sslSockets.get(which);
-		if(sockets == null) {
-			sockets = new ArrayList<SSLSocket>();
-			sslSockets.put(which, sockets);
-		}
-		for(SSLSocket exist : sockets) {
+	public SSLSocket getAgentAlive(String from) {
+		for(SSLSocket exist : sslSockets) {
 			if(from.equals(exist.from) && exist.status.busy && exist.socket != null && !exist.socket.isClosed()) {
 				logger.info("[Server] get agent exist = " + exist.toString());
 				return exist;
@@ -179,8 +169,8 @@ public class Server implements Closeable {
 		}
 		return null;
 	}
-	public boolean newAgent(WhichDB which, String from, long capacity) {
-		SSLSocket exist = getAgentAlive(which, from);
+	public boolean newAgent(String from, long capacity) {
+		SSLSocket exist = getAgentAlive(from);
 		if(exist != null) {
 			logger.info("[Server] new agent already exist");
 			return false;
@@ -195,7 +185,7 @@ public class Server implements Closeable {
 				@Override
 				public void run() {
 					try {
-						SSLSocket exist = getAgentAlive(which, from);
+						SSLSocket exist = getAgentAlive(from);
 						if(exist != null) {
 							logger.info("[Server] close gate no need to do: still none");
 							return;
@@ -229,7 +219,6 @@ public class Server implements Closeable {
 			if(notebook != null) notebook.close();
 			if(agentPool != null) agentPool.shutdownNow();
 			if(sslSockets != null) sslSockets.clear();
-			if(sources != null) sources.clear();
 		} catch (Exception e) {
 			logger.error("[Server] close Exception", e);
 		}
