@@ -9,7 +9,6 @@
   </parent>
   <groupId>com.suppresswarnings.osgi</groupId>
   <artifactId>com.suppresswarnings.osgi.neuralnetwork</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>com.suppresswarnings.osgi.neuralnetwork</name>
   <url>http://maven.apache.org</url>
   <properties>

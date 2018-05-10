@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <properties>
+    <suppresswarnings.version>0.0.1-SNAPSHOT</suppresswarnings.version>
+  </properties>
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>suppresswarnings-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${suppresswarnings.version}</version>
   </parent>
   <artifactId>com.suppresswarnings.osgi</artifactId>
   <packaging>pom</packaging>
@@ -19,7 +22,6 @@
       <module>com.suppresswarnings.osgi.alone</module>
       <module>com.suppresswarnings.osgi.data</module>
       <module>com.suppresswarnings.osgi.wx.data</module>
-      <module>com.suppresswarnings.osgi.command</module>
       <module>com.suppresswarnings.osgi.corpus</module>
       <module>com.suppresswarnings.osgi.corpus.register</module>
       <module>com.suppresswarnings.osgi.corpus.data</module>
@@ -28,5 +30,24 @@
       <module>com.suppresswarnings.osgi.neuralnetwork</module>
       <module>com.suppresswarnings.osgi.corpus.invite</module>
       <module>com.suppresswarnings.osgi.crawler</module>
+      <module>c.s.c.common</module>
+      <module>c.s.c.service</module>
   </modules>
+  <dependencies>
+  		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.10</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+  </dependencies>
 </project>

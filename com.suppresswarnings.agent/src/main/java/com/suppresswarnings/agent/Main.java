@@ -11,73 +11,43 @@ package com.suppresswarnings.agent;
 
 import java.io.FileInputStream;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import rx.Subscriber;
-
+/**
+ * agent Entrance
+ * @author lijiaming
+ *
+ */
 public class Main {
 	public static void main(String[] args) {
 		Properties config = new Properties();
 		try {
 			config.load(new FileInputStream("agent.properties"));
+			Agent agent = new Agent(config);
+			OkHttpClient.Builder builder = new OkHttpClient
+					.Builder()
+					.connectTimeout(3000, TimeUnit.MILLISECONDS)
+					.writeTimeout(5000,TimeUnit.MILLISECONDS)
+					.readTimeout(10000,TimeUnit.MILLISECONDS);
+			Retrofit retrofit = new Retrofit
+					.Builder()
+					.client(builder.build())
+					.baseUrl("http://" + agent.server)
+					.addConverterFactory(new ToStringConverter())
+					.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+					.build();
+			SyncTask synctask = new SyncTask(retrofit, agent);
+			ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+			LOG.info(Main.class, "sync task scheduled");
+			ses.scheduleWithFixedDelay(synctask, TimeUnit.SECONDS.toMillis(10), TimeUnit.MINUTES.toMillis(10), TimeUnit.MILLISECONDS);
+			LOG.info(Main.class, "sync task would execute every hour");
 		} catch (Exception e) {
-			System.out.println("fail to load agent.properties: " + e.getMessage());
+			LOG.info(Main.class, "fail to start agent: " + e.getMessage());
 		}
-		String which = config.getProperty("agent.backup.which", "backup");
-		String identity = config.getProperty("agent.backup.identity", "identity");
-		Agent agent = new Agent(config);
-		OkHttpClient.Builder builder = new OkHttpClient
-				.Builder()
-				.connectTimeout(3000, TimeUnit.MILLISECONDS)
-				.writeTimeout(5000,TimeUnit.MILLISECONDS)
-				.readTimeout(10000,TimeUnit.MILLISECONDS);
-//				.addNetworkInterceptor(new Interceptor(){
-//
-//					@Override
-//					public Response intercept(Chain chain) throws IOException {
-//						Request request = chain.request();
-//						request = request.newBuilder().header("csrf_token", "lijiaming").build();
-//						return chain.proceed(request);
-//					}
-//					
-//				});
-		Retrofit retrofit = new Retrofit
-				.Builder()
-				.client(builder.build())
-				.baseUrl("http://139.199.104.224/")
-				.addConverterFactory(new ToStringConverter())
-				.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-				.build();
-		retrofit.create(CallBy.class)
-		.backup(identity, which, "" + agent.capacity)
-		.subscribe(new Subscriber<String>() {
-
-			@Override
-			public void onCompleted() {
-				System.out.println("[backup] response finish");
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				System.out.println("[backup] fail to request " + e.getMessage());
-			}
-
-			@Override
-			public void onNext(String t) {
-				System.out.println("[backup] return " + t);
-				if("true".equals(t)) {
-					try {
-						
-						long time = agent.working();
-						System.out.println("[backup] cost: " + time + "ms");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
 	}
 }

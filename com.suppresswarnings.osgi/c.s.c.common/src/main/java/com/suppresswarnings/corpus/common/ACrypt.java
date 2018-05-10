@@ -7,7 +7,7 @@
  *  SuppressWarnings
  * 
  */
-package com.suppresswarnings.osgi.alone;
+package com.suppresswarnings.corpus.common;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

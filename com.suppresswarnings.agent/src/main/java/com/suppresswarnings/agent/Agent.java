@@ -35,20 +35,17 @@ public class Agent {
 	String which;
 	long capacity;
 	File parent;
-	public static void log(String msg) {
-		System.out.println("[Agent] " + msg);
-	}
 	public Agent(Properties config) {
 		System.setProperty("javax.net.ssl.keyStore", config.getProperty("javax.net.ssl.keyStore"));
         System.setProperty("javax.net.ssl.trustStore", config.getProperty("javax.net.ssl.trustStore"));
         System.setProperty("javax.net.ssl.keyStorePassword", config.getProperty("javax.net.ssl.keyStorePassword"));    
         System.setProperty("javax.net.ssl.trustStorePassword",config.getProperty("javax.net.ssl.trustStorePassword"));
         
-		this.which = config.getProperty("agent.backup.which");
-		this.folder = config.getProperty("agent.backup.folder");
-        this.identity = config.getProperty("agent.backup.identity");
-        this.server = config.getProperty("server.ssl.ip");
-        String port = config.getProperty("server.ssl.port");
+		this.which = config.getProperty("agent.backup.which", "backup");
+		this.folder = config.getProperty("agent.backup.folder", ".");
+        this.identity = config.getProperty("agent.backup.identity", "identity");
+        this.server = config.getProperty("server.ssl.ip", "139.199.104.224");
+        String port = config.getProperty("server.ssl.port", "6616");
         this.port = Integer.valueOf(port);
         this.parent = new File(folder, which);
         if(!parent.exists()) {
@@ -61,20 +58,21 @@ public class Agent {
 		long start = System.currentTimeMillis();
         SocketFactory factory = SSLSocketFactory.getDefault();    
 	    Socket sslsocket = factory.createSocket(server, port);    
-	    log("Client Connected");
+	    LOG.info(Agent.class, "Client Connected");
+	    String knock = String.join(",", this.identity, "" + this.capacity, this.which) + "\n";
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(),"UTF-8"));    
-        out.write(String.join(",", this.identity, "" + this.capacity, this.which) + "\n");  
+        out.write(knock);  
         out.flush();
-        log("Msg Sent");
+        LOG.info(Agent.class, "Msg Sent = " + knock);
         InputStream is = sslsocket.getInputStream();
         //String msg = String.join(Const.delimiter, which.name(), from, name, "" + i, "" + all, "" + size);
         ByteBuffer buffer = ByteBuffer.allocateDirect(4096);
         while(!sslsocket.isClosed()) {
 	        BufferedReader in = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 	        String msg = in.readLine();
-	        log("===================== receive Log: " + msg);
+	        LOG.info(Agent.class, "===================== receive Log: " + msg);
 	        if(msg == null || "CLOSE".equals(msg)) {
-	        	log("file none");
+	        	LOG.info(Agent.class, "file none");
 	        	break;
 	        }
 	        String[] argv = msg.split(",");
@@ -86,21 +84,22 @@ public class Agent {
 	        	backup.createNewFile();
 	        }
 	        if(length <= 0) {
-	        	log("zero file");
+	        	LOG.info(Agent.class, "zero file");
 	        	continue;
 	        }
 	        ReadableByteChannel channel = Channels.newChannel(is);
 	        FileOutputStream fos = new FileOutputStream(backup);
 	        FileChannel saveTo = fos.getChannel();
-	        int read = 0;
+	        long read = 0;
 	        while(channel.read(buffer) != -1) {
-	        	log("data size: "+buffer.position());
+	        	LOG.info(Agent.class, "data size: "+buffer.position());
 	        	read += buffer.position();
 	        	buffer.flip();
 	        	while(buffer.hasRemaining()) {
 	        		saveTo.write(buffer);
 	        	}
 	        	buffer.clear();
+	        	this.capacity = this.capacity - read;
 	        	if(read >= length) {
 	        		break;
 	        	}
