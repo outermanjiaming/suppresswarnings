@@ -35,6 +35,7 @@
       <module>c.s.c.service.data</module>
       <module>c.s.c.service.corpus.accost</module>
       <module>c.s.c.service.account</module>
+      <module>c.s.c.service.token</module>
   </modules>
   <dependencies>
   		<dependency>

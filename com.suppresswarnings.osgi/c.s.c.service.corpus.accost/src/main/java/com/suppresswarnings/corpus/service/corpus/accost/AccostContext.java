@@ -28,7 +28,7 @@ public class AccostContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(times -- <= 0) {
+			if(times -- < 1) {
 				times = 3;
 				return init;
 			}
