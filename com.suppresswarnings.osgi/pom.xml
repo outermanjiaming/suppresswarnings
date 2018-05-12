@@ -32,6 +32,9 @@
       <module>com.suppresswarnings.osgi.crawler</module>
       <module>c.s.c.common</module>
       <module>c.s.c.service</module>
+      <module>c.s.c.service.data</module>
+      <module>c.s.c.service.corpus.accost</module>
+      <module>c.s.c.service.account</module>
   </modules>
   <dependencies>
   		<dependency>

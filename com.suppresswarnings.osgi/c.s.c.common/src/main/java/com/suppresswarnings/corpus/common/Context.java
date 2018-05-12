@@ -12,6 +12,8 @@ package com.suppresswarnings.corpus.common;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * Context with state, holds a content to make decision
  * @author lijiaming
@@ -19,18 +21,16 @@ import java.util.function.Predicate;
  * @param <T>
  */
 public abstract class Context<T> implements Predicate<String> {
+	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	T content;
-	State<Context<T>> state;
-	String output;
+	protected State<Context<T>> state;
+	StringBuffer output = new StringBuffer();
 	String time;
 	String rand;
 	public Context(T ctx) {
 		this.content = ctx;
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
-	}
-	public void init(State<Context<T>> s) {
-		this.state = s;
 	}
 	public T content() {
 		return content;
@@ -42,10 +42,20 @@ public abstract class Context<T> implements Predicate<String> {
 		return rand;
 	}
 	public String output() {
-		return output;
+		String out = this.output.toString();
+		this.output.setLength(0);
+		return out;
 	}
 	public void output(String string) {
-		this.output = string;
+		this.output.setLength(0);
+		this.output.append(string);
+	}
+	public Context<T> appendLine(String line) {
+		if(this.output.length() > 0) {
+			this.output.append("\n");
+		}
+		this.output.append(line);
+		return this;
 	}
 	public State<Context<T>> state(){
 		return state;
@@ -54,13 +64,19 @@ public abstract class Context<T> implements Predicate<String> {
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
 	}
-	public abstract void log(String msg);
+	
 	@Override
 	public boolean test(String t) {
-		log(random() + "<-state:" + state);
-		state = state.apply(t, this);
-		log(random() + "->state:" + state);
-		state.accept(t, this);
+		
+		try {
+			logger.info(random() + "<-state:" + state);
+			state = state.apply(t, this);
+			logger.info(random() + "->state:" + state);
+			state.accept(t, this);
+		} catch (Exception e) {
+			this.appendLine("没事，处理数据出了点问题: " + e.getMessage());
+		}
+		
 		return state.finish();
 	}
 	@Override
