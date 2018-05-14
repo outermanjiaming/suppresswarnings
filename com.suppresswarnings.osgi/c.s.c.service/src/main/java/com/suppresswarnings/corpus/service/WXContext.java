@@ -25,7 +25,6 @@ public class WXContext extends Context<CorpusService> {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	String openid;
 	public State<Context<CorpusService>> init = new State<Context<CorpusService>>() {
-		String nameKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Name");
 		/**
 		 * 
 		 */
@@ -33,11 +32,18 @@ public class WXContext extends Context<CorpusService> {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			String nameKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Name");
 			String name = u.content().account().get(nameKey);
 			Set<String> commands = u.content().factories.keySet();
 			if(commands.size() < 1) {
 				u.output(name + " 你好，我现在还没有准备好！");
 			} else {
+				if(name != null) {
+					u.appendLine(name + " 你好，");
+				} else {
+					logger.error("get null from Account by key: " + nameKey);
+					u.appendLine("还不知怎么称呼您，(输入'我要注册')");
+				}
 				u.appendLine("我现在只会这些操作").appendLine(commands.toString());
 			}
 		}

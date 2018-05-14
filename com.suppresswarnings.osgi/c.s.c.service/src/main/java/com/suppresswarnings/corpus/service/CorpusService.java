@@ -53,10 +53,29 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 		if(account != null) {
 			return account;
 		}
-		account = new DefaultLevelDB("Account");
+		account = getOrDefault("Account");
 		return account;
 	}
-	
+	public LevelDB data(){
+		if(data != null) {
+			return data;
+		}
+		data = getOrDefault("Data");
+		return data;
+	}
+	public LevelDB token(){
+		if(token != null) {
+			return token;
+		}
+		token = getOrDefault("Token");
+		return token;
+	}
+	public LevelDB getOrDefault(String key) {
+		Provider<?> provider = providers.get(key);
+		if(provider == null) return new DefaultLevelDB(key);
+		LevelDB instance = (LevelDB) provider.instance();
+		return instance;
+	}
 	public void activate() {
 		logger.info("[corpus] activate.");
 		backup = new Server();
@@ -196,7 +215,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 				List<KeyValue> kvs = format.matches(sms);
 				KeyValue kv = kvs.get(Const.WXmsg.msgTypeIndex);
 				logger.info("[WX] check: " + kv.toString());
-				if(!"MsgType".equals(kv.key())) {
+				if(!Const.WXmsg.keys[Const.WXmsg.msgTypeIndex].equals(kv.key())) {
 					SendMail cn = new SendMail();
 					cn.title("notes [WX] msg structure not match", kvs.toString());
 					return xml(openid, Const.WXmsg.reply[1]);
@@ -294,7 +313,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 		contexts.put(openid, context);
 	}
 	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
-		expire(openid+"==C", timeToLiveMillis);
+		expire(openid, timeToLiveMillis);
 		contexts.put(openid, context);
 	}
 	public void expire(String name, long timeToLiveMillis) {
@@ -326,11 +345,11 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 	
 	public void clear(){
 		long now = System.currentTimeMillis();
-		logger.info("[content] start clean TTL("+ttl.size()+")");
+		logger.info("[corpus] start clean TTL("+ttl.size()+")");
 		ttl.removeIf(out -> {
 			if(out.ttl() < now) {
 				if(out.marked()) {
-					logger.info("[content] remove key: " + out.key());
+					logger.info("[corpus] remove key: " + out.key());
 					secondlife.remove(out.key());
 					contexts.remove(out.key());
 					return true;
@@ -341,7 +360,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			}
 			return false;
 		});
-		logger.info("[content] after clean TTL("+ttl.size()+")");
+		logger.info("[corpus] after clean TTL("+ttl.size()+")");
 	}
 	
 }

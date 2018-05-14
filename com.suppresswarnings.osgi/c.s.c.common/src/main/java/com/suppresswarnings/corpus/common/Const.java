@@ -13,7 +13,7 @@ public interface Const {
 	String exit = "exit()";
 	String continueTitle = "请问是否继续？yes/no";
 	public interface Version {
-		String V1 = "V1";
+		String V1 = "001";
 	}
 	/**
 	 * collection or question or classify or reply or produce or unknown
