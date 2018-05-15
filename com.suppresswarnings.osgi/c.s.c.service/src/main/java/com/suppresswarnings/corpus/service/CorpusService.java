@@ -27,7 +27,7 @@ import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
-import com.suppresswarnings.corpus.common.Format.KeyValue;
+import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.wx.WXtext;
 import com.suppresswarnings.corpus.service.wx.WXvoice;

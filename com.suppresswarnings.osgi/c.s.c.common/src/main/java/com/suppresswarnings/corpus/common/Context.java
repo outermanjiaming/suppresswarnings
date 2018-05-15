@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  */
 public abstract class Context<T> implements Predicate<String> {
-	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	T content;
 	protected State<Context<T>> state;
 	StringBuffer output = new StringBuffer();

@@ -2,7 +2,7 @@ package com.suppresswarnings.corpus.service.wx;
 
 import java.util.List;
 
-import com.suppresswarnings.corpus.common.Format.KeyValue;
+import com.suppresswarnings.corpus.common.KeyValue;
 
 
 public class WXtext extends WXmsg {

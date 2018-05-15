@@ -11,8 +11,6 @@ package com.suppresswarnings.corpus.service;
 
 import java.util.Set;
 
-import org.slf4j.LoggerFactory;
-
 import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
@@ -22,7 +20,6 @@ import com.suppresswarnings.corpus.common.State;
 
 public class WXContext extends Context<CorpusService> {
 	public static final String exit = "exit()";
-	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	String openid;
 	public State<Context<CorpusService>> init = new State<Context<CorpusService>>() {
 		/**
@@ -83,12 +80,18 @@ public class WXContext extends Context<CorpusService> {
 		return openid;
 	}
 	public boolean yes(String input, String expect) {
+		return confirm(input, expect, "yes y ok alright 好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
+	}
+	public boolean exit(String input, String expect) {
+		return confirm(input, expect, "我要退出 退出 exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
+	}
+	public boolean confirm(String input, String expect, String common) {
 		if(expect == input) return true;
 		if(input == null) return false;
 		if(expect != null && expect.equals(input)) return true;
 		//TODO ner check yes
 		String yes = CheckUtil.cleanStr(input.trim()) + " ";
-		if("好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ".contains(yes)) return true;
+		if(common.contains(yes.toLowerCase())) return true;
 		return false;
 	}
 }
