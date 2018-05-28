@@ -264,6 +264,26 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			String capacity = parameter.getParameter("capacity");
 			boolean result = backup.newAgent(from, Long.valueOf(capacity));
 			return Boolean.toString(result);
+		} else if("report".equals(action)) {
+			String reportMsg = parameter.getParameter("msg");
+			if(reportMsg == null || reportMsg.length() > 240) {
+				return "";
+			}
+			String reportToken = parameter.getParameter("token");
+			if(reportToken == null || reportToken.length() > 240) {
+				return "";
+			}
+			String lastKey = String.join(Const.delimiter, Const.Version.V1, "Report", "Token", reportToken);
+			String last = token().get(lastKey);
+			if(last == null) {
+				logger.error("[pi] token not accepted: " + reportToken);
+				return "";
+			}
+			String time = "" + System.currentTimeMillis();
+			String entry = String.join(Const.delimiter, Const.Version.V1, "Report", "Msg", reportToken, time);
+			token().put(lastKey, time);
+			token().put(entry, reportMsg + "\nFrom: " + ip);
+			return SUCCESS;
 		}
 		logger.info("[Corpus] return success for any unknown action " + action + " from " + ip);
 		return SUCCESS;

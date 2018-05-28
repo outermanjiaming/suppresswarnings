@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Service
 Bundle-SymbolicName: c.s.c.service
-Bundle-Version: 0.0.1.osgi
+Bundle-Version: 0.0.2.osgi
 Import-Package: com.suppresswarnings.corpus.common,
  com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.network.http,

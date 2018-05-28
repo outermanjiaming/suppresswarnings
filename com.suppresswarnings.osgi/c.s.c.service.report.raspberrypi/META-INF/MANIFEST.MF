@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Raspberrypi
+Bundle-SymbolicName: c.s.c.service.report.raspberrypi
+Bundle-Version: 0.0.1.osgi
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.osgi.leveldb,
+ org.slf4j
+Service-Component: OSGI-INF/component.xml
+Export-Package: com.suppresswarnings.corpus.service.report.raspberrypi
