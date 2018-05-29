@@ -201,10 +201,16 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			String sha1 = getSHA1(Const.WXmsg.secret[0], timestamp, nonce, "");
 			String openid =  parameter.getParameter("openid");
 			String echoStr = parameter.getParameter("echostr");
+			String token = parameter.getParameter("token");
+			String fromOpenId = Const.WXmsg.openid;
+			if(token != null) {
+				String fromOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "WXID", "Token", token);
+				fromOpenId = account().get(fromOpenIdKey);
+			}
 			if(msgSignature == null || !msgSignature.equals(sha1)) {
 				logger.error("[WX] wrong signature");
 				if(openid != null) {
-					return xml(openid, Const.WXmsg.reply[0]);
+					return xml(openid, Const.WXmsg.reply[0], fromOpenId);
 				}
 			}
 			if(echoStr != null) {
@@ -218,7 +224,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 				if(!Const.WXmsg.keys[Const.WXmsg.msgTypeIndex].equals(kv.key())) {
 					SendMail cn = new SendMail();
 					cn.title("notes [WX] msg structure not match", kvs.toString());
-					return xml(openid, Const.WXmsg.reply[1]);
+					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
 				}
 				String input = "";
 				if("text".equals(kv.value())) {
@@ -232,16 +238,16 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 				} else if("event".equals(kv.value())) {
 					KeyValue event = kvs.get(Const.WXmsg.msgTypeIndex + 1);
 					if(!"event".equals(event.key())) {
-						return xml(openid, Const.WXmsg.reply[1] + Const.WXmsg.types.get(kv.value()));
+						return xml(openid, Const.WXmsg.reply[1] + Const.WXmsg.types.get(kv.value()), fromOpenId);
 					}
 					if("subscribe".equals(event.value())) {
-						return xml(openid, "欢迎你来到素朴网联。");
+						return xml(openid, "欢迎你来到素朴网联。", fromOpenId);
 					}
 					if("unsubscribe".equals(event.value())) {
-						return xml(openid, "这里永远欢迎你再来。");
+						return xml(openid, "这里永远欢迎你再来。", fromOpenId);
 					}
 				} else {
-					return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()));
+					return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()), fromOpenId);
 				}
 				
 				Context<?> context = context(openid);
@@ -257,7 +263,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 					logger.info("[WX] this stage finished: " + context.state());
 				}
 				
-				return xml(openid, context.output());
+				return xml(openid, context.output(), fromOpenId);
 			}
 		} else if("backup".equals(action)) {
 			String from = parameter.getParameter("from");
@@ -282,16 +288,16 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			String time = "" + System.currentTimeMillis();
 			String entry = String.join(Const.delimiter, Const.Version.V1, "Report", "Msg", reportToken, time);
 			token().put(lastKey, time);
-			token().put(entry, reportMsg + "\nFrom: " + ip);
+			token().put(entry, reportMsg + "\n数据来源：" + ip);
 			return SUCCESS;
 		}
 		logger.info("[Corpus] return success for any unknown action " + action + " from " + ip);
 		return SUCCESS;
 	}
 
-	public String xml(String openid, String msg) {
+	public String xml(String openid, String msg, String fromOpenId) {
 		long time = System.currentTimeMillis()/1000;
-		return String.format(Const.WXmsg.xml, openid, Const.WXmsg.openid, "" + time, msg);
+		return String.format(Const.WXmsg.xml, openid, fromOpenId, "" + time, msg);
 	}
 	
 	public String getSHA1(String token, String timestamp, String nonce, String encrypt) {
