@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: c.s.c.common
 Bundle-SymbolicName: c.s.c.common
-Bundle-Version: 0.0.1.osgi
+Bundle-Version: 0.0.2.osgi
 Bundle-ClassPath: libs/core-3.3.0.jar,
  libs/javax-ssl-1.1.0.jar,
  libs/javax.activation-1.1.0.v201105071233.jar,

@@ -56,12 +56,12 @@ public class PiContext extends WXContext {
 			String lastReportKey = String.join(Const.delimiter, Const.Version.V1, "Report", "Msg", token, stamp);
 			String lastReport = u.content().token().get(lastReportKey);
 			if(lastReport == null) {
-				u.output("没有查到上报数据");
+				u.output("没有查到上报数据\n你的token是：" + token);
 				return;
 			}
 			long report = Long.valueOf(stamp);
 			if(System.currentTimeMillis() - report > TimeUnit.HOURS.toMillis(1)) {
-				u.output("近一小时内没有上报\n需要'刷新'吗？\n你也可以输入'退出'");
+				u.output("你的token是："+token+"\n近一小时内没有上报\n需要'刷新'吗？\n你也可以输入'退出'");
 				done = false;
 				return;
 			}
@@ -93,8 +93,8 @@ public class PiContext extends WXContext {
 		
 	};
 	
-	public PiContext(String openid, CorpusService ctx) {
-		super(openid, ctx);
+	public PiContext(String wxid, String openid, CorpusService ctx) {
+		super(wxid, openid, ctx);
 		this.state = my;
 	}
 

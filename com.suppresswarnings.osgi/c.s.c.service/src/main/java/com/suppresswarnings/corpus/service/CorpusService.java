@@ -252,7 +252,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 				
 				Context<?> context = context(openid);
 				if(context == null) {
-					WXContext ctx = new WXContext(openid, this);
+					WXContext ctx = new WXContext(fromOpenId, openid, this);
 					logger.info("[WX] init context: " + ctx + " for openid: " + openid);
 					context = ctx;
 					contextx(openid, context, Const.InteractionTTL.userReply);

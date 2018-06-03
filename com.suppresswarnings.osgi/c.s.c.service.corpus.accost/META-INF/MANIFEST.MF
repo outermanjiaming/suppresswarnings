@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Accost
 Bundle-SymbolicName: c.s.c.service.corpus.accost
-Bundle-Version: 0.0.1.osgi
+Bundle-Version: 0.0.2.osgi
 Export-Package: com.suppresswarnings.corpus.service.corpus.accost
 Import-Package: com.suppresswarnings.corpus.common,
  com.suppresswarnings.corpus.service,

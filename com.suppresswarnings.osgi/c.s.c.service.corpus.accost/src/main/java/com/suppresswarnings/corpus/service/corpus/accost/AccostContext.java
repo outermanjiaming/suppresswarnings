@@ -127,8 +127,8 @@ public class AccostContext extends WXContext {
 			return false;
 		}
 	};
-	public AccostContext(String openid, CorpusService ctx) {
-		super(openid, ctx);
+	public AccostContext(String wxid, String openid, CorpusService ctx) {
+		super(wxid, openid, ctx);
 		this.state = my;
 	}
 }

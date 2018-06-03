@@ -47,8 +47,8 @@ public class AccostContextFactory implements ContextFactory<CorpusService> {
 	}
 
 	@Override
-	public Context<CorpusService> getInstance(String openid, CorpusService content) {
-		return new AccostContext(openid, content);
+	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
+		return new AccostContext(wxid, openid, content);
 	}
 
 }

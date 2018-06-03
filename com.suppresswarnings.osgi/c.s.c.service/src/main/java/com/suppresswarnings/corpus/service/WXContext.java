@@ -21,6 +21,7 @@ import com.suppresswarnings.corpus.common.State;
 public class WXContext extends Context<CorpusService> {
 	public static final String exit = "exit()";
 	String openid;
+	String wxid;
 	public State<Context<CorpusService>> init = new State<Context<CorpusService>>() {
 		/**
 		 * 
@@ -50,7 +51,7 @@ public class WXContext extends Context<CorpusService> {
 			String command = CheckUtil.cleanStr(t.trim());
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
 			if(cf != null) {
-				Context<CorpusService> context = cf.getInstance(openid(), u.content());
+				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
 				if(cf.ttl() != ContextFactory.forever) {
 					u.content().contextx(openid(), context, cf.ttl());
 				}
@@ -70,8 +71,9 @@ public class WXContext extends Context<CorpusService> {
 			return false;
 		}
 	};
-	public WXContext(String openid, CorpusService ctx) {
+	public WXContext(String wxid, String openid, CorpusService ctx) {
 		super(ctx);
+		this.wxid = wxid;
 		this.openid = openid;
 		this.state = init;
 	}
@@ -79,11 +81,14 @@ public class WXContext extends Context<CorpusService> {
 	public String openid(){
 		return openid;
 	}
+	public String wxid() {
+		return wxid;
+	}
 	public boolean yes(String input, String expect) {
-		return confirm(input, expect, "yes y ok alright 好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
+		return confirm(input, expect, "yes y ok okay alright 好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
 	}
 	public boolean exit(String input, String expect) {
-		return confirm(input, expect, "我要退出 退出 exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
+		return confirm(input, expect, "我要退出 退出 quit exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
 	}
 	public boolean confirm(String input, String expect, String common) {
 		if(expect == input) return true;

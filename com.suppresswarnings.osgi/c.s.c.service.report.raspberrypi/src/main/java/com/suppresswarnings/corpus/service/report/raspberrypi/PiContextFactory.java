@@ -47,7 +47,7 @@ public class PiContextFactory implements ContextFactory<CorpusService> {
 	}
 
 	@Override
-	public Context<CorpusService> getInstance(String openid, CorpusService content) {
-		return new PiContext(openid, content);
+	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
+		return new PiContext(wxid, openid, content);
 	}
 }
