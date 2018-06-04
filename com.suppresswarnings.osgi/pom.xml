@@ -37,6 +37,7 @@
       <module>c.s.c.service.account</module>
       <module>c.s.c.service.token</module>
       <module>c.s.c.service.report.raspberrypi</module>
+      <module>c.s.c.service.user.register</module>
   </modules>
   <dependencies>
   		<dependency>
