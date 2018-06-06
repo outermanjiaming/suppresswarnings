@@ -72,7 +72,10 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 	}
 	public LevelDB getOrDefault(String key) {
 		Provider<?> provider = providers.get(key);
-		if(provider == null) return new DefaultLevelDB(key);
+		if(provider == null) {
+			logger.error("[corpus] get null from providers by key: " + key);
+			return new DefaultLevelDB(key);
+		}
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}

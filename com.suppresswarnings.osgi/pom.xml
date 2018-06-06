@@ -38,6 +38,7 @@
       <module>c.s.c.service.token</module>
       <module>c.s.c.service.report.raspberrypi</module>
       <module>c.s.c.service.user.register</module>
+      <module>c.s.c.service.corpus.teach</module>
   </modules>
   <dependencies>
   		<dependency>
