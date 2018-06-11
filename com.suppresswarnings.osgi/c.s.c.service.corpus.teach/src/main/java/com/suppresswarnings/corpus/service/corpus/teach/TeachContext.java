@@ -79,7 +79,7 @@ public class TeachContext extends WXContext {
 
 		@Override
 		public String name() {
-			return "教学入口";
+			return "自己提问";
 		}
 
 		@Override
@@ -119,7 +119,7 @@ public class TeachContext extends WXContext {
 
 		@Override
 		public String name() {
-			return "教学入口";
+			return "自己回复";
 		}
 
 		@Override
