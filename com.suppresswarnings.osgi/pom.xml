@@ -39,6 +39,8 @@
       <module>c.s.c.service.report.raspberrypi</module>
       <module>c.s.c.service.user.register</module>
       <module>c.s.c.service.corpus.teach</module>
+      <module>c.s.c.service.setting</module>
+      <module>c.s.c.service.warehouse</module>
   </modules>
   <dependencies>
   		<dependency>

@@ -15,7 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -41,14 +44,16 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 public class CorpusService implements HTTPService, Runnable, CommandProvider {
 	public static final String SUCCESS = "success";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	Format format = new Format(Const.WXmsg.msgFormat);
+	public Format format = new Format(Const.WXmsg.msgFormat);
 	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
 	LinkedBlockingQueue<TTL> ttl = new LinkedBlockingQueue<TTL>(100000);
-	Map<String, Provider<?>> providers = new HashMap<>();
-	Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
-	Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
-	LevelDB account, data, token;
+	public Map<String, Provider<?>> providers = new HashMap<>();
+	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
+	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
+	public LevelDB account, data, token;
 	Server backup;
+	ScheduledExecutorService scheduler; 
+	
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -87,12 +92,18 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 		} catch (Exception e) {
 			logger.error("[corpus] server backup fail to start working", e);
 		}
+		
+		scheduler = Executors.newSingleThreadScheduledExecutor();
+		scheduler.scheduleAtFixedRate(this, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(2), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] scheduler starts in 3 minutes");
 	}
 
 	public void deactivate() {
 		logger.info("[corpus] deactivate.");
 		if(backup != null) backup.close();
 		backup = null;
+		if(scheduler != null) scheduler.shutdownNow();
+		scheduler = null;
 		secondlife.clear();
 		ttl.clear();
 		providers.clear();
@@ -181,12 +192,31 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			}
 		});
 	}
+	
 	@Override
 	public void run() {
-		//TODO clean context
 		//TODO send email
-		logger.info("[run] unimplemented");
+		long now = System.currentTimeMillis();
+		int currentTTL = ttl.size();
+		logger.info("[corpus run] start clean TTL("+currentTTL+")");
+		ttl.removeIf(out -> {
+			if(out.ttl() < now) {
+				if(out.marked()) {
+					logger.info("[corpus run] remove key: " + out.key());
+					secondlife.remove(out.key());
+					contexts.remove(out.key());
+					return true;
+				} else {
+					out.mark();
+					secondlife.put(out.key(), out);
+				}
+			}
+			return false;
+		});
+		int change = currentTTL - ttl.size();
+		logger.info(change > 0 ? "[corpus run] removed " + change + " TTLs" : "[corpus run] TTL not changed");
 	}
+	
 	@Override
 	public String getName() {
 		return "wx.http";
@@ -221,6 +251,9 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			}
 			if(openid != null) {
 				String sms = parameter.getParameter(Parameter.POST_BODY);
+				if(sms == null) {
+					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
+				}
 				List<KeyValue> kvs = format.matches(sms);
 				KeyValue kv = kvs.get(Const.WXmsg.msgTypeIndex);
 				logger.info("[WX] check: " + kv.toString());

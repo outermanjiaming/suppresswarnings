@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Warehouse
+Bundle-SymbolicName: c.s.c.service.warehouse
+Bundle-Version: 0.0.1.osgi
+Export-Package: com.suppresswarnings.corpus.service.warehouse
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.osgi.leveldb
+Service-Component: OSGI-INF/component.xml

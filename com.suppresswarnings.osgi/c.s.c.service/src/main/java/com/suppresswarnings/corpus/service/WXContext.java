@@ -48,8 +48,16 @@ public class WXContext extends Context<CorpusService> {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			String command = CheckUtil.cleanStr(t.trim());
+			String command = CheckUtil.cleanStr(t.trim()).toLowerCase();
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
+			if(cf == null) {
+				String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", command);
+				String exchange = u.content().account().get(nowCommandKey);
+				if(exchange != null) {
+					cf = u.content().factories.get(exchange);
+				}
+			}
+			
 			if(cf != null) {
 				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
 				if(cf.ttl() != ContextFactory.forever) {
@@ -71,6 +79,37 @@ public class WXContext extends Context<CorpusService> {
 			return false;
 		}
 	};
+	
+	public State<Context<CorpusService>> set(State<Context<CorpusService>> start) {
+		return new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2352514490121930101L;
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				start.accept(t, u);
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				return start.apply(t, u);
+			}
+
+			@Override
+			public String name() {
+				return "set: " + start.name();
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+	}
 	public WXContext(String wxid, String openid, CorpusService ctx) {
 		super(ctx);
 		this.wxid = wxid;
