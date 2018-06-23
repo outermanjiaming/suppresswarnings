@@ -25,6 +25,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
@@ -32,6 +33,8 @@ import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.service.backup.Server;
+import com.suppresswarnings.corpus.service.wx.AccessToken;
+import com.suppresswarnings.corpus.service.wx.AccessTokenCall;
 import com.suppresswarnings.corpus.service.wx.WXtext;
 import com.suppresswarnings.corpus.service.wx.WXvoice;
 import com.suppresswarnings.corpus.common.Provider;
@@ -51,6 +54,7 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public LevelDB account, data, token;
+	AccessTokenCall call = new AccessTokenCall();
 	Server backup;
 	ScheduledExecutorService scheduler; 
 	
@@ -95,7 +99,26 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 		
 		scheduler = Executors.newSingleThreadScheduledExecutor();
 		scheduler.scheduleAtFixedRate(this, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(2), TimeUnit.MILLISECONDS);
-		logger.info("[corpus] scheduler starts in 3 minutes");
+		logger.info("[corpus] TTL scheduler starts in 3 minutes");
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					logger.info("[access token] start");
+					String json = call.call();
+					Gson gson = new Gson();
+					AccessToken at = gson.fromJson(json, AccessToken.class);
+					String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg");
+					String value = at.getAccess_token();
+					int result = token().put(key, value);
+					logger.info("[access token] refresh " + result + ", expires at " + at.getExpires_in());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.SECONDS.toMillis(7200), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] refresh access token scheduler starts in 3 minutes");
 	}
 
 	public void deactivate() {

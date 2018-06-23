@@ -3,11 +3,17 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Service
 Bundle-SymbolicName: c.s.c.service
 Bundle-Version: 0.0.2.osgi
-Import-Package: com.suppresswarnings.corpus.common,
+Import-Package: com.google.gson;version="2.2.4",
+ com.suppresswarnings.corpus.common,
  com.suppresswarnings.osgi.leveldb,
  com.suppresswarnings.osgi.network.http,
  javax.net,
  javax.net.ssl,
+ org.apache.http;version="4.4.8",
+ org.apache.http.client.config;version="4.5.3",
+ org.apache.http.client.methods;version="4.5.3",
+ org.apache.http.impl.client;version="4.5.3",
+ org.apache.http.util;version="4.4.8",
  org.eclipse.osgi.framework.console;version="1.1.0",
  org.slf4j
 Service-Component: OSGI-INF/component.xml
