@@ -33,8 +33,11 @@ import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.service.backup.Server;
+import com.suppresswarnings.corpus.service.http.CallableGet;
+import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
-import com.suppresswarnings.corpus.service.wx.AccessTokenCall;
+import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
+import com.suppresswarnings.corpus.service.wx.WXevent;
 import com.suppresswarnings.corpus.service.wx.WXtext;
 import com.suppresswarnings.corpus.service.wx.WXvoice;
 import com.suppresswarnings.corpus.common.Provider;
@@ -54,7 +57,6 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public LevelDB account, data, token;
-	AccessTokenCall call = new AccessTokenCall();
 	Server backup;
 	ScheduledExecutorService scheduler; 
 	
@@ -101,20 +103,25 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 		scheduler.scheduleAtFixedRate(this, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(2), TimeUnit.MILLISECONDS);
 		logger.info("[corpus] TTL scheduler starts in 3 minutes");
 		scheduler.scheduleAtFixedRate(new Runnable() {
+			int times = 0;
+			String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg");
+			String expireKey = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Expire", "973rozg");
 			
 			@Override
 			public void run() {
 				try {
-					logger.info("[access token] start");
-					String json = call.call();
+					times ++;
+					CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", "wx41b262e9b9d8885e", "e64302221a8a128fad1cbc723abc122d");
+					logger.info("[access token] start " + times);
+					String json = get.call();
 					Gson gson = new Gson();
 					AccessToken at = gson.fromJson(json, AccessToken.class);
-					String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg");
-					String value = at.getAccess_token();
-					int result = token().put(key, value);
+					long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(7200);
+					int result = token().put(key, at.getAccess_token());
+					token().put(expireKey, "" + expireAt);
 					logger.info("[access token] refresh " + result + ", expires at " + at.getExpires_in());
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("[access token] Exception when refresh", e);
 				}
 			}
 		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.SECONDS.toMillis(7200), TimeUnit.MILLISECONDS);
@@ -123,9 +130,13 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 
 	public void deactivate() {
 		logger.info("[corpus] deactivate.");
-		if(backup != null) backup.close();
+		if(backup != null) {
+			backup.close();
+		}
 		backup = null;
-		if(scheduler != null) scheduler.shutdownNow();
+		if(scheduler != null) {
+			scheduler.shutdownNow();
+		}
 		scheduler = null;
 		secondlife.clear();
 		ttl.clear();
@@ -295,15 +306,16 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 					value.init(kvs);
 					input = value.Recognition;
 				} else if("event".equals(kv.value())) {
-					KeyValue event = kvs.get(Const.WXmsg.msgTypeIndex + 1);
-					if(!"event".equals(event.key())) {
-						return xml(openid, Const.WXmsg.reply[1] + Const.WXmsg.types.get(kv.value()), fromOpenId);
+					WXevent event = new WXevent();
+					event.init(kvs);
+					if("subscribe".equals(event.event)) {
+						return xml(openid, "欢迎你来到素朴网联。\n" + event.eventKey, fromOpenId);
 					}
-					if("subscribe".equals(event.value())) {
-						return xml(openid, "欢迎你来到素朴网联。", fromOpenId);
-					}
-					if("unsubscribe".equals(event.value())) {
+					if("unsubscribe".equals(event.event)) {
 						return xml(openid, "这里永远欢迎你再来。", fromOpenId);
+					}
+					if("SCAN".equals(event.event)) {
+						return xml(openid, "欢迎来到【" + event.eventKey + "】", fromOpenId);
 					}
 				} else {
 					return xml(openid, Const.WXmsg.reply[2] + Const.WXmsg.types.get(kv.value()), fromOpenId);
@@ -349,6 +361,20 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			token().put(lastKey, time);
 			token().put(entry, reportMsg + "\n数据来源：" + ip);
 			return SUCCESS;
+		} else if("login".equals(action)) {
+			int sceneId = 100101;
+			String random = parameter.getParameter("random");
+			if(random != null) {
+				sceneId = sceneId + Integer.parseInt(random);
+			}
+			String json = "{\"expire_seconds\": 604800, \"action_name\": \"QR_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": " + sceneId + "}}}";
+			String accessToken = token().get(String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg"));
+			String url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" + accessToken;
+			CallablePost post = new CallablePost(url, json);
+			String result = post.call();
+			Gson gson = new Gson();
+			QRCodeTicket qrCodeTicket = gson.fromJson(result, QRCodeTicket.class);
+			return "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrCodeTicket.getTicket();
 		}
 		logger.info("[Corpus] return success for any unknown action " + action + " from " + ip);
 		return SUCCESS;

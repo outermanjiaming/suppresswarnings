@@ -10,7 +10,7 @@ public class WXtext extends WXmsg {
 	public String MsgId;
 	@Override
 	public void set(List<KeyValue> kvs) {
-		this.Content = kvs.get(4).value();
-		this.MsgId = kvs.get(5).value();
+		this.Content = get(4, kvs);
+		this.MsgId = get(5, kvs);
 	}
 }

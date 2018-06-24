@@ -86,8 +86,8 @@ public class QRCodeUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		createQrCode(new FileOutputStream(new File("/Users/lijiaming/Downloads/lijiaming.jpg")), "http://weixin.qq.com/r/YSi9pVHE8AyPrRXG931z", 1, "JPEG");
-		String text = readQrCode(new FileInputStream(new File("/Users/lijiaming/Downloads/qrcode_for_gh_a1fe05b98706_258.jpg")));
+		createQrCode(new FileOutputStream(new File("/Users/lijiaming/Downloads/showqrcode10010.jpg")), "http://weixin.qq.com/q/020-m2xCeFdcl15sUUhr1y", 1, "JPEG");
+		String text = readQrCode(new FileInputStream(new File("/Users/lijiaming/company/showqrcode.jpeg")));
 		System.out.println(text);
 	}
 

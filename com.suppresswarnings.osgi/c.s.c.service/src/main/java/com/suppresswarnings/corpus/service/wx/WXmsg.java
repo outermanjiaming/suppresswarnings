@@ -18,4 +18,10 @@ public abstract class WXmsg {
 		set(kvs);
 	}
 	public abstract void set(List<KeyValue> kvs);
+	public String get(int index, List<KeyValue> kvs) {
+		if(kvs == null || kvs.size() < index + 1) {
+			return null;
+		}
+		return kvs.get(index).value();
+	}
 }

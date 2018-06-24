@@ -21,6 +21,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+//import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.LoggerFactory;
 
@@ -49,16 +50,22 @@ public class AccessTokenCall implements Callable<String> {
 	    };  
 	  
 	    sc.init(null, new TrustManager[] { trustManager }, null);
-		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sc).build();
-        RequestConfig requestConfig = RequestConfig.custom()
+//	    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+//	    cm.setMaxTotal(100);
+//	    cm.setDefaultMaxPerRoute(50);
+	    RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(5000)
                 .setConnectionRequestTimeout(5000)
                 .setSocketTimeout(5000)
                 .setRedirectsEnabled(true)
                 .build();
+		CloseableHttpClient httpClient = HttpClients.custom()
+				.setSSLContext(sc)
+				.setDefaultRequestConfig(requestConfig)
+				.build();
+        
         String url = String.format(urlFormat, urlArgs);
         HttpGet httpGet = new HttpGet(url);
-        httpGet.setConfig(requestConfig);
         String srtResult = "";
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
