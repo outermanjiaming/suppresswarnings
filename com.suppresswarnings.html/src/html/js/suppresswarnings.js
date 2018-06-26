@@ -54,8 +54,21 @@
         gethtml("business.html", main)
     });
     
-    $("li.card").click(function(){
+    $("li.user").click(function(){
         gethtml("card.html", main)
+        $.ajax({
+      	  url: "/wx.http?",
+      	  data: {
+      		action: "login",
+      		random: Math.round(Math.random()*10000)
+      	  },
+      	  success: function( result ) {
+      	    $( "#qrcode" ).src( result );
+      	  },
+      	  error: function( xhr, result, obj ) {
+      	    console.log("[lijiaming] err: " + result);
+      	  }
+      	});
     });
     
     $("li.aboutus").click(function(){
