@@ -64,7 +64,7 @@
       		random: randnum
       	  },
       	  success: function( result ) {
-      	    $( "#qrcode" ).attr("src", result );
+      	    $( "#qrcodeimg" ).attr("src", result );
       	  },
       	  error: function( xhr, result, obj ) {
       	    console.log("[lijiaming] err: " + result);
