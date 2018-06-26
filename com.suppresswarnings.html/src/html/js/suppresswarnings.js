@@ -3,6 +3,7 @@
   var index = 0
   var forever = 10000
   var limited = 10000
+  var randnum = Math.round(Math.random()*10000)
   function red(){
     $("#"+"svg_"+ids[index%8]).css("stroke","pink");
     if(index<limited) {
@@ -57,10 +58,10 @@
     $("li.user").click(function(){
         gethtml("card.html", main)
         $.ajax({
-      	  url: "/wx.http?",
+      	  url: "/wx.http?r=" + Math.random(),
       	  data: {
       		action: "login",
-      		random: Math.round(Math.random()*10000)
+      		random: randnum
       	  },
       	  success: function( result ) {
       	    $( "#qrcode" ).src( result );
