@@ -223,4 +223,9 @@ public class Server implements Closeable {
 			logger.error("[Server] close Exception", e);
 		}
 	}
+	@Override
+	public String toString() {
+		return status.toString();
+	}
+	
 }

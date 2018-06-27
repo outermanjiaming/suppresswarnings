@@ -126,6 +126,39 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 			}
 		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.SECONDS.toMillis(7200), TimeUnit.MILLISECONDS);
 		logger.info("[corpus] refresh access token scheduler starts in 3 minutes");
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			int times = 0;
+			@Override
+			public void run() {
+				times ++;
+				String accessToken = token().get(String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg"));
+				String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + accessToken;
+				String admins = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Admins"));
+				if(admins == null) {
+					logger.error("[corpus] scheduler: the admins not set");
+					return;
+				}
+				String[] admin = admins.split(",");
+				StringBuffer info = new StringBuffer();
+				info.append("周期汇报：第").append(times).append("次").append("\n");
+				info.append("contexts: " + contexts.size()).append("\n");
+				info.append("providers: " + providers.size()).append("\n");
+				info.append("factories: " + factories.size()).append("\n");
+				info.append("ttl: " + ttl.size()).append("\n");
+				info.append("backup：" + backup.toString());
+				for(String one : admin) {
+					String json = "{\"touser\":\"" + one + "\",\"msgtype\":\"text\",\"text\":{\"content\":\"" + info.toString() + "\"}}";
+					CallablePost post = new CallablePost(url, json);
+					try {
+						String result = post.call();
+						logger.info("[corpus] scheduler post result: " + result);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(90), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] scheduler admins info starts in 3 minutes");
 	}
 
 	public void deactivate() {
@@ -309,12 +342,37 @@ public class CorpusService implements HTTPService, Runnable, CommandProvider {
 					WXevent event = new WXevent();
 					event.init(kvs);
 					if("subscribe".equals(event.event)) {
-						return xml(openid, "欢迎你来到素朴网联。\n" + event.eventKey, fromOpenId);
-					}
-					if("unsubscribe".equals(event.event)) {
+						String subscribeKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", openid);
+						String subscribe = account().get(subscribeKey);
+						String time = "" + System.currentTimeMillis();
+						
+						if(event.eventKey != null) {
+							String subscribeEventKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", "Event", openid, time);
+							account().put(subscribeEventKey, event.eventKey);
+						}
+						
+						if(subscribe == null) {
+							account().put(subscribeKey, time);
+							return xml(openid, "欢迎你来到素朴网联。\n" + event.eventKey, fromOpenId);
+						} else {
+							String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
+							account().put(subscribeHistoryKey, time);
+							account().put(subscribeKey, time);
+							if(subscribe.contains("unsubscribe")) {
+								return xml(openid, "欢迎再次来到素朴网联。\n" + event.eventKey, fromOpenId);
+							} else {
+								return xml(openid, "欢迎来到素朴网联。\n" + event.eventKey, fromOpenId);
+							}
+						}
+					} else if("unsubscribe".equals(event.event)) {
+						String subscribeKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", openid);
+						String subscribe = account().get(subscribeKey);
+						String time = "" + System.currentTimeMillis();
+						String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
+						account().put(subscribeHistoryKey, time);
+						account().put(subscribeKey, time + Const.delimiter + "unsubscribe");
 						return xml(openid, "这里永远欢迎你再来。", fromOpenId);
-					}
-					if("SCAN".equals(event.event)) {
+					} else if("SCAN".equals(event.event)) {
 						return xml(openid, "欢迎来到【" + event.eventKey + "】", fromOpenId);
 					}
 				} else {
