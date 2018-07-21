@@ -77,22 +77,23 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">微信扫一扫，看更多数据</h4>
+                <h4 class="modal-title" id="exampleModalLabel">为保证账号数据权限，请选择方式登录</h4>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="form-group">
+                        <label for="loginhref" class="control-label">方式一：点击按钮进入</label>
+                        <a class="form-control" id="loginhref" href="">微信浏览器点击进入</a>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginqrcodeimg" class="control-label">方式二：在公众号‘素朴网联’输入</label>
                         <img id="loginqrcodeimg" style="width:220px;height:220px;"/>
                     </div>
                     <div class="form-group">
-                        <label for="message-text" class="control-label">方式二：在公众号‘素朴网联’输入</label>
-                        <label class="form-control" id="message-text">YUS6789</label>
+                        <label for="message-text" class="control-label">方式三：在公众号‘素朴网联’输入</label>
+                        <label class="form-control" id="message-text">please wait</label>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Send message</button>
             </div>
         </div>
     </div>
@@ -133,13 +134,30 @@
 <script src="js/transition.js"></script>
 <script src="js/dropdown.js"></script>
 <script src="js/collapse.js"></script>
+<script src="js/jweixin-1.2.0.js"></script>
 
 <script src="js/suppresswarnings.js"></script>
 <script>
-  
+  function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+var Request = new Object();
+Request = GetRequest();
+console.log(Request.code)
+console.log(Request.state)
+
   var modal = $('#exampleModal')
-  modal.find('.modal-title').text('方式一：微信扫一扫')
-  modal.find('#message-text').text('US9769')
+  modal.find('#loginhref').attr('href', 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect')
+  modal.find('#message-text').text(randnum)
   modal.modal('show')
   $.ajax({
           url: "/wx.http?r=" + Math.random(),
