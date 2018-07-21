@@ -38,7 +38,7 @@
     		<path id="svg_dl" d="M4 14 L4 18"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
     		<path id="svg_d"  d="M10 14 L10 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
     		<path id="svg_dr" d="M16 14 L16 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-        <text x="25" y="17" fill="#5cb85c">立刻加入 素朴网联</text>
+        <text x="25" y="17" fill="#5cb85c" id="inviteTitle">立刻加入 素朴网联</text>
     		</svg>
         </a>
       </div>
@@ -152,9 +152,7 @@
 }
 var Request = new Object();
 Request = GetRequest();
-console.log(Request.code)
-console.log(Request.state)
-
+if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
   var modal = $('#exampleModal')
   modal.find('#loginhref').attr('href', 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect')
   modal.find('#message-text').text(randnum)
@@ -172,6 +170,11 @@ console.log(Request.state)
             console.log("[lijiaming] err: " + result);
           }
   });
+} else {
+  $('#inviteTitle').text('OK, code: ' + Request.code)
+}
+
+  
 </script>
 </body>
 </html>
