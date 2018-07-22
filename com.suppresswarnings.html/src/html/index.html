@@ -174,6 +174,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
                     if("OK" == result) {
                       clearInterval(timer)
                       modal.modal('hide')
+                      $('#inviteTitle').text('QR, ' + ticket)
                     } else if("Later" == result) {
                       console.log('waiting for scan qrcode')
                     } else if("Change" == result) {
@@ -186,7 +187,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
                   }
                 })
             }
-            timer = setInterval(check, 120);
+            timer = setInterval(check, 1024);
             
           },
           error: function( xhr, result, obj ) {
@@ -194,7 +195,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
           }
   });
 } else {
-  $('#inviteTitle').text('OK, ' + Request.code)
+  $('#inviteTitle').text('WX, ' + Request.code)
 }
 
   
