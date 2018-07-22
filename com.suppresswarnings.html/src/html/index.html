@@ -184,6 +184,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
                   error: function( xhr, result, obj ) {
                     console.log("[lijiaming] check logon err: " + result)
                   }
+                })
             }
             timer = setInterval(check, 120);
             
