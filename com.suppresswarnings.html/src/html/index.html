@@ -147,10 +147,16 @@
 var Request = new Object();
 Request = GetRequest();
 if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
+  var timer
   var modal = $('#exampleModal')
   modal.find('#loginhref').attr('href', 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect')
   modal.find('#message-text').text(randnum)
   modal.modal('show')
+  modal.on('hide.bs.modal',
+    function() {
+        clearInterval(timer)
+        console.log('clear when hide modal')
+  })
   $.ajax({
           url: "/wx.http?r=" + Math.random(),
           data: {
@@ -161,7 +167,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
             var qrcode = JSON.parse(result)
             ticket = qrcode.ticket
             $( "#loginqrcodeimg" ).attr("src", "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + ticket )
-            var timer
+            
             function check(){
                 $.ajax({
                   url: "/wx.http?r=" + Math.random(),
