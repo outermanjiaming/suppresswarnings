@@ -60,3 +60,79 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.list-new_v1 li h3 {
+    padding-bottom: 6px;
+    margin:0;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color:#606060;
+}
+.list-new_v1 li .price-show {
+    font-size: 18px;
+    color: #1dd7b2;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+.boder_v1:hover p.price-show{
+    -webkit-transform:scale(1.1);
+    -moz-transform:scale(1.1);
+    -transform:scale(1.1);
+}
+.list-new_v1 li .icons-div_v1 {
+    margin-top: 15px;
+    padding-top: 13px;
+    border-top: 1px solid #f2f2f2;
+}
+.icons-div_v1 .text {
+    margin-bottom: 8px;
+    color: #8c8c8c;
+    font-size: 12px;
+}
+.mark_text{
+    max-height: 26px;
+    overflow: hidden;
+}
+.mark_text span{
+    display: inline-block;
+    width: 60px;
+    font-size: 12px;
+    color:#02cfd4;
+    margin:0 2px;
+    padding:2px 4px;
+    border: 1px solid #02cfd4;
+    overflow: hidden; /*自动隐藏文字*/
+    text-overflow: ellipsis;/*文字隐藏后添加省略号*/
+    white-space: nowrap;/*强制不换行*/
+}
+.list-new_v1 > li .icons-div_v1 li {
+    display: inline-block;
+    position: relative;
+    margin: 0 8px;
+}
+.list-new_v1 > li .icons-div_v1 li p {
+    display: none;
+    position: absolute;
+    top: -33px;
+    left: -10px;
+    padding: 0 5px;
+    white-space: nowrap;
+    height: 25px;
+    line-height: 25px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    color: #666;
+    box-shadow: 0 0 5px rgba(0,0,0,.2);
+}
+.list-new_v1 > li .icons-div_v1 li p i {
+    position: absolute;
+    bottom: -8px;
+    left: 13px;
+    width: 12px;
+    height: 8px;
+}
