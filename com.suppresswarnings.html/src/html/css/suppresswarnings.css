@@ -1,17 +1,20 @@
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
 
-li {
-    list-style: none;
-}
 
 .con-listTab{
     position: relative;
     min-height: 488px;
 }
+
+.con-listTab ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.con-listTab li {
+    list-style: none;
+}
+
 .list-new_v1 {
     margin-left: -6px;
     position: relative;
