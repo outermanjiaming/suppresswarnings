@@ -44,3 +44,19 @@
     padding-top: 13px;
     border-top: 1px solid #f2f2f2;
 }
+.mark_text{
+    max-height: 26px;
+    overflow: hidden;
+}
+.mark_text span {
+    display: inline-block;
+    width: 60px;
+    font-size: 12px;
+    color: #02cfd4;
+    margin: 0 2px;
+    padding: 2px 4px;
+    border: 1px solid #02cfd4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
