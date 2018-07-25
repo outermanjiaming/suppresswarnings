@@ -1,8 +1,33 @@
+.boder_v1 {
+    list-style: none;
+    float: left;
+    width: 281px;
+    height: 380px;
+    border: 1px solid #e5e5e5;
+    margin: 6px 0 10px 6px;
+    padding: 20px;
+    cursor: pointer;
+}
 .boder_v1:hover{
     border-color: #02cfd4;
 }
-
-.boder_v1:hover p.price-show{
+.price-show{
+    display: block;
+    position: relative;  
+    text-align: center; 
+    padding: 0 5px;    
+    white-space: nowrap;    
+    height: 25px;    
+    line-height: 25px;    
+    border: 1px solid #e5e5e5;    
+    background: #fff;    
+    -webkit-border-radius: 3px;    
+    -moz-border-radius: 3px;    
+    border-radius: 3px;    
+    color: #666;    
+    box-shadow: 0 0 5px rgba(0,0,0,.2);
+}
+.boder_v1:hover .price-show{
     -webkit-transform:scale(1.1);
     -moz-transform:scale(1.1);
     -transform:scale(1.1);
