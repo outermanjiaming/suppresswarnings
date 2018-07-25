@@ -1,10 +1,10 @@
 .boder_v1 {
     list-style: none;
     float: left;
-    width: 266px;
-    height: 430px;
+    width: 270px;
+    height: 400px;
     border: 1px solid #e5e5e5;
-    margin: 6px 0 10px 6px;
+    margin: 6px 10px 6px;
     padding: 20px;
     cursor: pointer;
 }
@@ -15,8 +15,9 @@
     display: block;
     position: relative;  
     text-align: center; 
-    padding: 0 5px;    
-    white-space: nowrap;    
+    margin: 20px 0px 0px;
+    padding: 0px 5px; 
+    white-space: nowrap; 
     height: 25px;    
     line-height: 25px;    
     border: 1px solid #e5e5e5;    
@@ -37,10 +38,12 @@
     height: 60px;
 }
 .description {
-    height: 160px;
-    background: #f9f9f9;
+    height: 180px;
+    background: #fff;
     border: 1px solid #e5e5e5;
     word-wrap: break-word;
+    margin: 20px 0px 20px;
+    box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 }
 kbd {
   padding: 2px 4px;
