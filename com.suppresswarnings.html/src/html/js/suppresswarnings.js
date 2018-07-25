@@ -31,10 +31,10 @@
 	    zipcode: 97201
 	  },
 	  success: function( result ) {
-	    $( container ).html( "<pre>" + result + "</pre>" );
+	    $( container ).html(result);
 	  },
 	  error: function( xhr, result, obj ) {
-	    $( container ).html( "<pre><span>天哪，不见了</span><br/>" + result + "</pre>" );
+	    $( container ).html( "<span>天哪，不见了</span><br/>" + result);
 	  }
 	});
   }
