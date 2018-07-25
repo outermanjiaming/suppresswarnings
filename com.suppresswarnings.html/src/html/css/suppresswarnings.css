@@ -36,3 +36,8 @@
     width: 60px;
     height: 60px;
 }
+.description {
+    height: 160px;
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+}
