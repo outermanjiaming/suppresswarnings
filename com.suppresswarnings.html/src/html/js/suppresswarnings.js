@@ -28,7 +28,7 @@
     $.ajax({
 	  url: uri,
 	  data: {
-	    zipcode: 97201
+	    random: randnum
 	  },
 	  success: function( result ) {
 	    $( container ).html(result);
@@ -65,7 +65,7 @@
       		random: randnum
       	  },
       	  success: function( result ) {
-      	    $( "#qrcodeimg" ).attr("src", result );
+      	    $( "#qrcodeimg" ).attr("src", result.ticket );
       	  },
       	  error: function( xhr, result, obj ) {
       	    console.log("[lijiaming] err: " + result);
