@@ -36,6 +36,7 @@
 .type-img{
     width: 60px;
     height: 60px;
+    float: left;
 }
 .description {
     height: 180px;
