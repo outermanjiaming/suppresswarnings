@@ -41,7 +41,7 @@
   $(document).ready(function(){
     green();
     var main =  $("#main")
-    gethtml("welcome.html", main)
+    
     $(".navbar-brand").click(function(){
       if(limited <= 0) {
         index = 0
