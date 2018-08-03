@@ -305,7 +305,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
   $.ajax({
           url: "/wx.http?r=" + Math.random(),
           data: {
-          action: "login",
+          action: "qrcode",
           random: randnum
           },
           success: function( result ) {
@@ -322,7 +322,7 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
                   ticket : ticket
                   },
                   success: function( result ) {
-                    if("OK" == result) {
+                    if("success" == result) {
                       clearInterval(timer)
                       modal.modal('hide')
                       $('#inviteTitle').text('素朴网联')
@@ -346,6 +346,29 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
           }
   });
 } else {
+  $.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+    action : "access_token",
+    random : randnum,
+    ticket : Request.code
+    },
+    success: function( result ) {
+      if("success" == result) {
+        clearInterval(timer)
+        modal.modal('hide')
+        $('#inviteTitle').text('素朴网联')
+      } else if("Later" == result) {
+        console.log('waiting for scan qrcode')
+      } else if("Change" == result) {
+        clearInterval(timer)
+        window.location.reload()
+      }
+    },
+    error: function( xhr, result, obj ) {
+      console.log("[lijiaming] check logon err: " + result)
+    }
+  })
   $('#inviteTitle').text('素朴网联')
 }
 
