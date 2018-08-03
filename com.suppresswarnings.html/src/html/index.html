@@ -346,12 +346,13 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
           }
   });
 } else {
+  ticket = Request.code
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
     action : "access_token",
     random : randnum,
-    ticket : Request.code
+    ticket : ticket
     },
     success: function( result ) {
       if("success" == result) {
