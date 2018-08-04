@@ -300,6 +300,14 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
         clearInterval(timer)
         console.log('clear when hide modal')
   })
+
+  if(typeof WeixinJSBridge == "object") {
+    console.log('WeixinJSBridge: ' + WeixinJSBridge)
+    window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect"
+  } else {
+    console.log('very wired')
+  }
+
   $.ajax({
           url: "/wx.http?r=" + Math.random(),
           data: {
@@ -371,13 +379,6 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
   $('#inviteTitle').text('素朴网联')
 }
 
-
-if(typeof WeixinJSBridge == "object") {
-  console.log('WeixinJSBridge: ' + WeixinJSBridge)
-  window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect"
-} else {
-  console.log('very wired: ' + WeixinJSBridge)
-}
 
 </script>
 </body>
