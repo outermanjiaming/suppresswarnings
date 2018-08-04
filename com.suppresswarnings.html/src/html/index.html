@@ -235,36 +235,11 @@ function confirmBuy(obj) {
       console.log('prepay ok' + result)
       
       var prepay = JSON.parse(result)
-      function onBridgeReady(){
-       WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', {
-             "appId": prepay.appId,
-             "timeStamp":prepay.timeStamp,
-             "nonceStr":prepay.nonceStr,
-             "package":prepay.package,     
-             "signType":prepay.signType,
-             "paySign":prepay.paySign 
-          },
-          function(res){
-          if(res.err_msg == "get_brand_wcpay_request:ok" ){
-              modal.modal('hide')
-          }
-       }); 
-      }
-      if (typeof WeixinJSBridge == "undefined"){
-       if( document.addEventListener ){
-           document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-       }else if (document.attachEvent){
-           document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
-           document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-       }
-      } else{
-         onBridgeReady();
-      }
-
+      
+      console.log('prepay.package = ' + prepay.package)
     },
     error: function( xhr, result, obj ) {
-      console.log("[lijiaming] check prepay err: " + result)
+      console.log("prepay err: " + result)
     }
   })
 
@@ -283,11 +258,11 @@ function GetRequest() {
     }
     return theRequest;
 }
-var Request = new Object();
-Request = GetRequest();
+var Request = GetRequest();
+var modal = $('#exampleModal')
 if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
   var timer
-  var modal = $('#exampleModal')
+  
   modal.find('#loginhref').attr('href', 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect')
   modal.find('#message-text').text(randnum)
   modal.modal('show')
