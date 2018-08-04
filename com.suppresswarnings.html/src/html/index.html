@@ -199,6 +199,7 @@ function sample(obj) {
   var data = $(obj).attr('data-id')
   console.log('sample: ' + data)
   var modal = $('#sampleModal')
+  $("#sampleData").html(data)
   modal.modal('show')
 }
 
