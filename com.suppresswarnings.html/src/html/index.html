@@ -209,8 +209,6 @@ function join(obj) {
 
 function buy(obj) {
   var data = $(obj).attr('data-id')
-  var modal = $('#buyModal')
-  modal.modal('show')
   console.log('buy: ' + data)
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
@@ -227,6 +225,37 @@ function buy(obj) {
       var prepay = JSON.parse(result)
       
       console.log('prepay.package = ' + prepay.package)
+
+      function onBridgeReady(){
+        console.log('call onBridgeReady')
+         WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', {
+               "appId": prepay.appId,
+               "timeStamp":prepay.timeStamp,
+               "nonceStr":prepay.nonceStr,
+               "package":prepay.package,     
+               "signType":prepay.signType,
+               "paySign":prepay.paySign 
+            },
+            function(res){
+              console.log('res.err_msg'+res.err_msg)
+              if(res.err_msg == "get_brand_wcpay_request:ok" ){
+                  
+              }
+         });
+      }
+
+      if (typeof WeixinJSBridge == "undefined"){
+         if( document.addEventListener ){
+             document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+         } else if (document.attachEvent){
+             document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+             document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+         }
+      }
+
+      onBridgeReady();
+
     },
     error: function( xhr, result, obj ) {
       console.log("prepay err: " + obj )
