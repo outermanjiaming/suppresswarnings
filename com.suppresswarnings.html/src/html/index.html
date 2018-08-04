@@ -208,7 +208,7 @@ function join(obj) {
 }
 
 function buy(obj) {
-  var dataid = $(obj).attr('data-id')
+  var data = $(obj).attr('data-id')
   var modal = $('#buyModal')
   modal.modal('show')
   console.log('buy: ' + data)
@@ -218,8 +218,8 @@ function buy(obj) {
     action : "prepay",
     random : randnum,
     ticket : ticket,
-    title  : dataid,
-    goodsid: dataid
+    title  : data,
+    goodsid: data
     },
     success: function( result ) {
       console.log('prepay ok' + result)
