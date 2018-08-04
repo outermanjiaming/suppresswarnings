@@ -231,16 +231,16 @@ function buy(obj) {
          WeixinJSBridge.invoke(
             'getBrandWCPayRequest', {
                "appId": prepay.appId,
-               "timestamp":prepay.timeStamp,
+               "timeStamp":prepay.timeStamp,
                "nonceStr":prepay.nonceStr,
                "package":prepay.package,
                "signType":prepay.signType,
-               "paySign":prepay.paySign 
+               "paySign":prepay.paySign
             },
             function(res){
               console.log('res.err_msg'+res.err_msg)
               if(res.err_msg == "get_brand_wcpay_request:ok" ){
-                  
+                  console.log('finish success')
               }
          });
       }
