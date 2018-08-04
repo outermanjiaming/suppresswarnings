@@ -195,13 +195,6 @@
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 
-  var supportWX = 0
-  if (typeof WeixinJSBridge == "undefined"){
-    $("#methodloginhref").css('display','none'); 
-  } else {
-    supportWX = 1
-  }
-
 function sample(obj) {
   var data = $(obj).attr('data-id')
   console.log('sample: ' + data)
@@ -259,9 +252,9 @@ function buy(obj) {
              document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
              document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
          }
-      } else {
-        onBridgeReady();
       }
+
+      onBridgeReady();
 
     },
     error: function( xhr, result, obj ) {
