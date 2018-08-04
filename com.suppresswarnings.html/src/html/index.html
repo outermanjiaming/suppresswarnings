@@ -210,6 +210,7 @@ function join(obj) {
 function buy(obj) {
   var data = $(obj).attr('data-id')
   var modal = $('#buyModal')
+  modal.attr('data-id', data)
   modal.modal('show')
   console.log('buy: ' + data)
 }
