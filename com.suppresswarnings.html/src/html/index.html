@@ -233,8 +233,35 @@ function confirmBuy(obj) {
     },
     success: function( result ) {
       console.log('prepay ok' + result)
-      alert(result)
-      modal.modal('hide')
+      
+      var prepay = JSON.parse(result)
+      function onBridgeReady(){
+       WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', {
+             "appId": prepay.appId,
+             "timeStamp":prepay.timeStamp,
+             "nonceStr":prepay.nonceStr,
+             "package":prepay.package,     
+             "signType":prepay.signType,
+             "paySign":prepay.paySign 
+          },
+          function(res){
+          if(res.err_msg == "get_brand_wcpay_request:ok" ){
+              modal.modal('hide')
+          }
+       }); 
+      }
+      if (typeof WeixinJSBridge == "undefined"){
+       if( document.addEventListener ){
+           document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+       }else if (document.attachEvent){
+           document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+           document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+       }
+      } else{
+         onBridgeReady();
+      }
+
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] check prepay err: " + result)
