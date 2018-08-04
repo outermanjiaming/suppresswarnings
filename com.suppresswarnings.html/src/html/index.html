@@ -97,8 +97,7 @@
             <div class="modal-body">
                 <form>
                     <div class="form-group" id="sampleContent">
-                        <label for="loginhref" class="control-label">数据详情</label>
-                        <div class="description">hhh hhh hhh </div>
+                        <div class="description" id="sampleData"></div>
                     </div>
                    
                 </form>
@@ -289,34 +288,34 @@
    </footer>
 
 <!-- JavaScript Includes -->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/transition.js"></script>
-<script src="js/dropdown.js"></script>
-<script src="js/collapse.js"></script>
-
-<script src="js/suppresswarnings.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/transition.js"></script>
+<script type="text/javascript" src="js/dropdown.js"></script>
+<script type="text/javascript" src="js/collapse.js"></script>
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 
 function sample() {
-  var data = $(this).attr('data')
+  var data = this.attr('data')
   console.log('sample: ' + data)
   var modal = $('#sampleModal')
   modal.modal('show')
 }
 
 function join() {
-  var data = $(this).attr('data')
+  var data = this.attr('data')
   console.log('join: ' + data)
 }
 
 function buy() {
-  var data = $(this).attr('data')
+  var data = this.attr('data')
   console.log('buy: ' + data)
 }
 
 function bid() {
-  var data = $(this).attr('data')
+  var data = this.attr('data')
   console.log('bid: ' + data)
 }
 
