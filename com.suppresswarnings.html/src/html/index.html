@@ -208,21 +208,10 @@ function join(obj) {
 }
 
 function buy(obj) {
-  var data = $(obj).attr('data-id')
+  var dataid = $(obj).attr('data-id')
   var modal = $('#buyModal')
-  modal.attr('data-id', data)
   modal.modal('show')
   console.log('buy: ' + data)
-}
-
-function bid(obj) {
-  var data = $(obj).attr('data-id')
-  console.log('bid: ' + data)
-}
-
-function confirmBuy(obj) {
-  var modal = $('#buyModal')
-  var dataid = $(obj).attr('data-id')
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
@@ -243,7 +232,16 @@ function confirmBuy(obj) {
       console.log("prepay err: " + obj )
     }
   })
+}
 
+function bid(obj) {
+  var data = $(obj).attr('data-id')
+  console.log('bid: ' + data)
+}
+
+function confirmBuy(obj) {
+ var modal = $('#buyModal')
+  modal.modal('hide')
 }
 
 
