@@ -234,6 +234,7 @@ function confirmBuy(obj) {
     success: function( result ) {
       modal.modal('hide')
       console.log('prepay ok')
+      alert(result)
       WeixinJSBridge.invoke(
         'getBrandWCPayRequest', {
            "appId":"wx2421b1c4370ec43b",     //公众号名称，由商户传入     
@@ -251,6 +252,7 @@ function confirmBuy(obj) {
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] check prepay err: " + result)
+      alert(result)
     }
   })
 
