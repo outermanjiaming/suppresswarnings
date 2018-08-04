@@ -96,7 +96,7 @@
             </div>
             <div class="modal-body">
                 <form>
-                    <div class="form-group" id="sampleContent">
+                    <div class="form-group">
                         <div class="description" id="sampleData"></div>
                     </div>
                    
@@ -106,7 +106,26 @@
     </div>
 </div>
     
-    
+<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel">
+    <div class="modal-dialog text-center" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="buyModalLabel" >购买数据备份</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="description" id="buyData"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-success" data-id="" onclick="confirmBuy(this)">确认支付</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
     
@@ -190,12 +209,51 @@ function join(obj) {
 
 function buy(obj) {
   var data = $(obj).attr('data-id')
+  var modal = $('#buyModal')
+  modal.modal('show')
   console.log('buy: ' + data)
 }
 
 function bid(obj) {
   var data = $(obj).attr('data-id')
   console.log('bid: ' + data)
+}
+
+function confirmBuy(obj) {
+  var modal = $('#buyModal')
+  var dataid = $(obj).attr('data-id')
+  $.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+    action : "prepay",
+    random : randnum,
+    ticket : ticket,
+    title  : dataid,
+    goodsid: dataid
+    },
+    success: function( result ) {
+      modal.modal('hide')
+      console.log('prepay ok')
+      WeixinJSBridge.invoke(
+        'getBrandWCPayRequest', {
+           "appId":"wx2421b1c4370ec43b",     //公众号名称，由商户传入     
+           "timeStamp":"1395712654",         //时间戳，自1970年以来的秒数     
+           "nonceStr":"e61463f8efa94090b1f366cccfbbb444", //随机串     
+           "package":"prepay_id=u802345jgfjsdfgsdg888",     
+           "signType":"MD5",         //微信签名方式：     
+           "paySign":"70EA570631E4BB79628FBCA90534C63FF7FADD89" //微信签名 
+        }, 
+        function(res){
+          if(res.err_msg == "get_brand_wcpay_request:ok" ){
+            console.log('pay ok')
+          }
+        });
+    },
+    error: function( xhr, result, obj ) {
+      console.log("[lijiaming] check prepay err: " + result)
+    }
+  })
+
 }
 
 
