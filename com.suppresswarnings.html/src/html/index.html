@@ -72,10 +72,10 @@
             </div>
             <div class="modal-body">
                 <form>
-                    <div class="form-group">
+                    <div class="form-group" id="methodloginhref">
                         <label for="loginhref" class="control-label"><a class="form-control" id="loginhref" href="">方式一：在微信中打开 点击进入</a></label>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="methodloginqrcode">
                         <label for="loginqrcodeimg" class="control-label">方式二：浏览器打开 微信扫一扫<br/><img class="form-control" id="loginqrcodeimg" style="width:220px;height:220px;"/></label>
                         
                     </div>
@@ -86,6 +86,26 @@
 </div>
 
 
+ 
+<div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel">
+    <div class="modal-dialog text-center" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="sampleModalLabel" >查看数据样本</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="sampleContent">
+                        <label for="loginhref" class="control-label">数据详情</label>
+                        <div class="description">hhh hhh hhh </div>
+                    </div>
+                   
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     
     
     
@@ -114,10 +134,10 @@
          <button type="button" class="btn btn-ms" data="try-UYG67789">试试</button>
     </div>
     <table style="text-align: center;width: 100%"><tbody><tr>
-        <td><button type="button" class="btn btn-xs" data="look-UYG67789">查看样本</button></td>
-        <td><button type="button" class="btn btn-xs" data="join-UYG67789">加入生产</button></td>
-        <td><button type="button" class="btn btn-xs" data="buy-UYG67789">购买备份</button></td>
-        <td><button type="button" class="btn btn-xs" data="bid-UYG67789">购买版权</button></td>
+        <td><button type="button" class="btn btn-xs" data="look-UYG67789" onclick="sample()">查看样本</button></td>
+        <td><button type="button" class="btn btn-xs" data="join-UYG67789" onclick="join()">加入生产</button></td>
+        <td><button type="button" class="btn btn-xs" data="buy-UYG67789"  onclick="buy()">购买备份</button></td>
+        <td><button type="button" class="btn btn-xs" data="bid-UYG67789" onclick="bid()">购买版权</button></td>
         </tr>
       </tbody>
     </table>
@@ -277,7 +297,31 @@
 
 <script src="js/suppresswarnings.js"></script>
 <script>
-  function GetRequest() {
+
+function sample() {
+  var data = $(this).attr('data')
+  console.log('sample: ' + data)
+  var modal = $('#sampleModal')
+  modal.modal('show')
+}
+
+function join() {
+  var data = $(this).attr('data')
+  console.log('join: ' + data)
+}
+
+function buy() {
+  var data = $(this).attr('data')
+  console.log('buy: ' + data)
+}
+
+function bid() {
+  var data = $(this).attr('data')
+  console.log('bid: ' + data)
+}
+
+
+function GetRequest() {
     var url = location.search; //获取url中"?"符后的字串
     var theRequest = new Object();
     if (url.indexOf("?") != -1) {
