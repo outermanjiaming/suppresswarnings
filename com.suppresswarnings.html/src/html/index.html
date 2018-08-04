@@ -231,9 +231,9 @@ function buy(obj) {
          WeixinJSBridge.invoke(
             'getBrandWCPayRequest', {
                "appId": prepay.appId,
-               "timeStamp":prepay.timeStamp,
+               "timestamp":prepay.timeStamp,
                "nonceStr":prepay.nonceStr,
-               "package":prepay.package,     
+               "package":prepay.package,
                "signType":prepay.signType,
                "paySign":prepay.paySign 
             },
