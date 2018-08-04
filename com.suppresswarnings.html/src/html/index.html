@@ -194,6 +194,19 @@
 <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
+if (typeof WeixinJSBridge == "undefined"){
+   if( document.addEventListener ){
+       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+   } else if (document.attachEvent){
+       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+   }
+}
+
+if(typeof WeixinJSBridge == "object") {
+  console.log('WeixinJSBridge: ' + WeixinJSBridge)
+  window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect"
+}
 
 function sample(obj) {
   var data = $(obj).attr('data-id')
