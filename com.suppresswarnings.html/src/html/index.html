@@ -252,6 +252,10 @@ function onBridgeReady(){
   window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
 }
 
+function onBridgeOK(){
+  bridgeReady = 1
+}
+
 function checkBridge() {
   if (typeof WeixinJSBridge == "undefined"){
    if( document.addEventListener ){
@@ -267,7 +271,14 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
   console.log('first time here without code')
   checkBridge()
 } else {
-  
+  if (typeof WeixinJSBridge == "undefined"){
+   if( document.addEventListener ){
+       document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
+   } else if (document.attachEvent){
+       document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
+       document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
+   }
+  }
   ticket = Request.code
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
