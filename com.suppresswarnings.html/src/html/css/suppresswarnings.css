@@ -1,11 +1,10 @@
 .boder_v1 {
     list-style: none;
     float: left;
-    width: 300px;
-    height: 400px;
+    width: 100%;
+    height: 100%;
     border: 1px solid #e5e5e5;
-    margin: 5px 5px 5px;
-    padding: 20px;
+    padding: 15px;
     cursor: pointer;
 }
 .boder_v1:hover{
