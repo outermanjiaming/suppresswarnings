@@ -10,9 +10,6 @@
   <link rel="stylesheet" href="css/bootstrap-theme.min.css">
   <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
   <link rel="stylesheet" href="css/suppresswarnings.css">
-
-  <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
-
   <style type="text/css">
       pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
@@ -34,16 +31,16 @@
         </button>
         <a class="navbar-brand" href="#welcome.html">
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=175>
-    		<path id="svg_ul" d="M4 2 L4 6"     style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_u"  d="M10 2 L10 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_ur" d="M16 2 L16 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_ml" d="M4 8 L4 12"    style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_mr" d="M16 8 L16 12"  style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_dl" d="M4 14 L4 18"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_d"  d="M10 14 L10 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-    		<path id="svg_dr" d="M16 14 L16 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_ul" d="M4 2 L4 6"     style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_u"  d="M10 2 L10 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_ur" d="M16 2 L16 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_ml" d="M4 8 L4 12"    style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_mr" d="M16 8 L16 12"  style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_dl" d="M4 14 L4 18"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_d"  d="M10 14 L10 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
+            <path id="svg_dr" d="M16 14 L16 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <text x="25" y="17" fill="#5cb85c" id="inviteTitle">立刻加入 素朴网联</text>
-    		</svg>
+            </svg>
         </a>
       </div>
       <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
@@ -59,7 +56,35 @@
   </nav>
 
 
+
+
 </div>
+    
+    
+
+ 
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog text-center" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">素朴网联，数据之门</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="methodloginhref">
+                        <label for="loginhref" class="control-label"><a class="form-control" id="loginhref" href="">方式一：在微信中打开 点击进入</a></label>
+                    </div>
+                    <div class="form-group" id="methodloginqrcode">
+                        <label for="loginqrcodeimg" class="control-label">方式二：浏览器打开 微信扫一扫<br/><img class="form-control" id="loginqrcodeimg" style="width:220px;height:220px;"/></label>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
  
 <div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel">
@@ -103,6 +128,13 @@
 </div>
     
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
+    
+
+<div style="background: rgba(0,0,0,0.8);min-height: 160px;width: auto; padding: 10px 10px;box-shadow: 0px 8px 8px rgba(0,0,0,.2);text-align: center; color: white;">
+    <p><h1>数据之门</h1></p>
+    <p>在AI爆发的时代，未来科技将可以做到复制一个思想，在那之前，我们需要将思想“数据”记录下来。</p>
+</div>
+
 
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
@@ -159,15 +191,16 @@
 <script type="text/javascript" src="js/transition.js"></script>
 <script type="text/javascript" src="js/dropdown.js"></script>
 <script type="text/javascript" src="js/collapse.js"></script>
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-var bridgeReady = 0
+
 function sample(obj) {
   var data = $(obj).attr('data-id')
   console.log('sample: ' + data)
-  var smodal = $('#sampleModal')
+  var modal = $('#sampleModal')
   $("#sampleData").html(data)
-  smodal.modal('show')
+  modal.modal('show')
 }
 
 function join(obj) {
@@ -193,7 +226,10 @@ function buy(obj) {
       var prepay = JSON.parse(result)
       
       console.log('prepay.package = ' + prepay.package)
-      WeixinJSBridge.invoke(
+
+      function onBridgeReady(){
+        console.log('call onBridgeReady')
+         WeixinJSBridge.invoke(
             'getBrandWCPayRequest', {
                "appId": prepay.appId,
                "timeStamp":prepay.timeStamp,
@@ -206,8 +242,20 @@ function buy(obj) {
               console.log('res.err_msg'+res.err_msg)
               if(res.err_msg == "get_brand_wcpay_request:ok" ){
                   console.log('finish success')
-            }
-      });
+              }
+         });
+      }
+
+      if (typeof WeixinJSBridge == "undefined"){
+         if( document.addEventListener ){
+             document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+         } else if (document.attachEvent){
+             document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+             document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+         }
+      }
+
+      onBridgeReady();
 
     },
     error: function( xhr, result, obj ) {
@@ -222,8 +270,8 @@ function bid(obj) {
 }
 
 function confirmBuy(obj) {
- var bmodal = $('#buyModal')
-  bmodal.modal('hide')
+ var modal = $('#buyModal')
+  modal.modal('hide')
 }
 
 
@@ -240,30 +288,70 @@ function GetRequest() {
     return theRequest;
 }
 var Request = GetRequest();
-var wmodal = $('#welcomeModal')
-function onBridgeReady(){
-  bridgeReady = 1
-  console.log('ready onBridgeReady')
-  window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
-}
-
-if (typeof WeixinJSBridge == "undefined"){
-   if( document.addEventListener ){
-       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-   } else if (document.attachEvent){
-       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
-       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-   }
-}
-
+var modal = $('#exampleModal')
 if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
-  console.log('first time here without code')
-} else {
-  if (typeof WeixinJSBridge == "undefined"){
-    console.log('too bad WeixinJSBridge is undefined')
+  var timer
+  
+  modal.find('#loginhref').attr('href', 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect')
+  modal.find('#message-text').text(randnum)
+  modal.modal('show')
+  modal.on('hide.bs.modal',
+    function() {
+        clearInterval(timer)
+        console.log('clear when hide modal')
+  })
+
+  if(typeof WeixinJSBridge == "object") {
+    console.log('WeixinJSBridge: ' + WeixinJSBridge)
+    window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect"
   } else {
-    bridgeReady = 1
+    console.log('very wired')
   }
+
+  $.ajax({
+          url: "/wx.http?r=" + Math.random(),
+          data: {
+          action: "qrcode",
+          random: randnum
+          },
+          success: function( result ) {
+            var qrcode = JSON.parse(result)
+            ticket = qrcode.ticket
+            $( "#loginqrcodeimg" ).attr("src", "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + ticket )
+            
+            function check(){
+                $.ajax({
+                  url: "/wx.http?r=" + Math.random(),
+                  data: {
+                  action : "login",
+                  random : randnum,
+                  ticket : ticket
+                  },
+                  success: function( result ) {
+                    if("success" == result) {
+                      clearInterval(timer)
+                      modal.modal('hide')
+                      $('#inviteTitle').text('素朴网联')
+                    } else if("Later" == result) {
+                      console.log('waiting for scan qrcode')
+                    } else if("Change" == result) {
+                      clearInterval(timer)
+                      window.location.reload()
+                    }
+                  },
+                  error: function( xhr, result, obj ) {
+                    console.log("[lijiaming] check logon err: " + result)
+                  }
+                })
+            }
+            timer = setInterval(check, 1024);
+            
+          },
+          error: function( xhr, result, obj ) {
+            console.log("[lijiaming] login qrcode err: " + result)
+          }
+  });
+} else {
   ticket = Request.code
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
@@ -274,17 +362,23 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
     },
     success: function( result ) {
       if("success" == result) {
+        clearInterval(timer)
         modal.modal('hide')
         $('#inviteTitle').text('素朴网联')
-      } else {
-        console.log('fail to access_token: ' + result)
+      } else if("Later" == result) {
+        console.log('waiting for scan qrcode')
+      } else if("Change" == result) {
+        clearInterval(timer)
+        window.location.reload()
       }
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] check logon err: " + result)
     }
   })
+  $('#inviteTitle').text('素朴网联')
 }
+
 
 </script>
 </body>
