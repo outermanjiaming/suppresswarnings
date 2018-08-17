@@ -59,35 +59,7 @@
   </nav>
 
 
-
-
 </div>
-    
-    
-
- 
-<div class="modal fade" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="welcomeModalLabel">
-    <div class="modal-dialog text-center" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="welcomeModalLabel">素朴网联，数据之门</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group" id="methodloginhref">
-                        <label for="loginhref" class="control-label"><a class="form-control" id="loginhref" href="">方式一：在微信中打开 点击进入</a></label>
-                    </div>
-                    <div class="form-group" id="methodloginqrcode">
-                        <label for="loginqrcodeimg" class="control-label">方式二：浏览器打开 微信扫一扫<br/><img class="form-control" id="loginqrcodeimg" style="width:220px;height:220px;"/></label>
-                        
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 
  
 <div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel">
@@ -131,13 +103,6 @@
 </div>
     
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
-    
-
-<div style="background: rgba(0,0,0,0.8);min-height: 160px;width: auto; padding: 10px 10px;box-shadow: 0px 8px 8px rgba(0,0,0,.2);text-align: center; color: white;">
-    <p><h1>数据之门</h1></p>
-    <p>在AI爆发的时代，未来科技将可以做到复制一个思想，在那之前，我们需要将思想“数据”记录下来。</p>
-</div>
-
 
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
@@ -277,6 +242,7 @@ function GetRequest() {
 var Request = GetRequest();
 var wmodal = $('#welcomeModal')
 function onBridgeReady(){
+  bridgeReady = 1
   console.log('ready onBridgeReady')
   window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
 }
@@ -293,6 +259,11 @@ if (typeof WeixinJSBridge == "undefined"){
 if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
   console.log('first time here without code')
 } else {
+  if (typeof WeixinJSBridge == "undefined"){
+    console.log('too bad WeixinJSBridge is undefined')
+  } else {
+    bridgeReady = 1
+  }
   ticket = Request.code
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
@@ -303,21 +274,16 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
     },
     success: function( result ) {
       if("success" == result) {
-        clearInterval(timer)
         modal.modal('hide')
         $('#inviteTitle').text('素朴网联')
-      } else if("Later" == result) {
-        console.log('waiting for scan qrcode')
-      } else if("Change" == result) {
-        clearInterval(timer)
-        window.location.reload()
+      } else {
+        console.log('fail to access_token: ' + result)
       }
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] check logon err: " + result)
     }
   })
-  $('#inviteTitle').text('素朴网联')
 }
 
 </script>
