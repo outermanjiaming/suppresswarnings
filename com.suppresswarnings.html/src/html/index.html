@@ -248,9 +248,11 @@ function GetRequest() {
 var Request = GetRequest();
 var wmodal = $('#welcomeModal')
 function onBridgeReady(){
-  bridgeReady = 1
+  if(bridgeReady == 0) {
+    window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
+  }
   console.log('ready onBridgeReady')
-  window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
+  bridgeReady = 1
 }
 
 function checkBridge() {
@@ -283,7 +285,6 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
     },
     success: function( result ) {
       if("success" == result) {
-        modal.modal('hide')
         $('#inviteTitle').text('素朴网联')
       } else {
         console.log('fail to access_token: ' + result)
