@@ -253,17 +253,20 @@ function onBridgeReady(){
   window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
 }
 
-if (typeof WeixinJSBridge == "undefined"){
+function checkBridge() {
+  if (typeof WeixinJSBridge == "undefined"){
    if( document.addEventListener ){
        document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
    } else if (document.attachEvent){
        document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
    }
+  }
 }
 
 if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
   console.log('first time here without code')
+  checkBridge()
 } else {
   if (typeof WeixinJSBridge == "undefined"){
     console.log('too bad WeixinJSBridge is undefined')
@@ -284,10 +287,12 @@ if(Request.code === undefined || Request.state === undefined || Request.state !=
         $('#inviteTitle').text('素朴网联')
       } else {
         console.log('fail to access_token: ' + result)
+        checkBridge()
       }
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] check logon err: " + result)
+      checkBridge()
     }
   })
 }
