@@ -3,7 +3,7 @@
   var index = 0
   var forever = 10000
   var limited = 10000
-  var randnum = Math.round(Math.random()*10000)
+  var randnum = Math.round(Math.random()*100000) + 10000
   var ticket
   function red(){
     $("#"+"svg_"+ids[index%8]).css("stroke","pink");
