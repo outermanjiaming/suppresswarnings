@@ -80,7 +80,4 @@
     $("li.raspberrypi").click(function(){
       gethtml("walkthrough/raspberrypi.html", main)
     });
-    $("a.navbar-brand").click(function(){
-      gethtml("welcome.html", main)
-    });
   }); 
