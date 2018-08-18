@@ -266,7 +266,7 @@ function checkBridge() {
   }
 }
 
-if(Request.code === undefined || Request.state === undefined || Request.state != 'suppresswarnings') {
+if(Request.code === undefined || Request.state === undefined) {
   console.log('first time here without code')
   checkBridge()
 } else {
