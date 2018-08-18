@@ -68,15 +68,12 @@
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
   <li class="boder_v1">
-        <div style="height: 70px;padding: 5px;">
-          收集者：<img id="ownerimg" style="width: 40px;height: 40px;" src="/index.png"/>
-          <span id="ownername">Vivian</span>
-        </div>
-        <pre class="description">创建时间：2018.07.30
-  属性：语料
-  描述：用一句话夸赞自己的宠物猫。
-  比如：我家的小黑最近好听话
-  <img id="qrcodecorpus" src="" style="width: 120px;height: 120px;border: 0px;">
+  <div class="form-group">收集者：<img id="ownerimg" style="width: 20px;height: 20px;" src="/index.png"/><span id="ownername">Vivian</span></div>
+  <div class="form-group">创建时间：<span>2018.07.30</span></div>
+  <div class="form-group">类型：<span>语料</span></div>
+  <div class="form-group">描述：<span>用一句话夸赞自己的宠物猫。</span></div>
+  <div class="form-group">举例：<span>我家的小黑最近好听话</span></div>
+  <div class="form-group">识别二维码回答：<img id="qrcodecorpus" src="" style="width: 120px;height: 120px;border: 0px;"/></div>
 </pre>
   </li>
 
@@ -138,7 +135,8 @@ if(Request.code === undefined || Request.state === undefined) {
     data: {
     action : "access_token",
     random : randnum,
-    ticket : ticket
+    ticket : ticket,
+    state : Request.state
     },
     success: function( result ) {
       if("success" == result) {
