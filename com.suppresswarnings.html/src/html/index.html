@@ -93,9 +93,7 @@
                     <div class="form-group">
                         <div class="description" id="buyData"></div>
                     </div>
-                    <div class="form-group">
-                        <button class="btn btn-success" data-id="" onclick="confirmBuy(this)">确认支付</button>
-                    </div>
+                    
                 </form>
             </div>
         </div>
@@ -107,23 +105,23 @@
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
 <li class="boder_v1">
-      <div style="height: 70px;padding: 5px;"><img class="type-img" src="/index.png"/><pre style="margin-top: 10px;">表达高兴，开心的话</pre></div>
+      <div style="height: 70px;padding: 5px;"><img class="type-img" src="/index.png"/><pre style="margin-top: 10px;">版权所有：某某某</pre></div>
         <pre class="description">创建时间：2018.07.30
 属性：语料
 分类：情感
 参与度：0.65
 最大重合度：0.31
 模型准确率：0.70
-描述：用一句话表达一种高兴，开心的感受。比如：今个儿真高兴</pre>
+描述：用一句话表达一种高兴，开心的感受。
+比如：今个儿真高兴<button type="button" class="btn btn-xs" data-id="look-UYG67789" onclick="sample(this)">更多样本</button></pre>
     <div class="form-group" style="margin-top: 10px;">
          <input type="input" class="form-control" placeholder="试试" style="width: 75%;float: left;margin-right: 5px;" data-id="input-UYG67789"/>
          <button type="button" class="btn btn-ms" data-id="try-UYG67789">试试</button>
     </div>
-    <table style="text-align: center;width: 100%"><tbody><tr>
-        <td><button type="button" class="btn btn-xs" data-id="look-UYG67789" onclick="sample(this)">查看样本</button></td>
-        <td><button type="button" class="btn btn-xs" data-id="join-UYG67789" onclick="join(this)">加入生产</button></td>
-        <td><button type="button" class="btn btn-xs" data-id="buy-UYG67789"  onclick="buy(this)">购买备份</button></td>
-        <td><button type="button" class="btn btn-xs" data-id="bid-UYG67789" onclick="bid(this)">购买版权</button></td>
+    <table style="text-align: center;width: 100%">
+      <tbody>
+        <tr>
+          <td><button type="button" class="btn btn-xs" data-id="buy-UYG67789"  onclick="buy(this)">收购数据</button></td>
         </tr>
       </tbody>
     </table>
