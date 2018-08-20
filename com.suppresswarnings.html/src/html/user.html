@@ -33,7 +33,10 @@ pre {
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-example-js-navbar-collapse">
-						<span class="sr-only">Toggle navigation</span> 
+					  <span class="sr-only">Toggle navigation</span> 
+			          <span class="icon-bar"></span>
+			          <span class="icon-bar"></span>
+			          <span class="icon-bar"></span>
 					</button>
 					<span class="navbar-brand"> 
 					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=175>
@@ -92,11 +95,11 @@ pre {
 				</div>
 				<div class="form-group">
 					我的数据：<div id="data" class="form-group">
-					<span class="mydata">我收集的数据之一问题（例如：示例回答之一）</span>
-					<span class="mydata">我收集的数据之一问题（例如：示例回答之一）</span>
-					<span class="mydata">我收集的数据之一问题（例如：示例回答之一）</span>
-					<span class="mydata">我收集的数据之一问题（例如：示例回答之一）</span>
-					<span class="mydata">我收集的数据之一问题（例如：示例回答之一）</span>
+					  <div class="mydata" data-id="UHIABKSJLOUI8765789JHGJH"><span>我收集的数据之一问题（例如：示例回答之一）</span><button class="btn btn-ms btn-info">出售</button><a target="_black" href="/P_Corpus_VHKLJHIGYUGKJHIYGHV7980HJKJ.html">查看</a></div>
+					  <div class="mydata" data-id="UHIABKSJLOUI8765789JHGJH"><span>我收集的数据之一问题（例如：示例回答之一）</span><button class="btn btn-ms btn-info">出售</button><a target="_black" href="/P_Corpus_VHKLJHIGYUGKJHIYGHV7980HJKJ.html">查看</a></div>
+					  <div class="mydata" data-id="UHIABKSJLOUI8765789JHGJH"><span>我收集的数据之一问题（例如：示例回答之一）</span><button class="btn btn-ms btn-info">出售</button><a target="_black" href="/P_Corpus_VHKLJHIGYUGKJHIYGHV7980HJKJ.html">查看</a></div>
+					  <div class="mydata" data-id="UHIABKSJLOUI8765789JHGJH"><span>我收集的数据之一问题（例如：示例回答之一）</span><button class="btn btn-ms btn-info">出售</button><a target="_black" href="/P_Corpus_VHKLJHIGYUGKJHIYGHV7980HJKJ.html">查看</a></div>
+					  <div class="mydata" data-id="UHIABKSJLOUI8765789JHGJH"><span>我收集的数据之一问题（例如：示例回答之一）</span><button class="btn btn-ms btn-info">出售</button><a target="_black" href="/P_Corpus_VHKLJHIGYUGKJHIYGHV7980HJKJ.html">查看</a></div>
 					</div>
 				</div>
 			</li>
@@ -126,7 +129,8 @@ pre {
 	<script type="text/javascript" src="js/suppresswarnings.js"></script>
 	<script>
 		var bridgeReady = 0
-
+		var ticket
+		var state
 		function GetRequest() {
 			var url = location.search; //获取url中"?"符后的字串
 			var theRequest = new Object();
@@ -173,12 +177,14 @@ pre {
 				}
 			}
 			ticket = Request.code
+			state  = Request.state
 			$.ajax({
 				url : "/wx.http?r=" + Math.random(),
 				data : {
 					action : "access_token",
 					random : randnum,
-					ticket : ticket
+					ticket : ticket,
+					state  : state
 				},
 				success : function(result) {
 					if ("success" == result) {
