@@ -52,32 +52,4 @@
       }
     });
     
-    $("li.business").click(function(){
-        gethtml("business.html", main)
-    });
-    
-    $("li.user").click(function(){
-        gethtml("card.html", main)
-        $.ajax({
-      	  url: "/wx.http?r=" + Math.random(),
-      	  data: {
-      		action: "login",
-      		random: randnum
-      	  },
-      	  success: function( result ) {
-      	    $( "#qrcodeimg" ).attr("src", result.ticket );
-      	  },
-      	  error: function( xhr, result, obj ) {
-      	    console.log("[lijiaming] err: " + result);
-      	  }
-      	});
-    });
-    
-    $("li.aboutus").click(function(){
-        gethtml("aboutus.html", main)
-    });
-    
-    $("li.raspberrypi").click(function(){
-      gethtml("walkthrough/raspberrypi.html", main)
-    });
   }); 
