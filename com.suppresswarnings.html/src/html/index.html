@@ -111,6 +111,7 @@
   <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src="$userimg"/><span id="ownername"></span></div>
   <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
   <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
+  <div class="form-group">指标：<span id="sample">{{数据量|参与人数|重复度}}</span></div>
   <div class="form-group text-center">
     <img id="qrcodecorpus" src="$qrcode" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
   </div>
@@ -119,9 +120,9 @@
     <table style="text-align: center;width: 100%">
       <tbody>
         <tr>
-          <td><button type="button" class="btn btn-ms" data-id="next-UYG67789" onclick="next(this)">换一个</button></td>
-          <td><button type="button" class="btn btn-ms" data-id="look-UYG67789" onclick="sample(this)">查看样本</button></td>
-          <td><button type="button" class="btn btn-ms btn-info" data-id="buy-UYG67789"  onclick="buy(this)">收购数据：<span id="buyprice">¥0.08</button></td>
+          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" data-id="null" onclick="next(this)">换一个</button></td>
+          <td><button id="btnsample" type="button" class="btn btn-ms btn-warning" data-id="null" onclick="sample(this)">查看样本</button></td>
+          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-id="null"  onclick="buy(this)">收购数据：<span id="btnprice">¥0.08</button></td>
         </tr>
       </tbody>
     </table>
@@ -215,9 +216,19 @@ function buy(obj) {
   
 }
 
-function bid(obj) {
+function next(obj) {
   var data = $(obj).attr('data-id')
-  console.log('bid: ' + data)
+  console.log('next: ' + data)
+  $('#crewimg').text('next: ' + data)
+
+
+
+
+
+
+
+
+  
 }
 
 function confirmBuy(obj) {
