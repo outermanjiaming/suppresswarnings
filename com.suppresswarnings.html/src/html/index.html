@@ -99,30 +99,29 @@
         </div>
     </div>
 </div>
-    
+  
+
+
+ 
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
-<li class="boder_v1">
-      <div style="height: 70px;padding: 5px;"><img class="type-img" src="/index.png"/><pre style="margin-top: 10px;">版权所有：某某某</pre></div>
-        <pre class="description">创建时间：2018.07.30
-属性：语料
-分类：情感
-参与度：0.65
-最大重合度：0.31
-模型准确率：0.70
-描述：用一句话表达一种高兴，开心的感受。
-比如：今个儿真高兴</pre>
-    <div class="form-group" style="margin-top: 10px;">
-         <input type="input" class="form-control" placeholder="试试" style="width: 75%;float: left;margin-right: 5px;" data-id="input-UYG67789"/>
-         <button type="button" class="btn btn-ms" data-id="try-UYG67789">试试</button>
-    </div>
+  <li class="boder_v1">
+  <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src="$userimg"/><span id="ownername"></span></div>
+  <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
+  <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
+  <div class="form-group text-center">
+    <img id="qrcodecorpus" src="$qrcode" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
+  </div>
+  <div id="crewimg" class="form-group text-center"></div>
+
     <table style="text-align: center;width: 100%">
       <tbody>
         <tr>
-          <td><button type="button" class="btn btn-ms" data-id="look-UYG67789" onclick="sample(this)">查看样本：免费</button></td>
-          <td><button type="button" class="btn btn-ms btn-info" data-id="buy-UYG67789"  onclick="buy(this)">收购数据：¥0.08</button></td>
+          <td><button type="button" class="btn btn-ms" data-id="next-UYG67789" onclick="next(this)">换一个</button></td>
+          <td><button type="button" class="btn btn-ms" data-id="look-UYG67789" onclick="sample(this)">查看样本</button></td>
+          <td><button type="button" class="btn btn-ms btn-info" data-id="buy-UYG67789"  onclick="buy(this)">收购数据：<span id="buyprice">¥0.08</button></td>
         </tr>
       </tbody>
     </table>
@@ -167,11 +166,6 @@ function sample(obj) {
   var smodal = $('#sampleModal')
   $("#sampleData").html(data)
   smodal.modal('show')
-}
-
-function join(obj) {
-  var data = $(obj).attr('data-id')
-  console.log('join: ' + data)
 }
 
 function buy(obj) {
