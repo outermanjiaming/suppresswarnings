@@ -5,6 +5,7 @@
   var limited = 10000
   var randnum = Math.round(Math.random()*100000) + 10000
   var ticket
+  var state
   function red(){
     $("#"+"svg_"+ids[index%8]).css("stroke","pink");
     if(index<limited) {

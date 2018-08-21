@@ -111,9 +111,9 @@
   <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src="$userimg"/><span id="ownername"></span></div>
   <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
   <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
-  <div class="form-group">指标：<span id="sample">{{数据量|参与人数|重复度}}</span></div>
+  <div class="form-group">指标：<span id="summary">{{数据量|参与人数|重复度}}</span></div>
   <div class="form-group text-center">
-    <img id="qrcodecorpus" src="$qrcode" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
+    <img id="qrcode" src="" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
   </div>
   <div id="crewimg" class="form-group text-center"></div>
 
@@ -216,13 +216,57 @@ function buy(obj) {
   
 }
 
+
+var quizId
+var quizIds
+var index = 0
 function next(obj) {
   var data = $(obj).attr('data-id')
   console.log('next: ' + data)
-  $('#crewimg').text('next: ' + data)
-
-
-
+if(quizIds == undefined) {
+  quizId = ""
+} else {
+  if(index >= quizIds.length) {
+    index = 0
+  }
+  quizId = quizIds[index]
+  index = index + 1
+}
+jQuery.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+      action : "next",
+      random : randnum,
+      ticket : ticket,
+      state : state,
+      next  : quizId
+    },
+    success: function( result ) {
+      if("fail" == result) {
+        console.log('fail to next: ' + result)
+      } else {
+        var map = JSON.parse(result)
+        var quiz = map.quiz
+        if(quizIds == undefined) {
+          quizIds = map.array
+        }
+        $("#quiz").text(quiz.quiz)
+        $("#sample").text(quiz.sample)
+        $("#ownerimg").attr("src", quiz.ownerimg)
+        $("#ownername").html(quiz.ownername)
+        $("#btnprice").text(quiz.price)
+        $("#qrcode").attr("src", quiz.qrcode)
+        $("#btnbuy").data("id", quiz.quizId)
+        $("#btnsample").data("id", quiz.quizId)
+        $("#btnnext").data("id", quiz.quizId)
+      }
+      
+    },
+    error: function( xhr, result, obj ) {
+      console.log("[lijiaming] user err: " + result)
+      $('#inviteTitle').text('!个人中心')
+    }
+  })
 
 
 
@@ -284,6 +328,7 @@ if(Request.code === undefined || Request.state === undefined) {
    }
   }
   ticket = Request.code
+  state  = Request.state
   $.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
