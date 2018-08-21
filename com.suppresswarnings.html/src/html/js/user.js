@@ -14,8 +14,8 @@ jQuery.ajax({
         $('#inviteTitle').text('个人中心')
         
         var user = JSON.parse(result)
-        $("#ownerimg").html("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + result.ownerimg + "'/>")
-        $("#ownername").html(result.ownername)
+        $("#ownerimg").html("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + user.ownerimg + "'/>")
+        $("#ownername").html(user.ownername)
         var arr = user.array
         var length = arr.length
         var crewimg = $("#crewimg")
@@ -24,7 +24,7 @@ jQuery.ajax({
         }
         
         var datas = user.datas
-        var size = arr.length
+        var size = datas.length
         var mydatas = $("#mydatas")
         for (var k = 0; k < size; k++) {
         	var map = datas[k]
