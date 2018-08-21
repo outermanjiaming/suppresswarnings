@@ -14,8 +14,8 @@ jQuery.ajax({
         $('#inviteTitle').text('个人中心')
         
         var user = JSON.parse(result)
-        $("ownerimg").html("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + result.ownerimg + "'/>")
-        $("ownername").html(result.ownername)
+        $("#ownerimg").html("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + result.ownerimg + "'/>")
+        $("#ownername").html(result.ownername)
         var arr = user.array
         var length = arr.length
         var crewimg = $("#crewimg")
@@ -27,9 +27,10 @@ jQuery.ajax({
         var size = arr.length
         var mydatas = $("#mydatas")
         for (var k = 0; k < size; k++) {
-        	var quizId = datas[k].quizId
-        	var quiz   = datas[k].quiz
-        	var quizState = datas[k].quizState
+        	var map = datas[k]
+        	var quizId = map['quizId']
+        	var quiz   = map['quiz']
+        	var quizState = map['quizState']
         	var clazz = "btn-info"
         	var btn = "可出售"
         	if(quizState == 1) {
