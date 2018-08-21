@@ -14,7 +14,7 @@ jQuery.ajax({
         $('#inviteTitle').text('个人中心')
         
         var user = JSON.parse(result)
-        $("#ownerimg").html("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + user.ownerimg + "'/>")
+        $("#ownerimg").attr("src", user.ownerimg)
         $("#ownername").html(user.ownername)
         var arr = user.array
         var length = arr.length
