@@ -219,18 +219,18 @@ function buy(obj) {
 
 var quizId
 var quizIds
-var index = 0
+var nextindex = 0
 function next(obj) {
   var data = $(obj).attr('data-id')
   console.log('next: ' + data)
 if(quizIds == undefined) {
   quizId = ""
 } else {
-  if(index >= quizIds.length) {
-    index = 0
+  if(nextindex >= quizIds.length) {
+    nextindex = 0
   }
-  quizId = quizIds[index]
-  index = index + 1
+  quizId = quizIds[nextindex]
+  nextindex = nextindex + 1
 }
 jQuery.ajax({
     url: "/wx.http?r=" + Math.random(),
