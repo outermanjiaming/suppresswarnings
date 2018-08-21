@@ -251,6 +251,7 @@ jQuery.ajax({
           quizIds = map.array
         }
         $("#quiz").text(quiz.quiz)
+        if(quiz.sample == undefined) quiz.sample = ""
         $("#sample").text(quiz.sample)
         $("#ownerimg").attr("src", quiz.ownerimg)
         $("#ownername").html(quiz.ownername)
