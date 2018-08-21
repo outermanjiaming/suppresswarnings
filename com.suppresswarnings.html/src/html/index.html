@@ -120,7 +120,7 @@
     <table style="text-align: center;width: 100%">
       <tbody>
         <tr>
-          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" data-id="null" onclick="next(this)">换一个</button></td>
+          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" onclick="next()">换一个</button></td>
           <td><button id="btnsample" type="button" class="btn btn-ms btn-warning" data-id="null" onclick="sample(this)">查看样本</button></td>
           <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-id="null"  onclick="buy(this)">收购数据：<span id="btnprice">¥0.08</button></td>
         </tr>
@@ -220,9 +220,7 @@ function buy(obj) {
 var quizId
 var quizIds
 var nextindex = 0
-function next(obj) {
-  var data = $(obj).attr('data-id')
-  console.log('next: ' + data)
+function next() {
 if(quizIds == undefined) {
   quizId = ""
 } else {
@@ -259,7 +257,6 @@ jQuery.ajax({
         $("#qrcode").attr("src", quiz.qrcode)
         $("#btnbuy").data("id", quiz.quizId)
         $("#btnsample").data("id", quiz.quizId)
-        $("#btnnext").data("id", quiz.quizId)
       }
       
     },
@@ -340,6 +337,7 @@ if(Request.code === undefined || Request.state === undefined) {
     success: function( result ) {
       if("success" == result) {
         $('#inviteTitle').text('素朴网联')
+        next()
       } else {
         console.log('fail to access_token: ' + result)
         checkBridge()
