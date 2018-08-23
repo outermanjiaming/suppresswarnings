@@ -36,9 +36,9 @@ public class CallableGet implements Callable<String> {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             if(httpResponse.getStatusLine().getStatusCode() == 200){
                 srtResult = EntityUtils.toString(httpResponse.getEntity());
-                logger.info("[AccessTokenCall] http result: " + srtResult);
+                logger.info("[Get] http result: " + srtResult);
             } else {
-            	logger.error("[AccessTokenCall] fail to request " + url + ", response " + httpResponse.getStatusLine().toString());
+            	logger.error("[Get] fail to request " + url + ", response " + httpResponse.getStatusLine().toString());
             	throw new Exception("Fail to request get");
             }
         } finally {

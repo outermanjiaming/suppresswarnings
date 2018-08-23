@@ -41,6 +41,12 @@
       <module>c.s.c.service.corpus.teach</module>
       <module>c.s.c.service.setting</module>
       <module>c.s.c.service.warehouse</module>
+      <module>c.s.c.service.qrcode</module>
+      <module>c.s.c.service.authorize</module>
+      <module>c.s.c.service.shop</module>
+      <module>c.s.c.service.customer</module>
+      <module>c.s.c.service.collect</module>
+      <module>c.s.c.service.produce</module>
   </modules>
   <dependencies>
   		<dependency>

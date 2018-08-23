@@ -60,6 +60,25 @@ public abstract class Context<T> implements Predicate<String> {
 	public State<Context<T>> state(){
 		return state;
 	}
+	public abstract State<Context<T>> exit(); 
+	public boolean yes(String input, String expect) {
+		return confirm(input, expect, "yes y ok okay alright 好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
+	}
+	
+	public boolean exit(String input, String expect) {
+		return confirm(input, expect, "我要退出 退出 quit exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
+	}
+	
+	public boolean confirm(String input, String expect, String common) {
+		if(expect == input) return true;
+		if(input == null) return false;
+		if(expect != null && expect.equals(input)) return true;
+		//TODO ner check yes
+		String yes = CheckUtil.cleanStr(input.trim()) + " ";
+		if(common.contains(yes.toLowerCase())) return true;
+		return false;
+	}
+	
 	public void update(){
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
@@ -70,7 +89,11 @@ public abstract class Context<T> implements Predicate<String> {
 		
 		try {
 			logger.info(random() + "<-state:" + state);
-			state = state.apply(t, this);
+			if(exit(t, "exit()")) {
+				state = exit();
+			} else {
+				state = state.apply(t, this);
+			}
 			logger.info(random() + "->state:" + state);
 			state.accept(t, this);
 		} catch (Exception e) {
@@ -79,6 +102,7 @@ public abstract class Context<T> implements Predicate<String> {
 		
 		return state.finish();
 	}
+	
 	@Override
 	public String toString() {
 		return "Context [content=" + content + ", state=" + state + ", output=" + output + ", time=" + time + ", rand=" + rand + "]";

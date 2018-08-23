@@ -1,0 +1,1513 @@
+2018-08-18 17:59:40,842 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 17:59:40,843 - Velocity not initialized yet. Calling init()...
+2018-08-18 17:59:40,843 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 17:59:40,843 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 17:59:40,843 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 17:59:40,844 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1099)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:147)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 17:59:40,846 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 17:59:40,846 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 17:59:40,854 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 17:59:40,859 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 17:59:40,861 - Do unicode file recognition:  false
+2018-08-18 17:59:40,861 - FileResourceLoader : adding path '.'
+2018-08-18 17:59:40,899 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 17:59:40,903 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 17:59:40,905 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 17:59:40,909 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 17:59:40,915 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 17:59:40,917 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 17:59:40,955 - Created '20' parsers.
+2018-08-18 17:59:40,969 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 17:59:40,970 - Velocimacro : Default library not found.
+2018-08-18 17:59:40,970 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 17:59:40,970 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 17:59:40,970 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 17:59:40,970 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 17:59:40,972 - ResourceManager : unable to find resource '/Users/lijiaming/temp/template.vm' in any resource loader.
+2018-08-18 18:02:51,719 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 18:02:51,720 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 18:02:51,720 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 18:02:51,720 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 18:02:51,722 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:147)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 18:02:51,724 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:02:51,725 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:02:51,729 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 18:02:51,735 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 18:02:51,737 - Do unicode file recognition:  false
+2018-08-18 18:02:51,737 - FileResourceLoader : adding path '.'
+2018-08-18 18:02:51,772 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 18:02:51,774 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 18:02:51,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 18:02:51,780 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 18:02:51,783 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 18:02:51,784 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 18:02:51,835 - Created '20' parsers.
+2018-08-18 18:02:51,846 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 18:02:51,847 - Velocimacro : Default library not found.
+2018-08-18 18:02:51,847 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 18:02:51,847 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 18:02:51,847 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 18:02:51,847 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 18:02:51,852 - ResourceManager : unable to find resource '/Users/lijiaming/temp/template.vm' in any resource loader.
+2018-08-18 18:03:08,111 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 18:03:08,114 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 18:03:08,114 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 18:03:08,114 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 18:03:08,115 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:147)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 18:03:08,117 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:03:08,117 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:03:08,120 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 18:03:08,124 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 18:03:08,126 - Do unicode file recognition:  false
+2018-08-18 18:03:08,127 - FileResourceLoader : adding path '.'
+2018-08-18 18:03:08,158 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 18:03:08,161 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 18:03:08,163 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 18:03:08,170 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 18:03:08,176 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 18:03:08,178 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 18:03:08,230 - Created '20' parsers.
+2018-08-18 18:03:08,244 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 18:03:08,244 - Velocimacro : Default library not found.
+2018-08-18 18:03:08,244 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 18:03:08,245 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 18:03:08,245 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 18:03:08,245 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 18:03:08,250 - ResourceManager : unable to find resource '/Users/lijiaming/temp/template.vm' in any resource loader.
+2018-08-18 18:05:03,511 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 18:05:03,513 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 18:05:03,513 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 18:05:03,513 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 18:05:03,514 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:147)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 18:05:03,517 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:05:03,517 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:05:03,520 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 18:05:03,524 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 18:05:03,527 - Do unicode file recognition:  false
+2018-08-18 18:05:03,527 - FileResourceLoader : adding path '.'
+2018-08-18 18:05:03,575 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 18:05:03,577 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 18:05:03,580 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 18:05:03,586 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 18:05:03,588 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 18:05:03,590 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 18:05:03,628 - Created '20' parsers.
+2018-08-18 18:05:03,642 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 18:05:03,643 - Velocimacro : Default library not found.
+2018-08-18 18:05:03,643 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 18:05:03,643 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 18:05:03,643 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 18:05:03,643 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 18:05:03,665 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 18:06:40,187 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 18:06:40,188 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 18:06:40,189 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 18:06:40,189 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 18:06:40,190 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:147)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 18:06:40,192 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:06:40,192 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 18:06:40,195 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 18:06:40,199 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 18:06:40,200 - Do unicode file recognition:  false
+2018-08-18 18:06:40,200 - FileResourceLoader : adding path '.'
+2018-08-18 18:06:40,234 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 18:06:40,236 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 18:06:40,239 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 18:06:40,243 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 18:06:40,245 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 18:06:40,246 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 18:06:40,345 - Created '20' parsers.
+2018-08-18 18:06:40,359 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 18:06:40,360 - Velocimacro : Default library not found.
+2018-08-18 18:06:40,360 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 18:06:40,360 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 18:06:40,360 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 18:06:40,360 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 18:06:40,391 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:19:15,248 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:19:15,250 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:19:15,250 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:19:15,250 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:19:15,251 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:170)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:19:15,253 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:19:15,253 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:19:15,257 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:19:15,261 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:19:15,263 - Do unicode file recognition:  false
+2018-08-18 19:19:15,263 - FileResourceLoader : adding path '.'
+2018-08-18 19:19:15,297 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:19:15,298 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:19:15,300 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:19:15,303 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:19:15,306 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:19:15,307 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:19:15,351 - Created '20' parsers.
+2018-08-18 19:19:15,362 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:19:15,363 - Velocimacro : Default library not found.
+2018-08-18 19:19:15,363 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:19:15,363 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:19:15,363 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:19:15,363 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:19:15,380 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 11.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:176)
+2018-08-18 19:19:15,382 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 11 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:176)
+2018-08-18 19:20:35,760 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:20:35,761 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:20:35,761 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:20:35,761 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:20:35,762 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:20:35,764 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:20:35,764 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:20:35,767 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:20:35,771 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:20:35,773 - Do unicode file recognition:  false
+2018-08-18 19:20:35,773 - FileResourceLoader : adding path '.'
+2018-08-18 19:20:35,806 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:20:35,808 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:20:35,810 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:20:35,814 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:20:35,816 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:20:35,818 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:20:35,873 - Created '20' parsers.
+2018-08-18 19:20:35,884 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:20:35,884 - Velocimacro : Default library not found.
+2018-08-18 19:20:35,884 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:20:35,885 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:20:35,885 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:20:35,885 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:20:35,902 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 11.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:20:35,905 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 11 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:20:52,057 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:20:52,058 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:20:52,058 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:20:52,058 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:20:52,059 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:20:52,061 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:20:52,061 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:20:52,065 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:20:52,069 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:20:52,071 - Do unicode file recognition:  false
+2018-08-18 19:20:52,071 - FileResourceLoader : adding path '.'
+2018-08-18 19:20:52,105 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:20:52,107 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:20:52,112 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:20:52,116 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:20:52,118 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:20:52,120 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:20:52,179 - Created '20' parsers.
+2018-08-18 19:20:52,190 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:20:52,191 - Velocimacro : Default library not found.
+2018-08-18 19:20:52,191 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:20:52,191 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:20:52,191 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:20:52,191 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:20:52,214 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:21:03,713 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:21:03,714 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:21:03,714 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:21:03,714 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:21:03,715 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:21:03,718 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:03,718 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:03,723 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:21:03,727 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:21:03,728 - Do unicode file recognition:  false
+2018-08-18 19:21:03,728 - FileResourceLoader : adding path '.'
+2018-08-18 19:21:03,763 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:21:03,766 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:21:03,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:21:03,772 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:21:03,774 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:21:03,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:21:03,823 - Created '20' parsers.
+2018-08-18 19:21:03,834 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:21:03,834 - Velocimacro : Default library not found.
+2018-08-18 19:21:03,834 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:21:03,834 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:21:03,834 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:21:03,834 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:21:03,855 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:21:36,866 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:21:36,867 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:21:36,868 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:21:36,868 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:21:36,869 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:21:36,873 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:36,873 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:36,879 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:21:36,886 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:21:36,888 - Do unicode file recognition:  false
+2018-08-18 19:21:36,888 - FileResourceLoader : adding path '.'
+2018-08-18 19:21:36,933 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:21:36,935 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:21:36,951 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:21:36,960 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:21:36,970 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:21:36,973 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:21:37,050 - Created '20' parsers.
+2018-08-18 19:21:37,067 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:21:37,067 - Velocimacro : Default library not found.
+2018-08-18 19:21:37,068 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:21:37,068 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:21:37,068 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:21:37,068 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:21:37,087 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 11.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:21:37,089 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 11 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:21:49,779 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:21:49,780 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:21:49,781 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:21:49,781 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:21:49,781 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:21:49,783 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:49,784 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:21:49,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:21:49,790 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:21:49,792 - Do unicode file recognition:  false
+2018-08-18 19:21:49,792 - FileResourceLoader : adding path '.'
+2018-08-18 19:21:49,823 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:21:49,825 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:21:49,828 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:21:49,831 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:21:49,833 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:21:49,835 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:21:49,879 - Created '20' parsers.
+2018-08-18 19:21:49,890 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:21:49,891 - Velocimacro : Default library not found.
+2018-08-18 19:21:49,891 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:21:49,891 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:21:49,891 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:21:49,891 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:21:49,906 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered " " at line 134, column 11.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:21:49,909 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered " " at line 134, column 11 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:22:14,666 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:22:14,667 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:22:14,667 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:22:14,667 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:22:14,668 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:22:14,670 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:22:14,670 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:22:14,673 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:22:14,677 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:22:14,678 - Do unicode file recognition:  false
+2018-08-18 19:22:14,678 - FileResourceLoader : adding path '.'
+2018-08-18 19:22:14,713 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:22:14,715 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:22:14,718 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:22:14,723 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:22:14,725 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:22:14,727 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:22:14,769 - Created '20' parsers.
+2018-08-18 19:22:14,781 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:22:14,781 - Velocimacro : Default library not found.
+2018-08-18 19:22:14,781 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:22:14,782 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:22:14,782 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:22:14,782 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:22:14,802 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:22:46,700 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:22:46,704 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:22:46,704 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:22:46,704 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:22:46,705 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:22:46,707 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:22:46,707 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:22:46,711 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:22:46,717 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:22:46,719 - Do unicode file recognition:  false
+2018-08-18 19:22:46,719 - FileResourceLoader : adding path '.'
+2018-08-18 19:22:46,754 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:22:46,757 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:22:46,759 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:22:46,763 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:22:46,765 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:22:46,767 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:22:46,813 - Created '20' parsers.
+2018-08-18 19:22:46,825 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:22:46,826 - Velocimacro : Default library not found.
+2018-08-18 19:22:46,826 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:22:46,826 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:22:46,826 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:22:46,826 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:22:46,841 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "\n    " at line 134, column 10.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:22:46,843 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "\n    " at line 134, column 10 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:23:10,553 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:23:10,554 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:23:10,554 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:23:10,554 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:23:10,555 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:23:10,558 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:23:10,558 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:23:10,561 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:23:10,565 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:23:10,566 - Do unicode file recognition:  false
+2018-08-18 19:23:10,567 - FileResourceLoader : adding path '.'
+2018-08-18 19:23:10,597 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:23:10,599 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:23:10,601 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:23:10,604 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:23:10,607 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:23:10,609 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:23:10,648 - Created '20' parsers.
+2018-08-18 19:23:10,661 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:23:10,662 - Velocimacro : Default library not found.
+2018-08-18 19:23:10,662 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:23:10,662 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:23:10,662 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:23:10,662 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:23:10,677 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "\n    " at line 134, column 11.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:23:10,679 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "\n    " at line 134, column 11 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:23:43,746 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:23:43,747 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:23:43,747 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:23:43,747 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:23:43,748 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:23:43,749 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:23:43,749 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:23:43,752 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:23:43,756 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:23:43,757 - Do unicode file recognition:  false
+2018-08-18 19:23:43,757 - FileResourceLoader : adding path '.'
+2018-08-18 19:23:43,788 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:23:43,790 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:23:43,792 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:23:43,795 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:23:43,798 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:23:43,799 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:23:43,845 - Created '20' parsers.
+2018-08-18 19:23:43,860 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:23:43,861 - Velocimacro : Default library not found.
+2018-08-18 19:23:43,861 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:23:43,861 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:23:43,861 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:23:43,861 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:23:43,874 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 10.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:23:43,876 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 10 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:24:09,523 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:24:09,525 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:24:09,525 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:24:09,525 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:24:09,527 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:24:09,531 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:24:09,531 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:24:09,534 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:24:09,538 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:24:09,539 - Do unicode file recognition:  false
+2018-08-18 19:24:09,539 - FileResourceLoader : adding path '.'
+2018-08-18 19:24:09,574 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:24:09,576 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:24:09,580 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:24:09,583 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:24:09,586 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:24:09,587 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:24:09,649 - Created '20' parsers.
+2018-08-18 19:24:09,662 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:24:09,662 - Velocimacro : Default library not found.
+2018-08-18 19:24:09,662 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:24:09,662 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:24:09,663 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:24:09,663 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:24:09,679 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 10.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:24:09,681 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 10 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:24:57,320 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:24:57,321 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:24:57,321 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:24:57,321 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:24:57,322 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:24:57,325 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:24:57,325 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:24:57,329 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:24:57,333 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:24:57,335 - Do unicode file recognition:  false
+2018-08-18 19:24:57,335 - FileResourceLoader : adding path '.'
+2018-08-18 19:24:57,376 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:24:57,378 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:24:57,381 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:24:57,384 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:24:57,387 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:24:57,389 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:24:57,430 - Created '20' parsers.
+2018-08-18 19:24:57,442 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:24:57,443 - Velocimacro : Default library not found.
+2018-08-18 19:24:57,443 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:24:57,443 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:24:57,443 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:24:57,443 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:24:57,467 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:25:39,011 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:25:39,011 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:25:39,011 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:25:39,011 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:25:39,012 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:25:39,015 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:25:39,015 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:25:39,018 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:25:39,023 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:25:39,025 - Do unicode file recognition:  false
+2018-08-18 19:25:39,025 - FileResourceLoader : adding path '.'
+2018-08-18 19:25:39,056 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:25:39,058 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:25:39,060 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:25:39,064 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:25:39,067 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:25:39,069 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:25:39,114 - Created '20' parsers.
+2018-08-18 19:25:39,125 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:25:39,126 - Velocimacro : Default library not found.
+2018-08-18 19:25:39,126 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:25:39,126 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:25:39,126 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:25:39,126 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:25:39,144 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:25:49,723 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:25:49,724 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:25:49,724 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:25:49,724 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:25:49,725 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:25:49,727 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:25:49,727 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:25:49,731 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:25:49,736 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:25:49,739 - Do unicode file recognition:  false
+2018-08-18 19:25:49,739 - FileResourceLoader : adding path '.'
+2018-08-18 19:25:49,773 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:25:49,775 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:25:49,778 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:25:49,781 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:25:49,783 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:25:49,785 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:25:49,828 - Created '20' parsers.
+2018-08-18 19:25:49,841 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:25:49,842 - Velocimacro : Default library not found.
+2018-08-18 19:25:49,842 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:25:49,842 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:25:49,842 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:25:49,842 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:25:49,862 - ResourceManager : found template.vm with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:26:51,728 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:26:51,731 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:26:51,731 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:26:51,731 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:26:51,733 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:26:51,735 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:26:51,735 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:26:51,738 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:26:51,744 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:26:51,746 - Do unicode file recognition:  false
+2018-08-18 19:26:51,747 - FileResourceLoader : adding path '.'
+2018-08-18 19:26:51,790 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:26:51,792 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2018-08-18 19:26:51,795 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2018-08-18 19:26:51,799 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2018-08-18 19:26:51,801 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2018-08-18 19:26:51,803 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2018-08-18 19:26:51,863 - Created '20' parsers.
+2018-08-18 19:26:51,877 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2018-08-18 19:26:51,878 - Velocimacro : Default library not found.
+2018-08-18 19:26:51,878 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2018-08-18 19:26:51,878 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2018-08-18 19:26:51,878 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2018-08-18 19:26:51,878 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2018-08-18 19:26:51,896 - Parser Exception: template.vm
+org.apache.velocity.runtime.parser.ParseException: Encountered "{" at line 134, column 10.
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.runtime.parser.Parser.generateParseException(Parser.java:3360)
+	at org.apache.velocity.runtime.parser.Parser.jj_consume_token(Parser.java:3237)
+	at org.apache.velocity.runtime.parser.Parser.process(Parser.java:260)
+	at org.apache.velocity.runtime.parser.Parser.parse(Parser.java:105)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:1042)
+	at org.apache.velocity.runtime.RuntimeInstance.parse(RuntimeInstance.java:972)
+	at org.apache.velocity.Template.process(Template.java:120)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:26:51,898 - ResourceManager.getResource() parse exception
+org.apache.velocity.exception.ParseErrorException: Encountered "{" at line 134, column 10 of template.vm
+Was expecting one of:
+    <EOF> 
+    "(" ...
+    <RPAREN> ...
+    <ESCAPE_DIRECTIVE> ...
+    <SET_DIRECTIVE> ...
+    "##" ...
+    "\\\\" ...
+    "\\" ...
+    <TEXT> ...
+    "*#" ...
+    "*#" ...
+    <STRING_LITERAL> ...
+    <IF_DIRECTIVE> ...
+    <STOP_DIRECTIVE> ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <WORD> ...
+    <BRACKETED_WORD> ...
+    <IDENTIFIER> ...
+    <DOT> ...
+    "{" ...
+    "}" ...
+    
+	at org.apache.velocity.Template.process(Template.java:137)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:415)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:335)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1102)
+	at org.apache.velocity.app.VelocityEngine.mergeTemplate(VelocityEngine.java:498)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:180)
+2018-08-18 19:27:04,979 - Log4JLogChute initialized using file 'velocity.log'
+2018-08-18 19:27:04,980 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2018-08-18 19:27:04,980 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2018-08-18 19:27:04,980 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2018-08-18 19:27:04,981 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:348)
+	at org.apache.velocity.util.ClassUtils.getClass(ClassUtils.java:63)
+	at org.apache.velocity.util.ClassUtils.getNewInstance(ClassUtils.java:95)
+	at org.apache.velocity.runtime.log.LogManager.createLogChute(LogManager.java:147)
+	at org.apache.velocity.runtime.log.LogManager.updateLog(LogManager.java:208)
+	at org.apache.velocity.runtime.RuntimeInstance.initializeLog(RuntimeInstance.java:728)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:240)
+	at org.apache.velocity.runtime.RuntimeInstance.init(RuntimeInstance.java:534)
+	at org.apache.velocity.app.VelocityEngine.<init>(VelocityEngine.java:105)
+	at com.suppresswarnings.corpus.service.qrcode.QRCodeContext.main(QRCodeContext.java:171)
+Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 11 more
+2018-08-18 19:27:04,983 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:27:04,983 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2018-08-18 19:27:04,987 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2018-08-18 19:27:04,991 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2018-08-18 19:27:04,993 - Do unicode file recognition:  false
+2018-08-18 19:27:04,993 - FileResourceLoader : adding path '.'
+2018-08-18 19:27:05,040 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2018-08-18 19:27:05,042 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal

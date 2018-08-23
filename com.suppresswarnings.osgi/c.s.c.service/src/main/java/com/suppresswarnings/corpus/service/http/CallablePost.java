@@ -40,9 +40,9 @@ public class CallablePost implements Callable<String> {
             HttpResponse httpResponse = httpClient.execute(post);
             if(httpResponse.getStatusLine().getStatusCode() == 200){
                 srtResult = EntityUtils.toString(httpResponse.getEntity());
-                logger.info("[AccessTokenCall] http result: " + srtResult);
+                logger.info("[Post] http result: " + srtResult);
             } else {
-            	logger.error("[AccessTokenCall] fail to request " + url + ", response " + httpResponse.getStatusLine().toString());
+            	logger.error("[Post] fail to request " + url + ", response " + httpResponse.getStatusLine().toString());
             	throw new Exception("Fail to request post");
             }
         } finally {

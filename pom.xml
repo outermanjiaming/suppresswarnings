@@ -3,14 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.suppresswarnings</groupId>
 	<artifactId>suppresswarnings-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${suppresswarnings.version}</version>
 	<packaging>pom</packaging>
-	<name>LIJIAMING</name>
-
+	<properties>
+		<suppresswarnings.version>0.0.1-osgi</suppresswarnings.version>
+	</properties>
 	<modules>
 		<module>com.suppresswarnings.osgi</module>
 		<module>com.suppresswarnings.util</module>
 		<module>com.suppresswarnings.html</module>
+		<module>com.suppresswarnings.spring</module>
+		<module>com.suppresswarnings.agent</module>
 	</modules>
 	
 	<!-- force it to use jdk1.8 -->

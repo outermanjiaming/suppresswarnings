@@ -10,7 +10,7 @@
 package com.suppresswarnings.osgi.neuralnetwork;
 
 public class TestNN {
-	public static String serializeTo = "D:/lijiaming/NN.dnn.024";
+	public static String serializeTo = "NN.dnn.024";
 	public static void main(String[] args) {
 //		Network nn = new Network(5, new int[] {5, 5}, 3, 0.0, 0.0001);
 //		nn.fullConnect();

@@ -54,6 +54,7 @@ public interface Const {
 		String openid = "gh_a1fe05b98706";
 		String uri = "action={action}&signature={signature}&timestamp={timestamp}&nonce={nonce}&openid={openid}";
 		String xml  = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%s</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
+		String news = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%s</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[%s]]></Title><Description><![CDATA[%s]]></Description><PicUrl><![CDATA[%s]]></PicUrl><Url><![CDATA[%s]]></Url></item></Articles></xml>";
 		String[] keys = {
 				"ToUserName",
 				"FromUserName",
@@ -66,6 +67,7 @@ public interface Const {
 				"Location_X",
 				"Location_Y", 
 				"Scale", 
+				"Latitude","Longitude","Precision",
 				"Label", 
 				"Recognition"
 		};
@@ -76,11 +78,13 @@ public interface Const {
 		};
 		
 		String[] msgFormat = {
-				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><MediaId><![CDATA[{MediaId}]]></MediaId><Format><![CDATA[{Format}]]></Format><MsgId>{MsgId}</MsgId><Recognition><![CDATA[{Recognition}]]></Recognition></xml>",
-				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Content><![CDATA[{Content}]]></Content><MsgId>{MsgId}</MsgId></xml>",
-				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><PicUrl><![CDATA[{PicUrl}]]></PicUrl><MsgId>{MsgId}</MsgId><MediaId><![CDATA[{MediaId}]]></MediaId></xml>",
 				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Location_X>{Location_X}</Location_X><Location_Y>{Location_Y}</Location_Y><Scale>{Scale}</Scale><Label><![CDATA[{Label}]]></Label><MsgId>{MsgId}</MsgId></xml>",
-				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Event><![CDATA[{event}]]></Event><EventKey><![CDATA[{EventKey}]]></EventKey><Ticket><![CDATA[{Ticket}]]></Ticket></xml>"
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><MediaId><![CDATA[{MediaId}]]></MediaId><Format><![CDATA[{Format}]]></Format><MsgId>{MsgId}</MsgId><Recognition><![CDATA[{Recognition}]]></Recognition></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Event><![CDATA[{event}]]></Event><Latitude>{Latitude}</Latitude><Longitude>{Longitude}</Longitude><Precision>{Precision}</Precision></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><MediaId><![CDATA[{MediaId}]]></MediaId><ThumbMediaId><![CDATA[{ThumbMediaId}]]></ThumbMediaId><MsgId>{MsgId}</MsgId></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Event><![CDATA[{event}]]></Event><EventKey><![CDATA[{EventKey}]]></EventKey><Ticket><![CDATA[{Ticket}]]></Ticket></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><PicUrl><![CDATA[{PicUrl}]]></PicUrl><MsgId>{MsgId}</MsgId><MediaId><![CDATA[{MediaId}]]></MediaId></xml>",
+				"<xml><ToUserName><![CDATA[{ToUserName}]]></ToUserName><FromUserName><![CDATA[{FromUserName}]]></FromUserName><CreateTime>{CreateTime}</CreateTime><MsgType><![CDATA[{MsgType}]]></MsgType><Content><![CDATA[{Content}]]></Content><MsgId>{MsgId}</MsgId></xml>"
 		};
 		
 		String[] secret = {
@@ -99,8 +103,9 @@ public interface Const {
 				put("image",     "图片");
 				put("location",  "位置");
 				put("voice",     "语音");
+				put("video",     "视频");
 				put("text",      "文字");
-				put("event",      "事件");
+				put("event",     "事件");
 				put("subscribe", "关注");
 				put("unsubscribe", "取消关注");
 			}
