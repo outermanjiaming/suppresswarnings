@@ -16,10 +16,6 @@ jQuery.ajax({
         var collect = JSON.parse(result)
         var arr = collect.array
         var length = arr.length
-        if(length > 5) {
-        	length = 5
-        	$("#crewimg").append("<span>(5+)</span>")
-        }
         for (var k = 0; k < length; k++) {
         	$("#crewimg").append("<img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='" + arr[k] + "'/>");
         }
