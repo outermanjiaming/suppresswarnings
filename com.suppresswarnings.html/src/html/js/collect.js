@@ -10,6 +10,7 @@ jQuery.ajax({
       if("fail" == result) {
         console.log('fail to access_token: ' + result)
         $('#inviteTitle').text('素朴网联!')
+        oauth2()
       } else {
         $('#inviteTitle').text('素朴网联')
         
