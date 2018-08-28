@@ -24,7 +24,7 @@ function aomsendreply(obj) {
 	$(sendreplyinput).val("")
 }
 function replyone(myimg, reply) {
-	$("#business").append("<li class='boder_v1'><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></li>");
+	$("#clientreply").append("<li class='boder_v1'><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></li>");
 }
 function replyquiz(obj) {
 	var quizId = $(obj).data("quizid")
@@ -83,10 +83,13 @@ jQuery.ajax({
         $("#business > .boder_v1").append("<div class='form-group text-center'><input id='replyquiz' type='text' class='input btn-xs' placeholder='请按要求输入回复内容' size='33'><button type='button' class='btn btn-xs' data-quizid='"+state+"' onclick='replyquiz(this)'>回复</button></div>")
         $("#business").append("<input id='userimg' type='text' class='sr-only hidden' value='"+collect.userimg+"'/>")
         $("#business").append("<input id='username' type='text' class='sr-only hidden' value='"+collect.username+"'/>")
+        
+        $("#business").append("<li class='boder_v1'><div id='clientreply' class='form-group client-reply'></div></li>")
+        $("#business").append("<li class='boder_v1'><div id='serverreply' class='form-group server-reply'></div></li>")
         var replies = collect.replies
         var size = replies.length
         for (var n = 0; n < size; n++) {
-        	$("#business").append("<li class='boder_v1'><span class='collectreply'>" + replies[n] + "</span></li>");
+        	$("#serverreply").append(n + ".<span class='collectreply'>" + replies[n] + "</span>");
         }
       }
     },
