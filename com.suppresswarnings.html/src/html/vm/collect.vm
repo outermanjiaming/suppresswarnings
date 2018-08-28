@@ -137,7 +137,7 @@ $(document).ready(function(){
 	  state  = Request.state
 	}
 	
-   $.getScript("js/collect.js?r=" + Math.random());
+   jQuery.getScript("js/collect.js?r=" + Math.random());
 });
 </script>
 
