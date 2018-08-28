@@ -29,12 +29,17 @@ jQuery.ajax({
       oauth2()
     }
   })
-  
+function hideme(obj) {
+	obj.hide()
+}
+function addon(){
+	 $("#business").append("<li class='boder_v1 addon' onclick='hideme(this)'><span>addon</span></li>")
+}
 $(document).ready(function(){
   $(".replyinput").click(function(){
     $("p").slideToggle();
   });
   $(".boder_v1").click(function(){
-	  $("#business").append("<li class='boder_v1'><span>test</span></li>")
+	  $("#business").append("<li class='boder_v1' onclick='addon()'><span>test</span></li>")
   })
 });
