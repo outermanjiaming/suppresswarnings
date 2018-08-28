@@ -24,7 +24,7 @@ function aomsendreply(obj) {
 	$(sendreplyinput).val("")
 }
 function replyone(myimg, reply) {
-	$("#clientreply").append("<li class='boder_v1'><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></li>");
+	$("#clientreply").append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></div>");
 }
 function replyquiz(obj) {
 	var quizId = $(obj).data("quizid")
@@ -89,7 +89,7 @@ jQuery.ajax({
         var replies = collect.replies
         var size = replies.length
         for (var n = 0; n < size; n++) {
-        	$("#serverreply").append(n + ".<span class='collectreply'>" + replies[n] + "</span>");
+        	$("#serverreply").append(n + ".<div class='collectreply'>" + replies[n] + "</div>");
         }
       }
     },
