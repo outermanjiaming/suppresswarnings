@@ -30,7 +30,7 @@ jQuery.ajax({
     }
   })
 function hideme(obj) {
-	obj.hide()
+	$(obj).hide()
 }
 function addon(){
 	 $("#business").append("<li class='boder_v1 addon' onclick='hideme(this)'><span>addon</span></li>")
