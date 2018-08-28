@@ -1,20 +1,20 @@
-function newreply(myimg, reply, replyId) {
+function aomnewreply(myimg, reply, replyId) {
 	var li = "<li class='boder_v1'><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'><span>"+reply+"</span><div class='form-group text-center'><button type='button' class='btn btn-xs' onclick='changesame(this)'>同义句</button> - <button type='button' class='btn btn-xs' onclick='changereply(this)'>回复</button><div class='sendreplydiv hidden' style='padding-top:15px;'><input type='text' class='input btn-xs sendreplyinput' placeholder='请输入回复内容' size='30'><button type='button' data-replyid='"+replyId+"' data-which='replysame' class='btn btn-xs sendreplybtn' onclick='sendreply(this)'>发送</button></div></div></li>"
 	$("#business").append(li)
 }
-function changesame(obj) {
+function aomchangesame(obj) {
 	var sendreplydiv = $(obj).siblings(".sendreplydiv")[0]
 	$(sendreplydiv).removeClass("hidden")
 	var sendreplybtn = $(sendreplydiv).children(".sendreplybtn")[0]
 	$(sendreplybtn).data("which", "same")
 }
-function changereply(obj) {
+function aomchangereply(obj) {
 	var sendreplydiv = $(obj).siblings(".sendreplydiv")[0]
 	$(sendreplydiv).removeClass("hidden")
 	var sendreplybtn = $(sendreplydiv).children(".sendreplybtn")[0]
 	$(sendreplybtn).data("which", "reply")
 }
-function sendreply(obj) {
+function aomsendreply(obj) {
 	var replyId = $(obj).data("replyid")
 	var which = $(obj).data("which")
 	console.log(replyId + " & " + which)
@@ -22,6 +22,9 @@ function sendreply(obj) {
 	var reply = $(sendreplyinput).val()
 	alert(reply)
 	$(sendreplyinput).val("")
+}
+function replyone(myimg, reply) {
+	$("#business").append("<li class='boder_v1'><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></li>");
 }
 function replyquiz(obj) {
 	var quizId = $(obj).data("quizid")
@@ -42,7 +45,7 @@ function replyquiz(obj) {
     		$("#replyquiz").attr("placeholder","提交失败，稍后重试")
     	} else {
     		$("#replyquiz").attr("placeholder","提交成功，可以继续提交")
-    		newreply(myimg, reply, state)
+    		replyone(myimg, reply)
     	}
     	$("#replyquiz").val("")
     	$("#replyquiz").focus()
@@ -80,7 +83,11 @@ jQuery.ajax({
         $("#business > .boder_v1").append("<div class='form-group text-center'><input id='replyquiz' type='text' class='input btn-xs' placeholder='请按要求输入回复内容' size='33'><button type='button' class='btn btn-xs' data-quizid='"+state+"' onclick='replyquiz(this)'>回复</button></div>")
         $("#business").append("<input id='userimg' type='text' class='sr-only hidden' value='"+collect.userimg+"'/>")
         $("#business").append("<input id='username' type='text' class='sr-only hidden' value='"+collect.username+"'/>")
-        
+        var replies = collect.replies
+        var size = replies.length
+        for (var n = 0; n < size; n++) {
+        	$("#business").append("<li class='boder_v1'><span class='collectreply'>" + replies[n] + "</span></li>");
+        }
       }
     },
     error: function( xhr, result, obj ) {
