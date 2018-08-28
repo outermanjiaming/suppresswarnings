@@ -4,13 +4,13 @@ function newreply(myimg, reply, replyId) {
 }
 function changesame(obj) {
 	var sendreplydiv = $(obj).siblings(".sendreplydiv")[0]
-	$(sendreplydiv).show()
+	$(sendreplydiv).removeClass("hidden")
 	var sendreplybtn = $(sendreplydiv).children(".sendreplybtn")[0]
 	$(sendreplybtn).data("which", "same")
 }
 function changereply(obj) {
 	var sendreplydiv = $(obj).siblings(".sendreplydiv")[0]
-	$(sendreplydiv).show()
+	$(sendreplydiv).removeClass("hidden")
 	var sendreplybtn = $(sendreplydiv).children(".sendreplybtn")[0]
 	$(sendreplybtn).data("which", "reply")
 }
@@ -80,6 +80,7 @@ jQuery.ajax({
         $("#business > .boder_v1").append("<div class='form-group text-center'><input id='replyquiz' type='text' class='input btn-xs' placeholder='请按要求输入回复内容' size='33'><button type='button' class='btn btn-xs' data-quizid='"+state+"' onclick='replyquiz(this)'>回复</button></div>")
         $("#business").append("<input id='userimg' type='text' class='sr-only hidden' value='"+collect.userimg+"'/>")
         $("#business").append("<input id='username' type='text' class='sr-only hidden' value='"+collect.username+"'/>")
+        
       }
     },
     error: function( xhr, result, obj ) {
