@@ -107,35 +107,37 @@
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-function oauth2() {
-    window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/$filename&response_type=code&scope=snsapi_base&state=$qrscene#wechat_redirect'
-}
-
-function GetRequest() {
-    var url = location.search; //获取url中"?"符后的字串
-    var theRequest = new Object();
-    if (url.indexOf("?") != -1) {
-        var str = url.substr(1);
-        strs = str.split("&");
-        for(var i = 0; i < strs.length; i ++) {
-            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-        }
-    }
-    return theRequest;
-}
-var Request = GetRequest();
-
-if(Request.code === undefined || Request.state === undefined) {
-  console.log('first time here without code')
-  $('#inviteTitle').text('素朴网联...')
-  oauth2()
-} else {
-  ticket = Request.code
-  state  = Request.state
-}
+$(document).ready(function(){
+	function oauth2() {
+	    window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/$filename&response_type=code&scope=snsapi_base&state=$qrscene#wechat_redirect'
+	}
+	
+	function GetRequest() {
+	    var url = location.search; //获取url中"?"符后的字串
+	    var theRequest = new Object();
+	    if (url.indexOf("?") != -1) {
+	        var str = url.substr(1);
+	        strs = str.split("&");
+	        for(var i = 0; i < strs.length; i ++) {
+	            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+	        }
+	    }
+	    return theRequest;
+	}
+	var Request = GetRequest();
+	
+	if(Request.code === undefined || Request.state === undefined) {
+	  console.log('first time here without code')
+	  $('#inviteTitle').text('素朴网联...')
+	  oauth2()
+	} else {
+	  ticket = Request.code
+	  state  = Request.state
+	}
+	
+   $.getScript("js/collect.js?r=" + Math.random());
+});
 </script>
-
-<script type="text/javascript" src="js/collect.js"></script>
 
 </body>
 </html>

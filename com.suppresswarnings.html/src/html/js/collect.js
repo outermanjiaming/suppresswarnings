@@ -26,5 +26,15 @@ jQuery.ajax({
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] collect err: " + result)
       $('#inviteTitle').text('!素朴网联')
+      oauth2()
     }
   })
+  
+$(document).ready(function(){
+  $(".replyinput").click(function(){
+    $("p").slideToggle();
+  });
+  $(".boder_v1").click(function(){
+	  $("#business").append("<li class='boder_v1'><span>test</span></li>")
+  })
+});
