@@ -121,7 +121,7 @@ function similarreplyauto() {
 		    	  var items = JSON.parse(result)
 		    	  var itemsize = items.length
 		    	  for(var k=0;k < itemsize;k++) {
-		    		  $(div).append("<div>" + k + ". " + items[k] + "</div>");
+		    		  $(div).append("<div>   |-" + items[k] + "</div>");
 		    	  }
 		      }
 		    },
