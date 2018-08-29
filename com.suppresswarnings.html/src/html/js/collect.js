@@ -55,6 +55,56 @@ function replyquiz(obj) {
     }
   })
 }
+var replySize
+var replyCount
+var replyArray
+var timeOut
+function similarreply(obj) {
+	var replyId = $(obj).data("replyid")
+	var which = $(obj).data("which")
+	console.log(replyId + " & " + which)
+	var similarreplyinput = $(obj).siblings(".similarreplyinput")[0]
+	var similarrepliesdiv = $(obj).siblings("similarrepliesdiv")[0]
+	var reply = $(sendreplyinput).val()
+	var myimg = $("#userimg").val()
+	var myname= $("#username").val()
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+		    action : "replysimilar",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state,
+		    replyid : replyId,
+		    reply : reply
+	    },
+	    success: function( result ) {
+	    	if("fail" == result) {
+	    		$(similarreplyinput).attr("placeholder","提交失败，稍后重试")
+	    	} else {
+	    		$(similarreplyinput).attr("placeholder","提交成功，可以继续提交")
+	    		similarreplyone(similarrepliesdiv, myimg, reply)
+	    	}
+	    	$(similarreplyinput).val("")
+	    	$(similarreplyinput).focus()
+	    },
+	    error: function( xhr, result, obj ) {
+	    	$(similarreplyinput).attr("placeholder","服务端错误，请按要求输入重试")
+	    }
+	  })
+}
+function similarreplyone(div, myimg, reply) {
+	$(div).append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='similarreplyspan'>" + reply + "</span></div>");
+}
+function similarreply() {
+	if(replyCount > replySize) {
+		clearInterval(timeOut)
+	} else {
+		var reply = replyArray[replyCount]
+		$("#similarreply").append("<div class='form-group similarreplydiv'> <div class='form-group similarreplyreply'>"+reply.reply+"</div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button><div class='form-group similarrepliesdiv'></div></div>")
+		replyCount = replyCount + 1
+	}
+}
 jQuery.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
@@ -90,9 +140,14 @@ jQuery.ajax({
 			}
 		});
         $("#business").append("<li class='boder_v1'><div id='clientreply' class='form-group client-reply'><strong>你输入的数据显示在这里：</strong></div></li>")
-        $("#business").append("<li class='boder_v1'><div id='serverreply' class='form-group server-reply'><strong>已收集的数据显示在这里：</strong></div></li>")
+        $("#business").append("<li class='boder_v1'><div id='serverreply'  onclick='slideToggle()' class='form-group server-reply'><strong>已收集的数据显示在这里：</strong></div></li>")
+        $("#business").append("<li class='boder_v1'><div id='similarreply' class='form-group similar-reply'><strong>请写出每一句的同义句：</strong></div></li>")
         var replies = collect.replies
         var size = replies.length
+        replyArray = collect.replyinfo
+        replySize = replyArray.length
+        replyCount = 0
+        timeOut = setInterval("similarreply()",550)
         for (var n = 0; n < size; n++) {
         	$("#serverreply").append("<div class='collectreply'>" + n + ". " + replies[n] + "</div>");
         }
