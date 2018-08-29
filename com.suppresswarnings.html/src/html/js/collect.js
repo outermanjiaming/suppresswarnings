@@ -102,7 +102,33 @@ function similarreplyauto() {
 	} else {
 		var reply = replyArray[replyCount]
 		replyCount = replyCount + 1
-		$("#similarreply").append("<div class='form-group similarreplydiv'><div class='form-group similarrepliesdiv'></div><div class='form-group similarreplyreply'>" + replyCount + "" + reply.reply+"</div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
+		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'>" + replyCount + ". " + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
+		$("#similarreply").append(one)
+		var div = one.children(".similarrepliesdiv")[0]
+		jQuery.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+			    action : "similarreplies",
+			    random : randnum,
+			    ticket : ticket,
+			    state : state,
+			    replyid : reply.replyid
+		    },
+		    success: function( result ) {
+		      if("fail" == result) {
+		    	  console.log("fail to load similar replies")
+		      } else {
+		    	  var items = JSON.parse(result)
+		    	  var itemsize = items.length
+		    	  for(var k=0;k < itemsize;k++) {
+		    		  $(div).append("<div>" + k + ". " + items[k] + "</div>");
+		    	  }
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		      console.log("[lijiaming] similar replies err: " + result)
+		    }
+		})
 	}
 }
 jQuery.ajax({
