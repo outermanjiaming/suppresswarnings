@@ -60,8 +60,8 @@ var replyCount
 var replyArray
 var timeOut
 function showsimilarinputandbtn(obj) {
-	var similarreplyinput = $(obj).siblings(".similarreplyinput")[0]
-	var similarreplybtn = $(obj).siblings(".similarreplybtn")[0]
+	var similarreplyinput = $(obj).parent().siblings(".similarreplyinput")[0]
+	var similarreplybtn = $(obj).parent().siblings(".similarreplybtn")[0]
 	if($(similarreplyinput).hasClass("hidden")) {
 		$(similarreplyinput).removeClass("hidden")
 		$(similarreplybtn).removeClass("hidden")
