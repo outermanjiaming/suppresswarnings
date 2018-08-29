@@ -104,6 +104,20 @@ function similarreply(obj) {
 	    }
 	  })
 }
+function onsubmit(obj, e) {
+	var keynum
+	if(window.event) {
+		keynum = e.keyCode
+	} else if(e.which) {
+		keynum = e.which
+	}
+	if(keynum == 13){
+	   var btn = $(obj).siblings(".similarreplybtn")[0]
+	   $(btn).click()
+	   return false
+	}
+	return true
+}
 function similarreplyone(div, myimg, replyid, reply) {
 	$(div).append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='similarreplyspan' id='"+replyid+"'>" + reply + "</span></div>");
 }
@@ -113,7 +127,7 @@ function similarreplyauto() {
 	} else {
 		var reply = replyArray[replyCount]
 		replyCount = replyCount + 1
-		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput hidden' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn hidden' onclick='similarreply(this)'>发送</button></div>")
+		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30' onkeypress='return onsubmit(this, event)'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
 		$("#similarreply").append(one)
 		var div = one.children(".similarrepliesdiv")[0]
 		jQuery.ajax({
@@ -132,7 +146,7 @@ function similarreplyauto() {
 		    	  var items = JSON.parse(result)
 		    	  var itemsize = items.length
 		    	  for(var k=0;k < itemsize;k++) {
-		    		  $(div).append("<div>|---" + items[k] + "</div>");
+		    		  $(div).append("<div> \____" + items[k] + "</div>");
 		    	  }
 		      }
 		    },
@@ -181,7 +195,7 @@ jQuery.ajax({
         replyArray = collect.replyinfo
         replySize = replyArray.length
         replyCount = 0
-        timeOut = setInterval("similarreplyauto()",250)
+        timeOut = setInterval("similarreplyauto()",20)
       }
     },
     error: function( xhr, result, obj ) {
