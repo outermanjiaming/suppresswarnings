@@ -129,7 +129,7 @@ function similarreplyauto() {
 		replyCount = replyCount + 1
 		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30' onkeypress='return onsubmit(this, event)'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
 		$("#similarreply").append(one)
-		var div = one.children(".similarrepliesdiv")[0]
+		var div = one.children(".similarreplyreply")[0]
 		jQuery.ajax({
 		    url: "/wx.http?r=" + Math.random(),
 		    data: {
@@ -146,7 +146,7 @@ function similarreplyauto() {
 		    	  var items = JSON.parse(result)
 		    	  var itemsize = items.length
 		    	  for(var k=0;k < itemsize;k++) {
-		    		  $(div).append("<div> \____" + items[k] + "</div>");
+		    		  $(div).append("<div>  &nbsp; &nbsp;  &nbsp;" + items[k] + "</div>");
 		    	  }
 		      }
 		    },
