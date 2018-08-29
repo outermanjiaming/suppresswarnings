@@ -23,6 +23,20 @@ function aomsendreply(obj) {
 	alert(reply)
 	$(sendreplyinput).val("")
 }
+function justSubmit(obj, e) {
+	var keynum
+	if(window.event) {
+		keynum = e.keyCode
+	} else if(e.which) {
+		keynum = e.which
+	}
+	if(keynum == 13){
+	   var btn = $(obj).siblings(".similarreplybtn")[0]
+	   $(btn).click()
+	   return false
+	}
+	return true
+}
 function replyone(myimg, reply) {
 	$("#clientreply").append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='collectreply'>" + reply + "</span></div>");
 }
@@ -104,20 +118,7 @@ function similarreply(obj) {
 	    }
 	  })
 }
-function onsubmit(obj, e) {
-	var keynum
-	if(window.event) {
-		keynum = e.keyCode
-	} else if(e.which) {
-		keynum = e.which
-	}
-	if(keynum == 13){
-	   var btn = $(obj).siblings(".similarreplybtn")[0]
-	   $(btn).click()
-	   return false
-	}
-	return true
-}
+
 function similarreplyone(div, myimg, replyid, reply) {
 	$(div).append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='similarreplyspan' id='"+replyid+"'>" + reply + "</span></div>");
 }
@@ -127,7 +128,7 @@ function similarreplyauto() {
 	} else {
 		var reply = replyArray[replyCount]
 		replyCount = replyCount + 1
-		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30' onkeypress='return onsubmit(this, event)'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
+		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30' onkeypress='return justSubmit(this, event)'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
 		$("#similarreply").append(one)
 		var div = one.children(".similarreplyreply")[0]
 		jQuery.ajax({
