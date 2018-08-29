@@ -141,10 +141,6 @@ jQuery.ajax({
 		});
         $("#business").append("<li class='boder_v1'><div id='clientreply' class='form-group client-reply'><strong>你输入的数据显示在这里：</strong></div></li>")
         $("#business").append("<li class='boder_v1'><div id='similarreply' class='form-group similar-reply'><strong>请写出每一句的同义句：</strong></div></li>")
-        $(".boder_v1").click(function(){
-        	var child = $(this).children()[0]
-		    $(child).slideToggle();
-		});
         replyArray = collect.replyinfo
         replySize = replyArray.length
         replyCount = 0
