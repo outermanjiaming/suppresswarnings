@@ -101,8 +101,8 @@ function similarreplyauto() {
 		clearInterval(timeOut)
 	} else {
 		var reply = replyArray[replyCount]
-		$("#similarreply").append("<div class='form-group similarreplydiv'> <div class='form-group similarreplyreply'>"+reply.reply+"</div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button><div class='form-group similarrepliesdiv'></div></div>")
 		replyCount = replyCount + 1
+		$("#similarreply").append("<div class='form-group similarreplydiv'><div class='form-group similarrepliesdiv'></div><div class='form-group similarreplyreply'>" + replyCount + "" + reply.reply+"</div><input type='text' class='input btn-xs similarreplyinput' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn' onclick='similarreply(this)'>发送</button></div>")
 	}
 }
 jQuery.ajax({
