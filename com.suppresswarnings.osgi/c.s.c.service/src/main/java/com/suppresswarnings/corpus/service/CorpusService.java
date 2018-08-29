@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -273,7 +274,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String value = leveldb.get(key);
 		ci.println("get: "+ key + " = " + value);
 	}
-	
+	public void _deleten(CommandInterpreter ci) {
+		logger.info("[getkv] " + leveldb);
+		if(leveldb == null) return;
+		String start = ci.nextArgument();
+		String limit = ci.nextArgument();
+		int n = Integer.valueOf(limit);
+		ci.println("[_deleten] head: " + start + ", count: " + n);
+		AtomicInteger i = new AtomicInteger(0);
+		leveldb.page(start, start, null, n, (k, v) -> {
+			leveldb.del(k);
+			int index = i.incrementAndGet();
+			ci.println("[_deleten] " + index + "remove key:" + k + " = " + v);
+		});
+	}
 	public void _listn(CommandInterpreter ci) {
 		logger.info("[_listn] " + leveldb);
 		if(leveldb == null) return;
@@ -403,7 +417,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 						String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
 						account().put(subscribeHistoryKey, time);
 						account().put(subscribeKey, time + Const.delimiter + "unsubscribe");
-						return xml(openid, "这里永远欢迎你再来。", fromOpenId);
+						return SUCCESS;
 					} else if("SCAN".equals(event)) {
 						dealWithTicket(ticket, openid);
 						//TODO different scene
@@ -590,16 +604,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 			map.put("array", array);
 			map.put("username", user.getNickname());
 			map.put("userimg", user.getHeadimgurl());
-			List<String> replies = new ArrayList<>();
+			List<Map<String, Object>> replyinfo = new ArrayList<>();
 			String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
-			data().page(start, start, null, 250, new BiConsumer<String, String>() {
-
-				@Override
-				public void accept(String t, String u) {
-					replies.add(u);
+			data().page(start, start, null, 1000, (t, u) -> {
+				if(!t.contains("Similar")) {
+					Map<String, Object> e = new HashMap<>();
+					e.put("replyid", t);
+					e.put("reply", u);
+					replyinfo.add(e);
 				}
 			});
-			map.put("replies", replies);
+			map.put("replyinfo", replyinfo);
 			return gson.toJson(map);
 		} else if("replyquiz".equals(action)) {
 			String random = parameter.getParameter("random");
@@ -637,7 +652,84 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", exist);
 			data().put(crewKey, time);
 			logger.info("[corpus reply quiz] " + ret + " openid:" + exist);
-			return SUCCESS;
+			return replyKey;
+		} else if("replysimilar".equals(action)) {
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.error("[corpus reply similar] no random number");
+				return "fail";
+			}
+			String quizId = parameter.getParameter("state");
+			if(quizId == null) {
+				logger.error("[corpus reply quiz] no state");
+				return "fail";
+			}
+			String replyId = parameter.getParameter("replyid");
+			if(replyId == null) {
+				logger.error("[corpus reply similar] no replyId");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.error("[corpus reply similar] no ticket");
+				return "fail";
+			}
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			String exist = token().get(code2OpenIdKey);
+			if(exist == null) {
+				return "fail";
+			}
+			String similar = parameter.getParameter("similar");
+			if(similar == null) {
+				logger.error("[corpus reply similar] similar is null");
+				return "fail";
+			}
+			if(similar.trim().length() < 1) {
+				logger.error("[corpus reply similar] similar too short");
+				return "fail";
+			}
+			
+			String time = "" + System.currentTimeMillis();
+			String similarKey = String.join(Const.delimiter, replyId, "Similar", exist, time, random);
+			int ret = data().put(similarKey, similar);
+			String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", exist);
+			data().put(crewKey, time);
+			logger.info("[corpus reply similar] " + ret + " openid:" + exist);
+			return similarKey;
+		}else if("similarreplies".equals(action)) {
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.error("[corpus reply similar] no random number");
+				return "fail";
+			}
+			String quizId = parameter.getParameter("state");
+			if(quizId == null) {
+				logger.error("[corpus reply quiz] no state");
+				return "fail";
+			}
+			String replyId = parameter.getParameter("replyid");
+			if(replyId == null) {
+				logger.error("[corpus reply similar] no replyId");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.error("[corpus reply similar] no ticket");
+				return "fail";
+			}
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			String exist = token().get(code2OpenIdKey);
+			if(exist == null) {
+				return "fail";
+			}
+			String similarKey = String.join(Const.delimiter, replyId, "Similar");
+			List<String> result = new ArrayList<>();
+			data().page(similarKey, similarKey, null, 20, (t, u) -> {
+				result.add(u);
+			});
+			logger.info("[corpus reply similar] " + result.size() + " openid:" + exist);
+			Gson gson = new Gson();
+			return gson.toJson(result);
 		} else if("user".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -886,13 +978,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 		//001.Collect.Corpus.Quiz.T_Corpus_oDqlM1TyKpSulfMC2OsZPwhi-9Wk_1534646328739_890.QRCode
 		String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew");
 		List<String> crews = new ArrayList<>();
+		logger.info("[corpus collect crew image by quizId] " + quizId);
 		data().page(crewKey, crewKey, null, 10, new BiConsumer<String, String>() {
 
 			@Override
 			public void accept(String t, String u) {
 				if(t.length() > crewKey.length()) {
 					String crew = t.substring(crewKey.length() + 1);
-					logger.info("[Corpus collect crew]: " + crew + " time: " + u);
 					crews.add(crew);
 				}
 			}
@@ -932,24 +1024,37 @@ public class CorpusService implements HTTPService, CommandProvider {
 	 */
 	public WXuser getWXuserByOpenId(String openId) {
 		WXuser user = null;
+		Gson gson = new Gson();
+		String accessToken = accessToken("User Info");
+		
 		String userKey = String.join(Const.delimiter, Const.Version.V1, openId, "User");
-
 		String json = account().get(userKey);
 		if(json == null) {
 			logger.info("[Corpus] get WXuser info: " + openId);
-			String accessToken = accessToken("User Info");
 			CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
 			try {
 				json = get.call();
+				user = gson.fromJson(json, WXuser.class);
+				account().put(userKey, json);
 			} catch (Exception e) {
 				logger.error("[WXContext] fail to get user info: " + openId, e);
 			}
-		}
-		if(json != null) {
-			Gson gson = new Gson();
-			user = gson.fromJson(json, WXuser.class);
-			account().put(userKey, json);
 		} else {
+			user = gson.fromJson(json, WXuser.class);
+			if(user.getSubscribe() == 0) {
+				logger.info("[Corpus] get WXuser info: " + openId);
+				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
+				try {
+					json = get.call();
+					user = gson.fromJson(json, WXuser.class);
+				} catch (Exception e) {
+					logger.error("[WXContext] fail to get user info: " + openId, e);
+				}
+			}
+			account().put(userKey, json);
+		}
+		
+		if(user == null) {
 			logger.info("[WXContext] fail to get user info: use default");
 			user = new WXuser();
 			user.setSubscribe(0);
@@ -1089,6 +1194,5 @@ public class CorpusService implements HTTPService, CommandProvider {
 		logger.info("[corpus] after clean TTL("+ttl.size()+")");
 	}
 	
-	public static void main(String[] args) {
-	}
+	public static void main(String[] args) {}
 }

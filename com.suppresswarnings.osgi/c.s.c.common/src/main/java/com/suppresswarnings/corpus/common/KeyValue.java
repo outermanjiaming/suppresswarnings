@@ -16,7 +16,14 @@ public class KeyValue {
 		this.key = key;
 		this.value = value;
 	}
-	
+	public KeyValue key(String newKey) {
+		this.key = newKey;
+		return this;
+	}
+	public KeyValue value(String newValue) {
+		this.value = newValue;
+		return this;
+	}
 	public String key() {
 		return key;
 	}

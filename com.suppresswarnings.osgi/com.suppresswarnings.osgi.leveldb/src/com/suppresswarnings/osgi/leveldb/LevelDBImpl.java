@@ -144,9 +144,10 @@ public class LevelDBImpl implements LevelDB {
 	public String page(String head, String start, AtomicBoolean stop, long limit, BiConsumer<String, String> consumer) {
 		Iterator itr = db_.NewIterator(new ReadOptions());
 		long count = 0;
-		String now = start;
+		String next = start;
 		for(itr.Seek(new Slice(start));itr.Valid() && count < limit; itr.Next()) {
 			String key = itr.key().toString();
+			next = key;
 			if(stop != null && stop.get()) {
 				logger.info("[leveldb] early stop while reading key: " + key + " stop: " + stop);
 				break;
@@ -155,11 +156,10 @@ public class LevelDBImpl implements LevelDB {
 				logger.info("[leveldb] early stop while reading key: " + key + " head: " + head);
 				break;
 			}
-			now = key;
-			consumer.accept(now, itr.value().toString());
+			consumer.accept(next, itr.value().toString());
 			++count;
 		}
-		return now;
+		return next;
 	}
 	@Override
 	public boolean inited() {
