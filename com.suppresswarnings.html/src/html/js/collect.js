@@ -96,8 +96,8 @@ function similarreply(obj) {
 function similarreplyone(div, myimg, reply) {
 	$(div).append("<div><img style='width: 20px;height: 20px;margin-right: 5px;margin-top:2px;' src='"+myimg+"'/><span class='similarreplyspan'>" + reply + "</span></div>");
 }
-function similarreply() {
-	if(replyCount > replySize) {
+function similarreplyauto() {
+	if(replyCount >= replySize) {
 		clearInterval(timeOut)
 	} else {
 		var reply = replyArray[replyCount]
@@ -147,7 +147,7 @@ jQuery.ajax({
         replyArray = collect.replyinfo
         replySize = replyArray.length
         replyCount = 0
-        timeOut = setInterval("similarreply()",550)
+        timeOut = setInterval("similarreplyauto()",550)
         for (var n = 0; n < size; n++) {
         	$("#serverreply").append("<div class='collectreply'>" + n + ". " + replies[n] + "</div>");
         }
