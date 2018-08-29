@@ -65,7 +65,7 @@ function similarreply(obj) {
 	console.log(replyId + " & " + which)
 	var similarreplyinput = $(obj).siblings(".similarreplyinput")[0]
 	var similarrepliesdiv = $(obj).siblings("similarrepliesdiv")[0]
-	var reply = $(sendreplyinput).val()
+	var reply = $(similarreplyinput).val()
 	var myimg = $("#userimg").val()
 	var myname= $("#username").val()
 	jQuery.ajax({
@@ -142,8 +142,8 @@ jQuery.ajax({
         $("#business").append("<li class='boder_v1'><div id='clientreply' class='form-group client-reply'><strong>你输入的数据显示在这里：</strong></div></li>")
         $("#business").append("<li class='boder_v1'><div id='serverreply' class='form-group server-reply'><strong>已收集的数据显示在这里：</strong></div></li>")
         $("#business").append("<li class='boder_v1'><div id='similarreply' class='form-group similar-reply'><strong>请写出每一句的同义句：</strong></div></li>")
-        $("#serverreply").click(function(){
-		  $(this).slideToggle();
+        $(".boder_v1").click(function(){
+		  $(this).children()[0].slideToggle();
 		});
         var replies = collect.replies
         var size = replies.length
