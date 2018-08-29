@@ -62,8 +62,13 @@ var timeOut
 function showsimilarinputandbtn(obj) {
 	var similarreplyinput = $(obj).siblings(".similarreplyinput")[0]
 	var similarreplybtn = $(obj).siblings(".similarreplybtn")[0]
-	$(similarreplyinput).removeClass("hidden")
-	$(similarreplybtn).removeClass("hidden")
+	if($(similarreplyinput).hasClass("hidden")) {
+		$(similarreplyinput).removeClass("hidden")
+		$(similarreplybtn).removeClass("hidden")
+	} else {
+		$(similarreplyinput).addClass("hidden")
+		$(similarreplybtn).addClass("hidden")
+	}
 }
 function similarreply(obj) {
 	var replyId = $(obj).data("replyid")
@@ -108,7 +113,7 @@ function similarreplyauto() {
 	} else {
 		var reply = replyArray[replyCount]
 		replyCount = replyCount + 1
-		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". " + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput hidden' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn hidden' onclick='similarreply(this)'>发送</button></div>")
+		var one = $("<div class='form-group similarreplydiv'><div class='form-group similarreplyreply'><span class='replycount' onclick='showsimilarinputandbtn(this)'>" + replyCount + ". </span>" + reply.reply+"</div><div class='form-group similarrepliesdiv'></div><input type='text' class='input btn-xs similarreplyinput hidden' placeholder='请输入同义句' size='30'><button type='button' data-replyid='"+reply.replyid+"' data-which='similarreply' class='btn btn-xs similarreplybtn hidden' onclick='similarreply(this)'>发送</button></div>")
 		$("#similarreply").append(one)
 		var div = one.children(".similarrepliesdiv")[0]
 		jQuery.ajax({
@@ -127,7 +132,7 @@ function similarreplyauto() {
 		    	  var items = JSON.parse(result)
 		    	  var itemsize = items.length
 		    	  for(var k=0;k < itemsize;k++) {
-		    		  $(div).append("<div>   |-" + items[k] + "</div>");
+		    		  $(div).append("<div>|---" + items[k] + "</div>");
 		    	  }
 		      }
 		    },
