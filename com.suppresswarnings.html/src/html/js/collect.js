@@ -76,7 +76,7 @@ function similarreply(obj) {
 		    ticket : ticket,
 		    state : state,
 		    replyid : replyId,
-		    reply : reply
+		    similar : reply
 	    },
 	    success: function( result ) {
 	    	if("fail" == result) {
