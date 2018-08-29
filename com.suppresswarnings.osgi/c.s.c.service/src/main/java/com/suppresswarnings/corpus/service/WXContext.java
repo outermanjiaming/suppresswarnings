@@ -11,13 +11,10 @@ package com.suppresswarnings.corpus.service;
 
 import java.util.Set;
 
-import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.CheckUtil;
-import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
-import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 
@@ -26,6 +23,34 @@ public class WXContext extends Context<CorpusService> {
 	String openid;
 	String wxid;
 	WXuser user;
+	public final State<Context<CorpusService>> reject = new State<Context<CorpusService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1154267650726164000L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			u.output("暂时无权查看，请联系管理员。（本次对话结束）");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "无权查看";
+		}
+
+		@Override
+		public boolean finish() {
+			return true;
+		}
+		
+	};
 	public final State<Context<CorpusService>> init = new State<Context<CorpusService>>() {
 		/**
 		 * 
@@ -34,19 +59,11 @@ public class WXContext extends Context<CorpusService> {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			String nameKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Name");
-			String name = u.content().account().get(nameKey);
 			Set<String> commands = u.content().factories.keySet();
 			if(commands.size() < 1) {
-				u.output(name + " 你好，我现在还没有准备好！");
+				u.output("稍等，我现在还没有准备好！");
 			} else {
-				if(name != null) {
-					u.appendLine(name + " 你好，");
-				} else {
-					logger.error("get null from Account by key: " + nameKey);
-					u.appendLine("还不知怎么称呼您，(输入'我要注册')");
-				}
-				u.appendLine("我目前处于内测开发阶段。");
+				u.appendLine("我目前处于内测开发阶段。请关注 http://SuppressWarnings.com/");
 			}
 			if(exit(t, "exit()")) {
 				u.appendLine("上一阶段对话已经结束。");
@@ -58,8 +75,7 @@ public class WXContext extends Context<CorpusService> {
 			String command = CheckUtil.cleanStr(t.trim());
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
 			if(cf == null) {
-				String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", command.toLowerCase());
-				String exchange = u.content().account().get(nowCommandKey);
+				String exchange = u.content().globalCommand(command);
 				if(exchange != null) {
 					cf = u.content().factories.get(exchange);
 				}

@@ -70,7 +70,7 @@ public class ProduceContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
-
+		boolean first = true;
 		/**
 		 * 
 		 */
@@ -84,13 +84,15 @@ public class ProduceContext extends WXContext {
 			String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
 			u.content().data().put(crewKey, time());
 			update();
-			u.output("完成！你可以再次扫码回答，也可以输入'继续答题'，用不同的表达方式回答该问题。");
+			if(first) {
+				first = false;
+				u.output("好的，请继续回答该话题，尽量用不同的表达方式回答。（接下来我不说话了，如果你不想答题了，输入“退出”）");
+			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if("继续答题".equals(t)) return produce;
-			return init;
+			return answer;
 		}
 
 		@Override

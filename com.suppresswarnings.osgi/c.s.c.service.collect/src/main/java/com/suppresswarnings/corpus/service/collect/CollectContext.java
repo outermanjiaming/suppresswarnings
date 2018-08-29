@@ -41,7 +41,7 @@ public class CollectContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("请用一句话描述你要收集的语料(不懂可以去官网查看攻略，或请教他人)");
+			u.output("请用一句话描述你要收集的语料");
 		}
 
 		@Override
@@ -100,7 +100,7 @@ public class CollectContext extends WXContext {
 				u.content().account().put(myQuizKey, quizId);
 				u.content().account().put(allQuizKey, quizId);
 			}
-			u.output("恭喜你，语料收集任务创建成功。现在请举例示范该如何回答");
+			u.output("请举例示范该如何回答");
 		}
 
 		@Override
@@ -147,7 +147,7 @@ public class CollectContext extends WXContext {
 			File file = new File(rootPath + filename);
 			WXnews news = new WXnews();
 			news.setTitle("我在收集语料，帮我说句话！");
-			news.setDescription("分享给朋友们收集语料，也可以打开后分享到朋友圈，让更多人参与收集语料。语料数据可以卖钱！");
+			news.setDescription("分享给朋友们收集语料，让更多人参与收集语料数据，语料数据能交易，赚了钱可以分红。");
 			news.setUrl("http://suppresswarnings.com/" + filename);
 			news.setPicUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
 			String jsonnews = gson.toJson(news);
@@ -172,8 +172,7 @@ public class CollectContext extends WXContext {
 				logger.info("html file created: " + s);
 				writer.flush();
 				writer.close();
-				String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", quizId.toLowerCase());
-				u.content().account().put(nowCommandKey, "我要上报语料");
+				u.content().setGlobalCommand(quizId, "我要上报语料", openid(), time());
 			} catch (Exception e) {
 				logger.error("lijiaming: fail to use velocity engine", e);
 			}

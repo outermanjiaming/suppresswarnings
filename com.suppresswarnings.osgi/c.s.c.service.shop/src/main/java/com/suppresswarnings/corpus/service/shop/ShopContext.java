@@ -119,8 +119,7 @@ public class ShopContext extends WXContext {
 					qrTicket = gson.fromJson(json, QRCodeTicket.class);
 					logger.info("Create permanent qrcode: " + qrTicket.getUrl());
 				}
-				String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", qrScene.toLowerCase());
-				u.content().account().put(nowCommandKey, "商铺客服");
+				u.content().setGlobalCommand(qrScene, "商铺客服", openid(), time());
 				
 				//end--
 				

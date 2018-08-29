@@ -9,7 +9,6 @@
  */
 package com.suppresswarnings.corpus.service.setting;
 
-import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
@@ -85,8 +84,7 @@ public class SettingContext extends WXContext {
 				u.output("设置失败，命令已经存在，新命令不可用");
 				return;
 			}
-			String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", now);
-			u.content().account().put(nowCommandKey, old);
+			u.content().setGlobalCommand(now, old, openid(), time());
 			u.output("新命令已经记录，继续设置或者退出");
 		}
 

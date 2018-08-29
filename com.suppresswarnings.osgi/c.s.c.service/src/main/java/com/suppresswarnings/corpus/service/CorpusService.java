@@ -367,8 +367,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 						if(eventKey != null) {
 							String subscribeEventKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", "Event", openid, time);
 							account().put(subscribeEventKey, eventKey);
-							String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", where.toLowerCase());
-							String exchange = account().get(nowCommandKey);
+							String exchange = globalCommand(where);
 							logger.info("SCAN: " + exchange + " == " + where);
 							//NOTE a qrcode with exchange commands
 							if(exchange != null) {
@@ -408,8 +407,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					} else if("SCAN".equals(event)) {
 						dealWithTicket(ticket, openid);
 						//TODO different scene
-						String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", where.toLowerCase());
-						String exchange = account().get(nowCommandKey);
+						String exchange = globalCommand(where);
 						logger.info("SCAN: " + exchange + " == " + where);
 						if(exchange != null) {
 							ContextFactory<CorpusService> cf = factories.get(exchange);
@@ -436,8 +434,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					String where = account().get(alterCommandKey);
 					logger.info("[corpus] command: " + command + ", where: " + where);
 					if(where != null) {
-						String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", where.toLowerCase());
-						String exchange = account().get(nowCommandKey);
+						String exchange = globalCommand(where);
 						logger.info("ALTER: " + exchange + " == " + where);
 						if(exchange != null) {
 							ContextFactory<CorpusService> cf = factories.get(exchange);
@@ -581,14 +578,66 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String json = get.call();
 			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
 			logger.info("[corpus collect access_token] " + accessToken.toString());
-			if(accessToken.getOpenid() == null) {
+			String openId = accessToken.getOpenid();
+			if(openId == null) {
 				return "fail";
 			}
-			String openId = accessToken.getOpenid();
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			token().put(code2OpenIdKey, openId);
+			WXuser user = getWXuserByOpenId(openId);
 			Map<String, Object> map = new HashMap<>();
 			List<String> array = collectCrewImageByQuizId(quizId);
 			map.put("array", array);
+			map.put("username", user.getNickname());
+			map.put("userimg", user.getHeadimgurl());
+			List<String> replies = new ArrayList<>();
+			String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+			data().page(start, start, null, 250, new BiConsumer<String, String>() {
+
+				@Override
+				public void accept(String t, String u) {
+					replies.add(u);
+				}
+			});
+			map.put("replies", replies);
 			return gson.toJson(map);
+		} else if("replyquiz".equals(action)) {
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.error("[corpus reply quiz] no random number");
+				return "fail";
+			}
+			String quizId = parameter.getParameter("state");
+			if(quizId == null) {
+				logger.error("[corpus reply quiz] no state");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.error("[corpus reply quiz] no ticket");
+				return "fail";
+			}
+			String reply = parameter.getParameter("reply");
+			if(reply == null) {
+				logger.error("[corpus reply quiz] reply is null");
+				return "fail";
+			}
+			if(reply.trim().length() < 1) {
+				logger.error("[corpus reply quiz] reply too short");
+				return "fail";
+			}
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			String exist = token().get(code2OpenIdKey);
+			if(exist == null) {
+				return "fail";
+			}
+			String time = "" + System.currentTimeMillis();
+			String replyKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer", exist, time, random);
+			int ret = data().put(replyKey, reply);
+			String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", exist);
+			data().put(crewKey, time);
+			logger.info("[corpus reply quiz] " + ret + " openid:" + exist);
+			return SUCCESS;
 		} else if("user".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -688,8 +737,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			String ticket = parameter.getParameter("ticket");
+			if(ticket == null) {
+				return "fail";
+			}
 			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", ticket);
 			String openid = token().get(code2OpenIdKey);
+			if(openid == null) {
+				return "fail";
+			}
 			String goodsid= parameter.getParameter("goodsid");
 			String title  = parameter.getParameter("title");
 			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", title:" + title);
@@ -857,6 +912,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void subscribe(String openId, String time) {
 		String userKey = String.join(Const.delimiter, Const.Version.V1, "User", openId);
 		account().put(userKey, time);
+	}
+	public String globalCommand(String sceneOrCommand) {
+		String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", sceneOrCommand.toLowerCase());
+		String exchange = account().get(nowCommandKey);
+		return exchange;
+	}
+	public void setGlobalCommand(String newCommand, String command, String openId, String time) {
+		String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", newCommand.toLowerCase());
+		String infoKey = String.join(Const.delimiter, "Setting", "Info", "Global", "Command", newCommand.toLowerCase());
+		String info = String.join(Const.delimiter, newCommand, openId, time);
+		account().put(nowCommandKey, command);
+		account().put(infoKey, info);
 	}
 	/**
 	 * 001.openidvalue.User = {user info json}
