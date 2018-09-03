@@ -37,6 +37,13 @@ dl dt {
     text-align: left;
     line-height: 20px;
 }
+.single_item li{
+    width: 100%;
+    float: left;
+    overflow: hidden;
+    margin-bottom: 5px;
+    position: relative;
+}
 </style>
 
 </head>
@@ -63,7 +70,9 @@ dl dt {
 	</nav>
 </div>
 <br/>
-<ul class="product single_item info" style="margin:0px;padding:0px;list-style:none">
+
+<div class="list-item">
+<ul class="single_item" style="margin:0px;padding:0px;list-style:none">
 <li>
   <div class="item">
     <div class="goods_images"> 
@@ -130,7 +139,6 @@ dl dt {
     </dl>
   </div>
 </li>
-
 
 <li>
   <div class="item">
@@ -216,5 +224,6 @@ dl dt {
   </div>
 </li>
 </ul>
-
-</body></html>
+</div>
+</body>
+</html>
