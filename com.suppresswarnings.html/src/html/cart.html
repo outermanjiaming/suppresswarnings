@@ -44,12 +44,15 @@
     height: auto;
 }
 
-.goods_desc {
-    width: 70%;
-    float: right;
-    height: 80px;
-    padding-right: 2%;
-}
+
+.goods_desc{ width:70%; float:right; padding-right:2%;}
+.goods_desc dl{ width:100%; overflow:hidden}
+.goods_desc dl dt{ width:100%; height:40px; overflow:hidden; font-size:14px; line-height:20px; color:#666; -webkit-line-clamp: 2; /*2，是控制行数的*/-webkit-box-orient: vertical;display: -webkit-box;  }
+.goods_desc dl dd{ width:100%; height:20px; overflow:hidden; font-size:12px; line-height:20px; color:#999; -webkit-line-clamp:1; /*2，是控制行数的*/-webkit-box-orient: vertical;display: -webkit-box;  }
+.goods_desc .price{ width:100%; overflow:hidden;}
+.goods_desc .price i{ display:block; float:left; margin-left:8px; font-size:12px; line-height:150%; color:#999;text-decoration:line-through;}
+.goods_desc .price span{ display:block;float:left; font-size:14px; line-height:150%; color:#E71F19;}
+.goods_desc .price em{ display:block; float:right; font-size:14px; line-height:150%; color:#666;}
 
 
 .item-list .num {width:60%; float:right; padding-right:2%; }
