@@ -1,0 +1,153 @@
+<html class="gr__xinniuguoji_com"><head><meta charset="UTF-8">
+<meta name="generator" content="ShopEx 4.8.5 For Mobile(MyShopEx.com)">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black" name="apple-mobile-web-app-status-bar-style">
+<meta name="format-detection" content="telephone=no">
+<title>查看购物车</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<style>
+.folw_shopmain {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: #FFF;
+    border-bottom: 1px solid #eeeeee;
+}
+.item-list {
+    width: 100%;
+    overflow: hidden;
+    background: #f5f5f5;
+    margin-bottom: 2px;
+}
+
+.item-list .inner {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.item_img {
+    width: 25%;
+    padding-left: 2%;
+    float: left;
+    overflow: hidden;
+}
+
+.item_img img {
+    display: block;
+    width: 80px;
+    height: auto;
+}
+
+.goods_desc {
+    width: 70%;
+    float: right;
+    height: 80px;
+    padding-right: 2%;
+}
+
+
+.item-list .num {width:60%; float:right; padding-right:2%; }
+
+.qiehuan{width:70%; overflow:hidden; float:left;}
+.xm-input-number { vertical-align: middle;width:100%; margin:auto; position:relative;}
+.xm-input-number .input-sub {display: block; width: 30px;height: 30px;position: absolute;left: 0px;top: 0px;vertical-align: middle;border: 1px solid #CCC;background-color: #FFF; background:#F5F5F5 url(shop-cart.png) no-repeat 7px -53px; background-size: 60px}
+.xm-input-number .input-sub.active{background:#fff url(shop-cart.png) no-repeat 7px -24px; background-size: 60px}
+.xm-input-number .input-num { background:#fff; vertical-align: middle; display:block; width:48%; height:30px; text-align: center; font-size: 16px; color: #999; -webkit-appearance: none; border-radius: 0; -webkit-box-flex: 1; -webkit-flex: 1; flex: 1;  border:1px solid #CCC; margin:auto;}
+.xm-input-number .input-add { display: inline-block; width:30px; height:30px; position:absolute; right:0px; top:0px;  vertical-align: middle;  background:#fff url(shop-cart.png) no-repeat -23px -24px; background-size: 60px;  border:1px solid #CCC ;}
+
+.goods_attr { background:url(arrow_down_on.png) no-repeat right center;background-size:15px 15px; width:100%; overflow:hidden; height:25px;  margin-top:5px;}
+.goods_attr span{ display:block; width:90%; float:left; overflow:hidden;line-height:25px; font-size:12px; line-height:25px; color:#999;}
+
+.delete {width:60px; height:30px; text-align: center; overflow: hidden; background:#dd2726; float: right;}
+.delete a{color:#fff; font-size:14px; line-height:30px;}
+
+
+.flow_bottom { position: fixed; left: 0; bottom: 0; width: 100%; height: 50px; border-top: 1px solid #d7d7d7; background-color: #fff; z-index: 2; display: -webkit-box; display: -moz-box; display: -ms-box; display: -o-box; display: box; -webkit-box-align: center; -moz-box-align: center; -ms-box-align: center; -o-box-align: center; box-align: center; -webkit-box-pack: center; -moz-box-pack: center; -ms-box-pack: center; -o-box-pack: center; box-pack: center; min-width:320px; }
+.flow_bottom .info { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; width: 100%; color: #FF5778; font-size: 16px; text-align: right; margin-right: 5px; }
+.flow_bottom .quanxuan { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; margin-left: 9px; height: 40px; width: 60%; }
+.flow_bottom .quanxuan .check-wrapper {  margin-left: 0px;  width: 70px; padding-top:11px;}
+.flow_bottom .quanxuan .cart-checkbox { float: left; }
+.flow_bottom .quanxuan .cart-checktext { float: left; width: 35px; height: 20px; line-height: 20px; font-size: 14px; text-indent: 3px; color: #000; }
+.flow_bottom .info .hot { font-size: 16px; color: #c42a32; text-align: right; }
+.flow_bottom .info .hot em { font-size: 16px; color: #c42a32; }
+
+.flow_bottom .right { width: 100px; height: 50px;}
+.flow_bottom .right a { background: #f60; }
+
+.flow_bottom .xm-button {  background-color:#DD2726; text-align: center; height: 50px; line-height: 50px; font-size: 16px; color: #fff; width: 100%; border: none; font-family: 微软雅黑; display:block }
+
+</style>
+</head>
+<body data-gr-c-s-loaded="true">
+  <header class="header">
+  <div class="tab_nav">
+    <div class="header">
+      <div class="h-left" style="float:left;margin-right:20px;"><a class="sb-back" href="javascript:history.back(-1)" title="返回">返回首页</a></div>
+      <div class="h-mid">购物车</div>
+	</div>
+  </div>
+</header>
+<form id="form-cart" name="formCart" method="post" action="?cart-checkout.html">
+<div class="folw_shopmain">
+<div class="item-list" number="6" urlupdate="?cart-g-8446@10132@na-updateCart.html" urlremove="?cart-g-removeCart.html" price="29.99">
+      <div class="inner">
+        <!--input type="checkbox" autocomplete="off" checked="checked" name="sel_cartgoods[]" value="8446-10132-na" id="sel_cartgoods_8446-10132-na" class="f_checkbox check-wrapper check-wrapper-1"-->
+        <div class="item_img"> 
+         <a href="?product-8446.html"> 
+          <img src="http://xinniuguoji.com/images/goods/20180508/a66e61c17968b23f.jpg" title="8+ MINUTE 极速面膜 7片装 买1送1链接 三种搭配可选 (白 白)"> 
+         </a> 
+        </div>
+        <div class="goods_desc">
+          <dl>
+            <dt><a href="?product-8446.html">8+ MINUTE 极速面膜 7片装 买1送1链接 三种搭配可选 (白 白)</a></dt>
+          </dl>
+          <div class="price"><span>NZ29.99</span><i>NZ39.00</i> <em class="goods_numx">x6</em> </div>
+        </div>
+        <div class="num">
+          <div class="qiehuan">
+            <div class="xm-input-number"> 
+              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).next('input'),-1,event);" class="input-sub active"></a>
+              <input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" name="cartNum[g][8446-10132-na]" id="goods_number_8446-10132-na" value="2" class="input-num" onchange="Cart.ItemNumUpdate(jQuery(this),this.value,event);">
+              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).prev('input'),1,event);" class="input-add"></a> </div>
+          </div>
+          <div class="delete"> 
+            <a href="javascript:;" onclick="Cart.removeItem(this, event);"> 删除 </a> 
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="item-list" number="1" urlupdate="?cart-g-5178@5456@na-updateCart.html" urlremove="?cart-g-removeCart.html" price="8.70">
+      <div class="inner">
+        <!--input type="checkbox" autocomplete="off" checked="checked" name="sel_cartgoods[]" value="5178-5456-na" id="sel_cartgoods_5178-5456-na" class="f_checkbox check-wrapper check-wrapper-1"-->
+        <div class="item_img"> <a href="?product-5178.html"> <img src="http://hyhealth.nz/aaaold/media/catalog/product/cache/1/small_image/210x/zzznew1/1/1/11_11.jpg" title="汤普森 生物护发素 100片  保质期2020/02【thompson】"> </a> </div>
+        <div class="goods_desc">
+          <dl>
+            <dt><a href="?product-5178.html">汤普森 生物护发素 100片  保质期2020/02【thompson】</a></dt>
+          </dl>
+          <div class="price"><span>NZ8.70</span><i>NZ25.00</i> <em class="goods_numx">x1</em> </div>
+        </div>
+        <div class="num">
+          <div class="qiehuan">
+            <div class="xm-input-number"> <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).next('input'),-1,event);" class="input-sub active"></a>
+              <input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" name="cartNum[g][5178-5456-na]" id="goods_number_5178-5456-na" value="1" class="input-num" onchange="Cart.ItemNumUpdate(jQuery(this),this.value,event);">
+              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).prev('input'),1,event);" class="input-add"></a> </div>
+          </div>
+          <div class="delete"> <a href="javascript:;" onclick="Cart.removeItem(this, event);"> 删除 </a> </div>
+        </div>
+      </div>
+    </div>
+ </div>  
+  <div class="flow_bottom">
+    <div class="info"><span class="hot" id="cartTotal">共 <span></span>种<span></span>件&nbsp;&nbsp;合计:<span class="totalprice">NZ188.64</span></span></div>
+    <div class="right">
+      <input type="button" onclick="Cart.submit();" class="xm-button " value="去结算">
+    </div>
+  </div>
+</form>
+</body></html>
