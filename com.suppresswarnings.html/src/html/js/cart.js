@@ -24,7 +24,7 @@ function updateCartnum(inputnum, cartid, newnum){
 }
 function subnum(obj) {
 	var cartid = $(obj).parent().data("cartid")
-	var inputnum = $(obj).siblings("input-num")[0]
+	var inputnum = $(obj).siblings(".input-num")[0]
 	var num = $(inputnum).val()
 	var newnum = parseInt(num) - 1
 	updateCartnum(inputnum, cartid, newnum)
@@ -34,12 +34,12 @@ function updatenum(obj) {
 	var cartid = $(obj).parent().data("cartid")
 	var num = $(obj).val()
 	var newnum = parseInt(num)
-	updateCartnum(inputnum, cartid, newnum)
+	updateCartnum(obj, cartid, newnum)
 }
 
 function addnum(obj) {
 	var cartid = $(obj).parent().data("cartid")
-	var inputnum = $(obj).siblings("input-num")[0]
+	var inputnum = $(obj).siblings(".input-num")[0]
 	var num = $(inputnum).val()
 	var newnum = parseInt(num) + 1
 	updateCartnum(inputnum, cartid, newnum)
