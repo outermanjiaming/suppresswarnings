@@ -28,7 +28,7 @@ function addone(cart) {
      '</div>'+
    '</div>'+
  '</div>'
-    $(".item_list").append(div)
+    $(".item-list").append(div)
 }
 
 jQuery.ajax({
