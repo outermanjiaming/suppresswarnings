@@ -54,7 +54,7 @@ jQuery.ajax({
         	var goods = cart.goods
         	var cent = parseFloat(goods.pricecent)
         	sum = sum + cent
-        	count = count + cart.count
+        	count = count + parseInt(cart.count)
         	var price = rate * cent
         	addone(cart, goods, price)
         }
