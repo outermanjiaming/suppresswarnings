@@ -85,61 +85,48 @@
 	</div>
   </div>
 </header>
-<form id="form-cart" name="formCart" method="post" action="?cart-checkout.html">
-<div class="folw_shopmain">
-<div class="item-list" number="6" urlupdate="?cart-g-8446@10132@na-updateCart.html" urlremove="?cart-g-removeCart.html" price="29.99">
-      <div class="inner">
-        <!--input type="checkbox" autocomplete="off" checked="checked" name="sel_cartgoods[]" value="8446-10132-na" id="sel_cartgoods_8446-10132-na" class="f_checkbox check-wrapper check-wrapper-1"-->
-        <div class="item_img"> 
-         <a href="?product-8446.html"> 
-          <img src="http://xinniuguoji.com/images/goods/20180508/a66e61c17968b23f.jpg" title="8+ MINUTE 极速面膜 7片装 买1送1链接 三种搭配可选 (白 白)"> 
-         </a> 
-        </div>
-        <div class="goods_desc">
-          <dl>
-            <dt><a href="?product-8446.html">8+ MINUTE 极速面膜 7片装 买1送1链接 三种搭配可选 (白 白)</a></dt>
-          </dl>
-          <div class="price"><span>NZ29.99</span><i>NZ39.00</i> <em class="goods_numx">x6</em> </div>
-        </div>
-        <div class="num">
-          <div class="qiehuan">
-            <div class="xm-input-number"> 
-              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).next('input'),-1,event);" class="input-sub active"></a>
-              <input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" name="cartNum[g][8446-10132-na]" id="goods_number_8446-10132-na" value="2" class="input-num" onchange="Cart.ItemNumUpdate(jQuery(this),this.value,event);">
-              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).prev('input'),1,event);" class="input-add"></a> </div>
-          </div>
-          <div class="delete"> 
-            <a href="javascript:;" onclick="Cart.removeItem(this, event);"> 删除 </a> 
-          </div>
-        </div>
-      </div>
+  <div class="folw_shopmain">
+    <div class="item-list">
+      
     </div>
-<div class="item-list" number="1" urlupdate="?cart-g-5178@5456@na-updateCart.html" urlremove="?cart-g-removeCart.html" price="8.70">
-      <div class="inner">
-        <!--input type="checkbox" autocomplete="off" checked="checked" name="sel_cartgoods[]" value="5178-5456-na" id="sel_cartgoods_5178-5456-na" class="f_checkbox check-wrapper check-wrapper-1"-->
-        <div class="item_img"> <a href="?product-5178.html"> <img src="http://hyhealth.nz/aaaold/media/catalog/product/cache/1/small_image/210x/zzznew1/1/1/11_11.jpg" title="汤普森 生物护发素 100片  保质期2020/02【thompson】"> </a> </div>
-        <div class="goods_desc">
-          <dl>
-            <dt><a href="?product-5178.html">汤普森 生物护发素 100片  保质期2020/02【thompson】</a></dt>
-          </dl>
-          <div class="price"><span>NZ8.70</span><i>NZ25.00</i> <em class="goods_numx">x1</em> </div>
-        </div>
-        <div class="num">
-          <div class="qiehuan">
-            <div class="xm-input-number"> <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).next('input'),-1,event);" class="input-sub active"></a>
-              <input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" name="cartNum[g][5178-5456-na]" id="goods_number_5178-5456-na" value="1" class="input-num" onchange="Cart.ItemNumUpdate(jQuery(this),this.value,event);">
-              <a href="javascript:;" onclick="Cart.ItemNumUpdate(jQuery(this).prev('input'),1,event);" class="input-add"></a> </div>
-          </div>
-          <div class="delete"> <a href="javascript:;" onclick="Cart.removeItem(this, event);"> 删除 </a> </div>
-        </div>
-      </div>
-    </div>
- </div>  
+  </div>
   <div class="flow_bottom">
     <div class="info"><span class="hot" id="cartTotal">共 <span>2</span>种<span>5</span>件&nbsp;&nbsp;合计:<span class="totalprice">¥1088.64</span></span></div>
     <div class="right">
-      <input type="button" onclick=";" class="xm-button " value="去结算">
+      <input type="button" onclick="order(this);" class="xm-button " value="去结算">
     </div>
   </div>
-</form>
+  <script>
+function index() {
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
+}
+
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+	
+$(document).ready(function(){
+	
+	var Request = GetRequest();
+	
+	if(Request.code === undefined || Request.state === undefined) {
+	  console.log('first time here without code')
+	  index()
+	} else {
+	  ticket = Request.code
+	  state  = Request.state
+	}
+	
+	jQuery.getScript("js/cart.js?r=" + Math.random());
+})
+</script>
 </body></html>
