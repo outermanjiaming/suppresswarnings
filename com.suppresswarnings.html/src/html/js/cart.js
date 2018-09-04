@@ -1,5 +1,46 @@
 function order(obj) {
+	var username = $("#username").val()
+	if(mobile.length < 1) {
+		$("#username").focus()
+		return
+	}
+	var mobile = $("#mobile").val()
+	if(mobile.length < 11) {
+		$("#mobile").focus()
+		return
+	}
 	
+	var address = $("#address").val()
+	if(address.length < 10) {
+		$("#address").focus()
+		return
+	}
+	var comment = $("#comment").val()
+
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+		    action : "daigou",
+		    todo : "makeanorder",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state,
+		    username : username,
+		    mobile : mobile,
+		    address : address,
+		    comment : comment
+	    },
+	    success: function( result ) {
+	      if("fail" == result) {
+	        console.log('fail to access_token: ' + result)
+	      } else {
+	    	  console.log('great make an order')
+	      }
+	    },
+	    error: function( xhr, result, obj ) {
+	      console.log("[lijiaming] order err: " + result)
+	    }
+	})
 }
 function addone(cart, goods, price) {
 	var div = '<div class="inner">' +
