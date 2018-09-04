@@ -44,6 +44,8 @@ function addone(goods) {
   $(".single_item").append(li)
 }
 
+$("#gotoorder").attr("href", "/order.html?state="+state+"&code="+ ticket)
+$("#gotocart").attr("href", "/cart.html?state="+state+"&code="+ ticket)
 jQuery.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
