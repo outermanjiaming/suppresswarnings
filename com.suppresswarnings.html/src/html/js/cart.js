@@ -1,8 +1,7 @@
-
-function addone(cart) {
-	var goods = cart.goods
-	var rate = 0.01
-	var price = rate * parseFloat(goods.pricecent)
+function order(obj) {
+	
+}
+function addone(cart, goods, price) {
 	var div = '<div class="inner">' +
         '<div class="item_img">' + 
     '<a href="/detail.html?goodsid=' +goods.goodsid+ '">' + 
@@ -47,10 +46,22 @@ jQuery.ajax({
       } else {
         var cartslist = JSON.parse(result)
         var length = cartslist.length
+        var sum = 0
+        var count = 0
+        var rate = 0.01
         for (var k = 0; k < length; k++) {
         	var cart = cartslist[k]
-        	addone(cart)
+        	var goods = cart.goods
+        	var cent = parseFloat(goods.pricecent)
+        	sum = sum + cent
+        	count = count + cart.count
+        	var price = rate * cent
+        	addone(cart, goods, price)
         }
+        var totalprice = rate * parseFloat(sum)
+        $("#totalprice").text("¥" + totalprice)
+        $("#goodscount").text(count)
+        $("#goodstype").text(length)
       }
     },
     error: function( xhr, result, obj ) {
