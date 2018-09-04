@@ -1,6 +1,6 @@
 function order(obj) {
 	var username = $("#username").val()
-	if(mobile.length < 1) {
+	if(username.length < 1) {
 		$("#username").focus()
 		return
 	}
