@@ -115,7 +115,7 @@ dl dt {
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 function oauth2() {
-	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=who#wechat_redirect'
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
 }
 
 function GetRequest() {
@@ -137,14 +137,13 @@ $(document).ready(function(){
 	
 	if(Request.code === undefined || Request.state === undefined) {
 	  console.log('first time here without code')
-	  $('#inviteTitle').text('素朴网联...')
 	  oauth2()
 	} else {
 	  ticket = Request.code
 	  state  = Request.state
 	}
 	
-   jQuery.getScript("js/daigou.js?r=" + Math.random());
+    jQuery.getScript("js/daigou.js?r=" + Math.random());
 });
 </script>
 

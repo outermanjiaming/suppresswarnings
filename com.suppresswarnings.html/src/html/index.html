@@ -222,57 +222,51 @@ var quizIds
 var rate = 0.01
 var nextindex = 0
 function next() {
-if(quizIds == undefined) {
-  quizId = ""
-} else {
-  if(nextindex >= quizIds.length) {
-    nextindex = 0
-  }
-  quizId = quizIds[nextindex]
-  nextindex = nextindex + 1
-}
-jQuery.ajax({
-    url: "/wx.http?r=" + Math.random(),
-    data: {
-      action : "next",
-      random : randnum,
-      ticket : ticket,
-      state : state,
-      next  : quizId
-    },
-    success: function( result ) {
-      if("fail" == result) {
-        console.log('fail to next: ' + result)
-      } else {
-        var map = JSON.parse(result)
-        var quiz = map.quiz
-        if(quizIds == undefined) {
-          quizIds = map.array
-        }
-        $("#quiz").text(quiz.quiz)
-        if(quiz.sample == undefined) quiz.sample = ""
-        $("#sample").text(quiz.sample)
-        $("#ownerimg").attr("src", quiz.ownerimg)
-        $("#ownername").html(quiz.ownername)
-        var price = rate * parseFloat(quiz.price)
-        $("#btnprice").text(price)
-        $("#qrcode").attr("src", quiz.qrcode)
-        $("#btnbuy").data("id", quiz.quizId)
-        $("#btnsample").data("id", quiz.quizId)
-      }
-      
-    },
-    error: function( xhr, result, obj ) {
-      console.log("[lijiaming] user err: " + result)
-      $('#inviteTitle').text('!个人中心')
-    }
-  })
-
-
-
-
-
-  
+	if(quizIds == undefined) {
+	  quizId = ""
+	} else {
+	  if(nextindex >= quizIds.length) {
+	    nextindex = 0
+	  }
+	  quizId = quizIds[nextindex]
+	  nextindex = nextindex + 1
+	}
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+	      action : "next",
+	      random : randnum,
+	      ticket : ticket,
+	      state : state,
+	      next  : quizId
+	    },
+	    success: function( result ) {
+	      if("fail" == result) {
+	        console.log('fail to next: ' + result)
+	      } else {
+	        var map = JSON.parse(result)
+	        var quiz = map.quiz
+	        if(quizIds == undefined) {
+	          quizIds = map.array
+	        }
+	        $("#quiz").text(quiz.quiz)
+	        if(quiz.sample == undefined) quiz.sample = ""
+	        $("#sample").text(quiz.sample)
+	        $("#ownerimg").attr("src", quiz.ownerimg)
+	        $("#ownername").html(quiz.ownername)
+	        var price = rate * parseFloat(quiz.price)
+	        $("#btnprice").text(price)
+	        $("#qrcode").attr("src", quiz.qrcode)
+	        $("#btnbuy").data("id", quiz.quizId)
+	        $("#btnsample").data("id", quiz.quizId)
+	      }
+	      
+	    },
+	    error: function( xhr, result, obj ) {
+	      console.log("[lijiaming] user err: " + result)
+	      $('#inviteTitle').text('!个人中心')
+	    }
+	  })
 }
 
 function confirmBuy(obj) {

@@ -1,21 +1,49 @@
 
-function addone() {
+function addone(goods) {
+	var rate = 0.01
+	var price = rate * parseFloat(goods.pricecent)
 	var li = '<li>' +
    '<div class="item">' +
     '<div class="goods_images">' +
-      '<a href="/detail.html?agentid=who&code=what&goodsid=which">' +
-        '<img src="http://xinniuguoji.com/images/goods/20180802/eed7ca5854e0df17.png" style="width:100%;" alt="测试动态">' +
+      '<a href="/detail.html?agentid='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">' +
+        '<img src="' + goods.image + '" style="width:100%;" alt="'+goods.title+'">' +
       '</a>' +
     '</div>' +
     '<dl>' +
-          '<dt><a href="/detail.html?agentid=who&code=what&goodsid=which">测试动态</a></dt>' +
-	  	  '<dd style="font-size:12px;">[新西兰仓]</dd>' + 
-	      '<dd><i>￥350.63</i></dd>' + 
-	      '<dd><a class="rbtn mini-addcart" href="javascript:;" data-agentid="who" data-goodsid="which"> 加入购物车 </a></dd>' +
+          '<dt><a href="/detail.html?agentid=who&code=what&goodsid=which">'+goods.title+'</a></dt>' +
+	  	  '<dd style="font-size:12px;">'+goods.extra+'</dd>' + 
+	      '<dd><i>￥'+price+'</i></dd>' + 
+	      '<dd><a class="rbtn mini-addcart" href="javascript:;" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a></dd>' +
     '</dl>' +
   '</div>' +
 '</li>'
   $(".single_item").append(li)
 }
 
-addone()
+jQuery.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+	    action : "daigou",
+	    todo : "index",
+	    random : randnum,
+	    ticket : ticket,
+	    state : state
+    },
+    success: function( result ) {
+      if("fail" == result) {
+        console.log('fail to access_token: ' + result)
+        oauth2()
+      } else {
+        var goodslist = JSON.parse(result)
+        var length = goodslist.length
+        for (var k = 0; k < length; k++) {
+        	var goods = goodslist[k]
+        	addone(goods)
+        }
+      }
+    },
+    error: function( xhr, result, obj ) {
+      console.log("[lijiaming] collect err: " + result)
+      oauth2()
+    }
+})
