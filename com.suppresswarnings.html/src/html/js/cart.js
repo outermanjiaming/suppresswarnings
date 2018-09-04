@@ -1,3 +1,49 @@
+function updateCartnum(inputnum, cartid, newnum){
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+		    action : "daigou",
+		    todo : "updatecartnum",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state,
+		    cartid : cartid,
+		    newnum : newnum
+	    },
+	    success: function( result ) {
+	      if("fail" == result) {
+	            console.log('fail to updatecartnum: ' + result)
+	      } else {
+	    	  $(inputnum).val(result)
+	      }
+	    },
+	    error: function( xhr, result, obj ) {
+	      console.log("[lijiaming] updatecartnum err: " + result)
+	    }
+	})
+}
+function subnum(obj) {
+	var cartid = $(obj).parent().data("cartid")
+	var inputnum = $(obj).siblings("input-num")[0]
+	var num = $(inputnum).val()
+	var newnum = parseInt(num) - 1
+	updateCartnum(inputnum, cartid, newnum)
+}
+
+function updatenum(obj) {
+	var cartid = $(obj).parent().data("cartid")
+	var num = $(obj).val()
+	var newnum = parseInt(num)
+	updateCartnum(inputnum, cartid, newnum)
+}
+
+function addnum(obj) {
+	var cartid = $(obj).parent().data("cartid")
+	var inputnum = $(obj).siblings("input-num")[0]
+	var num = $(inputnum).val()
+	var newnum = parseInt(num) + 1
+	updateCartnum(inputnum, cartid, newnum)
+}
 function order(obj) {
 	var username = $("#username").val()
 	if(username.length < 1) {
@@ -79,8 +125,8 @@ function addone(cart, goods, price) {
    '<div class="num">' +
      '<div class="qiehuan">' +
        '<div class="xm-input-number"  data-cartid="' +cart.cartid+ '" >' + 
-         '<a href="javascript:;" onclick="subnum(this)" class="input-sub active"></a>' +
-         '<input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" value="1" class="input-num" onchange="updatenum(this);">' +
+         '<a href="javascript:;" onclick="subnum(this)" class="input-sub"></a>' +
+         '<input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" value="' + cart.count + '" class="input-num" onchange="updatenum(this);">' +
          '<a href="javascript:;" onclick="addnum(this)" class="input-add"></a>' + 
         '</div>' +
      '</div>' +
