@@ -53,7 +53,8 @@ function order(obj) {
 	                  console.log('res.err_msg'+res.err_msg)
 	                  if(res.err_msg == "get_brand_wcpay_request:ok" ){
 	                      console.log('finish success')
-	                }
+	                      window.location.href = '/order.html?code=' + ticket + '&state=' + state
+	                  }
 	          })
 	      }
 	    },
