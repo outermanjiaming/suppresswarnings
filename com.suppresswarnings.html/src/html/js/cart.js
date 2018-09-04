@@ -35,6 +35,26 @@ function order(obj) {
 	        console.log('fail to access_token: ' + result)
 	      } else {
 	    	  console.log('great make an order')
+	    	  console.log('prepay ok' + result)
+	          
+	          var prepay = JSON.parse(result)
+	          
+	          console.log('prepay.package = ' + prepay.package)
+	          WeixinJSBridge.invoke(
+	                'getBrandWCPayRequest', {
+	                   "appId": prepay.appId,
+	                   "timeStamp":prepay.timeStamp,
+	                   "nonceStr":prepay.nonceStr,
+	                   "package":prepay.package,
+	                   "signType":prepay.signType,
+	                   "paySign":prepay.paySign
+	                },
+	                function(res){
+	                  console.log('res.err_msg'+res.err_msg)
+	                  if(res.err_msg == "get_brand_wcpay_request:ok" ){
+	                      console.log('finish success')
+	                }
+	          })
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
