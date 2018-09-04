@@ -141,6 +141,24 @@ $(document).ready(function(){
 	} else {
 	  ticket = Request.code
 	  state  = Request.state
+	  $.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+		    action : "access_token",
+		    random : randnum,
+		    ticket : ticket
+		    },
+		    success: function( result ) {
+		      if("success" == result) {
+		    	  console.log('great lijiaming')
+		      } else {
+		        console.log('fail to access_token: ' + result)
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		      console.log("[lijiaming] check logon err: " + result)
+		    }
+		  })
 	}
 	
     jQuery.getScript("js/daigou.js?r=" + Math.random());
