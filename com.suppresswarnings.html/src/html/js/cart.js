@@ -11,7 +11,7 @@ function isPositiveNum(val){
         return false;
     }
 }
-function removeItem(obj) {
+function removeitem(obj) {
 	var cartid = $(obj).data("cartid")
 	jQuery.ajax({
 	    url: "/wx.http?r=" + Math.random(),
