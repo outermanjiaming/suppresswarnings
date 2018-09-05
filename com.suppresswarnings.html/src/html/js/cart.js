@@ -1,4 +1,44 @@
+function isPositiveNum(val){
+    if(val === "" || val ==null){
+        return false;
+    }
+    if(!isNaN(val)){
+    	if(val <= 0) {
+    		return false;
+    	}
+        return true;
+    } else{
+        return false;
+    }
+}
+function removeItem(obj) {
+	var cartid = $(obj).data("cartid")
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+		    action : "daigou",
+		    todo : "removecart",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state,
+		    cartid : cartid
+	    },
+	    success: function( result ) {
+	      if("fail" == result) {
+	    	  console.log('fail to remove item: ' + result)
+	      } else {
+	    	  $(obj).parent().parent().remove()
+	      }
+	    },
+	    error: function( xhr, result, obj ) {
+	      console.log("[lijiaming] remove item err: " + result)
+	    }
+	})
+}
 function updateCartnum(inputnum, cartid, newnum){
+	if(!isPositiveNum(newnum)) {
+		return false;
+	}
 	jQuery.ajax({
 	    url: "/wx.http?r=" + Math.random(),
 	    data: {
@@ -120,18 +160,18 @@ function addone(cart, goods, price) {
      '<dl>' +
        '<dt><a href="/detail.html?goodsid=' +goods.goodsid+ '">' +goods.title+ '</a></dt>' +
      '</dl>' +
-     '<div class="price"><span>¥' +price+ '</span><em class="goods_numx">x' +cart.count+ '</em> </div>' +
+     '<div class="price"><span>¥' +price+ '</span></div>' +
    '</div>' +
    '<div class="num">' +
      '<div class="qiehuan">' +
-       '<div class="xm-input-number"  data-cartid="' +cart.cartid+ '" >' + 
+       '<div class="xm-input-number" data-cartid="' +cart.cartid+ '">' + 
          '<a href="javascript:;" onclick="subnum(this)" class="input-sub"></a>' +
          '<input type="text" onkeydown="if(event.keyCode == 13) event.returnValue = false" value="' + cart.count + '" class="input-num" onchange="updatenum(this);">' +
          '<a href="javascript:;" onclick="addnum(this)" class="input-add"></a>' + 
         '</div>' +
      '</div>' +
      '<div class="delete">' +
-       '<a href="javascript:;" onclick="removeitem(this);"> 删除 </a>' + 
+       '<a href="javascript:;" data-cartid="' +cart.cartid+ '" onclick="removeitem(this);"> 删除 </a>' + 
      '</div>'+
    '</div>'+
  '</div>'
