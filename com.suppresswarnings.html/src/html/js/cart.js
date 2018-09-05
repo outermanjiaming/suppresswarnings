@@ -28,6 +28,7 @@ function removeitem(obj) {
 	    	  console.log('fail to remove item: ' + result)
 	      } else {
 	    	  $(obj).parent().parent().parent().remove()
+	    	  loadCarts()
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
@@ -52,9 +53,10 @@ function updateCartnum(inputnum, cartid, newnum){
 	    },
 	    success: function( result ) {
 	      if("fail" == result) {
-	            console.log('fail to updatecartnum: ' + result)
+	          console.log('fail to updatecartnum: ' + result)
 	      } else {
 	    	  $(inputnum).val(result)
+	    	  loadCarts()
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
@@ -150,7 +152,7 @@ function order(obj) {
 	})
 }
 function addone(cart, goods, price) {
-	var div = '<div class="inner">' +
+	var div = '<div class="inner" data-goodscount="'+cart.count+'" data-goodsprice="'+goods.pricecent+'">' +
         '<div class="item_img">' + 
     '<a href="/detail.html?goodsid=' +goods.goodsid+ '">' + 
          '<img src="' +goods.image+ '" title="' +goods.title+ '">' + 
@@ -177,45 +179,52 @@ function addone(cart, goods, price) {
  '</div>'
     $(".item-list").append(div)
 }
-
-jQuery.ajax({
-    url: "/wx.http?r=" + Math.random(),
-    data: {
-	    action : "daigou",
-	    todo : "mycarts",
-	    random : randnum,
-	    ticket : ticket,
-	    state : state
-    },
-    success: function( result ) {
-      if("fail" == result) {
-        console.log('fail to access_token: ' + result)
-        index()
-      } else {
-        var cartslist = JSON.parse(result)
-        var length = cartslist.length
-        var sum = 0
-        var count = 0
-        var rate = 0.01
-        for (var k = 0; k < length; k++) {
-        	var cart = cartslist[k]
-        	var goods = cart.goods
-        	var cent = parseFloat(goods.pricecent)
-        	var cnt = parseInt(cart.count)
-        	var total = cent * cnt
-        	sum = sum + total
-        	count = count + cnt
-        	var price = rate * cent
-        	addone(cart, goods, price)
-        }
-        var totalprice = rate * parseFloat(sum)
-        $("#totalprice").text("¥" + totalprice)
-        $("#goodscount").text(count)
-        $("#goodstype").text(length)
-      }
-    },
-    error: function( xhr, result, obj ) {
-      console.log("[lijiaming] collect err: " + result)
-      index()
-    }
-})
+function loadCarts(){
+	jQuery.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+		    action : "daigou",
+		    todo : "mycarts",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state
+	    },
+	    success: function( result ) {
+	      if("fail" == result) {
+	        console.log('fail to access_token: ' + result)
+	        index()
+	      } else {
+	        var cartslist = JSON.parse(result)
+	         $(".item-list").empty()
+	        
+	        var length = cartslist.length
+	        if(length == 0) {
+	        	$(".folw_shopmain").html("<a href='/daigou.html'>购物车为什么空空如也？</a>")
+	        	return
+	        }
+	        var sum = 0
+	        var count = 0
+	        var rate = 0.01
+	        for (var k = 0; k < length; k++) {
+	        	var cart = cartslist[k]
+	        	var goods = cart.goods
+	        	var cent = parseFloat(goods.pricecent)
+	        	var cnt = parseInt(cart.count)
+	        	var total = cent * cnt
+	        	sum = sum + total
+	        	count = count + cnt
+	        	var price = rate * cent
+	        	addone(cart, goods, price)
+	        }
+	        var totalprice = rate * parseFloat(sum)
+	        $("#totalprice").text("¥" + totalprice)
+	        $("#goodscount").text(count)
+	        $("#goodstype").text(length)
+	      }
+	    },
+	    error: function( xhr, result, obj ) {
+	      console.log("[lijiaming] collect err: " + result)
+	      index()
+	    }
+	})
+}
