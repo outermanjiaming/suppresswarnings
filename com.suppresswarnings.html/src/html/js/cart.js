@@ -27,7 +27,7 @@ function removeitem(obj) {
 	      if("fail" == result) {
 	    	  console.log('fail to remove item: ' + result)
 	      } else {
-	    	  $(obj).parent().parent().remove()
+	    	  $(obj).parent().parent().parent().remove()
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
