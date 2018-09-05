@@ -30,17 +30,12 @@ ul li{
     padding: 0;
     list-style-type: none;
 }
-/*底部导航*/
-.bian{ border-right:1px solid #eeeeee; margin-left:-1px;}
-.footer_nav{ width:100%; height:50px; position:fixed; z-index:100; bottom:0px; background:#f8f8f8;border-top:1px solid #eeeeee;}
-.footer_nav ul{ width:40%; float:left; height:50px;}
+/*返回首页*/
+.footer_nav{ width:120px; height:65px; position:fixed; z-index:100; bottom:0px;}
 .footer_nav ul li{ width:100%; float:left; height:50px;}
-.footer_nav ul li span{ display:block; width:100%; height:30px; text-align:center; font-size:12px; color:#666; line-height:20px;}
+.footer_nav ul li span{ display:block; text-align:center; color:#666; }
 .footer_nav ul li em{ display:block; width:30px; height:25px; margin:auto;background: url(pub_goods.png) no-repeat;background-size:auto 280px;}
 .footer_nav ul li .goods_nav1{ background-position:0 -190px;}
-.footer_nav ul li .goods_nav2{background-position:0 -220px;}
-.footer_nav ul li .goods_nav3{background-position:0 -252px;}
-.footer_nav ul li a.on .goods_nav3{background: url('/pub_goods_on.png') no-repeat;background-size:auto 280px;background-position:0 -252px;}
 
 .goods_price{ width:95%; margin:auto; overflow:hidden;}
 .goods_price dt{ width:100%; overflow:hidden; height:30px;}
@@ -80,7 +75,7 @@ ul li{
 </div>
 <br/>
 <div class="flow_bottom">
-    <ul><li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li></ul>
+    <div class="footer_nav"><ul><li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li></ul></div>
     <div class="info"><span class="totalprice" id="totalprice">¥64.30</span>元</div>
     <div class="right">
       <input type="button" onclick="addtocart(this);" class="xm-button " value="加入购物车">

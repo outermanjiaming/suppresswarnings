@@ -200,8 +200,10 @@ function loadCarts(){
 	        var length = cartslist.length
 	        if(length == 0) {
 	        	$(".folw_shopmain").html('<div id="emptycart" style="padding:50px 0;text-align: center;line-height: 40px;color: #999;font-size: 18px;margin-top: 20px;"><img src="/empty_cart.png" width="100" height="95"> <br>购物车为什么空空的呢？</div><div class="qb_gap" style="width:60%; margin:0 auto;"><a href="/daigou.html" style="text-align: center;text-decoration: none;line-height: 45px;height: 45px;font-size: 15px;display: block;width: 100%;color: #ffffff!important;-webkit-border-radius: .3em;-moz-border-radius: .3em;-ms-border-radius: .3em;-o-border-radius: .3em;border-radius: .3em;background-color: #DD2726;">马上买买买!</a></div>')
+	        	$(".flow_bottom").hide()
 	        	return
 	        }
+	        $(".flow_bottom").show()
 	        var sum = 0
 	        var count = 0
 	        var rate = 0.01

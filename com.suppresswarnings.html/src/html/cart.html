@@ -74,6 +74,13 @@
 .flow_bottom .right a { background: #f60; }
 .flow_bottom .xm-button {  background-color:#DD2726; text-align: center; height: 50px; line-height: 50px; font-size: 16px; color: #fff; width: 100%; border: none; font-family: 微软雅黑; display:block }
 .address {magin-bottom: 100px;width:100%;}
+/*返回首页*/
+.footer_nav{ width:120px; height:65px; position:fixed; z-index:100; bottom:0px;}
+.footer_nav ul li{ width:100%; float:left; height:50px;}
+.footer_nav ul li span{ display:block; text-align:center; color:#666; }
+.footer_nav ul li em{ display:block; width:30px; height:25px; margin:auto;background: url(pub_goods.png) no-repeat;background-size:auto 280px;}
+.footer_nav ul li .goods_nav1{ background-position:0 -190px;}
+
 </style>
 
   <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
@@ -99,7 +106,7 @@
   </div>
   <div class="line" style="width:100%;height:100px;"></div>
   <div class="flow_bottom">
-    <div class="h-left" ><a id="backtodaigou" class="sb-back" href="/daigou.html" title="返回首页"><span>返回首页</span></a></div>
+    <div class="footer_nav"><ul><li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li></ul></div>
     <div class="info"><span class="hot" id="cartTotal">共 <span id="goodstype">0</span>种<span id="goodscount">0</span>件&nbsp;&nbsp;合计:<span class="totalprice" id="totalprice">¥0.00</span>元</span></div>
     <div class="right">
       <input type="button" onclick="order(this);" class="xm-button " value="去结算">
