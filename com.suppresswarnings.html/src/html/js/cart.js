@@ -214,9 +214,12 @@ function loadCarts(){
 	        	sum = sum + total
 	        	count = count + cnt
 	        	var price = rate * cent
+	        	price = price.toFixed(2)
 	        	addone(cart, goods, price)
 	        }
-	        var totalprice = rate * parseFloat(sum)
+	        
+	        var totalprice = rate * sum
+	        totalprice = totalprice.toFixed(2)
 	        $("#totalprice").text("¥" + totalprice)
 	        $("#goodscount").text(count)
 	        $("#goodstype").text(length)
