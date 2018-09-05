@@ -62,11 +62,11 @@ public abstract class Context<T> implements Predicate<String> {
 	}
 	public abstract State<Context<T>> exit(); 
 	public boolean yes(String input, String expect) {
-		return confirm(input, expect, "yes y ok okay alright 好 好的 可以 嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
+		return confirm(input, expect, "yes y ok okay alright 好 好啊 好吧 那好吧 好的 可以 没问题 行 行吧 嗯 嗯嗯 是 是的 没错 当然 好啊 是啊 可以的 对 确定 确认 ");
 	}
 	
 	public boolean exit(String input, String expect) {
-		return confirm(input, expect, "我要退出 退出 quit exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
+		return confirm(input, expect, "我要退出 退出 退下 滚 quit exit exit() 不玩了 不想玩了 不做了 不要了 不了 算了 不用了 返回 ");
 	}
 	
 	public boolean confirm(String input, String expect, String common) {
@@ -74,7 +74,7 @@ public abstract class Context<T> implements Predicate<String> {
 		if(input == null) return false;
 		if(expect != null && expect.equals(input)) return true;
 		//TODO ner check yes
-		String yes = CheckUtil.cleanStr(input.trim()) + " ";
+		String yes = CheckUtil.cleanStr(input) + " ";
 		if(common.contains(yes.toLowerCase())) return true;
 		return false;
 	}

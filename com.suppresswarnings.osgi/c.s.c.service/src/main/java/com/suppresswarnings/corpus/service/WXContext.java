@@ -12,6 +12,7 @@ package com.suppresswarnings.corpus.service;
 import java.util.Set;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
+import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
@@ -68,11 +69,16 @@ public class WXContext extends Context<CorpusService> {
 			if(exit(t, "exit()")) {
 				u.appendLine("上一阶段对话已经结束。");
 			}
+			String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+			String quizId = u.content().data().get(taskKey);
+			if(quizId != null) {
+				u.appendLine("接下来进入回答语料问题场景，请问可以吗？");
+			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			String command = CheckUtil.cleanStr(t.trim());
+			String command = CheckUtil.cleanStr(t);
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
 			if(cf == null) {
 				String exchange = u.content().globalCommand(command);
@@ -85,10 +91,24 @@ public class WXContext extends Context<CorpusService> {
 				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
 				if(cf.ttl() != ContextFactory.forever) {
 					u.content().contextx(openid(), context, cf.ttl());
+				} else {
+					u.content().context(openid, context);
 				}
 				return context.state();
 			}
-		
+			
+			//TODO lijiaming: save unknown words
+			update();
+			String yesKey = String.join(Const.delimiter, Const.Version.V1, "TODO", "Yes", openid(), time(), random());
+			u.content().data().put(yesKey, t);
+			if(yes(t, "可以")) {
+				cf = u.content().factories.get("我要回答问题");
+				if(cf != null) {
+					Context<CorpusService> context = cf.getInstance(wxid, openid, u.content());
+					u.content().context(openid, context);
+					return context.state();
+				}
+			}
 			return this;
 		}
 

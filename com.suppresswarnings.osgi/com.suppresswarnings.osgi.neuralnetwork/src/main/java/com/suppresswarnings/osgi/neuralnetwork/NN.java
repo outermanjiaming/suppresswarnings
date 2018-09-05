@@ -22,7 +22,7 @@ public class NN implements AI, Serializable {
 	int inputSize;
 	int outputSize;
 	int[] hiddenSize;
-	int max = 10000000;
+	int max = 10;
 	double tolerate = 0.001;
 	double error = 0;
 	/**
@@ -138,4 +138,12 @@ public class NN implements AI, Serializable {
 		if(layerIndexWhereInputIs0 > hiddenLayer.size()) return output.value();
 		return hiddenLayer.get(layerIndexWhereInputIs0 - 1).value();
 	}
+	
+	public void tolerate(double tolerate) {
+		this.tolerate = tolerate;
+	}
+	public void iteration(int max) {
+		this.max = max;
+	}
+	public void saveTo() {}
 }

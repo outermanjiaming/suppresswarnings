@@ -11,6 +11,7 @@ package com.suppresswarnings.corpus.service.produce;
 
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
+import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
@@ -86,13 +87,24 @@ public class ProduceContext extends WXContext {
 			update();
 			if(first) {
 				first = false;
-				u.output("好的，请继续回答该话题，尽量用不同的表达方式回答。（接下来我不说话了，如果你不想答题了，输入“退出”）");
+				u.output("谢谢，语料收集任务已经完成。准备进入下一阶段。");
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return answer;
+			//TODO lijiaming: save unknown words
+			update();
+			String yesKey = String.join(Const.delimiter, Const.Version.V1, "TODO", "Next", openid(), time(), random());
+			u.content().data().put(yesKey, t);
+			
+			ContextFactory<CorpusService> cf = u.content().factories.get("我要回答问题");
+			if(cf != null) {
+				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
+				u.content().context(openid(), context);
+				return context.state();
+			}
+			return init;
 		}
 
 		@Override

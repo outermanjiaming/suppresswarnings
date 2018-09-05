@@ -47,6 +47,7 @@
       <module>c.s.c.service.customer</module>
       <module>c.s.c.service.collect</module>
       <module>c.s.c.service.produce</module>
+      <module>c.s.c.service.reply</module>
   </modules>
   <dependencies>
   		<dependency>

@@ -44,7 +44,8 @@ public class Main {
 			SyncTask synctask = new SyncTask(retrofit, agent);
 			ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 			LOG.info(Main.class, "sync task scheduled");
-			ses.scheduleWithFixedDelay(synctask, TimeUnit.SECONDS.toMillis(10), TimeUnit.MINUTES.toMillis(10), TimeUnit.MILLISECONDS);
+			Integer minutes = Integer.parseInt(config.getProperty("agent.schedule.minutes", "120"));
+			ses.scheduleWithFixedDelay(synctask, TimeUnit.SECONDS.toMillis(10), TimeUnit.MINUTES.toMillis(minutes), TimeUnit.MILLISECONDS);
 			LOG.info(Main.class, "sync task would execute every hour");
 		} catch (Exception e) {
 			LOG.info(Main.class, "fail to start agent: " + e.getMessage());

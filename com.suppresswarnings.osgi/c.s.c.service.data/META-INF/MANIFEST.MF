@@ -7,4 +7,5 @@ Service-Component: OSGI-INF/component.xml
 Import-Package: com.suppresswarnings.corpus.common,
  com.suppresswarnings.corpus.service,
  com.suppresswarnings.osgi.leveldb,
+ com.suppresswarnings.osgi.neuralnetwork,
  org.slf4j

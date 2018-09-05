@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,6 +37,10 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.service.backup.Server;
+import com.suppresswarnings.corpus.service.daigou.Cart;
+import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
+import com.suppresswarnings.corpus.service.daigou.Goods;
+import com.suppresswarnings.corpus.service.daigou.Order;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
@@ -66,6 +71,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public LevelDB account, data, token;
 	Server backup;
+	DaigouHandler daigouHandler;
 	ScheduledExecutorService scheduler;
 	
 	public LevelDB account(){
@@ -106,6 +112,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		} catch (Exception e) {
 			logger.error("[corpus] server backup fail to start working", e);
 		}
+		//daigou
+		daigouHandler = new DaigouHandler(this);
 		
 		scheduler = Executors.newSingleThreadScheduledExecutor();
 		scheduler.scheduleAtFixedRate(new Runnable() {
@@ -439,11 +447,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 				} else {
 					return SUCCESS;
 				}
-				
+
 				Context<?> context = context(openid);
 				if(context == null) {
 					//check for shop alter command
-					String command = CheckUtil.cleanStr(input.trim());
+					String command = CheckUtil.cleanStr(input);
 					String alterCommandKey = String.join(Const.delimiter, Const.Version.V1, openid, "AlterCommand", command);
 					String where = account().get(alterCommandKey);
 					logger.info("[corpus] command: " + command + ", where: " + where);
@@ -532,6 +540,148 @@ public class CorpusService implements HTTPService, CommandProvider {
 			long expire = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(qrCodeTicket.getExpire_seconds());
 			token().put(String.join(Const.delimiter, Const.Version.V1, "Temp", "QRCode", "Login", qrCodeTicket.getTicket()), "" + expire);
 			return result;
+		} else if("daigou".equals(action)){
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.info("random == null");
+				return "fail";
+			}
+			String todo = parameter.getParameter("todo");
+			if(todo == null) {
+				logger.info("todo == null");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.info("ticket == null");
+				return "fail";
+			}
+			
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			String openid = token().get(code2OpenIdKey);
+			if(openid == null) {
+				logger.info("openid == null");
+				return "fail";
+			}
+			
+			/**
+			 * TODO: Daigou
+			 */
+			Gson gson = new Gson();
+			if("index".equals(todo)) {
+				logger.info("index");
+				return gson.toJson(daigouHandler.listGoods());
+			}
+			if("addgoodstocart".equals(todo)) {
+				logger.info("addgoodstocart");
+				String agentid = parameter.getParameter("state");
+				if(agentid == null) {
+					logger.info("state == null");
+					return "fail";
+				}
+				String goodsid = parameter.getParameter("goodsid");
+				if(goodsid == null) {
+					logger.info("goodsid == null");
+					return "fail";
+				}
+				Cart cart = daigouHandler.addGoodsToCart(agentid, openid, goodsid);
+				if(cart == null) {
+					logger.info("cart == null");
+					return "fail";
+				}
+				return SUCCESS;
+			}
+			if("mycarts".equals(todo)) {
+				logger.info("mycarts");
+				List<Cart> carts = daigouHandler.myCarts(openid);
+				daigouHandler.fillGoodsToCart(carts);
+				return gson.toJson(carts);
+			}
+			if("makeanorder".equals(todo)) {
+				logger.info("makeanorder");
+				String username = parameter.getParameter("username");
+				String mobile = parameter.getParameter("mobile");
+				String address = parameter.getParameter("address");
+				String comment = parameter.getParameter("comment");
+				List<Cart> carts = daigouHandler.myCarts(openid);
+				daigouHandler.fillGoodsToCart(carts);
+				StringBuffer sb = new StringBuffer();
+				long totalcent = 0;
+				int totalcount = 0;
+				int totaltype = 0;
+				for(Cart cart : carts) {
+					int count = Integer.parseInt(cart.getCount());
+					int price = Integer.parseInt(cart.getGoods().getPricecent());
+					long pricecent = price * count;
+					totaltype = totaltype + 1;
+					totalcent = totalcent + pricecent;
+					totalcount = totalcount + count;
+					sb.append("Goodsid:").append(cart.getGoodsid()).append(",count:").append(cart.getCount());
+				}
+				double totalprice = totalcent * 0.01d;
+				
+				String openIdEnd = openid.substring(openid.length() - 7);
+				String randEnd = random.substring(random.length() - 4);
+				long current = System.currentTimeMillis();
+				String orderid = "DG"+ current + openIdEnd + randEnd;
+				String clientip = ip.split(",")[0];
+				String body = "新西兰代购:" + totaltype + "种" + totalcount + "件，共¥" + totalprice;
+				String detail = sb.toString();
+				String attach = openid;
+				String prepay = prepay(orderid, body, detail, attach, ""+totalcent, clientip, openid, current);
+				if(prepay != null) {
+					Order order = new Order();
+					order.setAddress(address);
+					order.setCarts(carts);
+					order.setComment(comment);
+					order.setGoodscount(""+totalcount);
+					order.setGoodstypes(""+totaltype);
+					order.setMobile(mobile);
+					order.setOpenid(openid);
+					order.setOrderid(orderid);
+					order.setState(Order.State.Create);
+					order.setTime(""+current);
+					order.setTotalcent(""+totalcent);
+					order.setUsername(username);
+					order.setDetail(detail);
+					daigouHandler.saveOrder(order);
+					return prepay;
+				} else {
+					return "fail";
+				}
+			}
+			if("goodsdetail".equals(todo)) {
+				String goodsid = parameter.getParameter("goodsid");
+				if(goodsid == null) {
+					logger.info("goodsid == null");
+					return "fail";
+				}
+				Goods goods = daigouHandler.getByGoodsid(goodsid);
+				return gson.toJson(goods);
+			}
+			
+			if("myorders".equals(todo)) {
+				List<Order> myOrders = daigouHandler.myOrders(openid);
+				//TODO clean input for xss
+				return gson.toJson(myOrders);
+			}
+			
+			if("updatecartnum".equals(todo)) {
+				logger.info("update cart num");
+				String cartid = parameter.getParameter("cartid");
+				if(cartid == null) {
+					logger.info("cartid == null");
+					return "fail";
+				}
+				String newnum = parameter.getParameter("newnum");
+				if(newnum == null) {
+					logger.info("newnum == null");
+					return "fail";
+				}
+				String result = daigouHandler.updateCartCount(openid, cartid, newnum);
+				return result;
+			}
+			return SUCCESS;
 		} else if("access_token".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -600,14 +750,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 			token().put(code2OpenIdKey, openId);
 			WXuser user = getWXuserByOpenId(openId);
 			Map<String, Object> map = new HashMap<>();
+			String quizKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId);
+			String quiz = data().get(quizKey);
+			map.put("quiz", quiz);
 			List<String> array = collectCrewImageByQuizId(quizId);
 			map.put("array", array);
 			map.put("username", user.getNickname());
 			map.put("userimg", user.getHeadimgurl());
 			List<Map<String, Object>> replyinfo = new ArrayList<>();
 			String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
-			data().page(start, start, null, 1000, (t, u) -> {
-				if(!t.contains("Similar")) {
+			data().page(start, start, null, 20000, (t, u) -> {
+				if(!t.contains("Similar") && !t.contains("Reply")) {
 					Map<String, Object> e = new HashMap<>();
 					e.put("replyid", t);
 					e.put("reply", u);
@@ -724,8 +877,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			String similarKey = String.join(Const.delimiter, replyId, "Similar");
 			List<String> result = new ArrayList<>();
-			data().page(similarKey, similarKey, null, 20, (t, u) -> {
-				result.add(u);
+			data().page(similarKey, similarKey, null, 30, (t, u) -> {
+				if(!t.contains("Reply")) {
+					result.add(u);
+				}
 			});
 			logger.info("[corpus reply similar] " + result.size() + " openid:" + exist);
 			Gson gson = new Gson();
@@ -839,59 +994,92 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			String goodsid= parameter.getParameter("goodsid");
 			String title  = parameter.getParameter("title");
-			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", title:" + title);
-			WXPayConfig config = new WXPayConfigImpl();
-			WXPay wxPay = new WXPay(config);
-			logger.info("[corpus prepay] WXPay ready");
-			Map<String, String> reqData = new HashMap<>();
-			long current = System.currentTimeMillis(); 
-			long timeStamp = current / 1000;
-			reqData.put("timeStamp", ""+timeStamp);
-			reqData.put("device_info", "WEB");
-			reqData.put("body", "素朴网联-语料");
-			reqData.put("detail", "goodsid:" + goodsid + ",title:" + title);
-			reqData.put("attach", ticket);
+			String body = "素朴网联-语料";
+			String detail = "goodsid:" + goodsid + ",title:" + title;
+			String totalcent = "8";
 			String openIdEnd = openid.substring(openid.length() - 7);
 			String randEnd = random.substring(random.length() - 4);
-			reqData.put("out_trade_no", current + openIdEnd + randEnd);
-			reqData.put("fee_type", "CNY");
-			reqData.put("total_fee", "8");
-			reqData.put("spbill_create_ip", ip.split(",")[0]);
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-			reqData.put("time_start", dateFormat.format(new Date(current)));
-			reqData.put("time_expire", dateFormat.format(new Date(current + TimeUnit.HOURS.toMillis(2))));
-			reqData.put("notify_url", "http://suppresswarnings.com/wx.http");
-			reqData.put("trade_type", "JSAPI");
-			reqData.put("product_id", goodsid);
-			reqData.put("openid", openid);
-			logger.info("[corpus prepay] reqData: " + reqData.toString());
-			Map<String, String> resultData = wxPay.unifiedOrder(reqData);
-			logger.info("[corpus prepay] unifiedOrder result ready");
-			
-			Map<String, String> result = new HashMap<>();
-	    	String appid = resultData.get("appid");
-	    	String nonceStr = resultData.get("nonce_str");
-	    	String prepay_id = resultData.get("prepay_id");
-	    	
-	    	result.put("appId", appid);
-	    	result.put("timeStamp", ""+timeStamp);
-	    	result.put("nonceStr", nonceStr);
-	    	result.put("package", "prepay_id=" + prepay_id);
-	    	result.put("signType", SignType.HMACSHA256.name());
-	    	//sign
-	    	String sign = wxPay.sign(result, SignType.HMACSHA256);
-			result.put("paySign", sign);
-			logger.info("[corpus prepay] paySign ready");
-			
-			Gson gson = new Gson();
-			String unifiedOrder = gson.toJson(result);
-			logger.info("[corpus prepay] unifiedOrder OK: " + unifiedOrder);
-			return unifiedOrder;
+			long current = System.currentTimeMillis(); 
+			String orderid = current + openIdEnd + randEnd;
+			String clientip = ip.split(",")[0];
+			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", title:" + title);
+			try {
+				return prepay(orderid, body, detail, openid, totalcent, clientip, openid, current);
+			} catch (Exception e) {
+				return "fail";
+			}
+		} else if("notify".equals(action)) {
+			String postbody = parameter.getParameter(Parameter.POST_BODY);
+			Map<String, String> map = WXPayUtil.xmlToMap(postbody);
+			logger.info("notify map: " + map.toString());
+			String orderid = map.get("out_trade_no");
+			String openid = map.get("openid");
+			daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+			long current = System.currentTimeMillis();
+			int random = new Random().nextInt(100000);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Notify", ""+current, ""+random, ip), postbody);
+			return SUCCESS;
 		}
+		logger.info(parameter.toString());
 		logger.info("[Corpus] return success for any unknown action " + action + " from " + ip);
 		return SUCCESS;
 	}
 
+	public String prepay(String orderid, String body, String detail, String attach, String totalcent, String clientip, String openid, long current) throws Exception {
+		
+		long timeStamp = current / 1000;
+		WXPayConfig config = new WXPayConfigImpl();
+		WXPay wxPay = new WXPay(config);
+		logger.info("[corpus prepay] WXPay ready");
+		Map<String, String> reqData = new HashMap<>();
+		reqData.put("timeStamp", ""+timeStamp);
+		reqData.put("device_info", "WEB");
+		reqData.put("body", body);
+		reqData.put("detail", detail);
+		reqData.put("attach", attach);
+		reqData.put("out_trade_no", orderid);
+		reqData.put("fee_type", "CNY");
+		reqData.put("total_fee", totalcent);
+		reqData.put("spbill_create_ip", clientip);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		reqData.put("time_start", dateFormat.format(new Date(current)));
+		reqData.put("time_expire", dateFormat.format(new Date(current + TimeUnit.HOURS.toMillis(2))));
+		reqData.put("notify_url", "http://suppresswarnings.com/notify.http");
+		reqData.put("trade_type", "JSAPI");
+		reqData.put("product_id", orderid);
+		reqData.put("openid", openid);
+		logger.info("[corpus prepay] reqData: " + reqData.toString());
+		Map<String, String> resultData = wxPay.unifiedOrder(reqData);
+		logger.info("[corpus prepay] unifiedOrder result ready");
+		
+		Map<String, String> result = new HashMap<>();
+    	String appid = resultData.get("appid");
+    	String nonceStr = resultData.get("nonce_str");
+    	String prepay_id = resultData.get("prepay_id");
+    	
+    	result.put("appId", appid);
+    	result.put("timeStamp", ""+timeStamp);
+    	result.put("nonceStr", nonceStr);
+    	result.put("package", "prepay_id=" + prepay_id);
+    	result.put("signType", SignType.HMACSHA256.name());
+    	//sign
+    	String sign = wxPay.sign(result, SignType.HMACSHA256);
+		result.put("paySign", sign);
+		logger.info("[corpus prepay] paySign ready");
+		
+		Gson gson = new Gson();
+		String unifiedOrder = gson.toJson(result);
+		logger.info("[corpus prepay] unifiedOrder OK: " + unifiedOrder);
+		String reqjson = gson.toJson(reqData);
+		String resultjson = gson.toJson(resultData);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", "Orderid", orderid), orderid);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "UnifiedOrder"), unifiedOrder);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Reqjson"), reqjson);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Resultjson"), resultjson);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State"), "Wait");
+		return unifiedOrder;
+		
+	}
 	public String xml(String openid, String msg, String fromOpenId) {
 		if(msg == null || msg.length() < 1) {
 			logger.error("[Corpus] empty response");
@@ -979,7 +1167,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew");
 		List<String> crews = new ArrayList<>();
 		logger.info("[corpus collect crew image by quizId] " + quizId);
-		data().page(crewKey, crewKey, null, 10, new BiConsumer<String, String>() {
+		data().page(crewKey, crewKey, null, 100, new BiConsumer<String, String>() {
 
 			@Override
 			public void accept(String t, String u) {

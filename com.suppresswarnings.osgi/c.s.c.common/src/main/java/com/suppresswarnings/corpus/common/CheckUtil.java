@@ -23,7 +23,12 @@ public class CheckUtil {
 	
 	public static String cleanStr(String str) {
 		if(str == null) return null;
-		return symbolPattern.matcher(str.trim()).replaceAll("");
+		String trim = str.trim();
+		String clean = symbolPattern.matcher(trim).replaceAll("");
+		if(clean.length() < 1) {
+			clean = trim;
+		}
+		return clean;
 	}
 
 	public static String check(Object obj) {
