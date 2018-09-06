@@ -8,17 +8,24 @@ function addorder(order) {
     	
     	'订单号：<span>' + order.orderid + '</span><br/>'+
     	'收货人：<span>' + order.username + '</span><br/>'+
-    	'时间：<span>' + order.time + '</span><br/>'+
-    	'状态：<span>' + order.state + '</span><button>立即支付</button><br/>'+
-    	'详情：<button class="toggleordergoods" onclick="toggleordergoods(this)">展开</button><span>' + order.detail + '</span><br/>'+
+    	'时间：<span>' + order.time + '</span><br/>'
+    if(order.state == "Paid") {
+    	orderinfo = orderinfo +'状态：<span>已支付</span><br/>'
+    } else {
+    	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><button>立即支付</button><br/>'
+    }
+	orderinfo = orderinfo +'详情：<button class="toggleordergoods" onclick="toggleordergoods(this)">展开</button><span>' + order.detail + '</span><br/>'+
     	'</div>'
-    var ordergoods = '<div class="order_goods" style="display: none;">' + 
-    	'<ul>'
+    var ordergoods = '<div class="order_goods" style="display: none;"><ul>'
+    var rate = 0.01
 	var carts = order.carts
 	var size = carts.length
 	for(var k=0;k<size;k++) {
 		var cart = carts[k]
 		var goods = cart.goods
+		var cent = parseFloat(goods.pricecent)
+    	var price = rate * cent
+    	price = price.toFixed(2)
 		var goodsli = '<li>' +
 				        '<div class="inner">' +
 				              '<div class="item_img">' +
@@ -28,7 +35,7 @@ function addorder(order) {
 				              '</div>' +
 				              '<a class="smalla" href="/detail.html?code='+ticket+'&state='+state+'&goodsid=' +goods.goodsid+ '">' + goods.title+ '</a>' +
 				              '<div class="price">' +
-				                '<span>' + goods.price+ '</span>' +
+				                '<span>' + price + '</span>' +
 				                '<em>'+ cart.count + '件</em>' +
 				              '</div>' +
 				            '</div>' +
