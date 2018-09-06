@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +74,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	Server backup;
 	DaigouHandler daigouHandler;
 	ScheduledExecutorService scheduler;
-	
+	public Map<String, String> questionToAid = new HashMap<>();
+	public Map<String, HashSet<String>> aidToAnswers = new HashMap<>();
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -254,7 +256,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t which - which <which> - change to use different LevelDB.\n");
 		buffer.append("\t putkv - putkv <key> <value> - put value to that key.\n");
 		buffer.append("\t getkv - getkv <key> - get value by that key.\n");
-		buffer.append("\t listn - listn <start> <limit> - list some values by start limit.\n");
+		buffer.append("\t listn - listn <startkey> <limit> - list some values by start limit.\n");
+		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
 		return buffer.toString();
 	}
 	LevelDB leveldb;
@@ -293,7 +296,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		leveldb.page(start, start, null, n, (k, v) -> {
 			leveldb.del(k);
 			int index = i.incrementAndGet();
-			ci.println("[_deleten] " + index + "remove key:" + k + " = " + v);
+			ci.println("[_deleten] " + index + ". remove key:" + k + " = " + v);
 		});
 	}
 	public void _listn(CommandInterpreter ci) {
@@ -309,6 +312,99 @@ public class CorpusService implements HTTPService, CommandProvider {
 				index ++;
 				ci.println("[_listn] " + index + ". " + t + " = " + u);
 			}
+		});
+	}
+	public void fillQuestionsAndAnswers(Map<String, String> Question2Aid, Map<String, HashSet<String>> Aid2Answer, String quizId){
+		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+		data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
+			String left = t.substring(start.length());
+			if(!left.contains("Similar") && !left.contains("Reply")) {
+				boolean questionExist = false;
+				String aid = Question2Aid.get(u);
+				if(aid != null) {
+					//question exist
+					questionExist = true;
+				} else {
+					//new question
+					aid = t;
+				}
+				//get Similar HashSet includes u
+				HashSet<String> similar = new HashSet<>();
+				//important
+				similar.add(CheckUtil.cleanStr(u));
+				String similarKey = String.join(Const.delimiter, t, "Similar");
+				data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (x, y) -> {
+					String z = x.substring(similarKey.length());
+					if(!z.contains("Similar") && !z.contains("Reply")) {
+						similar.add(CheckUtil.cleanStr(y));
+					}
+				});
+				//for each check exist
+				if(!questionExist) {
+					for(String s : similar) {
+						String exist = Question2Aid.get(s);
+						if(exist != null){
+							questionExist = true;
+							aid = exist;
+							break;
+						}
+					}
+				}
+				//if any use the exist aid
+				//use aid for all similar
+				for(String s : similar) {
+					Question2Aid.put(s, aid);
+				}
+				HashSet<String> set = Aid2Answer.get(aid);
+				if(set == null) {
+					set = new HashSet<>();
+				}
+				//list answers for t and put them into set
+				HashSet<String> answers = set;
+				String replyKey = String.join(Const.delimiter, t, "Reply");
+				data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (x, y) -> {
+					String z = x.substring(replyKey.length());
+					if(!z.contains("Similar") && !z.contains("Reply")) {
+						answers.add(CheckUtil.cleanStr(y));
+					}
+				});
+				Aid2Answer.put(aid, answers);
+			}
+		});
+	}
+	public void _interception(CommandInterpreter ci) {
+		String quizId = ci.nextArgument();
+		ci.println("[_interception] quizId: " + quizId);
+		fillQuestionsAndAnswers(this.questionToAid, this.aidToAnswers, quizId);
+		AtomicInteger integer = new AtomicInteger(0);
+		this.questionToAid.forEach((quiz, aid) -> {
+			ci.println(integer.incrementAndGet() + ".\t" + quiz + " -> " + this.aidToAnswers.get(aid));
+		});
+		questionToAid.forEach((quiz, aid) ->{
+			HashSet<String> answers = aidToAnswers.get(aid);
+			ContextFactory<CorpusService> cf = new ContextFactory<CorpusService>() {
+
+				@Override
+				public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
+					return new AutoContext(quiz, aid, answers, wxid, openid, content);
+				}
+
+				@Override
+				public String command() {
+					return quiz;
+				}
+
+				@Override
+				public String description() {
+					return quiz;
+				}
+
+				@Override
+				public long ttl() {
+					return TimeUnit.SECONDS.toMillis(30);
+				}
+			};
+			factory(cf);
 		});
 	}
 	
@@ -661,11 +757,25 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			if("myorders".equals(todo)) {
+				//TODO check openid
+				logger.info("myorders");
 				List<Order> myOrders = daigouHandler.myOrders(openid);
 				//TODO clean input for xss
 				return gson.toJson(myOrders);
 			}
-			
+			if("removecart".equals(todo)) {
+				logger.info("remove cart");
+				String cartid = parameter.getParameter("cartid");
+				if(cartid == null) {
+					logger.info("cartid == null");
+					return "fail";
+				}
+				String deleted = daigouHandler.deleteCart(openid, cartid);
+				if(!Cart.State.Delete.equals(deleted)) {
+					return "fail";
+				}
+				return SUCCESS;
+			}
 			if("updatecartnum".equals(todo)) {
 				logger.info("update cart num");
 				String cartid = parameter.getParameter("cartid");
@@ -676,6 +786,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 				String newnum = parameter.getParameter("newnum");
 				if(newnum == null) {
 					logger.info("newnum == null");
+					return "fail";
+				}
+				try {
+					Integer num = Integer.parseInt(newnum);
+					if(num <= 0 || num > 10000) {
+						return "fail";
+					}
+				} catch (Exception e) {
+					logger.info("wrong number for cart: " + newnum + ", openid: " + openid + ", cartid: " + cartid);
 					return "fail";
 				}
 				String result = daigouHandler.updateCartCount(openid, cartid, newnum);

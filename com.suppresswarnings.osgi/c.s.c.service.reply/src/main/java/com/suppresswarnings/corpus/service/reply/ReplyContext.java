@@ -10,6 +10,7 @@
 package com.suppresswarnings.corpus.service.reply;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -66,12 +67,12 @@ public class ReplyContext extends WXContext {
 	
 	KeyValue current = null;
 	KeyValue next = null;
-	State<Context<CorpusService>> getQuiz = new State<Context<CorpusService>>() {
+	State<Context<CorpusService>> getQuizOld = new State<Context<CorpusService>>() {
 
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 5400821751033110118L;
+		private static final long serialVersionUID = 12052606984693252L;
 		Iterator<KeyValue> iterator = null;
 		String quizId = null;
 		
@@ -117,6 +118,69 @@ public class ReplyContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return reply;
+		}
+
+		@Override
+		public String name() {
+			return "出题";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
+	State<Context<CorpusService>> getQuiz = new State<Context<CorpusService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5400821751033110118L;
+		Iterator<KeyValue> iterator = null;
+		String quizId = null;
+		boolean finished = false;
+		
+		
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			if(iterator != null && iterator.hasNext()) {
+				//1.get one
+				//2.save next
+				next = iterator.next();
+				u.output(current.value());
+			} else {
+				List<KeyValue> list = new ArrayList<>();
+				if(quizId == null) {
+					String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+					quizId = u.content().data().get(taskKey);
+				}
+				if(quizId != null && iterator != null && !iterator.hasNext()) {
+					u.content().fillQuestionsAndAnswers(u.content().questionToAid, u.content().aidToAnswers, quizId);
+				}
+				u.content().questionToAid.forEach((quiz, aid) ->{
+					HashSet<String> set = u.content().aidToAnswers.get(aid);
+					if(set == null || set.size() < 2) {
+						KeyValue kv = new KeyValue(aid, quiz);
+						list.add(kv);
+					}
+				});
+				
+				if(list.size() < 1) {
+					u.output("恭喜你，现在没有剩余任何问题");
+					finished = true;
+				} else {
+					current = list.remove(0);
+					iterator = list.iterator();
+					next = iterator.next();
+					u.output(current.value());
+				}
+			}
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(finished) return init.apply(t, u);
 			return reply;
 		}
 
