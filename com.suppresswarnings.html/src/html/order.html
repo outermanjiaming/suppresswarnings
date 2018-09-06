@@ -73,9 +73,17 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
 .dashedli:hover {
     border-color: #02cfd4;
 }
+.smalla{
+text-decoration : none;
+font-size: 12;
+}
+.order_info span{
+font-size: 14;
+color: #666
+}
 </style>
 
-  <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
 </head>
 <body data-gr-c-s-loaded="true">
   <header class="header">
@@ -90,12 +98,12 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
         <li class="dashedli">
             <div>
 		    	<div class="order_info">
-		    	<span>1.  </span>
-		    	<span>2017-08-09 13:00:00</span><br/>
+		    	
 		    	订单号：<span>DG1302954053499113.3254</span><br/>
 		    	收货人：<span>李先生</span><br/>
-		    	<span>共2种3件 合计 ¥203元</span><button>立即支付</button><br/>
-		    	商品详情：<button class="toggleordergoods">展开</button>
+		    	状态：<span>未支付</span><button>立即支付</button><br/>
+		    	详情：<span>共2种3件 合计 ¥203元</span><button class="toggleordergoods">展开</button><br/>
+		    	时间：<span>2017-08-09 13:00:00</span><br/>
 		    	</div>
 		    	<div class="order_goods" style="display: none;">
 				    <ul>
@@ -106,7 +114,7 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
 				                  <img src="/anchorfull.jpg" title="Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱">
 				                </a>
 				              </div>
-				              <a href="/detail.html?goodsid=1001">Anchor安佳 Anchor安佳 Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
+				              <a class="smalla" href="/detail.html?goodsid=1001">Anchor安佳 Anchor安佳 Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
 				              <div class="price">
 				                <span>¥0.02</span>
 				                <em>6件</em>
@@ -122,7 +130,7 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
 				                  <img src="/anchorfull.jpg" title="Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱">
 				                </a>
 				              </div>
-				              <a href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
+				              <a class="smalla" href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
 				              <div class="price">
 				                <span>¥0.02</span>
 				                <em style="margin-left:10px">6件</em>
@@ -137,7 +145,7 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
 				                  <img src="/anchorfull.jpg" title="Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱">
 				                </a>
 				              </div>
-				              <a href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
+				              <a class="smalla" href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
 				              <div class="price">
 				                <span>¥0.02</span>
 				                <em style="margin-left:10px">6件</em>
@@ -152,7 +160,7 @@ ul li{ margin: 0; padding: 0; list-style-type: none;}
 				                  <img src="/anchorfull.jpg" title="Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱">
 				                </a>
 				              </div>
-				              <a href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
+				              <a class="smalla" href="/detail.html?goodsid=1001">Anchor安佳 成人奶粉 全脂 1kg装 6袋/箱</a>
 				              <div class="price">
 				                <span>¥0.02</span>
 				                <em style="margin-left:10px">6件</em>
@@ -290,8 +298,9 @@ function GetRequest() {
 	
 $(document).ready(function(){
 	$(".toggleordergoods").click(function(){
-		$(".order_goods").slideToggle();
-	});
+		var goods = $(this).parent().siblings(".order_goods")[0]
+		$(goods).slideToggle()
+	})
 	var Request = GetRequest();
 	
 	if(Request.code === undefined || Request.state === undefined) {
