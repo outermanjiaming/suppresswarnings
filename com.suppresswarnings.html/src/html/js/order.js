@@ -7,7 +7,7 @@ function addorder(order) {
     	'收货人：<span>' + order.username + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'+
     	'状态：<span>' + order.state + '</span><button>立即支付</button><br/>'+
-    	'详情：<button class="toggleordergoods">展开</button<span>' + order.detail + '</span><br/>'+
+    	'详情：<button class="toggleordergoods">展开</button><span>' + order.detail + '</span><br/>'+
     	'</div>'
     var ordergoods = '<div class="order_goods" style="display: none;">' + 
     	'<ul>'
