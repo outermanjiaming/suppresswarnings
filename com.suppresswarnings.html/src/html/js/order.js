@@ -1,4 +1,7 @@
-
+function toggleordergoods(obj) {
+	var goods = $(obj).parent().siblings(".order_goods")[0]
+	$(goods).slideToggle()
+}
 function addorder(order) {
 	var myorders = $("#myorders")
 	var orderinfo = '<div class="order_info">' +
@@ -7,7 +10,7 @@ function addorder(order) {
     	'收货人：<span>' + order.username + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'+
     	'状态：<span>' + order.state + '</span><button>立即支付</button><br/>'+
-    	'详情：<button class="toggleordergoods">展开</button><span>' + order.detail + '</span><br/>'+
+    	'详情：<button class="toggleordergoods" onclick="toggleordergoods(this)">展开</button><span>' + order.detail + '</span><br/>'+
     	'</div>'
     var ordergoods = '<div class="order_goods" style="display: none;">' + 
     	'<ul>'
@@ -33,7 +36,7 @@ function addorder(order) {
 		ordergoods = ordergoods + goodsli
 	}
 	ordergoods = ordergoods + '</ul></div>'
-	$('<div>' + orderinfo + ordergoods + '</div>').appendTo(myorders)
+	$('<li class="dashedli"><div>' + orderinfo + ordergoods + '</div></li>').appendTo(myorders)
 }
 
 
