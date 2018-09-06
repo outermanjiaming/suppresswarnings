@@ -9,81 +9,8 @@
 <title>查看购物车</title>
 <meta name="keywords" content="">
 <meta name="description" content="">
-<style>
-.folw_shopmain {
-    width: 100%;
-    overflow: hidden;
-    margin-bottom: 8px;
-    background: #FFF;
-    border-bottom: 1px solid #eeeeee;
-}
-.item-list {
-    width: 100%;
-    overflow: hidden;
-    background: #f5f5f5;
-    margin-bottom: 2px;
-}
-
-.item-list .inner {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-.item_img {
-    width: 25%;
-    padding-left: 2%;
-    float: left;
-    overflow: hidden;
-}
-
-.item_img img {
-    display: block;
-    width: 80px;
-    height: auto;
-}
-.goods_desc{ width:70%; float:right; padding-right:2%;}
-.goods_desc dl{ width:100%; overflow:hidden}
-.goods_desc dl dt{ width:100%; height:40px; overflow:hidden; font-size:14px; line-height:20px; color:#666; -webkit-line-clamp: 2; /*2，是控制行数的*/-webkit-box-orient: vertical;display: -webkit-box;  }
-.goods_desc dl dd{ width:100%; height:20px; overflow:hidden; font-size:12px; line-height:20px; color:#999; -webkit-line-clamp:1; /*2，是控制行数的*/-webkit-box-orient: vertical;display: -webkit-box;  }
-.goods_desc .price{ width:100%; overflow:hidden;}
-.goods_desc .price i{ display:block; float:left; margin-left:8px; font-size:12px; line-height:150%; color:#999;text-decoration:line-through;}
-.goods_desc .price span{ display:block;float:left; font-size:14px; line-height:150%; color:#E71F19;}
-.goods_desc .price em{ display:block; float:right; font-size:14px; line-height:150%; color:#666;}
-.item-list .num {width:60%; float:right; padding-right:2%; }
-.qiehuan{width:70%; overflow:hidden; float:left;}
-.xm-input-number { vertical-align: middle;width:100%; margin:auto; position:relative;}
-.xm-input-number .input-sub {display: block; width: 30px;height: 30px;position: absolute;left: 0px;top: 0px;vertical-align: middle;border: 1px solid #CCC;background-color: #FFF; background:#F5F5F5 url(shop-cart.png) no-repeat 7px -53px; background-size: 60px}
-.xm-input-number .input-sub.active{background:#fff url(shop-cart.png) no-repeat 7px -24px; background-size: 60px}
-.xm-input-number .input-num { background:#fff; vertical-align: middle; display:block; width:48%; height:30px; text-align: center; font-size: 16px; color: #999; -webkit-appearance: none; border-radius: 0; -webkit-box-flex: 1; -webkit-flex: 1; flex: 1;  border:1px solid #CCC; margin:auto;}
-.xm-input-number .input-add { display: inline-block; width:30px; height:30px; position:absolute; right:0px; top:0px;  vertical-align: middle;  background:#fff url(shop-cart.png) no-repeat -23px -24px; background-size: 60px;  border:1px solid #CCC ;}
-.goods_attr { background:url(arrow_down_on.png) no-repeat right center;background-size:15px 15px; width:100%; overflow:hidden; height:25px;  margin-top:5px;}
-.goods_attr span{ display:block; width:90%; float:left; overflow:hidden;line-height:25px; font-size:12px; line-height:25px; color:#999;}
-.delete {width:60px; height:30px; text-align: center; overflow: hidden; background:#dd2726; float: right;}
-.delete a{color:#fff; font-size:14px; line-height:30px;}
-.flow_bottom { position: fixed; left: 0; bottom: 0; width: 100%; height: 50px; border-top: 1px solid #d7d7d7; background-color: #fff; z-index: 2; display: -webkit-box; display: -moz-box; display: -ms-box; display: -o-box; display: box; -webkit-box-align: center; -moz-box-align: center; -ms-box-align: center; -o-box-align: center; box-align: center; -webkit-box-pack: center; -moz-box-pack: center; -ms-box-pack: center; -o-box-pack: center; box-pack: center; min-width:320px; }
-.flow_bottom .info { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; width: 100%; color: #FF5778; font-size: 16px; text-align: right; margin-right: 5px; }
-.flow_bottom .quanxuan { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; margin-left: 9px; height: 40px; width: 60%; }
-.flow_bottom .quanxuan .check-wrapper {  margin-left: 0px;  width: 70px; padding-top:11px;}
-.flow_bottom .quanxuan .cart-checkbox { float: left; }
-.flow_bottom .quanxuan .cart-checktext { float: left; width: 35px; height: 20px; line-height: 20px; font-size: 14px; text-indent: 3px; color: #000; }
-.flow_bottom .info .hot { font-size: 16px; color: #c42a32; text-align: right; }
-.flow_bottom .info .hot em { font-size: 16px; color: #c42a32; }
-.flow_bottom .right { width: 100px; height: 50px;}
-.flow_bottom .right a { background: #f60; }
-.flow_bottom .xm-button {  background-color:#DD2726; text-align: center; height: 50px; line-height: 50px; font-size: 16px; color: #fff; width: 100%; border: none; font-family: 微软雅黑; display:block }
-.address {magin-bottom: 100px;width:100%;}
-/*返回首页*/
-.footer_nav{ width:50px; height:50px; position:fixed; z-index:100; bottom:0px;}
-.footer_nav ul{ margin: 0; padding: 0; list-style-type: none;}
-.footer_nav ul li{ margin: 0; padding: 0; list-style-type: none; width:100%; float:left; height:50px;}
-.footer_nav ul li span{ display:block; text-align:center; color:#666; }
-.footer_nav ul li em{ display:block; width:30px; height:25px; margin:auto;background: url(pub_goods.png) no-repeat;background-size:auto 280px;}
-.footer_nav ul li .goods_nav1{ background-position:0 -190px;}
-</style>
-
-  <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<link rel="stylesheet" href="css/daigou.css">
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
 </head>
 <body data-gr-c-s-loaded="true">
   <header class="header">
@@ -122,7 +49,7 @@
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 function index() {
-	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
+	//window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
 }
 
 function GetRequest() {
