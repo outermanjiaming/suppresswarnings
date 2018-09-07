@@ -57,6 +57,7 @@ function loadDetail(){
 	        $("#totalprice").text("¥" + price)
 	        $("#addtocart").data("goodsid", goods.goodsid)
 	        $("#addtocart").data("agentid", ticket)
+	        $("#gotocart").attr("href", "/cart.html?state=" + state+"&code="+ticket)
 	        var goodsimage = goods.listimages
 	        var arr = goodsimage.split(",")
 	        var length = arr.length
