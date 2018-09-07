@@ -191,8 +191,8 @@ function loadCarts(){
 	    },
 	    success: function( result ) {
 	      if("fail" == result) {
-	        console.log('fail to access_token: ' + result)
-	        index()
+	        console.log('fail to cart: ' + result)
+	        daigou()
 	      } else {
 	        var cartslist = JSON.parse(result)
 	         $(".item-list").empty()
@@ -228,8 +228,8 @@ function loadCarts(){
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
-	      console.log("[lijiaming] collect err: " + result)
-	      index()
+	      console.log("[lijiaming] cart err: " + result)
+	      daigou()
 	    }
 	})
 }

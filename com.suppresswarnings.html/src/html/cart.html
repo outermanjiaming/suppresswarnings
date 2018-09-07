@@ -125,7 +125,7 @@
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-function index() {
+function daigou() {
 	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
 }
 
@@ -148,7 +148,7 @@ $(document).ready(function(){
 	
 	if(Request.code === undefined || Request.state === undefined) {
 	  console.log('first time here without code')
-	  index()
+	  daigou()
 	} else {
 	  ticket = Request.code
 	  state  = Request.state

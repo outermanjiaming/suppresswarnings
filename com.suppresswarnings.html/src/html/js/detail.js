@@ -1,5 +1,5 @@
 
-function loadCarts(){
+function loadDetail(){
 	jQuery.ajax({
 	    url: "/wx.http?r=" + Math.random(),
 	    data: {
@@ -13,7 +13,7 @@ function loadCarts(){
 	    success: function( result ) {
 	      if("fail" == result) {
 	        console.log('fail to detail: ' + result)
-	        index()
+	        daigou()
 	      } else {
 	        var goods = JSON.parse(result)
 	        var cent = parseFloat(goods.pricecent)
@@ -35,8 +35,8 @@ function loadCarts(){
 	    },
 	    error: function( xhr, result, obj ) {
 	      console.log("[lijiaming] detail err: " + result)
-	      index()
+	      daigou()
 	    }
 	})
 }
-loadCarts()
+loadDetail()
