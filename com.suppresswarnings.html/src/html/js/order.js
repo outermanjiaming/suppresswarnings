@@ -20,9 +20,8 @@ function addorder(order) {
     } else {
     	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><br/>'
     }
-	orderinfo = orderinfo +'详情：<button class="toggleordergoods" onclick="toggleordergoods(this)">展开</button><br/>'+
-    	'</div>'
-    var ordergoods = '<div class="order_goods" style="display: none;"><ul>'
+	orderinfo = orderinfo + '</div>'
+    var ordergoods = '<div class="order_goods"><ul>'
     var rate = 0.01
 	var carts = order.carts
 	var size = carts.length
