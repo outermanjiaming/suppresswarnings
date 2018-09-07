@@ -1,3 +1,4 @@
+var rate = 0.01
 function addtocart(obj) {
 	var goodsid = $(obj).data("goodsid")
 	var agentid = $(obj).data("agentid")
@@ -24,8 +25,8 @@ function addtocart(obj) {
 	})
 }
 function addone(goods) {
-	var rate = 0.01
 	var price = rate * parseFloat(goods.pricecent)
+	price = price.toFixed(2)
 	var li = '<li>' +
    '<div class="item">' +
     '<div class="goods_images">' +
