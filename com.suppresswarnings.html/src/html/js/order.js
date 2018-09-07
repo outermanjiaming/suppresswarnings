@@ -12,13 +12,13 @@ function addorder(order) {
     if(order.state == "Paid") {
     	orderinfo = orderinfo +'状态：<span>已支付</span><br/>'
     } else if(order.state == "Closed"){
-    	orderinfo = orderinfo +'状态：<span>已关闭</span><button>重新购买</button><br/>'
+    	orderinfo = orderinfo +'状态：<span>已关闭</span><br/>'
     } else if(order.state == "Paying"){
     	orderinfo = orderinfo +'状态：<span>正在支付</span><br/>'
     } else if(order.state == "Create"){
-    	orderinfo = orderinfo +'状态：<span>未支付</span><button>立即支付</button><br/>'
+    	orderinfo = orderinfo +'状态：<span>未支付</span><br/>'
     } else {
-    	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><button>立即支付</button><br/>'
+    	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><br/>'
     }
 	orderinfo = orderinfo +'详情：<button class="toggleordergoods" onclick="toggleordergoods(this)">展开</button><br/>'+
     	'</div>'
