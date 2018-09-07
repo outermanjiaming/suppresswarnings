@@ -65,7 +65,7 @@ jQuery.ajax({
     success: function( result ) {
       if("fail" == result) {
         console.log('fail to access_token: ' + result)
-        index()
+        daigou()
       } else {
         var orderlist = JSON.parse(result)
         var length = orderlist.length
@@ -77,6 +77,6 @@ jQuery.ajax({
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] order list err: " + result)
-      index()
+      daigou()
     }
 })
