@@ -29,12 +29,12 @@ function addone(goods) {
 	var li = '<li>' +
    '<div class="item">' +
     '<div class="goods_images">' +
-      '<a href="/detail.html?agentid='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">' +
+      '<a href="/detail.html?state='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">' +
         '<img src="' + goods.image + '" style="width:100%;" alt="'+goods.title+'">' +
       '</a>' +
     '</div>' +
     '<dl>' +
-          '<dt><a href="/detail.html?agentid=who&code=what&goodsid=which">'+goods.title+'</a></dt>' +
+          '<dt><a href="/detail.html?state='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">'+goods.title+'</a></dt>' +
 	  	  '<dd style="font-size:12px;">'+goods.extra+'</dd>' + 
 	      '<dd><i>￥'+price+'</i></dd>' + 
 	      '<dd><a class="rbtn mini-addcart" href="javascript:;" onclick="addtocart(this)" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a></dd>' +

@@ -154,13 +154,13 @@ function order(obj) {
 function addone(cart, goods, price) {
 	var div = '<div class="inner" data-goodscount="'+cart.count+'" data-goodsprice="'+goods.pricecent+'">' +
         '<div class="item_img">' + 
-    '<a href="/detail.html?goodsid=' +goods.goodsid+ '">' + 
+    '<a href="/detail.html?goodsid=' +goods.goodsid+ '&state='+state+'&code='+ticket+'">' + 
          '<img src="' +goods.image+ '" title="' +goods.title+ '">' + 
     '</a>' + 
    '</div>' +
    '<div class="goods_desc">' +
      '<dl>' +
-       '<dt><a href="/detail.html?goodsid=' +goods.goodsid+ '">' +goods.title+ '</a></dt>' +
+       '<dt><a href="/detail.html?goodsid=' +goods.goodsid+ '&state='+state+'&code='+ticket+'">' +goods.title+ '</a></dt>' +
      '</dl>' +
      '<div class="price"><span>¥' +price+ '</span></div>' +
    '</div>' +
