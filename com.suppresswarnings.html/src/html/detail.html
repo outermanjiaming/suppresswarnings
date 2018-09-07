@@ -62,40 +62,26 @@
 </head>
 <body>
 <div class="index-ad clearfix"> 
-	  <a href="">
-		<img src="/ads.png" style="">
-	  </a>
+    <img id="image" src="">
  </div>
 <div class="product_info">
     <div class="info_dottm">
-      <h2>Savar奇迹宝宝舒缓膏护肤霜 100ml 保质期2020/06</h2>
+      <span id="goodstitle"></span>
     </div>
     <dl class="goods_price">
-      <dt><span id="ECS_GOODS_AMOUNT">¥64.67元</span></dt>
+      <dt><span id="goodsprice"></span>元</dt>
     </dl>
 </div>
 <br/>
 <div class="flow_bottom">
     <div class="footer_nav"><ul><li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li></ul></div>
-    <div class="info"><span class="totalprice" id="totalprice">¥64.30</span>元</div>
+    <div class="info"><span class="totalprice" id="totalprice"></span>元</div>
     <div class="right">
       <input type="button" onclick="addtocart(this);" class="xm-button " value="加入购物车">
     </div>
 </div>
-<div class="list-item">
+<div class="list-item"  id="goodsimages">
 <div class="notice">详细的商品描述</div>
-<div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/55d43747e580b437.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/3fa1f1d0cc78a7d0.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/96d4a9a4157b0fe4.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/d34a24064ee591f8.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/f948eaa18bffa9fe.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/b3c34f0e15ca154c.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/3ef048fe84a0a09f.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/84f0421063a5b2ce.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/d8ae3e73219bd9c5.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/d343c94e01816ba9.jpg"></div><div> 
-<img class="desc" src="http://www.hyhealth.nz/images//20180904/5800e4c5be86b6f5.jpg"></div>
 </div>
 
 <!-- JavaScript Includes -->
@@ -105,6 +91,40 @@
 <script type="text/javascript" src="js/dropdown.js"></script>
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
+<script>
+var goodsid
+function index() {
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
+}
 
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+	
+$(document).ready(function(){
+	
+	var Request = GetRequest();
+	
+	if(Request.code === undefined || Request.state === undefined || Request.goodsid == undefined) {
+	  console.log('first time here without code')
+	  index()
+	} else {
+	  ticket = Request.code
+	  state  = Request.state
+	  goodsid = Request.goodsid
+	}
+	
+	jQuery.getScript("js/detail.js?r=" + Math.random());
+})
+</script>
 </body>
 </html>
