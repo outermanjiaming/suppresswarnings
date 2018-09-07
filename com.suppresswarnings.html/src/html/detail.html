@@ -45,7 +45,7 @@
 
 
 /*返回首页*/
-.footer_nav{ width:100px; height:50px; position:fixed; z-index:100; bottom:0px;}
+.footer_nav{ width:40%; height:50px; position:fixed; z-index:100; bottom:0px;}
 .footer_nav ul{ margin: 0; padding: 0; list-style-type: none;}
 .footer_nav ul li{ margin: 0; padding: 0; list-style-type: none; width:50%; float:left; height:50px;text-align: center;}
 .footer_nav ul li span{ display:block; text-align:center; color:#666; font-size: 12;}
@@ -74,10 +74,15 @@
 </div>
 <br/>
 <div class="flow_bottom">
-    <div class="footer_nav"><ul><li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li></ul></div>
+    <div class="footer_nav">
+    <ul>
+	    <li class="bian"><a href="/daigou.html"><em class="goods_nav1"></em><span>首页</span></a></li>
+	    <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"></a><span>购物车</span></li>
+    </ul>
+    </div>
     <div class="info"><span class="totalprice" id="totalprice"></span></div>
     <div class="right">
-      <input type="button" onclick="addtocart(this);" class="xm-button " value="加入购物车">
+      <input type="button" id="addtocart" data-agentid="" data-goodsid="" onclick="addtocart(this);" class="xm-button " value="加入购物车">
     </div>
 </div>
 <div class="list-item"  id="goodsimages">
@@ -91,7 +96,8 @@
 <script type="text/javascript" src="js/dropdown.js"></script>
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
-<script>
+
+<script type="text/javascript">
 var goodsid
 function daigou() {
 	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
@@ -109,7 +115,7 @@ function GetRequest() {
     }
     return theRequest;
 }
-	
+
 $(document).ready(function(){
 	
 	var Request = GetRequest();
@@ -124,7 +130,8 @@ $(document).ready(function(){
 	}
 	
 	jQuery.getScript("js/detail.js?r=" + Math.random());
-})
+	
+});        
 </script>
 </body>
 </html>

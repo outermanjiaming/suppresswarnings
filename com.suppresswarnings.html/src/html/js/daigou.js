@@ -17,6 +17,13 @@ function addtocart(obj) {
 	    	  console.log('fail to addgoodstocart: ' + result)
 	      } else {
 	    	  console.log('great addgoodstocart')
+	    	  $.tipsBox({
+  	            obj: $("#gotocart"),
+  	            str: "+1",
+  	            callback: function () {
+  	            }
+  	        });
+  	        niceIn($("#gotocart"));
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
