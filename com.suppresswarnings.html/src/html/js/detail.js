@@ -1,4 +1,4 @@
-
+var rate = 0.01
 function loadDetail(){
 	jQuery.ajax({
 	    url: "/wx.http?r=" + Math.random(),
