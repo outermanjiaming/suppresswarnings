@@ -102,8 +102,8 @@ dl dt {
 <div class="flow_bottom">
     <div class="footer_nav">
 	    <ul>
-		    <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"><span>购物车</span></a></li>
-		    <li class="bian"><a id="gotoorder" href="/order.html"><img alt="我的订单" src="/mine.png" style="width:30px;"><span>我的订单</span></a></li>
+		    <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"></a><span>购物车</span></li>
+		    <li class="bian"><a id="gotoorder" href="/order.html"><img alt="我的订单" src="/mine.png" style="width:30px;"></a><span>我的订单</span></li>
 	    </ul>
     </div>
 </div>
@@ -142,6 +142,10 @@ $(document).ready(function(){
 	} else {
 	  ticket = Request.code
 	  state  = Request.state
+
+	  $("#gotoorder").attr("href", "/order.html?state="+state+"&code="+ ticket)
+	  $("#gotocart").attr("href", "/cart.html?state="+state+"&code="+ ticket)
+	  
 	  $.ajax({
 		    url: "/wx.http?r=" + Math.random(),
 		    data: {

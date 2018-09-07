@@ -76,8 +76,8 @@
 <div class="flow_bottom">
     <div class="footer_nav">
     <ul>
-	    <li class="bian"><a href="/daigou.html"><img alt="首页" src="/order.png" style="width:30px;"><span>首页</span></a></li>
-	    <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"><span>购物车</span></a></li>
+	    <li class="bian"><a href="/daigou.html"><img alt="首页" src="/order.png" style="width:30px;"></a><span>首页</span></li>
+	    <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"></a><span>购物车</span></li>
     </ul>
     </div>
     <div class="info"><span class="totalprice" id="totalprice"></span></div>
@@ -127,6 +127,7 @@ $(document).ready(function(){
 	  ticket = Request.code
 	  state  = Request.state
 	  goodsid = Request.goodsid
+	  $("#gotocart").attr("href", "/cart.html?state=" + state+"&code=" + ticket)
 	}
 	
 	jQuery.getScript("js/detail.js?r=" + Math.random());
