@@ -10,7 +10,7 @@ function addorder(order) {
     	'收货人：<span>' + order.username + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'
     if(order.state == "Paid") {
-    	orderinfo = orderinfo +'状态：<span>已支付</span><br/>'
+    	orderinfo = orderinfo +'状态：<span style="color:green;">已支付</span><br/>'
     } else if(order.state == "Closed"){
     	orderinfo = orderinfo +'状态：<span>已关闭</span><br/>'
     } else if(order.state == "Paying"){
@@ -51,7 +51,6 @@ function addorder(order) {
 	$('<li class="dashedli"><div>' + orderinfo + ordergoods + '</div></li>').appendTo(myorders)
 }
 
-showDiv()
 jQuery.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
@@ -66,6 +65,7 @@ jQuery.ajax({
         console.log('fail to access_token: ' + result)
         daigou()
       } else {
+    	  showDiv()
         var orderlist = JSON.parse(result)
         var length = orderlist.length
         for (var k = 0; k < length; k++) {
