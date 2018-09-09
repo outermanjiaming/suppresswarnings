@@ -1,5 +1,6 @@
 var rate = 0.01
 function addtocart(obj) {
+	showDiv()
 	var goodsid = $(obj).data("goodsid")
 	var agentid = $(obj).data("agentid")
 	jQuery.ajax({
@@ -13,6 +14,7 @@ function addtocart(obj) {
 		    state : agentid
 	    },
 	    success: function( result ) {
+	    	closeDiv()
 	      if("fail" == result) {
 	    	  console.log('fail to addgoodstocart: ' + result)
 	      } else {
@@ -27,6 +29,7 @@ function addtocart(obj) {
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
+	    	closeDiv()
 	      console.log("[lijiaming] addgoodstocart err: " + result)
 	    }
 	})
