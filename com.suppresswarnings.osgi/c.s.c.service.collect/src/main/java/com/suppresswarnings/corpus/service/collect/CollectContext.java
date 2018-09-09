@@ -29,6 +29,7 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class CollectContext extends WXContext {
 	public static final String CMD = "我要收集语料";
+	public static final String[] AUTH = {"Questions"};
 	String quizId;
 	String quiz;
 	

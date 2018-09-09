@@ -48,6 +48,7 @@ import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
+import com.suppresswarnings.corpus.service.work.WorkHandler;
 import com.suppresswarnings.corpus.service.sdk.WXPayConstants.SignType;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
@@ -73,9 +74,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public LevelDB account, data, token;
 	Server backup;
 	DaigouHandler daigouHandler;
+	WorkHandler workHandler;
 	ScheduledExecutorService scheduler;
-	public Map<String, String> questionToAid = new HashMap<>();
-	public Map<String, HashSet<String>> aidToAnswers = new HashMap<>();
+	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
+	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
+	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -106,6 +109,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
+	
+	public String youGotMe(String openId, String quiz, String quizId) {
+		this.workHandler.clockOut(openId);
+		return this.workHandler.newJob(quiz, quizId, openId);
+	}
+	public void forgetIt(String openId) {
+		this.workHandler.forgetIt(openId);
+	}
+	public boolean iWantJob(String openid) {
+		return this.workHandler.clockIn(openid);
+	}
 	public void activate() {
 		logger.info("[corpus] activate.");
 		backup = new Server();
@@ -116,12 +130,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		//daigou
 		daigouHandler = new DaigouHandler(this);
-		
+		workHandler = new WorkHandler(this, Const.WXmsg.openid);
+		try {
+			workHandler.working();
+		} catch (Exception e) {
+			logger.error("[corpus] workHandler fail to start working", e);
+		}
 		scheduler = Executors.newSingleThreadScheduledExecutor();
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
 			@Override
 			public void run() {
+				workHandler.report();
 				//TODO send email
 				long now = System.currentTimeMillis();
 				int currentTTL = ttl.size();
@@ -185,14 +205,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[corpus] scheduler: the admins not set");
 					return;
 				}
+				String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+				String quizId = data().get(taskKey);
+				if(quizId != null) {
+					fillQuestionsAndAnswers(questionToAid, aidToAnswers, aidToSimilars, quizId);
+				}
+				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
 				info.append("周期汇报：第").append(times).append("次").append("\n");
 				info.append("contexts: " + contexts.size()).append("\n");
 				info.append("providers: " + providers.size()).append("\n");
 				info.append("factories: " + factories.size()).append("\n");
+				info.append("questionToAid: " + questionToAid.size()).append("\n");
+				info.append("aidToAnswers: " + aidToAnswers.size()).append("\n");
 				info.append("ttl: " + ttl.size()).append("\n");
-				info.append("backup：" + backup.toString());
+				info.append("backup：" + backup.toString()).append("\n");
+				info.append("workHandler：" + workHandler.report());
 				for(String one : admin) {
 					sendTxtTo("schedule report", info.toString(), one);
 				}
@@ -314,29 +343,36 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 	}
-	public void fillQuestionsAndAnswers(Map<String, String> Question2Aid, Map<String, HashSet<String>> Aid2Answer, String quizId){
+	public void fillQuestionsAndAnswers(Map<String, String> Question2Aid, Map<String, HashSet<String>> Aid2Answer, Map<String, HashSet<String>> Aid2Similar, String quizId){
 		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
 		data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
 			String left = t.substring(start.length());
 			if(!left.contains("Similar") && !left.contains("Reply")) {
+				logger.info("[fillQuestionsAndAnswers] quiz: " + u);
 				boolean questionExist = false;
-				String aid = Question2Aid.get(u);
+				String quiz = CheckUtil.cleanStr(u);
+				String aid = Question2Aid.get(quiz);
+				HashSet<String> similars = null;
 				if(aid != null) {
 					//question exist
 					questionExist = true;
-				} else {
-					//new question
-					aid = t;
+					similars = aidToSimilars.get(aid);
+				}
+				if(similars == null) {
+					similars = new HashSet<>();
 				}
 				//get Similar HashSet includes u
 				HashSet<String> similar = new HashSet<>();
+				HashSet<String> allSimilar = similars;
 				//important
-				similar.add(CheckUtil.cleanStr(u));
+				similar.add(quiz);
 				String similarKey = String.join(Const.delimiter, t, "Similar");
 				data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (x, y) -> {
+					logger.info("[fillQuestionsAndAnswers] similarKey: " + similarKey);
 					String z = x.substring(similarKey.length());
 					if(!z.contains("Similar") && !z.contains("Reply")) {
 						similar.add(CheckUtil.cleanStr(y));
+						allSimilar.add(y);
 					}
 				});
 				//for each check exist
@@ -351,6 +387,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 					}
 				}
 				//if any use the exist aid
+				if(!questionExist) {
+					aid = t;
+				}
 				//use aid for all similar
 				for(String s : similar) {
 					Question2Aid.put(s, aid);
@@ -362,49 +401,25 @@ public class CorpusService implements HTTPService, CommandProvider {
 				//list answers for t and put them into set
 				HashSet<String> answers = set;
 				String replyKey = String.join(Const.delimiter, t, "Reply");
+				logger.info("[fillQuestionsAndAnswers] replyKey: " + replyKey);
 				data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (x, y) -> {
 					String z = x.substring(replyKey.length());
 					if(!z.contains("Similar") && !z.contains("Reply")) {
-						answers.add(CheckUtil.cleanStr(y));
+						answers.add(y);
 					}
 				});
 				Aid2Answer.put(aid, answers);
+				Aid2Similar.put(aid, allSimilar);
 			}
 		});
 	}
 	public void _interception(CommandInterpreter ci) {
 		String quizId = ci.nextArgument();
 		ci.println("[_interception] quizId: " + quizId);
-		fillQuestionsAndAnswers(this.questionToAid, this.aidToAnswers, quizId);
+		fillQuestionsAndAnswers(this.questionToAid, this.aidToAnswers, this.aidToSimilars, quizId);
 		AtomicInteger integer = new AtomicInteger(0);
 		this.questionToAid.forEach((quiz, aid) -> {
-			ci.println(integer.incrementAndGet() + ".\t" + quiz + " -> " + this.aidToAnswers.get(aid));
-		});
-		questionToAid.forEach((quiz, aid) ->{
-			HashSet<String> answers = aidToAnswers.get(aid);
-			ContextFactory<CorpusService> cf = new ContextFactory<CorpusService>() {
-
-				@Override
-				public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
-					return new AutoContext(quiz, aid, answers, wxid, openid, content);
-				}
-
-				@Override
-				public String command() {
-					return quiz;
-				}
-
-				@Override
-				public String description() {
-					return quiz;
-				}
-
-				@Override
-				public long ttl() {
-					return TimeUnit.SECONDS.toMillis(30);
-				}
-			};
-			factory(cf);
+			ci.println(integer.incrementAndGet() + ".\t" + quiz + "\n\t->A. " + this.aidToAnswers.get(aid) + "\n\t->S. " + this.aidToSimilars.get(aid));
 		});
 	}
 	
@@ -462,6 +477,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 						input = "听不清说了啥？";
 					}
 				} else if("event".equals(msgType)) {
+					//lijiaming leave from worker user
+					forgetIt(openid);
+					
 					String where = "素朴网联";
 					String event = wxmsg.get("Event");
 					String eventKey = wxmsg.get("EventKey");
@@ -546,22 +564,34 @@ public class CorpusService implements HTTPService, CommandProvider {
 
 				Context<?> context = context(openid);
 				if(context == null) {
-					//check for shop alter command
+					//lijiaming leave from worker user
+					forgetIt(openid);
+					
 					String command = CheckUtil.cleanStr(input);
-					String alterCommandKey = String.join(Const.delimiter, Const.Version.V1, openid, "AlterCommand", command);
-					String where = account().get(alterCommandKey);
-					logger.info("[corpus] command: " + command + ", where: " + where);
-					if(where != null) {
-						String exchange = globalCommand(where);
-						logger.info("ALTER: " + exchange + " == " + where);
+//					
+//					String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+//					String quizId = data().get(taskKey);
+//					if(quizId != null) {
+//						logger.info("has task to do: " + quizId);
+//					}
+					ContextFactory<CorpusService> cf = factories.get(command);
+					if(cf == null) {
+						String exchange = globalCommand(command);
 						if(exchange != null) {
-							ContextFactory<CorpusService> cf = factories.get(exchange);
-							Context<CorpusService> contxt = cf.getInstance(fromOpenId, openid, this);
-							//TODO use ALTE_ as start instead
-							contxt.test("SCAN_" + where);
-							contextx(openid, contxt, cf.ttl());
-							return xml(openid, contxt.output(), fromOpenId);
+							cf = factories.get(exchange);
 						}
+					}
+					
+					if(cf != null) {
+						Context<CorpusService> ctx = cf.getInstance(fromOpenId, openid, this);
+						context = ctx;
+						if(cf.ttl() != ContextFactory.forever) {
+							contextx(openid, context, cf.ttl());
+						} else {
+							context(openid, context);
+						}
+						context.test(input);
+						return xml(openid, context.output(), fromOpenId);
 					}
 					
 					WXContext ctx = new WXContext(fromOpenId, openid, this);
@@ -878,12 +908,44 @@ public class CorpusService implements HTTPService, CommandProvider {
 			map.put("userimg", user.getHeadimgurl());
 			List<Map<String, Object>> replyinfo = new ArrayList<>();
 			String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
-			data().page(start, start, null, 20000, (t, u) -> {
-				if(!t.contains("Similar") && !t.contains("Reply")) {
-					Map<String, Object> e = new HashMap<>();
-					e.put("replyid", t);
-					e.put("reply", u);
-					replyinfo.add(e);
+			data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
+				String z = t.substring(start.length());
+				if(!z.contains("Similar") && !z.contains("Reply")) {
+					boolean need = false;
+					
+					String adminKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", "Admin", openId);
+					String admin = account().get(adminKey);
+					if(admin != null && !"None".equals(admin)) {
+						need = true;
+					}
+					String question = CheckUtil.cleanStr(u);
+					String aid = questionToAid.get(question);
+					
+					if(aid != null && !need) {
+						HashSet<String> answers = aidToAnswers.get(aid);
+						if(answers == null) {
+							need = true;
+						} else {
+							if(answers.size() < 1) {
+								need = true;
+							}
+						}
+						
+						HashSet<String> similars = aidToSimilars.get(aid);
+						if(similars == null) {
+							need = true;
+						} else {
+							if(similars.size() < 1) {
+								need = true;
+							}
+						}
+					}
+					if(need) {
+						Map<String, Object> e = new HashMap<>();
+						e.put("replyid", t);
+						e.put("reply", u);
+						replyinfo.add(e);
+					}
 				}
 			});
 			map.put("replyinfo", replyinfo);
@@ -996,8 +1058,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			String similarKey = String.join(Const.delimiter, replyId, "Similar");
 			List<String> result = new ArrayList<>();
-			data().page(similarKey, similarKey, null, 30, (t, u) -> {
-				if(!t.contains("Reply")) {
+			data().page(similarKey, similarKey, null, 1000, (t, u) -> {
+				String z = t.substring(similarKey.length());
+				if(!z.contains("Reply")) {
 					result.add(u);
 				}
 			});

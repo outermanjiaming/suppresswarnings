@@ -12,7 +12,6 @@ package com.suppresswarnings.corpus.service;
 import java.util.Set;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
-import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
@@ -20,7 +19,6 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 
 
 public class WXContext extends Context<CorpusService> {
-	public static final String exit = "exit()";
 	String openid;
 	String wxid;
 	WXuser user;
@@ -30,7 +28,7 @@ public class WXContext extends Context<CorpusService> {
 		 * 
 		 */
 		private static final long serialVersionUID = 1154267650726164000L;
-
+		boolean first = true;
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			u.output("暂时无权查看，请联系管理员。（本次对话结束）");
@@ -38,6 +36,11 @@ public class WXContext extends Context<CorpusService> {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(first) {
+				first = false;
+				return reject;
+			}
+			first = true;
 			return init;
 		}
 
@@ -63,21 +66,11 @@ public class WXContext extends Context<CorpusService> {
 			Set<String> commands = u.content().factories.keySet();
 			if(commands.size() < 1) {
 				u.output("稍等，我现在还没有准备好！");
-			} else {
-				u.appendLine("我目前处于内测开发阶段。请关注 http://SuppressWarnings.com/");
 			}
 			if(exit(t, "exit()")) {
-				u.appendLine("上一阶段对话已经结束。");
+				u.output("上一阶段对话已经结束。");
+				u.content().forgetIt(openid());
 			}
-			String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-			String quizId = u.content().data().get(taskKey);
-			if(quizId != null) {
-				u.appendLine("接下来进入回答语料问题场景，请问可以吗？");
-			}
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			String command = CheckUtil.cleanStr(t);
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
 			if(cf == null) {
@@ -88,27 +81,26 @@ public class WXContext extends Context<CorpusService> {
 			}
 			
 			if(cf != null) {
-				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
+				//leave from worker user
+				u.content().forgetIt(openid());
+				
+				Context<CorpusService> ctx = cf.getInstance(wxid(), openid(), u.content());
 				if(cf.ttl() != ContextFactory.forever) {
-					u.content().contextx(openid(), context, cf.ttl());
+					u.content().contextx(openid, ctx, cf.ttl());
 				} else {
-					u.content().context(openid, context);
+					u.content().context(openid, ctx);
 				}
-				return context.state();
+				ctx.test(t);
+				u.output(ctx.output());
+			} else {
+				logger.info("[WXContext] "+ openid() + "\tAccost words: " + t);
+				
 			}
 			
-			//TODO lijiaming: save unknown words
-			update();
-			String yesKey = String.join(Const.delimiter, Const.Version.V1, "TODO", "Yes", openid(), time(), random());
-			u.content().data().put(yesKey, t);
-			if(yes(t, "可以")) {
-				cf = u.content().factories.get("我要回答问题");
-				if(cf != null) {
-					Context<CorpusService> context = cf.getInstance(wxid, openid, u.content());
-					u.content().context(openid, context);
-					return context.state();
-				}
-			}
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			return this;
 		}
 
@@ -173,5 +165,8 @@ public class WXContext extends Context<CorpusService> {
 	@Override
 	public State<Context<CorpusService>> exit() {
 		return init;
+	}
+	public void state(State<Context<CorpusService>> state) {
+		this.state = state;
 	}
 }

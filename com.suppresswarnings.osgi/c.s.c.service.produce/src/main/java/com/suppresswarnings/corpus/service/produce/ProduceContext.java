@@ -9,9 +9,13 @@
  */
 package com.suppresswarnings.corpus.service.produce;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
@@ -33,7 +37,10 @@ public class ProduceContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			if(quizId == null) {
 				u.output("请通过扫码进入");
-				return;
+				String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+				quizId = u.content().data().get(taskKey);
+				if(quizId != null) u.output("现在让你进入默认语料场景");
+				else return;
 			}
 			String quizKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId);
 			String quizOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "OpenId");
@@ -56,6 +63,9 @@ public class ProduceContext extends WXContext {
 			if(CMD.equals(t)) {
 				return produce;
 			}
+			if(quizId == null) {
+				return init;
+			}
 			return answer;
 		}
 
@@ -71,7 +81,7 @@ public class ProduceContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
-		boolean first = true;
+		Map<String, AutoContext> contexts = new HashMap<>();
 		/**
 		 * 
 		 */
@@ -79,32 +89,48 @@ public class ProduceContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			String reply = t;
-			String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid(), time(), random());
-			u.content().data().put(answerKey, reply);
-			String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
-			u.content().data().put(crewKey, time());
-			update();
-			if(first) {
-				first = false;
-				u.output("谢谢，语料收集任务已经完成。准备进入下一阶段。");
+			String reply = CheckUtil.cleanStr(t);
+			String aid = u.content().questionToAid.get(reply);
+			if(aid != null) {
+				HashSet<String> answers = u.content().aidToAnswers.get(aid);
+				if(answers != null && answers.size() > 0) {
+					AutoContext context = contexts.get(aid);
+					if(context == null) {
+						context = new AutoContext(answer, reply, aid, answers, wxid(), openid(), u.content());
+						contexts.put(aid, context);
+					}
+					context.test(t);
+					u.output(context.output());
+					return;
+				}
+			}
+			
+			if(aid == null) {
+				//save new question
+				String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid(), time(), random());
+				u.content().data().put(answerKey, t);
+				String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
+				u.content().data().put(crewKey, time());
+				aid = answerKey;
+			}
+			//save
+			u.content().questionToAid.put(reply, aid);
+			//send task
+			String result = u.content().youGotMe(openid(), t, aid);
+			if(result != null) {
+				HashSet<String> answers = u.content().aidToAnswers.get(aid);
+				if(answers == null) {
+					answers = new HashSet<>();
+					u.content().aidToAnswers.put(aid, answers);
+				}
+				answers.add(result);
+				u.output(result);
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			//TODO lijiaming: save unknown words
-			update();
-			String yesKey = String.join(Const.delimiter, Const.Version.V1, "TODO", "Next", openid(), time(), random());
-			u.content().data().put(yesKey, t);
-			
-			ContextFactory<CorpusService> cf = u.content().factories.get("我要回答问题");
-			if(cf != null) {
-				Context<CorpusService> context = cf.getInstance(wxid(), openid(), u.content());
-				u.content().context(openid(), context);
-				return context.state();
-			}
-			return init;
+			return answer;
 		}
 
 		@Override

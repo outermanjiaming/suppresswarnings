@@ -7,20 +7,22 @@
  *  SuppressWarnings
  * 
  */
-package com.suppresswarnings.corpus.service;
+package com.suppresswarnings.corpus.service.produce;
 
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
+import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.WXContext;
 
 public class AutoContext extends WXContext {
 	String key;
 	String cmd;
 	HashSet<String> answers;
 	Iterator<String> iterator;
+	final State<Context<CorpusService>> from;
 	State<Context<CorpusService>> auto = new State<Context<CorpusService>>() {
 
 		/**
@@ -31,7 +33,7 @@ public class AutoContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			if(iterator == null) {
-				u.output("这话没法接，你可以输入“"+teach.name()+"”");
+				u.output("这话没法接，稍等我想一下");
 				return;
 			}
 			if(iterator.hasNext()) {
@@ -49,13 +51,7 @@ public class AutoContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(cmd.equals(t)) {
-				return auto;
-			}
-			if("我来教你".equals(t)) {
-				return teach;
-			}
-			return init.apply(t, u);
+			return auto;
 		}
 
 		@Override
@@ -69,68 +65,8 @@ public class AutoContext extends WXContext {
 		}
 		
 	};
-	State<Context<CorpusService>> teach = new State<Context<CorpusService>>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 8362444463454109741L;
-
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			u.output("主人说：“" + cmd + "”,\n我怎么答：");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return saveAnswer;
-		}
-
-		@Override
-		public String name() {
-			return "我来教你";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
-	State<Context<CorpusService>> saveAnswer = new State<Context<CorpusService>>() {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -1122472681854450463L;
-
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			String answer = t;
-			String answerKey = String.join(Const.delimiter, key, "Reply", openid(), time(), random());
-			update();
-			u.content().data().put(answerKey, answer);
-			answers.add(answer);
-			iterator = answers.iterator();
-			u.output("以后知道怎么回答了");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return init.apply(t, u);
-		}
-
-		@Override
-		public String name() {
-			return "保存回复";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
-	public AutoContext(String cmd, String aid, HashSet<String> answers, String wxid, String openid, CorpusService ctx) {
+	
+	public AutoContext(State<Context<CorpusService>> from, String cmd, String aid, HashSet<String> answers, String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.cmd = cmd;
 		this.key = aid;
@@ -140,6 +76,7 @@ public class AutoContext extends WXContext {
 			this.iterator = answers.iterator();
 		}
 		this.state = auto;
+		this.from = from;
 	}
 
 }

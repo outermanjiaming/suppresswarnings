@@ -48,6 +48,7 @@
       <module>c.s.c.service.collect</module>
       <module>c.s.c.service.produce</module>
       <module>c.s.c.service.reply</module>
+      <module>c.s.c.service.menu</module>
   </modules>
   <dependencies>
   		<dependency>

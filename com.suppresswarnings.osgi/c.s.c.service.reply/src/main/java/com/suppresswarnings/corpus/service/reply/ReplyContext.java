@@ -10,7 +10,6 @@
 package com.suppresswarnings.corpus.service.reply;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,8 +22,9 @@ import com.suppresswarnings.corpus.service.WXContext;
 
 public class ReplyContext extends WXContext {
 	public static final String CMD = "我要回答问题";
-	State<Context<CorpusService>> enter = new State<Context<CorpusService>>() {
-		int alarm = 0;
+	
+	State<Context<CorpusService>> online = new State<Context<CorpusService>>() {
+
 		/**
 		 * 
 		 */
@@ -32,26 +32,55 @@ public class ReplyContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			alarm ++;
-			u.output("您已进入回答问题场景，接下来我说一句，您回一句。请问可以吗？");
-			if(alarm > 2) {
-				u.appendLine("其实您说'可以'就行了，接下来为您进入答题场景，请认真答题好吗？");
+			boolean x = u.content().iWantJob(openid());
+			if(x) {
+				u.output("一会儿有在线任务优先派发给您");
+			} else {
+				u.output("现在暂时没有在线任务，你可以输入 离线回答");
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			//TODO lijiaming: save unknown words
-			update();
-			String yesKey = String.join(Const.delimiter, Const.Version.V1, "TODO", "Okay", openid(), time(), random());
-			u.content().data().put(yesKey, t);
-			
-			if(yes(t, "可以")) return getQuiz;
-			if(alarm > 2) {
-				alarm = 0;
-				return getQuiz;
+			if("离线回答".equals(t)) {
+				return enter;
 			}
-			return enter;
+			return online;
+		}
+
+		@Override
+		public String name() {
+			return "在线回答问题";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
+	State<Context<CorpusService>> enter = new State<Context<CorpusService>>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4687592239209693234L;
+		boolean first = false;
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			u.output("接下来您扮演机器人，我说一句，您回一句");
+			getQuiz.accept(t, u);
+			first = true;
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(t.startsWith("SCAN_")) {
+				return this;
+			}
+			if(first) {
+				first = false;
+				return reply;
+			}
+			return this;
 		}
 
 		@Override
@@ -67,7 +96,8 @@ public class ReplyContext extends WXContext {
 	
 	KeyValue current = null;
 	KeyValue next = null;
-	State<Context<CorpusService>> getQuizOld = new State<Context<CorpusService>>() {
+	
+	State<Context<CorpusService>> getQuiz = new State<Context<CorpusService>>() {
 
 		/**
 		 * 
@@ -86,7 +116,7 @@ public class ReplyContext extends WXContext {
 				//2.save next
 				next = iterator.next();
 				u.content().data().put(nextKey, next.key());
-				u.output(current.value());
+				u.output("请回答：\n"+current.value());
 			} else {
 				List<KeyValue> list = new ArrayList<>();
 				if(quizId == null) {
@@ -98,8 +128,9 @@ public class ReplyContext extends WXContext {
 				if(nextReply == null) {
 					nextReply = head;
 				}
-				nextReply = u.content().data().page(head, nextReply, null, 300, (k, v) -> {
-					if(!k.contains("Reply") && !k.contains("Similar")) {
+				nextReply = u.content().data().page(head, nextReply, null, Integer.MAX_VALUE, (k, v) -> {
+					String z = k.substring(head.length());
+					if(!z.contains("Reply") && !z.contains("Similar")) {
 						list.add(new KeyValue(k, v));
 					}
 				});
@@ -111,76 +142,13 @@ public class ReplyContext extends WXContext {
 					current = list.remove(0);
 					iterator = list.iterator();
 					next = iterator.next();
-					u.output(current.value());
+					u.output("请回答：\n" + current.value());
 				}
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return reply;
-		}
-
-		@Override
-		public String name() {
-			return "出题";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-	};
-	State<Context<CorpusService>> getQuiz = new State<Context<CorpusService>>() {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 5400821751033110118L;
-		Iterator<KeyValue> iterator = null;
-		String quizId = null;
-		boolean finished = false;
-		
-		
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			if(iterator != null && iterator.hasNext()) {
-				//1.get one
-				//2.save next
-				next = iterator.next();
-				u.output(current.value());
-			} else {
-				List<KeyValue> list = new ArrayList<>();
-				if(quizId == null) {
-					String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-					quizId = u.content().data().get(taskKey);
-				}
-				if(quizId != null && iterator != null && !iterator.hasNext()) {
-					u.content().fillQuestionsAndAnswers(u.content().questionToAid, u.content().aidToAnswers, quizId);
-				}
-				u.content().questionToAid.forEach((quiz, aid) ->{
-					HashSet<String> set = u.content().aidToAnswers.get(aid);
-					if(set == null || set.size() < 2) {
-						KeyValue kv = new KeyValue(aid, quiz);
-						list.add(kv);
-					}
-				});
-				
-				if(list.size() < 1) {
-					u.output("恭喜你，现在没有剩余任何问题");
-					finished = true;
-				} else {
-					current = list.remove(0);
-					iterator = list.iterator();
-					next = iterator.next();
-					u.output(current.value());
-				}
-			}
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(finished) return init.apply(t, u);
 			return reply;
 		}
 
@@ -225,10 +193,11 @@ public class ReplyContext extends WXContext {
 		@Override
 		public boolean finish() {
 			return false;
-		}};
+		}
+	};
 	public ReplyContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
-		this.state = enter;
+		this.state = online;
 	}
 
 }

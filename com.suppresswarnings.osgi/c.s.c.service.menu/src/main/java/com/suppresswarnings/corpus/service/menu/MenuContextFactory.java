@@ -7,39 +7,37 @@
  *  SuppressWarnings
  * 
  */
-package com.suppresswarnings.corpus.service.collect;
-
-import java.util.concurrent.TimeUnit;
+package com.suppresswarnings.corpus.service.menu;
 
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class CollectContextFactory extends AbstractAuthContextFactory {
+public class MenuContextFactory extends AbstractAuthContextFactory {
 
 	@Override
 	public String command() {
-		return CollectContext.CMD;
+		return MenuContext.CMD;
 	}
 
 	@Override
 	public String description() {
-		return "用户发起收集语料任务，分享给朋友们进行收集";
+		return "展示所有功能菜单";
 	}
 
 	@Override
 	public long ttl() {
-		return TimeUnit.MINUTES.toMillis(5);
+		return 7200;
 	}
 
 	@Override
 	public String[] requiredAuth() {
-		return CollectContext.AUTH;
+		return MenuContext.AUTH;
 	}
 
 	@Override
 	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
-		return new CollectContext(wxid, openid, content);
+		return new MenuContext(wxid, openid, content);
 	}
 
 }

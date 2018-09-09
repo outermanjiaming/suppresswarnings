@@ -33,7 +33,7 @@ public class ProduceContextFactory implements ContextFactory<CorpusService> {
 
 	@Override
 	public long ttl() {
-		return TimeUnit.MINUTES.toMillis(3);
+		return TimeUnit.HOURS.toMillis(3);
 	}
 
 }

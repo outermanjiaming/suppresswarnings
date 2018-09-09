@@ -44,12 +44,23 @@ public abstract class Context<T> implements Predicate<String> {
 	public String output() {
 		String out = this.output.toString();
 		this.output.setLength(0);
+		update();
 		return out;
 	}
+	
 	public void output(String string) {
-		this.output.setLength(0);
+		if(this.output.length() > 0) {
+			this.output.append("\n");
+		}
 		this.output.append(string);
 	}
+	
+	/**
+	 * use output instead as the same function append line
+	 * @param line
+	 * @return
+	 */
+	@Deprecated
 	public Context<T> appendLine(String line) {
 		if(this.output.length() > 0) {
 			this.output.append("\n");
@@ -97,7 +108,8 @@ public abstract class Context<T> implements Predicate<String> {
 			logger.info(random() + "->state:" + state);
 			state.accept(t, this);
 		} catch (Exception e) {
-			this.appendLine("没事，处理数据出了点问题: " + e.getMessage());
+			logger.error("[Context] lijiaming", e);
+			this.output("没事，处理数据出了点问题: " + e.getMessage());
 		}
 		
 		return state.finish();

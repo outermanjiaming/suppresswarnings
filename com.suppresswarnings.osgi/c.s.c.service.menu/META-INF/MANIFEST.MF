@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Menu
+Bundle-SymbolicName: c.s.c.service.menu
+Bundle-Version: 0.0.1.osgi
+Export-Package: com.suppresswarnings.corpus.service.menu
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.osgi.leveldb
+Service-Component: OSGI-INF/component.xml
