@@ -110,6 +110,7 @@ function order(obj) {
 	}
 	var comment = $("#comment").val()
 
+	showDiv()
 	jQuery.ajax({
 	    url: "/wx.http?r=" + Math.random(),
 	    data: {
@@ -130,7 +131,7 @@ function order(obj) {
 	      } else {
 	    	  console.log('great make an order')
 	    	  console.log('prepay ok' + result)
-	          
+	          closeDiv()
 	          var prepay = JSON.parse(result)
 	          
 	          console.log('prepay.package = ' + prepay.package)
@@ -148,6 +149,8 @@ function order(obj) {
 	                  if(res.err_msg == "get_brand_wcpay_request:ok" ){
 	                      console.log('finish success')
 	                      window.location.href = '/order.html?code=' + ticket + '&state=' + state
+	                  } else {
+	                	  window.location.href = '/cart.html?code=' + ticket + '&state=' + state
 	                  }
 	          })
 	      }

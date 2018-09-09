@@ -51,7 +51,7 @@ function addorder(order) {
 	$('<li class="dashedli"><div>' + orderinfo + ordergoods + '</div></li>').appendTo(myorders)
 }
 
-
+showDiv()
 jQuery.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
@@ -72,6 +72,7 @@ jQuery.ajax({
         	var order = orderlist[k]
         	addorder(order)
         }
+        closeDiv()
       }
     },
     error: function( xhr, result, obj ) {
