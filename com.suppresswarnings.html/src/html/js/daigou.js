@@ -66,12 +66,14 @@ jQuery.ajax({
         console.log('fail to access_token: ' + result)
         oauth2()
       } else {
+    	  showDiv()
         var goodslist = JSON.parse(result)
         var length = goodslist.length
         for (var k = 0; k < length; k++) {
         	var goods = goodslist[k]
         	addone(goods)
         }
+    	  closeDiv()
       }
     },
     error: function( xhr, result, obj ) {

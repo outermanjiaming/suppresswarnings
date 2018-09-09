@@ -39,7 +39,12 @@ function gethtml(uri, container) {
 		}
 	});
 }
-
+function showDiv() {
+    document.getElementById('popWindow').style.display = 'block';
+}
+function closeDiv() {
+    document.getElementById('popWindow').style.display = 'none';
+}
 (function($) {
 	$.extend({
 		tipsBox : function(options) {
