@@ -45,7 +45,7 @@ function addone(goods) {
           '<dt><a href="/detail.html?state='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">'+goods.title+'</a></dt>' +
 	  	  '<dd style="font-size:12px;">'+goods.extra+'</dd>' + 
 	      '<dd><i>￥'+price+'</i></dd>' + 
-	      '<dd><a class="rbtn mini-addcart" href="javascript:;" onclick="addtocart(this)" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a></dd>' +
+	      '<dd style="float:left;"><a class="rbtn mini-addcart" href="javascript:;" onclick="addtocart(this)" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a></dd>' +
     '</dl>' +
   '</div>' +
 '</li>'
