@@ -92,6 +92,11 @@ function order(obj) {
 		$("#username").focus()
 		return
 	}
+	var idcard = $("#idcard").val()
+	if(idcard.length < 15) {
+		$("#idcard").focus()
+		return
+	}
 	var mobile = $("#mobile").val()
 	if(mobile.length < 11) {
 		$("#mobile").focus()
@@ -114,6 +119,7 @@ function order(obj) {
 		    ticket : ticket,
 		    state : state,
 		    username : username,
+		    idcard : idcard,
 		    mobile : mobile,
 		    address : address,
 		    comment : comment
