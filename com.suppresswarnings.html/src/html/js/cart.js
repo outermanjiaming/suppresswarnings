@@ -228,7 +228,6 @@ function loadCarts(){
 	        	price = price.toFixed(2)
 	        	addone(cart, goods, price)
 	        }
-	        $(".item-list").append('<div style="width:100%;height:111px;"><img src="/loading.gif" style="width:100%;heigth:30px"></div>')
 	        var totalprice = rate * sum
 	        totalprice = totalprice.toFixed(2)
 	        $("#totalprice").text("¥" + totalprice)
