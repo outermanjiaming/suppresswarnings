@@ -217,14 +217,30 @@ function buy(obj) {
 
 var quizId
 var quizIds
+var quizMap = []
 var rate = 0.01
 var nextindex = 0
+var mapindex = 0
 function next() {
 	if(quizIds == undefined) {
 	  quizId = ""
 	} else {
 	  if(nextindex >= quizIds.length) {
-	    nextindex = 0
+		  var size = quizMap.length
+	      var oneid = quizMap[mapindex]
+		  var onequiz = quizMap[oneid]
+		  
+	      $("#quiz").text(onequiz.quiz)
+			if(onequiz.sample == undefined) onequiz.sample = ""
+			$("#sample").text(onequiz.sample)
+			$("#ownerimg").attr("src", onequiz.ownerimg)
+			var price = rate * parseFloat(onequiz.price)
+			price = price.toFixed(2)
+			$("#btnprice").text(price)
+			$("#qrcode").attr("src", onequiz.qrcode)
+			$("#btnbuy").data("quizid", onequiz.quizId)
+			mapindex = mapindex + 1
+			mapindex = mapindex % size
 	  }
 	  quizId = quizIds[nextindex]
 	  nextindex = nextindex + 1
@@ -256,6 +272,8 @@ function next() {
 	        $("#btnprice").text(price)
 	        $("#qrcode").attr("src", quiz.qrcode)
 	        $("#btnbuy").data("quizid", quiz.quizId)
+	        quizMap[quiz.quizId] = quiz
+	        quizMap.push[quiz.quizId]
 	      }
 	      
 	    },
