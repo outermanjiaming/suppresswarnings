@@ -119,13 +119,16 @@
     <table style="text-align: center;width: 100%">
       <tbody>
         <tr>
-          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" onclick="next()">下一个</button></td>
+          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-quizid="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</span></button></td>
         </tr>
       </tbody>
     </table>
+    
+    <button id="btnnext" type="button" class="btn btn-xs" onclick="next()">下一个</button>
 </li>
 </ul>
-<button id="btnnext" type="button" class="btn btn-xs" onclick="next()">下一个</button>
+
+
 </div>
    
    
@@ -165,7 +168,7 @@ function sample(obj) {
 }
 
 function buy(obj) {
-  var data = $(obj).attr('data-id')
+  var data = $(obj).data('quizid')
   console.log('buy: ' + data)
   if(bridgeReady == 1) {
     $.ajax({
@@ -252,7 +255,7 @@ function next() {
 	        price = price.toFixed(2)
 	        $("#btnprice").text(price)
 	        $("#qrcode").attr("src", quiz.qrcode)
-	        $("#btnbuy").data("id", quiz.quizId)
+	        $("#btnbuy").data("quizid", quiz.quizId)
 	      }
 	      
 	    },
