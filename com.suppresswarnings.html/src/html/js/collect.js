@@ -182,7 +182,7 @@ jQuery.ajax({
         
         var myimg = collect.userimg
         var myname = collect.username
-        $("#business > .boder_v1").append("<div class='form-group text-center'><div>"+collect.quiz+"</div><input id='replyquiz' type='text' class='input btn-xs' data-quizid='"+state+"' placeholder='请按要求输入想说的话' size='30'><button id='replyquizbtn' type='button' class='btn btn-xs' data-quizid='"+state+"' onclick='replyquiz(this)'>回复</button></div>")
+        $("#business > .boder_v1").append("<div class='form-group'><div>"+collect.quiz+"</div><input id='replyquiz' type='text' class='input btn-xs' data-quizid='"+state+"' placeholder='请按要求输入想说的话' size='30'><button id='replyquizbtn' type='button' class='btn btn-xs' data-quizid='"+state+"' onclick='replyquiz(this)'>回复</button></div>")
         $("#business").append("<input id='userimg' type='text' class='sr-only hidden' value='"+collect.userimg+"'/>")
         $("#business").append("<input id='username' type='text' class='sr-only hidden' value='"+collect.username+"'/>")
         $("#replyquiz").on('keypress', function(e) {
