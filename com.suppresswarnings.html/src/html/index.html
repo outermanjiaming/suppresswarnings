@@ -253,7 +253,7 @@ function next() {
 	        $("#ownerimg").attr("src", quiz.ownerimg)
 	        $("#ownername").html(quiz.ownername)
 	        var price = rate * parseFloat(quiz.price)
-	        price = price.ToFixed(2)
+	        price = price.toFixed(2)
 	        $("#btnprice").text(price)
 	        $("#qrcode").attr("src", quiz.qrcode)
 	        $("#btnbuy").data("id", quiz.quizId)
