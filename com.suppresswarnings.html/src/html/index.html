@@ -108,7 +108,7 @@
 <ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
 
   <li class="boder_v1">
-  <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src="$userimg"/><span id="ownername"></span></div>
+  <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src=""/><span id="ownername">语料所属</span></div>
   <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
   <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
   <div class="form-group text-center">
@@ -120,15 +120,12 @@
       <tbody>
         <tr>
           <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" onclick="next()">下一个</button></td>
-          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-id="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</span></button></td>
         </tr>
       </tbody>
     </table>
 </li>
-
 </ul>
-
-
+<button id="btnnext" type="button" class="btn btn-xs" onclick="next()">下一个</button>
 </div>
    
    
@@ -251,7 +248,6 @@ function next() {
 	        if(quiz.sample == undefined) quiz.sample = ""
 	        $("#sample").text(quiz.sample)
 	        $("#ownerimg").attr("src", quiz.ownerimg)
-	        $("#ownername").html(quiz.ownername)
 	        var price = rate * parseFloat(quiz.price)
 	        price = price.toFixed(2)
 	        $("#btnprice").text(price)
