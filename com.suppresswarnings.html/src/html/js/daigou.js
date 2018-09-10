@@ -76,6 +76,7 @@ jQuery.ajax({
         	var goods = goodslist[k]
         	addone(goods)
         }
+    	  $(".single_item").append('<div style="width:100%;height:111px;"><img src="/loading.gif" style="width:100%;heigth:30px"></div>')
     	  closeDiv()
       }
     },

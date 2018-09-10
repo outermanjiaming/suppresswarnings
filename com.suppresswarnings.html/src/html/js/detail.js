@@ -67,7 +67,7 @@ function loadDetail(){
 	        	var str = arr[k]
 	        	$('<div><img class="desc" src="' +str+ '"></div>').appendTo($("#goodsimages"))
 	        }
-	        
+	        $("#goodsimages").append('<div style="width:100%;height:111px;"><img src="/loading.gif" style="width:100%;heigth:30px"></div>')
 	      }
 	    },
 	    error: function( xhr, result, obj ) {
