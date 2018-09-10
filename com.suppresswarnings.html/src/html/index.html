@@ -111,7 +111,6 @@
   <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src="$userimg"/><span id="ownername"></span></div>
   <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
   <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
-  <div class="form-group">指标：<span id="summary">{{数据量|参与人数|重复度}}</span></div>
   <div class="form-group text-center">
     <img id="qrcode" src="" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
   </div>
@@ -120,9 +119,8 @@
     <table style="text-align: center;width: 100%">
       <tbody>
         <tr>
-          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" onclick="next()">换一个</button></td>
-          <td><button id="btnsample" type="button" class="btn btn-ms btn-warning" data-id="null" onclick="sample(this)">查看样本</button></td>
-          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-id="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</button></td>
+          <td><button id="btnnext" type="button" class="btn btn-ms btn-primary" onclick="next()">下一个</button></td>
+          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-id="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</span></button></td>
         </tr>
       </tbody>
     </table>
@@ -255,10 +253,10 @@ function next() {
 	        $("#ownerimg").attr("src", quiz.ownerimg)
 	        $("#ownername").html(quiz.ownername)
 	        var price = rate * parseFloat(quiz.price)
+	        price = price.ToFixed(2)
 	        $("#btnprice").text(price)
 	        $("#qrcode").attr("src", quiz.qrcode)
 	        $("#btnbuy").data("id", quiz.quizId)
-	        $("#btnsample").data("id", quiz.quizId)
 	      }
 	      
 	    },
