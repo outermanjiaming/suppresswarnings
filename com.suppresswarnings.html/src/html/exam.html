@@ -17,15 +17,18 @@
    width: 100%;
    margin-top: 10px;
   }
+  .tall{
+  height:420px;
+  }
   .borders {
    margin-top: 20px;
    border:1px dashed #ccc;
-   height: 300px;
+   height: 600px;
   }
   .borders:hover{
    margin-top: 20px;
    border:2px solid pink;
-   height: 300px;
+   height: 600px;
   }
   </style>
 </head>
@@ -92,32 +95,37 @@
 
 <div class="form-group quiz full borders">
 <label for="quiz" class="full">一.（提问）假设你家里有一个非常智能的家居设备，你会主动和它说什么？</label>
+
+<div class="form-group quiztext full tall">
+<span class="full">你说的话展示在这里：</span>
+</div>
 <input type="text" class="full" name="quiz" value="" placeholder="请输入你想对它说什么">
 <button type="button" name="btnquiz" class="btn btn-ms btn-info full">确认</button>
-<div class="form-group quiztext full">
-qwertyuiop
-</div>
 </div>
 
 <div class="form-group reply full borders">
 <label for="reply" class="full">二.（回复）假设就是这个非常智能的家居设备，你会怎么回复主人说的话？</label>
-<input type="text" class="full" name="reply" value="" placeholder="请输入你该怎么回复"/>
-<span id="quiztoreply" class="full" data-quizid="">1234567890</span>
-<button type="button" name="btnreply" class="btn btn-ms btn-info full">确认</button>
-<div class="form-group replytext full">
-qwertyuiop
+
+<div class="form-group replytext full tall">
+<span class="full">问题和你的回复展示在这里：</span>
 </div>
+
+主人说：<span id="quiztoreply" class="full" data-quizid="">1234567890</span>
+<input type="text" class="full" name="reply" value="" placeholder="请输入你该怎么回复"/>
+<button type="button" name="btnreply" class="btn btn-ms btn-info full">确认</button>
 </div>
 
 
 <div class="form-group similar full borders">
 <label for="similar" class="full">三.（同义句）请用不同的表达方式，表达与以下语句同样的意思</label>
-<span id="quiztosimilar" class="full" data-quizid="">1234567890</span>
+
+<div class="form-group similartext full tall">
+<span class="full">问题和同义句展示在这里</span>
+</div>
+
+主人说：<span id="quiztosimilar" class="full" data-quizid="">1234567890</span>
 <input type="text" class="full" name="similar" value="" placeholder="请输入同义句">
 <button type="button" name="btnsimilar" class="btn btn-ms btn-info full">确认</button>
-<div class="form-group similartext full">
-qwertyuiop
-</div>
 </div>
 
 </div>
