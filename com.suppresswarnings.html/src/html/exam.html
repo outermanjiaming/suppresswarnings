@@ -17,18 +17,22 @@
    width: 100%;
    margin-top: 10px;
   }
+  
   .tall{
-  height:420px;
+      height:350px;
+      overflow:auto;
+      border-top: 1px solid #eee;
+      -moz-box-shadow: 3px 3px 2px #888888;
+	  box-shadow: 3px 3px 2px #888888;
   }
   .borders {
    margin-top: 20px;
-   border:1px dashed #ccc;
-   height: 600px;
+   height: 500px;
   }
   .borders:hover{
    margin-top: 20px;
-   border:2px solid pink;
-   height: 600px;
+   border:1px solid #eee;
+   height: 500px;
   }
   </style>
 </head>
@@ -62,7 +66,7 @@
 <div class="form-group quiztext full tall">
 <span class="full">你说的话展示在这里：</span>
 </div>
-<input type="text" class="full" name="quiz" value="" placeholder="请输入你想对它说什么" onkeypress="return justSubmit(this, event)"/>
+<input type="text" class="full" id="quiz" name="quiz" value="" placeholder="请输入你想对它说什么" onkeypress="return justSubmit(this, event)"/>
 <button type="button" name="btnquiz" class="btn btn-ms btn-info full" onclick="subquiz(this)">确认</button>
 </div>
 
@@ -73,8 +77,8 @@
 <span class="full">问题和你的回复展示在这里：</span>
 </div>
 
-主人说：<span id="quiztoreply" class="full" data-quizid="">1234567890</span>
-<input type="text" class="full" name="reply" value="" placeholder="请输入你该怎么回复" onkeypress="return justSubmit(this, event)"/>
+主人说：<span id="quiztoreply" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131.Reply.">1234567890</span>
+<input type="text" class="full" id="reply" name="reply" value="" placeholder="请输入你该怎么回复" onkeypress="return justSubmit(this, event)"/>
 <button type="button" name="btnreply" class="btn btn-ms btn-info full" onclick="subreply(this)">确认</button>
 </div>
 
@@ -87,7 +91,7 @@
 </div>
 
 主人说：<span id="quiztosimilar" class="full" data-quizid="">1234567890</span>
-<input type="text" class="full" name="similar" value="" placeholder="请输入同义句" onkeypress="return justSubmit(this, event)" />
+<input type="text" class="full" id="similar" name="similar" value="" placeholder="请输入同义句" onkeypress="return justSubmit(this, event)" />
 <button type="button" name="btnsimilar" class="btn btn-ms btn-info full" onclick="subsimilar(this)">确认</button>
 </div>
 
@@ -105,7 +109,9 @@
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 var randomid = Math.random()
-var openid = "class_random_openid_" + randomid
+var time = new Date().getTime()
+var openid = "class_openid_" + randomid + "." + time
+var ticket = openid
 function justSubmit(obj, e){
 	var keynum
 	if(window.event) {
@@ -120,68 +126,121 @@ function justSubmit(obj, e){
 	}
 	return true
 }
-
 function subquiz(obj) {
-	alert($(obj).text())
+	var text = $("#quiz").val()
+	if(text.length < 1) {
+		return
+	}
+	
+	$.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+	    action : "class_exam",
+	    type : "quiz",
+	    quizid : "T_Corpus_classExam_1536649615642_3131",
+	    text : text,
+	    random : randnum,
+	    ticket : ticket
+	    },
+	    success: function( result ) {
+	    	closeDiv()
+	    	console.log("[lijiaming] check exam ok: " + result)
+	        if("fail" == result) {
+	        	console.log("fail to quiz")
+	        } else {
+	        	$(".quiztext").append("<pre>" + text + "(✅)</pre>")
+	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
+	        }
+	    },
+	    error: function( xhr, result, obj ) {
+	    	closeDiv()
+	        console.log("[lijiaming] check exam err: " + result)
+	    }
+	  })
+	
+	
+	$("#quiz").val("")
+	
 }
 
 function subreply(obj) {
-	alert($(obj).text())
+	var quiz = $("#quiztoreply").text()
+	var text = $("#reply").val()
+	if(text.length < 1) {
+		return
+	}
+	quizid = $("#reply").data("quizid")
+
+	$.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+	    action : "class_exam",
+	    type : "reply",
+	    quizid : quizid,
+	    text : text,
+	    random : randnum,
+	    ticket : ticket
+	    },
+	    success: function( result ) {
+	    	closeDiv()
+	    	console.log("[lijiaming] check exam ok: " + result)
+	        if("fail" == result) {
+	        	console.log("fail to quiz")
+	        } else {
+	        	var replyquiz = JSON.parse(result)
+	        	$("#quiztoreply").text(replyquiz.quiz)
+	        	$("#reply").data("quizid", replyquiz.quizid)
+	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "(✅)</pre>")
+	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
+	        }
+	    },
+	    error: function( xhr, result, obj ) {
+	    	closeDiv()
+	        console.log("[lijiaming] check exam err: " + result)
+	    }
+	  })
+	$("#reply").val("")
 }
 
 function subsimilar(obj) {
-	alert($(obj).text())
-}
-
-function GetRequest() {
-    var url = location.search; //获取url中"?"符后的字串
-    var theRequest = new Object();
-    if (url.indexOf("?") != -1) {
-        var str = url.substr(1);
-        strs = str.split("&");
-        for(var i = 0; i < strs.length; i ++) {
-            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-        }
-    }
-    return theRequest;
-}
-
-$(document).ready(function(){
-	
-	var Request = GetRequest();
-	
-	if(Request.code === undefined || Request.state === undefined) {
-	  console.log('first time here without code')
-	} else {
-	  ticket = Request.code
-	  state  = Request.state
-	  showDiv()
-	  $.ajax({
-		    url: "/wx.http?r=" + Math.random(),
-		    data: {
-		    action : "class_exam",
-		    random : randnum,
-		    ticket : ticket
-		    },
-		    success: function( result ) {
-		    	closeDiv()
-		      if("success" == result) {
-		    	  console.log('great lijiaming')
-		      } else {
-		          console.log('fail to class_exam: ' + result)
-		      }
-		    },
-		    error: function( xhr, result, obj ) {
-		    	closeDiv()
-		        console.log("[lijiaming] check logon err: " + result)
-		    }
-		  })
+	var quiz = $("#quiztosimilar").text()
+	var text = $("#similar").val()
+	if(text.length < 1) {
+		return
 	}
-    
 	
-	
-	
-});
+	quizid = $("#similar").data("quizid")
+
+	$.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+	    action : "class_exam",
+	    type : "similar",
+	    quizid : quizid,
+	    text : text,
+	    random : randnum,
+	    ticket : ticket
+	    },
+	    success: function( result ) {
+	    	closeDiv()
+	    	console.log("[lijiaming] check exam ok: " + result)
+	        if("fail" == result) {
+	        	console.log("fail to quiz")
+	        } else {
+	        	var replyquiz = JSON.parse(result)
+	        	$("#quiztosimilar").text(replyquiz.quiz)
+	        	$("#similar").data("quizid", replyquiz.quizid)
+	        	$(".quizsimilar").append("<pre>主人：" + quiz + "\n同义句：" + text + "(✅)</pre>")
+	        	$(".quizsimilar").scrollTop($(".quizsimilar")[0].scrollHeight);
+	        }
+	    },
+	    error: function( xhr, result, obj ) {
+	    	closeDiv()
+	        console.log("[lijiaming] check exam err: " + result)
+	    }
+	  })
+	$("#similar").val("")
+}
 
 </script>
 </body>
