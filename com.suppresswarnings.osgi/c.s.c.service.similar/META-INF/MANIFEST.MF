@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Similar
+Bundle-SymbolicName: c.s.c.service.similar
+Bundle-Version: 0.0.1.osgi
+Export-Package: com.suppresswarnings.corpus.service.similar
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.osgi.leveldb
+Service-Component: OSGI-INF/component.xml

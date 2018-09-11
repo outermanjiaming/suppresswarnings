@@ -70,6 +70,8 @@ public class WXContext extends Context<CorpusService> {
 			if(exit(t, "exit()")) {
 				u.output("上一阶段对话已经结束。");
 				u.content().forgetIt(openid());
+				//TODO bugfix
+				return;
 			}
 			String command = CheckUtil.cleanStr(t);
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
@@ -94,7 +96,14 @@ public class WXContext extends Context<CorpusService> {
 				u.output(ctx.output());
 			} else {
 				logger.info("[WXContext] "+ openid() + "\tAccost words: " + t);
-				
+				cf = u.content().factories.get("我要上报语料");
+				if(cf != null) {
+					Context<CorpusService> ctx = cf.getInstance(wxid, openid, u.content());
+					ctx.test(t);
+					u.output(ctx.output());
+					u.content().context(openid, ctx);
+					logger.info("[WXContex] auto response");
+				}
 			}
 			
 		}

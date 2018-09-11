@@ -20,6 +20,7 @@ public class Goods {
 	String quota;
 	String listimages;
 	String time;
+	String state;
 	public String getImage() {
 		return image;
 	}
@@ -39,7 +40,7 @@ public class Goods {
 		this.title = title;
 	}
 	public String getExtra() {
-		return extra;
+		return extra == null ? "" : extra;
 	}
 	public void setExtra(String extra) {
 		this.extra = extra;
@@ -51,7 +52,7 @@ public class Goods {
 		this.pricecent = pricecent;
 	}
 	public String getQuota() {
-		return quota;
+		return quota == null ? "" : quota;
 	}
 	public void setQuota(String quota) {
 		this.quota = quota;
@@ -68,9 +69,17 @@ public class Goods {
 	public void setTime(String time) {
 		this.time = time;
 	}
+	
 	@Override
 	public String toString() {
-		return "Goods [goodsid=" + goodsid + ", pricecent=" + pricecent + ", title=" + title + "]";
+		return "[" + pricecent + "分]「" + title + "」[" + goodsid + "]";
+	}
+	
+	public void setState(String state) {
+		this.state = state;
+	}
+	public String getState() {
+		return state == null ? "" : state;
 	}
 	
 }

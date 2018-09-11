@@ -11,6 +11,7 @@ package com.suppresswarnings.corpus.service.produce;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
@@ -19,6 +20,7 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
+import com.suppresswarnings.corpus.service.work.Quiz;
 
 public class ProduceContext extends WXContext {
 	public static final String CMD = "我要上报语料";
@@ -36,11 +38,12 @@ public class ProduceContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			if(quizId == null) {
-				u.output("请通过扫码进入");
 				String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
 				quizId = u.content().data().get(taskKey);
-				if(quizId != null) u.output("现在让你进入默认语料场景");
-				else return;
+				if(quizId == null) {
+					u.output("无话题可说");
+					return;
+				}
 			}
 			String quizKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId);
 			String quizOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "OpenId");
@@ -57,14 +60,11 @@ public class ProduceContext extends WXContext {
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(t.startsWith("SCAN_")) {
-				quizId = t.substring(5);
+				quizId = t.substring("SCAN_".length());
 				return produce;
 			}
 			if(CMD.equals(t)) {
 				return produce;
-			}
-			if(quizId == null) {
-				return init;
 			}
 			return answer;
 		}
@@ -81,6 +81,11 @@ public class ProduceContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
+		Iterator<Quiz> askQuiz = null;
+		int pointer = 0;
+		String[] FORMAT = {"对了，有人曾经对我说：%s，我也是半天没想到怎么回答",
+				"难倒我了，就像上次，别人说：%s，我该咋说", "好吧，又把我问到了，还有人说：%s，我能说什么"};
+		int count = 2;
 		Map<String, AutoContext> contexts = new HashMap<>();
 		/**
 		 * 
@@ -125,6 +130,24 @@ public class ProduceContext extends WXContext {
 				}
 				answers.add(result);
 				u.output(result);
+			} else {
+				//count to 2
+				//fetch a task todo
+				count --;
+				if(count < 0) {
+					count = 2;
+					if(askQuiz == null) {
+						askQuiz = u.content().assimilatedQuiz.iterator();
+					}
+					if(askQuiz.hasNext()) {
+						Quiz ask = askQuiz.next();
+						u.output(String.format(FORMAT[pointer], ask.getQuiz().value()));
+						pointer ++;
+						if(pointer >= FORMAT.length) {
+							pointer = 0;
+						}
+					}
+				}
 			}
 		}
 

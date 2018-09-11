@@ -14,6 +14,7 @@ public interface Const {
 	String continueTitle = "请问是否继续？yes/no";
 	public interface Version {
 		String V1 = "001";
+		String V2 = "002";
 	}
 	/**
 	 * collection or question or classify or reply or produce or unknown

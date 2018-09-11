@@ -22,6 +22,7 @@ public class Order {
 	String orderid;
 	String openid;
 	String username;
+	String idcard;
 	String mobile;
 	String address;
 	String comment;
@@ -34,6 +35,12 @@ public class Order {
 	
 	List<Cart> carts;
 	
+	public String getIdcard() {
+		return idcard;
+	}
+	public void setIdcard(String idcard) {
+		this.idcard = idcard;
+	}
 	public String getDetail() {
 		return detail;
 	}

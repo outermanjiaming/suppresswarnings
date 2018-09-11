@@ -9,10 +9,19 @@
  */
 package com.suppresswarnings.corpus.service.work;
 
-public class WorkerUser {
+import com.suppresswarnings.corpus.common.Type;
 
+public class WorkerUser {
 	String openId;
-	transient int state;
+	Type type = Type.Reply;
+	transient int state = 0;
+	
+	public Type getType() {
+		return type;
+	}
+	public void setType(Type type) {
+		this.type = type;
+	}
 	public String getOpenId() {
 		return openId;
 	}

@@ -71,6 +71,33 @@ public class DaigouHandler {
 		return list;
 	}
 	
+	public void saveMyGoods(String openid, Goods goods) {
+		String goodsid = goods.getGoodsid();
+		String goodsidKey = String.join(Const.delimiter, Const.Version.V1, "Daigou","Goods", goodsid);
+		service.account().put(goodsidKey, goods.getGoodsid());
+		String myGoodsidKey = String.join(Const.delimiter, Const.Version.V1, "Daigou", openid, "Goodsid", goodsid);
+		service.account().put(myGoodsidKey, goods.getGoodsid());
+		
+		String keyPricecent = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Pricecent");
+		service.account().put(keyPricecent, goods.getPricecent());
+		
+		String keyImage = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Image");
+		service.account().put(keyImage, goods.getImage());
+		String keyTitle = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Title");
+		service.account().put(keyTitle, goods.getTitle());
+		String keyListimages = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Listimages");
+		service.account().put(keyListimages, goods.getListimages());
+		String keyTime = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Time");
+		service.account().put(keyTime, goods.getTime());
+		
+		String keyExtra = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Extra");
+		service.account().put(keyExtra, goods.getExtra());
+		String keyQuota = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Quota");
+		service.account().put(keyQuota, goods.getQuota());
+		String keyState = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Time");
+		service.account().put(keyState, goods.getState());
+	}
+	
 	public Cart getByOpenidCartid(String openid, String cartid, String wantedState) {
 		String stateKey = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Cart", openid, cartid, "State");
 		String state = service.account().get(stateKey);
@@ -222,6 +249,8 @@ public class DaigouHandler {
 		service.account().put(keyMobile, order.getMobile());
 		String keyUsername = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Order", openid, orderid, "Username");
 		service.account().put(keyUsername, order.getUsername());
+		String keyIdcard = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Order", openid, orderid, "Idcard");
+		service.account().put(keyIdcard, order.getIdcard());
 		String keyComment = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Order", openid, orderid, "Comment");
 		service.account().put(keyComment, order.getComment());
 		String keyOpenid = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Order", openid, orderid, "Openid");

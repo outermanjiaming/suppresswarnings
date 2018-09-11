@@ -12,6 +12,11 @@ package com.suppresswarnings.corpus.service.work;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * TodoTask has no type, depends on how you did it
+ * @author lijiaming
+ *
+ */
 public class TodoTask {
 	String openId;
 	String quizId;
@@ -75,11 +80,13 @@ public class TodoTask {
 		this.finishTime = System.currentTimeMillis();
 		this.result = reply;
 		this.state = 1;
-		lock.lock();
-		try {
-			waiting.signalAll();
-		} finally {
-			lock.unlock();
+		if(lock != null){
+			lock.lock();
+			try {
+				waiting.signalAll();
+			} finally {
+				lock.unlock();
+			}
 		}
 	}
 	public boolean isFinish() {

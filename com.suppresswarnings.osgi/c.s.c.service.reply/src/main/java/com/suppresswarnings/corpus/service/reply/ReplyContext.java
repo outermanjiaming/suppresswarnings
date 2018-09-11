@@ -17,6 +17,7 @@ import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
+import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 
@@ -24,7 +25,6 @@ public class ReplyContext extends WXContext {
 	public static final String CMD = "我要回答问题";
 	
 	State<Context<CorpusService>> online = new State<Context<CorpusService>>() {
-
 		/**
 		 * 
 		 */
@@ -32,18 +32,18 @@ public class ReplyContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			boolean x = u.content().iWantJob(openid());
+			boolean x = u.content().iWantJob(openid(), Type.Reply);
 			if(x) {
-				u.output("一会儿有在线任务优先派发给您");
+				u.output("打卡成功，一会儿有在线任务优先派发给您,不想接任务就输入「打卡下班」");
 			} else {
-				u.output("现在暂时没有在线任务，你可以输入 离线回答");
+				u.output("现在暂时没有在线任务，你可以输入「打卡下班」");
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if("离线回答".equals(t)) {
-				return enter;
+			if("打卡下班".equals(t)) {
+				return init;
 			}
 			return online;
 		}

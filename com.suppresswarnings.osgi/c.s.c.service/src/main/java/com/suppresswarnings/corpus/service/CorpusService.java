@@ -42,13 +42,17 @@ import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.daigou.Order;
+import com.suppresswarnings.corpus.service.exam.ExamHandler;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
+import com.suppresswarnings.corpus.service.work.Quiz;
+import com.suppresswarnings.corpus.service.work.TodoTask;
 import com.suppresswarnings.corpus.service.work.WorkHandler;
+import com.suppresswarnings.corpus.service.work.WorkerUser;
 import com.suppresswarnings.corpus.service.sdk.WXPayConstants.SignType;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
@@ -58,6 +62,7 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.corpus.common.SendMail;
 import com.suppresswarnings.corpus.common.TTL;
+import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
@@ -73,12 +78,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public LevelDB account, data, token;
 	Server backup;
-	DaigouHandler daigouHandler;
-	WorkHandler workHandler;
+	public DaigouHandler daigouHandler;
+	public WorkHandler workHandler;
+	
+	public ExamHandler examHandler;
 	ScheduledExecutorService scheduler;
 	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
+	//
+	public List<Quiz> assimilatedQuiz = new ArrayList<>();
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -117,8 +126,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void forgetIt(String openId) {
 		this.workHandler.forgetIt(openId);
 	}
-	public boolean iWantJob(String openid) {
-		return this.workHandler.clockIn(openid);
+	public boolean iWantJob(String openid, Type type) {
+		return this.workHandler.clockIn(openid, type);
 	}
 	public void activate() {
 		logger.info("[corpus] activate.");
@@ -131,6 +140,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		//daigou
 		daigouHandler = new DaigouHandler(this);
 		workHandler = new WorkHandler(this, Const.WXmsg.openid);
+		examHandler = new ExamHandler(this, "ClassExam");
 		try {
 			workHandler.working();
 		} catch (Exception e) {
@@ -205,11 +215,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[corpus] scheduler: the admins not set");
 					return;
 				}
-				String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-				String quizId = data().get(taskKey);
-				if(quizId != null) {
-					fillQuestionsAndAnswers(questionToAid, aidToAnswers, aidToSimilars, quizId);
-				}
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
@@ -228,6 +233,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(90), TimeUnit.MILLISECONDS);
 		logger.info("[corpus] scheduler admins info starts in 3 minutes");
+		
+		String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+		String quizId = data().get(taskKey);
+		if(quizId != null) {
+			fillQuestionsAndAnswers(quizId);
+		}
 	}
 
 	public void deactivate() {
@@ -343,83 +354,81 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 	}
-	public void fillQuestionsAndAnswers(Map<String, String> Question2Aid, Map<String, HashSet<String>> Aid2Answer, Map<String, HashSet<String>> Aid2Similar, String quizId){
+	public void fillQuestionsAndAnswers(String quizId){
 		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+		assimilatedQuiz.clear();
+		workHandler.close();
+		workHandler.working();
+		List<Quiz> allQuiz = new ArrayList<>();
 		data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
 			String left = t.substring(start.length());
 			if(!left.contains("Similar") && !left.contains("Reply")) {
-				logger.info("[fillQuestionsAndAnswers] quiz: " + u);
-				boolean questionExist = false;
-				String quiz = CheckUtil.cleanStr(u);
-				String aid = Question2Aid.get(quiz);
-				HashSet<String> similars = null;
-				if(aid != null) {
-					//question exist
-					questionExist = true;
-					similars = aidToSimilars.get(aid);
-				}
-				if(similars == null) {
-					similars = new HashSet<>();
-				}
-				//get Similar HashSet includes u
-				HashSet<String> similar = new HashSet<>();
-				HashSet<String> allSimilar = similars;
-				//important
-				similar.add(quiz);
-				String similarKey = String.join(Const.delimiter, t, "Similar");
-				data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (x, y) -> {
-					logger.info("[fillQuestionsAndAnswers] similarKey: " + similarKey);
-					String z = x.substring(similarKey.length());
-					if(!z.contains("Similar") && !z.contains("Reply")) {
-						similar.add(CheckUtil.cleanStr(y));
-						allSimilar.add(y);
-					}
-				});
-				//for each check exist
-				if(!questionExist) {
-					for(String s : similar) {
-						String exist = Question2Aid.get(s);
-						if(exist != null){
-							questionExist = true;
-							aid = exist;
-							break;
-						}
-					}
-				}
-				//if any use the exist aid
-				if(!questionExist) {
-					aid = t;
-				}
-				//use aid for all similar
-				for(String s : similar) {
-					Question2Aid.put(s, aid);
-				}
-				HashSet<String> set = Aid2Answer.get(aid);
-				if(set == null) {
-					set = new HashSet<>();
-				}
-				//list answers for t and put them into set
-				HashSet<String> answers = set;
-				String replyKey = String.join(Const.delimiter, t, "Reply");
-				logger.info("[fillQuestionsAndAnswers] replyKey: " + replyKey);
-				data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (x, y) -> {
-					String z = x.substring(replyKey.length());
-					if(!z.contains("Similar") && !z.contains("Reply")) {
-						answers.add(y);
-					}
-				});
-				Aid2Answer.put(aid, answers);
-				Aid2Similar.put(aid, allSimilar);
+				Quiz quiz = new Quiz(t, u);
+				allQuiz.add(quiz);
 			}
 		});
+		allQuiz.forEach(quiz -> {
+			
+			String replyKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Reply");
+			data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (t, u) -> {
+				String left = t.substring(replyKey.length());
+				if(!left.contains("Similar") && !left.contains("Reply")) {
+					quiz.reply(t, u);
+				}
+			});
+			
+			String similarKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Similar");
+			data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (t, u) -> {
+				String left = t.substring(similarKey.length());
+				if(!left.contains("Similar") && !left.contains("Reply")) {
+					quiz.similar(t, u);
+				}
+			});
+		});
+		
+		
+		allQuiz.forEach(quiz -> {
+			boolean assimilated = false;
+			for(int i=0;i<assimilatedQuiz.size();i++) {
+				Quiz host = assimilatedQuiz.get(i);
+				if(host.assimilate(quiz)) {
+					logger.info("[fillQuestionsAndAnswers] assimilate: " + host.toString());
+					assimilated = true;
+					break;
+				}
+			}
+			if(!assimilated) {
+				assimilatedQuiz.add(quiz);
+			}
+		});
+		logger.info("[fillQuestionsAndAnswers] done assimilate");
+		assimilatedQuiz.forEach(quiz -> {
+			logger.info("[fillQuestionsAndAnswers] assimilated quiz: " + quiz.toString());
+			this.questionToAid.put(CheckUtil.cleanStr(quiz.getQuiz().value()), quiz.getQuiz().key());
+			
+			HashSet<String> answers = new HashSet<>();
+			quiz.getReply().forEach(reply -> {
+				answers.add(reply.value());
+			});
+			this.aidToAnswers.put(quiz.getQuiz().key(), answers);
+			
+			HashSet<String> similars = new HashSet<>();
+			quiz.getSimilar().forEach(similar -> {
+				String value = similar.value();
+				similars.add(value);
+				this.questionToAid.put(CheckUtil.cleanStr(value), quiz.getQuiz().key());
+			});
+			this.aidToSimilars.put(quiz.getQuiz().key(), similars);
+		});
+		
 	}
 	public void _interception(CommandInterpreter ci) {
 		String quizId = ci.nextArgument();
 		ci.println("[_interception] quizId: " + quizId);
-		fillQuestionsAndAnswers(this.questionToAid, this.aidToAnswers, this.aidToSimilars, quizId);
+		fillQuestionsAndAnswers(quizId);
 		AtomicInteger integer = new AtomicInteger(0);
 		this.questionToAid.forEach((quiz, aid) -> {
-			ci.println(integer.incrementAndGet() + ".\t" + quiz + "\n\t->A. " + this.aidToAnswers.get(aid) + "\n\t->S. " + this.aidToSimilars.get(aid));
+			ci.println(integer.incrementAndGet() + ".   " + quiz + "\n\t->A. " + this.aidToAnswers.get(aid) + "\n\t->S. " + this.aidToSimilars.get(aid));
 		});
 	}
 	
@@ -432,7 +441,94 @@ public class CorpusService implements HTTPService, CommandProvider {
 		// TODO get action to do things
 		String action = parameter.getParameter("action");
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
-		if("WX".equals(action)) {
+		if("class_exam".equals(action)){
+			String onKey = String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON");
+			String on = data().get(onKey);
+			if("off".equals(on)) {
+				return "fail";
+			}
+			examHandler.report();
+			String time = "" +System.currentTimeMillis();
+			String openid = parameter.getParameter("ticket");
+			String type = parameter.getParameter("type");
+			String random = parameter.getParameter("random");
+			String quizid = parameter.getParameter("quizid");
+			if(quizid == null || "".equals(quizid.trim())) {
+				logger.info("[class_exam] null quizid: " + quizid);
+				return "fail";
+			}
+			String text =  parameter.getParameter("text");
+			if(text == null || "".equals(text.trim())) {
+				logger.info("[class_exam] null text: " + text);
+				return "fail";
+			}
+			Gson gson = new Gson();
+			try {
+				if("quiz".equals(type)) {
+					String quizKey = String.join(Const.delimiter, Const.Version.V2, "Collect","Corpus","Quiz", quizid, "Answer", openid, time);
+					data().put(quizKey, text);
+					examHandler.newJob(text, quizKey, openid);
+					return SUCCESS;
+				} else {
+					if("reply".equals(type)) {
+						logger.info("[class_exam] reply");
+						TodoTask task = new TodoTask();
+						task.setOpenId(openid);
+						task.setQuizId(quizid);
+						task.setQuiz(text);
+						task.setResult(text);
+						
+						String answer = text;
+						String answerKey = String.join(Const.delimiter, task.getQuizId(), Type.Reply.name(), openid, time, random);
+						data().put(answerKey, answer);
+						task.finish(answer);
+						logger.info("[class_exam] reply： " + task.toString());
+						examHandler.done(task, Type.Reply);
+						
+						
+						WorkerUser worker = new WorkerUser();
+						worker.setOpenId(openid);
+						worker.setType(Type.Reply);
+						worker.setFree();
+						TodoTask todo = examHandler.want(worker);
+						if(todo == null) return "fail";
+						Map<String, String> map = new HashMap<>();
+						map.put("quiz", todo.getQuiz());
+						map.put("quizid", todo.getQuizId());
+						return gson.toJson(map);
+					} else if("similar".equals(type)) {
+						logger.info("[class_exam] similar");
+						TodoTask task = new TodoTask();
+						task.setOpenId(openid);
+						task.setQuizId(quizid);
+						task.setResult(text);
+						task.setQuiz(text);
+						
+						String answer = text;
+						String answerKey = String.join(Const.delimiter, task.getQuizId(), Type.Similar.name(), openid, time, random);
+						data().put(answerKey, answer);
+						task.finish(answer);
+						logger.info("[class_exam] similar： " + task.toString());
+						examHandler.done(task, Type.Similar);
+						examHandler.newJob(text, quizid, openid);
+						
+						WorkerUser worker = new WorkerUser();
+						worker.setOpenId(openid);
+						worker.setType(Type.Similar);
+						TodoTask todo = examHandler.want(worker);
+						if(todo == null) return "fail";
+						Map<String, String> map = new HashMap<>();
+						map.put("quiz", todo.getQuiz());
+						map.put("quizid", todo.getQuizId());
+						return gson.toJson(map);
+					}
+					
+				}
+			} catch (Exception e) {
+				logger.error("[class_exam] Exception", e);
+			}
+			return "fail";
+		} else if("WX".equals(action)) {
 			logger.info("[WX] request: " + parameter.toString());
 			String msgSignature = parameter.getParameter("signature");
 			String timestamp = parameter.getParameter("timestamp");
@@ -521,15 +617,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 						
 						if(subscribe == null) {
 							account().put(subscribeKey, time);
-							return xml(openid, "欢迎初次来到" + where, fromOpenId);
+							return xml(openid, "hi，如果你愿意，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
 						} else {
 							String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
 							account().put(subscribeHistoryKey, time);
 							account().put(subscribeKey, time);
 							if(subscribe.contains("unsubscribe")) {
-								return xml(openid, "欢迎再次来到" + where, fromOpenId);
+								return xml(openid, "hi，如果你依然愿意，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
 							} else {
-								return xml(openid, "欢迎来到" + where, fromOpenId);
+								return xml(openid, "hi，如果你还愿意的话，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
 							}
 						}
 					} else if("unsubscribe".equals(event)) {
@@ -558,6 +654,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 						logger.info("[corpus] location: " + wxmsg.get("FromUserName") + " = (" + wxmsg.get("Latitude") + ", " + wxmsg.get("Longitude") + ") * " + wxmsg.get("Precision"));
 						return SUCCESS;
 					}
+				} else if("image".equals(msgType)) {
+					String url = wxmsg.get("PicUrl");
+					input = "IMAGE_" + url;
 				} else {
 					return SUCCESS;
 				}
@@ -726,10 +825,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if("makeanorder".equals(todo)) {
 				logger.info("makeanorder");
 				String username = parameter.getParameter("username");
+				if(username == null || username.length() < 1) return "fail";
+				String idcard = parameter.getParameter("idcard");
+				if(idcard == null || idcard.length() < 15) return "fail";
 				String mobile = parameter.getParameter("mobile");
+				if(mobile == null || mobile.length() < 10) return "fail";
 				String address = parameter.getParameter("address");
+				if(address == null || address.length() < 3) return "fail";
 				String comment = parameter.getParameter("comment");
+				
 				List<Cart> carts = daigouHandler.myCarts(openid);
+				if(carts.isEmpty()) {
+					logger.info("[lijiaming] 订单为空");
+					return "fail";
+				}
 				daigouHandler.fillGoodsToCart(carts);
 				StringBuffer sb = new StringBuffer();
 				long totalcent = 0;
@@ -742,7 +851,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					totaltype = totaltype + 1;
 					totalcent = totalcent + pricecent;
 					totalcount = totalcount + count;
-					sb.append("Goodsid:").append(cart.getGoodsid()).append(",count:").append(cart.getCount());
+					sb.append("[").append(cart.getGoodsid()).append("*").append(cart.getCount()).append("] ");
 				}
 				double totalprice = totalcent * 0.01d;
 				
@@ -750,15 +859,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 				String randEnd = random.substring(random.length() - 4);
 				long current = System.currentTimeMillis();
 				String orderid = "DG"+ current + openIdEnd + randEnd;
+				sb.append(openid);
+				String detail = sb.toString();
 				String clientip = ip.split(",")[0];
 				String body = "新西兰代购:" + totaltype + "种" + totalcount + "件，共¥" + totalprice;
-				String detail = sb.toString();
 				String attach = openid;
 				String prepay = prepay(orderid, body, detail, attach, ""+totalcent, clientip, openid, current);
 				if(prepay != null) {
 					Order order = new Order();
 					order.setAddress(address);
 					order.setCarts(carts);
+					order.setIdcard(idcard);
 					order.setComment(comment);
 					order.setGoodscount(""+totalcount);
 					order.setGoodstypes(""+totaltype);
@@ -1128,11 +1239,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(next == null || "".equals(next)) {
 				String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus");
 				List<String> quizIds = new ArrayList<>();
-				account().page(start, start, null, 100, new BiConsumer<String, String>() {
+				account().page(start, start, null, Integer.MAX_VALUE, new BiConsumer<String, String>() {
 
 					@Override
 					public void accept(String t, String u) {
-						quizIds.add(u);
+						//putkv 001.Collect.Corpus.Quiz.T_Corpus_oDqlM1fwmR6XTkKTjalDwMXsi2ME_1534649693345_106.State Hide
+						String stateKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz",  u, "State");
+						String state = data().get(stateKey);
+						logger.info("[next] quizid: " + state + " = " + u);
+						if(!"Hide".equals(state)) {
+							quizIds.add(u);
+						}
 					}
 				});
 				String quizId = quizIds.remove(0);
@@ -1174,17 +1291,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(openid == null) {
 				return "fail";
 			}
-			String goodsid= parameter.getParameter("goodsid");
+			String quizId= parameter.getParameter("goodsid");
 			String title  = parameter.getParameter("title");
 			String body = "素朴网联-语料";
-			String detail = "goodsid:" + goodsid + ",title:" + title;
-			String totalcent = "8";
+			String detail = "[" + quizId + ", 1]";
+			String quizPriceKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Price");
+			String totalcent = data().get(quizPriceKey);
+			if(totalcent == null) {
+				totalcent = "8";
+			}
 			String openIdEnd = openid.substring(openid.length() - 7);
 			String randEnd = random.substring(random.length() - 4);
 			long current = System.currentTimeMillis(); 
 			String orderid = current + openIdEnd + randEnd;
 			String clientip = ip.split(",")[0];
-			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", title:" + title);
+			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + quizId + ", title:" + title);
 			try {
 				return prepay(orderid, body, detail, openid, totalcent, clientip, openid, current);
 			} catch (Exception e) {
