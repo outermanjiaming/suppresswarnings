@@ -77,7 +77,7 @@
 <span class="full">问题和你的回复展示在这里：</span>
 </div>
 
-主人说：<span id="quiztoreply" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131.Reply.">1234567890</span>
+主人说：<span id="quiztoreply" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131">你会说英语吗？</span>
 <input type="text" class="full" id="reply" name="reply" value="" placeholder="请输入你该怎么回复" onkeypress="return justSubmit(this, event)"/>
 <button type="button" name="btnreply" class="btn btn-ms btn-info full" onclick="subreply(this)">确认</button>
 </div>
@@ -90,7 +90,7 @@
 <span class="full">问题和同义句展示在这里</span>
 </div>
 
-主人说：<span id="quiztosimilar" class="full" data-quizid="">1234567890</span>
+主人说：<span id="quiztosimilar" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131">你会说英语吗？</span>
 <input type="text" class="full" id="similar" name="similar" value="" placeholder="请输入同义句" onkeypress="return justSubmit(this, event)" />
 <button type="button" name="btnsimilar" class="btn btn-ms btn-info full" onclick="subsimilar(this)">确认</button>
 </div>
@@ -127,6 +127,7 @@ function justSubmit(obj, e){
 	return true
 }
 function subquiz(obj) {
+	showDiv()
 	var text = $("#quiz").val()
 	if(text.length < 1) {
 		return
@@ -164,6 +165,7 @@ function subquiz(obj) {
 }
 
 function subreply(obj) {
+	showDiv()
 	var quiz = $("#quiztoreply").text()
 	var text = $("#reply").val()
 	if(text.length < 1) {
@@ -203,6 +205,7 @@ function subreply(obj) {
 }
 
 function subsimilar(obj) {
+	showDiv()
 	var quiz = $("#quiztosimilar").text()
 	var text = $("#similar").val()
 	if(text.length < 1) {
