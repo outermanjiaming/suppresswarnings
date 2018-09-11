@@ -149,12 +149,16 @@ function subquiz(obj) {
 	    	console.log("[lijiaming] check exam ok: " + result)
 	        if("fail" == result) {
 	        	console.log("fail to quiz")
+	        	$(".quiztext").append("<pre>出错了(❌)</pre>")
+	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        } else {
 	        	$(".quiztext").append("<pre>" + text + "(✅)</pre>")
 	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        }
 	    },
 	    error: function( xhr, result, obj ) {
+	    	$(".quiztext").append("<pre>出错啦(❌)</pre>")
+        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	    	closeDiv()
 	        console.log("[lijiaming] check exam err: " + result)
 	    }
@@ -190,6 +194,8 @@ function subreply(obj) {
 	    	console.log("[lijiaming] check exam ok: " + result)
 	        if("fail" == result) {
 	        	console.log("fail to quiz")
+	        	$(".replytext").append("<pre>出错了(❌)</pre>")
+	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	        } else {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztoreply").text(replyquiz.quiz)
@@ -199,6 +205,8 @@ function subreply(obj) {
 	        }
 	    },
 	    error: function( xhr, result, obj ) {
+	    	$(".replytext").append("<pre>出错啦(❌)</pre>")
+        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	    	closeDiv()
 	        console.log("[lijiaming] check exam err: " + result)
 	    }
@@ -232,6 +240,8 @@ function subsimilar(obj) {
 	    	console.log("[lijiaming] check exam ok: " + result)
 	        if("fail" == result) {
 	        	console.log("fail to quiz")
+	        	$(".similartext").append("<pre>出错了(❌)</pre>")
+	        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	        } else {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztosimilar").text(replyquiz.quiz)
@@ -241,6 +251,8 @@ function subsimilar(obj) {
 	        }
 	    },
 	    error: function( xhr, result, obj ) {
+	    	$(".similartext").append("<pre>出错啦(❌)</pre>")
+        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	    	closeDiv()
 	        console.log("[lijiaming] check exam err: " + result)
 	    }
