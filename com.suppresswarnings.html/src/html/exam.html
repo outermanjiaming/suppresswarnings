@@ -130,6 +130,7 @@ function subquiz(obj) {
 	showDiv()
 	var text = $("#quiz").val()
 	if(text.length < 1) {
+		closeDiv()
 		return
 	}
 	
@@ -169,6 +170,7 @@ function subreply(obj) {
 	var quiz = $("#quiztoreply").text()
 	var text = $("#reply").val()
 	if(text.length < 1) {
+		closeDiv()
 		return
 	}
 	quizid = $("#quiztoreply").data("quizid")
@@ -209,6 +211,7 @@ function subsimilar(obj) {
 	var quiz = $("#quiztosimilar").text()
 	var text = $("#similar").val()
 	if(text.length < 1) {
+		closeDiv()
 		return
 	}
 	
