@@ -49,47 +49,10 @@
         </svg>
         </span>
 </div>
- 
-<div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel">
-    <div class="modal-dialog text-center" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="sampleModalLabel" >场景对话</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <div class="description" id="sampleData"></div>
-                    </div>
-                   
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    
-<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel">
-    <div class="modal-dialog text-center" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="buyModalLabel" >同义句表达</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <div class="description" id="buyData"></div>
-                    </div>
-                    
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-  
 
-
+<div id="popWindow" class="popWindow" style="text-align:center;display: none;background-color:#9D9D9D;width: 100%;height: 100%;left: 0;top: 0;filter: alpha(opacity=30);opacity: 0.3;z-index: 100;position: absolute;">
+    <div style="margin-top:30%;background:url(/loading.gif) no-repeat;"></div>
+</div>
  
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
@@ -141,7 +104,44 @@
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-
+var randomid = Math.random()
+var openid = "class_random_openid_" + randomid
+$(document).ready(function(){
+	
+	var Request = GetRequest();
+	
+	if(Request.code === undefined || Request.state === undefined) {
+	  console.log('first time here without code')
+	} else {
+	  ticket = Request.code
+	  state  = Request.state
+	  showDiv()
+	  $.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+		    action : "class_exam",
+		    random : randnum,
+		    ticket : ticket
+		    },
+		    success: function( result ) {
+		    	closeDiv()
+		      if("success" == result) {
+		    	  console.log('great lijiaming')
+		      } else {
+		          console.log('fail to class_exam: ' + result)
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		    	closeDiv()
+		        console.log("[lijiaming] check logon err: " + result)
+		    }
+		  })
+	}
+    
+	
+	
+	
+});
 
 </script>
 </body>
