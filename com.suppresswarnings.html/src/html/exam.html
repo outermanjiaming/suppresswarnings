@@ -52,6 +52,7 @@
         <text x="25" y="17" fill="#5cb85c" id="inviteTitle">素朴网联</text>
         </svg>
         </span>
+        <span></span>
 </div>
 
 <div id="popWindow" class="popWindow" style="text-align:center;display: none;background-color:#9D9D9D;width: 100%;height: 100%;left: 0;top: 0;filter: alpha(opacity=30);opacity: 0.3;z-index: 100;position: absolute;">
@@ -126,6 +127,7 @@ function justSubmit(obj, e){
 	}
 	return true
 }
+var quizCount = 0
 function subquiz(obj) {
 	showDiv()
 	var text = $("#quiz").val()
@@ -152,7 +154,8 @@ function subquiz(obj) {
 	        	$(".quiztext").append("<pre>出错了(❌)</pre>")
 	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        } else {
-	        	$(".quiztext").append("<pre>" + text + "(✅)</pre>")
+	        	quizCount ++
+	        	$(".quiztext").append("<pre>" + text + "("+quizCount+"✅)</pre>")
 	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        }
 	    },
@@ -168,7 +171,7 @@ function subquiz(obj) {
 	$("#quiz").val("")
 	
 }
-
+replyCount = 0
 function subreply(obj) {
 	showDiv()
 	var quiz = $("#quiztoreply").text()
@@ -197,10 +200,11 @@ function subreply(obj) {
 	        	$(".replytext").append("<pre>出错了(❌)</pre>")
 	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	        } else {
+	        	replyCount ++
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztoreply").text(replyquiz.quiz)
 	        	$("#quiztoreply").data("quizid", replyquiz.quizid)
-	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "(✅)</pre>")
+	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "("+replyCount+"✅)</pre>")
 	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	        }
 	    },
@@ -213,7 +217,7 @@ function subreply(obj) {
 	  })
 	$("#reply").val("")
 }
-
+var similarCount = 0
 function subsimilar(obj) {
 	showDiv()
 	var quiz = $("#quiztosimilar").text()
@@ -243,10 +247,11 @@ function subsimilar(obj) {
 	        	$(".similartext").append("<pre>出错了(❌)</pre>")
 	        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	        } else {
+	        	similarCount ++
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztosimilar").text(replyquiz.quiz)
 	        	$("#quiztosimilar").data("quizid", replyquiz.quizid)
-	        	$(".similartext").append("<pre>主人：" + quiz + "\n同义句：" + text + "(✅)</pre>")
+	        	$(".similartext").append("<pre>主人：" + quiz + "\n同义句：" + text + "("+similarCount+"✅)</pre>")
 	        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	        }
 	    },
@@ -259,6 +264,16 @@ function subsimilar(obj) {
 	  })
 	$("#similar").val("")
 }
+
+window.isCloseHint = true;
+//初始化关闭
+window.addEventListener("beforeunload", function(e) {
+  if (window.isCloseHint) {
+      var confirmationMessage = "关闭之后数据都将清空，真的关闭吗？";
+      (e || window.event).returnValue = confirmationMessage; // 兼容 Gecko + IE
+      return confirmationMessage; // 兼容 Gecko + Webkit, Safari, Chrome
+  }
+});
 
 </script>
 </body>
