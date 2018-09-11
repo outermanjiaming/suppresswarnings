@@ -62,8 +62,8 @@
 <div class="form-group quiztext full tall">
 <span class="full">你说的话展示在这里：</span>
 </div>
-<input type="text" class="full" name="quiz" value="" placeholder="请输入你想对它说什么">
-<button type="button" name="btnquiz" class="btn btn-ms btn-info full">确认</button>
+<input type="text" class="full" name="quiz" value="" placeholder="请输入你想对它说什么" onkeypress="return justSubmit(this, event)"/>
+<button type="button" name="btnquiz" class="btn btn-ms btn-info full" onclick="subquiz(this)">确认</button>
 </div>
 
 <div class="form-group reply full borders">
@@ -74,8 +74,8 @@
 </div>
 
 主人说：<span id="quiztoreply" class="full" data-quizid="">1234567890</span>
-<input type="text" class="full" name="reply" value="" placeholder="请输入你该怎么回复"/>
-<button type="button" name="btnreply" class="btn btn-ms btn-info full">确认</button>
+<input type="text" class="full" name="reply" value="" placeholder="请输入你该怎么回复" onkeypress="return justSubmit(this, event)"/>
+<button type="button" name="btnreply" class="btn btn-ms btn-info full" onclick="subreply(this)">确认</button>
 </div>
 
 
@@ -87,8 +87,8 @@
 </div>
 
 主人说：<span id="quiztosimilar" class="full" data-quizid="">1234567890</span>
-<input type="text" class="full" name="similar" value="" placeholder="请输入同义句">
-<button type="button" name="btnsimilar" class="btn btn-ms btn-info full">确认</button>
+<input type="text" class="full" name="similar" value="" placeholder="请输入同义句" onkeypress="return justSubmit(this, event)" />
+<button type="button" name="btnsimilar" class="btn btn-ms btn-info full" onclick="subsimilar(this)">确认</button>
 </div>
 
 </div>
@@ -106,7 +106,32 @@
 <script>
 var randomid = Math.random()
 var openid = "class_random_openid_" + randomid
+function justSubmit(this, event){
+	var keynum
+	if(window.event) {
+		keynum = e.keyCode
+	} else if(e.which) {
+		keynum = e.which
+	}
+	if(keynum == 13){
+	   var btn = $(obj).siblings(".btn")[0]
+	   $(btn).click()
+	   return false
+	}
+	return true
+}
 
+function subquiz(obj) {
+	alert($(obj).text())
+}
+
+function subreply(obj) {
+	alert($(obj).text())
+}
+
+function subsimilar(obj) {
+	alert($(obj).text())
+}
 
 function GetRequest() {
     var url = location.search; //获取url中"?"符后的字串
