@@ -233,8 +233,8 @@ function subsimilar(obj) {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztosimilar").text(replyquiz.quiz)
 	        	$("#quiztosimilar").data("quizid", replyquiz.quizid)
-	        	$(".quizsimilar").append("<pre>主人：" + quiz + "\n同义句：" + text + "(✅)</pre>")
-	        	$(".quizsimilar").scrollTop($(".quizsimilar")[0].scrollHeight);
+	        	$(".similartext").append("<pre>主人：" + quiz + "\n同义句：" + text + "(✅)</pre>")
+	        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	        }
 	    },
 	    error: function( xhr, result, obj ) {
