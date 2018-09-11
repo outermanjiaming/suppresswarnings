@@ -171,7 +171,7 @@ function subreply(obj) {
 	if(text.length < 1) {
 		return
 	}
-	quizid = $("#reply").data("quizid")
+	quizid = $("#quiztoreply").data("quizid")
 
 	$.ajax({
 	    url: "/wx.http?r=" + Math.random(),
@@ -191,7 +191,7 @@ function subreply(obj) {
 	        } else {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztoreply").text(replyquiz.quiz)
-	        	$("#reply").data("quizid", replyquiz.quizid)
+	        	$("#quiztoreply").data("quizid", replyquiz.quizid)
 	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "(✅)</pre>")
 	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	        }
@@ -212,7 +212,7 @@ function subsimilar(obj) {
 		return
 	}
 	
-	quizid = $("#similar").data("quizid")
+	quizid = $("#quiztosimilar").data("quizid")
 
 	$.ajax({
 	    url: "/wx.http?r=" + Math.random(),
@@ -232,7 +232,7 @@ function subsimilar(obj) {
 	        } else {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztosimilar").text(replyquiz.quiz)
-	        	$("#similar").data("quizid", replyquiz.quizid)
+	        	$("#quiztosimilar").data("quizid", replyquiz.quizid)
 	        	$(".quizsimilar").append("<pre>主人：" + quiz + "\n同义句：" + text + "(✅)</pre>")
 	        	$(".quizsimilar").scrollTop($(".quizsimilar")[0].scrollHeight);
 	        }
