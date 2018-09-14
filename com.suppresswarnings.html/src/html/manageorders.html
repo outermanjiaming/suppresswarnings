@@ -257,7 +257,8 @@ function addorder(order) {
     	'时间：<span>' + order.time + '</span><br/>'
     orderinfo = orderinfo +'状态：<span class="state">'
     if(order.state == "Paid") {
-    	orderinfo = orderinfo +'<span style="color:green;">已支付</span>'
+    	orderinfo = orderinfo +'<span style="color:green;">已支付</span></span>'
+    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderout(this)">已备货</button>'
     } else if(order.state == "Closed"){
     	orderinfo = orderinfo +'已关闭'
     } else if(order.state == "Paying"){
@@ -265,12 +266,12 @@ function addorder(order) {
     } else if(order.state == "Create"){
     	orderinfo = orderinfo +'未支付'
     } else {
-    	orderinfo = orderinfo + order.state + '</span><br/>'
+    	orderinfo = orderinfo + order.state + '</span>'
     }
-    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderout(this)">已备货</button>'
-    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderdelivery(this)">已发货</button>'
-    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderreach(this)">已到达</button>'
-    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderfinish(this)">已完成</button>'
+    	
+    	if(order.state == "已备货") orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderdelivery(this)">已发货</button>'
+    	if(order.state == "已发货") orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderreach(this)">已送达</button>'
+    	if(order.state == "已送达") orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderfinish(this)">已完成</button>'
 	orderinfo = orderinfo + '</div>'
     var ordergoods = '<div class="order_goods"><ul>'
     var rate = 0.01
