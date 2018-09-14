@@ -113,6 +113,32 @@ var randomid = Math.random()
 var time = new Date().getTime()
 var openid = "class_openid_" + randomid + "." + time
 var ticket = openid
+
+
+function  delete(obj, deletequizid) {
+	$.ajax({
+	    url: "/wx.http?r=" + Math.random(),
+	    data: {
+	    action : "class_exam",
+	    type : "delete",
+	    quizid : deletequizid,
+	    text : text,
+	    random : randnum,
+	    ticket : ticket
+	    },
+	    success: function( result ) {
+	    	console.log("[lijiaming] check exam ok: " + result)
+	        if("fail" == result) {
+	        	console.log("fail to quiz")
+	        } else {
+	        	$(obj).parent().remove()
+	        }
+	    },
+	    error: function( xhr, result, obj ) {
+	        console.log("[lijiaming] check exam err: " + result)
+	    }
+	  })
+}
 function justSubmit(obj, e){
 	var keynum
 	if(window.event) {
@@ -155,7 +181,7 @@ function subquiz(obj) {
 	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        } else {
 	        	quizCount ++
-	        	$(".quiztext").append("<pre>" + text + "("+quizCount+"✅)</pre><button type='button' class='delete' onclick='delete("+result+")'>删除</button>")
+	        	$(".quiztext").append("<pre>" + text + "("+quizCount+"✅)<button type='button' class='delete' onclick='delete(this, "+result+")'>删除</button></pre>")
 	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
 	        	
 	        	
@@ -211,7 +237,7 @@ function subreply(obj) {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztoreply").text(replyquiz.quiz)
 	        	$("#quiztoreply").data("quizid", replyquiz.quizid)
-	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "("+replyCount+"✅)<button type='button' class='delete' onclick='delete("+replyquiz.delete+")'>删除</button></pre>")
+	        	$(".replytext").append("<pre>主人：" + quiz + "\n回复：" + text + "("+replyCount+"✅)<button type='button' class='delete' onclick='delete(this, "+replyquiz.delete+")'>删除</button></pre>")
 	        	$(".replytext").scrollTop($(".replytext")[0].scrollHeight);
 	        }
 	    },
@@ -258,7 +284,7 @@ function subsimilar(obj) {
 	        	var replyquiz = JSON.parse(result)
 	        	$("#quiztosimilar").text(replyquiz.quiz)
 	        	$("#quiztosimilar").data("quizid", replyquiz.quizid)
-	        	$(".similartext").append("<pre>主人：" + quiz + "\n同义句：" + text + "("+similarCount+"✅)<button type='button' class='delete' onclick='delete("+similarquiz.delete+")'>删除</button></pre>")
+	        	$(".similartext").append("<pre>主人：" + quiz + "\n同义句：" + text + "("+similarCount+"✅)<button type='button' class='delete' onclick='delete(this,"+replyquiz.delete+")'>删除</button></pre>")
 	        	$(".similartext").scrollTop($(".similartext")[0].scrollHeight);
 	        }
 	    },
