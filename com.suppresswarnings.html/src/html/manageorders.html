@@ -203,23 +203,73 @@ color: #666
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
+function changeorderstate(obj, newstate) {
+	var userid = $(obj).data("userid")
+	var orderid = $(obj).data("orderid")
+	$.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+		    action : "daigou",
+		    todo : "changeorderstate",
+		    random : randnum,
+		    newstate: newstate,
+		    orderid: orderid,
+		    state : state,
+		    ticket : ticket
+		    },
+		    success: function( result ) {
+		      closeDiv()
+		      if("fail" == result) {
+		    	  console.log('fail daigou changeorderstate')
+		      } else {
+		          console.log('good to changeorderstate: ' + result)
+		          var statespan = $(obj).siblings(".state")[0]
+		          $(statespan).text(result)
+		          $(obj).attr("disabled","disabled")
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		    	closeDiv()
+		        console.log("[lijiaming] manageorders err: " + result)
+		    }
+		  })
+}
+function orderout(obj) {
+	changeorderstate(obj, "已备货")
+}
+function orderdelivery(obj) {
+	changeorderstate(obj, "已发货")
+}
+function orderreach(obj) {
+	changeorderstate(obj, "已送达")
+}
+function orderfinish(obj) {
+	changeorderstate(obj, "已完成")
+}
+
+
 function addorder(order) {
 	var myorders = $("#myorders")
 	var orderinfo = '<div class="order_info">' +
     	'订单号：<span>' + order.orderid + '</span><br/>'+
     	'收货人：<span>' + order.username + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'
+    orderinfo = orderinfo +'状态：<span class="state">'
     if(order.state == "Paid") {
-    	orderinfo = orderinfo +'状态：<span style="color:green;">已支付</span><br/>'
+    	orderinfo = orderinfo +'<span style="color:green;">已支付</span>'
     } else if(order.state == "Closed"){
-    	orderinfo = orderinfo +'状态：<span>已关闭</span><br/>'
+    	orderinfo = orderinfo +'已关闭'
     } else if(order.state == "Paying"){
-    	orderinfo = orderinfo +'状态：<span>正在支付</span><br/>'
+    	orderinfo = orderinfo +'正在支付'
     } else if(order.state == "Create"){
-    	orderinfo = orderinfo +'状态：<span>未支付</span><br/>'
+    	orderinfo = orderinfo +'未支付'
     } else {
-    	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><br/>'
+    	orderinfo = orderinfo + order.state + '</span><br/>'
     }
+    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderout(this)">已备货</button>'
+    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderdelivery(this)">已发货</button>'
+    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderreach(this)">已到达</button>'
+    	orderinfo = orderinfo + '<button data-userid="'+order.openid+'" data-orderid="'+order.orderid+'" onclick="orderfinish(this)">已完成</button>'
 	orderinfo = orderinfo + '</div>'
     var ordergoods = '<div class="order_goods"><ul>'
     var rate = 0.01
