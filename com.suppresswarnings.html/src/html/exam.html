@@ -310,6 +310,40 @@ window.addEventListener("beforeunload", function(e) {
   }
 });
 
+
+var indexCount = 0
+$.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+    action : "class_exam",
+    type : "index",
+    quizid : "exam_quizid",
+    text : "exam_index",
+    random : randnum,
+    ticket : ticket
+    },
+    success: function( result ) {
+    	console.log("[lijiaming] check exam ok: " + result)
+        if("fail" == result) {
+        	console.log("fail to quiz")
+        } else {
+        	indexCount ++
+        	console.log("[lijiaming] quiz list: "+result)
+        	var quizList = JSON.parse(result)
+        	var size = quizList.length
+        	for(var k=0;k<size;k++) {
+        		var quiz = quizList[k]
+        		var text = quiz.quiz.value
+        		var quizid = quiz.quiz.key
+        		$(".quiztext").append("<pre>" + text + "("+indexCount+"✅)<button type='button' class='delete' data-text='"+text+"' data-deletequizid='"+quizid+"' onclick='deleteone(this)'>删除</button></pre>")
+	        	$(".quiztext").scrollTop($(".quiztext")[0].scrollHeight);
+        	}
+        }
+    },
+    error: function( xhr, result, obj ) {
+        console.log("[lijiaming] check exam err: " + result)
+    }
+  })
 </script>
 </body>
 </html>
