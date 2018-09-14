@@ -105,7 +105,71 @@ dl dt {
     color: #F00;
     font-style: normal;
 }
+.folw_shopmain {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 100px;
+    background: #FFF;
+    border-bottom: 1px solid #eeeeee;
+}
 
+.inner {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.item_img {
+    width: 45px;
+    padding-left: 5px;
+    float: left;
+    overflow: hidden;
+}
+.item_img img {
+    display: block;
+    width: 40px;
+    height: auto;
+}
+.price span {
+    display: block;
+    float: left;
+    font-size: 14px;
+    line-height: 150%;
+    color: #E71F19;
+}
+
+.price em {
+    display: block;
+    float: right;
+    font-size: 14px;
+    line-height: 150%;
+    color: #666;
+}
+ul{ margin: 0; padding: 0; list-style-type: none;}
+ul li{ margin: 0; padding: 0; list-style-type: none;}
+
+.flow_bottom { position: fixed; left: 0; bottom: 0; width: 100%; height: 50px; border-top: 1px solid #d7d7d7; background-color: #fff; z-index: 2; display: -webkit-box; display: -moz-box; display: -ms-box; display: -o-box; display: box; -webkit-box-align: center; -moz-box-align: center; -ms-box-align: center; -o-box-align: center; box-align: center; -webkit-box-pack: center; -moz-box-pack: center; -ms-box-pack: center; -o-box-pack: center; box-pack: center; min-width:320px; }
+
+
+.dashedli {
+    margin: 10px 0px;
+    padding: 5px 5px;
+    list-style-type: none;
+    border: 1px dashed #ccc;
+}
+.dashedli:hover {
+    border-color: #02cfd4;
+}
+.smalla{
+text-decoration : none;
+font-size: 12;
+}
+.order_info span{
+font-size: 14;
+color: #666
+}
 </style>
 
 </head>
@@ -115,8 +179,19 @@ dl dt {
 </div>
 <div class="notice">所有订单列表</div>
 <div class="list-item">
-	<ul class="single_item" style="margin:0px;padding:0px;list-style:none">
-	</ul>
+	<div id="myorders">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	</div>
 <div style="width:100%;text-align:center;"><span style="font-size: 12;">--- 已经见底了 ---</span><img src="/loading.gif" style="width:100%;padding: 0px 0px 80px;"/></div>
 </div>
 
@@ -128,6 +203,54 @@ dl dt {
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
+function addorder(order) {
+	var myorders = $("#myorders")
+	var orderinfo = '<div class="order_info">' +
+    	'订单号：<span>' + order.orderid + '</span><br/>'+
+    	'收货人：<span>' + order.username + '</span><br/>'+
+    	'时间：<span>' + order.time + '</span><br/>'
+    if(order.state == "Paid") {
+    	orderinfo = orderinfo +'状态：<span style="color:green;">已支付</span><br/>'
+    } else if(order.state == "Closed"){
+    	orderinfo = orderinfo +'状态：<span>已关闭</span><br/>'
+    } else if(order.state == "Paying"){
+    	orderinfo = orderinfo +'状态：<span>正在支付</span><br/>'
+    } else if(order.state == "Create"){
+    	orderinfo = orderinfo +'状态：<span>未支付</span><br/>'
+    } else {
+    	orderinfo = orderinfo +'状态：<span>' + order.state + '</span><br/>'
+    }
+	orderinfo = orderinfo + '</div>'
+    var ordergoods = '<div class="order_goods"><ul>'
+    var rate = 0.01
+	var carts = order.carts
+	var size = carts.length
+	for(var k=0;k<size;k++) {
+		var cart = carts[k]
+		var goods = cart.goods
+		var cent = parseFloat(goods.pricecent)
+    	var price = rate * cent
+    	price = price.toFixed(2)
+		var goodsli = '<li>' +
+				        '<div class="inner">' +
+				              '<div class="item_img">' +
+				                '<a href="/detail.html?code='+ticket+'&state='+state+'&goodsid=' +goods.goodsid+ '">' +
+				                   '<img src="'+goods.image+'" title="' +goods.title+ '">'+
+				                '</a>' +
+				              '</div>' +
+				              '<a class="smalla" href="/detail.html?code='+ticket+'&state='+state+'&goodsid=' +goods.goodsid+ '">' + goods.title+ '</a>' +
+				              '<div class="price">' +
+				                '<span>' + price + '</span>' +
+				                '<em>'+ cart.count + '件</em>' +
+				              '</div>' +
+				            '</div>' +
+				        '</li>'
+		ordergoods = ordergoods + goodsli
+	}
+	ordergoods = ordergoods + '</ul></div>'
+	$('<li class="dashedli"><div>' + orderinfo + ordergoods + '</div></li>').appendTo(myorders)
+}
+
 function oauth2() {
 	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/manageorders.html&response_type=code&scope=snsapi_base&state=manageorders#wechat_redirect'
 }
@@ -171,14 +294,15 @@ $(document).ready(function(){
 		    	  console.log('fail daigou manageorders')
 		      } else {
 		          console.log('good to manageorders: ' + result)
-		          var orderlist = JSON.parse(result)
-		          var length = orderlist.length
-		          for(var k =0;k<length;k++) {
-		        	  var order = orderlist[k]
-		        	  console.log(order)
-		        	  console.log("--- --- --- --- --- --- --- ---")
-		        	  $(".single_item").append("<li><pre>" + order.orderid + "\n" + order.openid +"\n" + order.username + "\n" + order.totalcent + "</pre></li>")
-		          }
+		          showDiv()
+			        var orderlist = JSON.parse(result)
+			        var length = orderlist.length
+			        for (var k = 0; k < length; k++) {
+			        	var order = orderlist[k]
+			        	addorder(order)
+			        }
+			    	$("#myorders").append('<div style="width:100%;height:111px;"><img src="/loading.gif" style="width:100%;heigth:30px"></div>')
+			        closeDiv()
 		      }
 		    },
 		    error: function( xhr, result, obj ) {
