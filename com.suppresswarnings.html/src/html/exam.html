@@ -335,11 +335,11 @@ $.ajax({
         if("fail" == result) {
         	console.log("fail to quiz")
         } else {
-        	indexCount ++
         	console.log("[lijiaming] quiz list: "+result)
         	var quizList = JSON.parse(result)
         	var size = quizList.length
         	for(var k=0;k<size;k++) {
+        		indexCount ++
         		var quiz = quizList[k]
         		var text = quiz.quiz.value
         		var quizid = quiz.quiz.key
