@@ -13,6 +13,12 @@
 
   <style type="text/css">
       pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
+  input{
+      border: 1px solid #ccc;
+     -moz-box-shadow: 2px 2px 1px #666;
+	  box-shadow: 2px 2px 1px #666;
+	  height:40px;
+  }
   .full{
    width: 100%;
    margin-top: 10px;
@@ -21,9 +27,7 @@
   .tall{
       height:350px;
       overflow:auto;
-      border-top: 1px solid #eee;
-      -moz-box-shadow: 3px 3px 2px #888888;
-	  box-shadow: 3px 3px 2px #888888;
+      border: 1px solid #eee;
   }
   .borders {
    margin-top: 20px;
@@ -62,21 +66,24 @@
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
 <div class="form-group quiz full borders">
-<label for="quiz" class="full">一.（提问）假设你家里有一个非常智能的家居设备，你是主人，你会主动和它说什么？</label>
 
 <div class="form-group quiztext full tall">
 <span class="full">你说的话展示在这里：</span>
 </div>
+
+<label for="quiz" class="full">一.（提问）假设你家里有一个非常智能的家居设备，你是主人，你会主动和它说什么？</label>
+
 <input type="text" class="full" id="quiz" name="quiz" value="" placeholder="请输入你想对它说什么" onkeypress="return justSubmit(this, event)"/>
 <button type="button" name="btnquiz" class="btn btn-ms btn-info full" onclick="subquiz(this)">确认</button>
 </div>
 
 <div class="form-group reply full borders">
-<label for="reply" class="full">二.（回复）假设你就是这个非常智能的家居设备，你会怎么回复主人说的话？</label>
 
 <div class="form-group replytext full tall">
 <span class="full">问题和你的回复展示在这里：</span>
 </div>
+
+<label for="reply" class="full">二.（回复）假设你就是这个非常智能的家居设备，你会怎么回复主人说的话？</label>
 
 主人说：<span id="quiztoreply" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131">你会说英语吗？</span>
 <input type="text" class="full" id="reply" name="reply" value="" placeholder="请输入你该怎么回复" onkeypress="return justSubmit(this, event)"/>
@@ -85,11 +92,12 @@
 
 
 <div class="form-group similar full borders">
-<label for="similar" class="full">三.（同义句）请用不同的表达方式，表达与以下语句同样的意思</label>
 
 <div class="form-group similartext full tall">
 <span class="full">问题和同义句展示在这里</span>
 </div>
+
+<label for="similar" class="full">三.（同义句）请用不同的表达方式，表达与以下语句同样的意思</label>
 
 主人说：<span id="quiztosimilar" class="full" data-quizid="T_Corpus_classExam_1536649615642_3131">你会说英语吗？</span>
 <input type="text" class="full" id="similar" name="similar" value="" placeholder="请输入同义句" onkeypress="return justSubmit(this, event)" />
