@@ -254,6 +254,9 @@ function addorder(order) {
 	var orderinfo = '<div class="order_info">' +
     	'订单号：<span>' + order.orderid + '</span><br/>'+
     	'收货人：<span>' + order.username + '</span><br/>'+
+    	'手机：<span>' + order.mobile + '</span><br/>'+
+    	'地址：<span>' + order.address + '</span><br/>'+
+    	'备注：<span>' + order.comment + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'
     orderinfo = orderinfo +'状态：<span class="state">'
     if(order.state == "Paid") {
@@ -280,7 +283,7 @@ function addorder(order) {
 	for(var k=0;k<size;k++) {
 		var cart = carts[k]
 		var goods = cart.goods
-		var cent = parseFloat(goods.pricecent)
+		var cent = parseFloat(cart.actualpricecent)
     	var price = rate * cent
     	price = price.toFixed(2)
 		var goodsli = '<li>' +
@@ -290,9 +293,9 @@ function addorder(order) {
 				                   '<img src="'+goods.image+'" title="' +goods.title+ '">'+
 				                '</a>' +
 				              '</div>' +
-				              '<a class="smalla" href="/detail.html?code='+ticket+'&state='+state+'&goodsid=' +goods.goodsid+ '">' + goods.title+ '</a>' +
+				              '<a class="smalla" href="/detail.html?code='+ticket+'&agentid='+cart.agentid+'&state='+state+'&goodsid=' +goods.goodsid+ '">' + goods.title+ '</a>' + ' | <a href="'+goods.outurl+'">外部链接</a>'
 				              '<div class="price">' +
-				                '<span>' + price + '</span>' +
+				                '<span>' + price + '</span>' +  '<span>' + cart.actualreason + '</span>' +
 				                '<em>'+ cart.count + '件</em>' +
 				              '</div>' +
 				            '</div>' +
