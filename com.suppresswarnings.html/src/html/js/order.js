@@ -66,7 +66,7 @@ jQuery.ajax({
     success: function( result ) {
       if("fail" == result) {
         console.log('fail to access_token: ' + result)
-        daigou()
+        daigou(state)
       } else {
     	  showDiv()
         var orderlist = JSON.parse(result)
@@ -81,6 +81,6 @@ jQuery.ajax({
     },
     error: function( xhr, result, obj ) {
       console.log("[lijiaming] order list err: " + result)
-      daigou()
+      daigou(state)
     }
 })

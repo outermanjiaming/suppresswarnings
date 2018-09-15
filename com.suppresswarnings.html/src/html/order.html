@@ -105,7 +105,7 @@ color: #666
 </div>
 <div class="flow_bottom">
     <div class="footer_nav"><ul>
-    <li class="bian"><a href="/daigou.html"><img alt="首页" src="/order.png" style="width:30px;"></a><span>首页</span></li>
+    <li class="bian"><a id="backtodaigou" href="/daigou.html"><img alt="首页" src="/order.png" style="width:30px;"></a><span>首页</span></li>
     <li class="bian"><a id="gotocart" href="/cart.html"><img alt="购物车" src="/cart.png" style="width:30px;"></a><span>购物车</span></li>
     </ul></div>
 </div>
@@ -117,8 +117,8 @@ color: #666
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-function daigou() {
-	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
+function daigou(agentid) {
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/daigou_'+agentid+'.html&response_type=code&scope=snsapi_base&state=agentlijiaming#wechat_redirect'
 }
 
 function GetRequest() {
@@ -147,6 +147,7 @@ $(document).ready(function(){
 	} else {
 	  ticket = Request.code
 	  state  = Request.state
+	  $("#backtodaigou").attr("href", "/daigou_" + state + ".html")
 	  $("#gotocart").attr("href", "/cart.html?state=" + state+"&code=" + ticket)
 	}
 	
