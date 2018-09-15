@@ -13,6 +13,14 @@ public class Goods {
 	//openid.time.random
 	String goodsid;
 	String pricecent;
+	//TODO
+	String pricesecret;
+	String priceagent;
+	String pricevip;
+	String usewhichprice;
+	//TODO
+	String outurl;
+	
 	String image;
 	String title;
 	String extra;
@@ -21,6 +29,38 @@ public class Goods {
 	String listimages;
 	String time;
 	String state;
+	
+	
+	public String getUsewhichprice() {
+		return usewhichprice;
+	}
+	public void setUsewhichprice(String usewhichprice) {
+		this.usewhichprice = usewhichprice;
+	}
+	public String getPricesecret() {
+		return pricesecret;
+	}
+	public void setPricesecret(String pricesecret) {
+		this.pricesecret = pricesecret;
+	}
+	public String getPriceagent() {
+		return priceagent;
+	}
+	public void setPriceagent(String priceagent) {
+		this.priceagent = priceagent;
+	}
+	public String getPricevip() {
+		return pricevip;
+	}
+	public void setPricevip(String pricevip) {
+		this.pricevip = pricevip;
+	}
+	public String getOuturl() {
+		return outurl;
+	}
+	public void setOuturl(String outurl) {
+		this.outurl = outurl;
+	}
 	public String getImage() {
 		return image;
 	}

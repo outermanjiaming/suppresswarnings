@@ -9,8 +9,8 @@
  */
 package com.suppresswarnings.corpus.service.work;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.LoggerFactory;
@@ -19,15 +19,15 @@ import com.suppresswarnings.corpus.common.Type;
 
 public class WorkCommand implements Runnable {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	ArrayBlockingQueue<TodoTask> todos;
-	ArrayBlockingQueue<WorkerUser> users;
+	LinkedBlockingDeque<TodoTask> todos;
+	LinkedBlockingDeque<WorkerUser> users;
 	ConcurrentHashMap<String, WorkerUser> workers;
 	ConcurrentHashMap<String, TodoTask> tasks;
 	Type type;
 	AtomicBoolean on;
 	WorkHandler handler;
 	public WorkCommand(){}
-	public WorkCommand(WorkHandler handler,Type type, ArrayBlockingQueue<TodoTask> todos, ArrayBlockingQueue<WorkerUser> users, ConcurrentHashMap<String, WorkerUser> workers, ConcurrentHashMap<String, TodoTask> tasks, AtomicBoolean on) {
+	public WorkCommand(WorkHandler handler,Type type, LinkedBlockingDeque<TodoTask> todos, LinkedBlockingDeque<WorkerUser> users, ConcurrentHashMap<String, WorkerUser> workers, ConcurrentHashMap<String, TodoTask> tasks, AtomicBoolean on) {
 		this.handler = handler;
 		this.type = type;
 		this.todos = todos;

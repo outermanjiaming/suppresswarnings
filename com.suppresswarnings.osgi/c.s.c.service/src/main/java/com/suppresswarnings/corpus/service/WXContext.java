@@ -70,7 +70,7 @@ public class WXContext extends Context<CorpusService> {
 			if(exit(t, "exit()")) {
 				u.output("上一阶段对话已经结束。");
 				u.content().forgetIt(openid());
-				//TODO bugfix
+				//TODO bugfixed
 				return;
 			}
 			String command = CheckUtil.cleanStr(t);

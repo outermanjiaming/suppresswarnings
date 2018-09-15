@@ -9,6 +9,8 @@
  */
 package com.suppresswarnings.corpus.service.work;
 
+import java.util.HashSet;
+
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
@@ -44,9 +46,15 @@ public class WorkContext extends WXContext {
 			} else {
 				task = todo;
 				if(worker.getType() == Type.Reply) {
-					u.output("请回答：\n" + task.getQuiz());
+					u.output("请回答：\n    " + task.getQuiz());
 				} else if(worker.getType() == Type.Similar) {
-					u.output("同义句：\n" + task.getQuiz());
+					StringBuffer similars = new StringBuffer(task.getQuiz());
+					HashSet<String> set = handler.service.aidToSimilars.get(task.getQuizId());
+					if(set != null && set.size() > 0) {
+						similars.append("\n例如：\n    ");
+						set.iterator().forEachRemaining(similar -> similars.append(similar).append("\n    "));
+					}
+					u.output("同义句：\n    " + similars.toString());
 				} else {
 					u.output("任务：\n" + task.getQuiz());
 				}

@@ -11,10 +11,10 @@ package com.suppresswarnings.corpus.service.work;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -32,10 +32,10 @@ public class WorkHandler {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	CorpusService service;
 	String wxid;
-	ArrayBlockingQueue<TodoTask> similarTasks;
-	ArrayBlockingQueue<TodoTask> replyTasks;
-	ArrayBlockingQueue<WorkerUser> replyUsers;
-	ArrayBlockingQueue<WorkerUser> similarUsers;
+	LinkedBlockingDeque<TodoTask> similarTasks;
+	LinkedBlockingDeque<TodoTask> replyTasks;
+	LinkedBlockingDeque<WorkerUser> replyUsers;
+	LinkedBlockingDeque<WorkerUser> similarUsers;
 	ConcurrentHashMap<String, WorkerUser> workers;
 	ConcurrentHashMap<String, TodoTask> tasks;
 	ExecutorService executor;
@@ -44,10 +44,10 @@ public class WorkHandler {
 	public WorkHandler(CorpusService service, String wxid) {
 		this.service = service;
 		this.wxid = wxid;
-		this.replyTasks   = new ArrayBlockingQueue<>(100000);
-		this.similarTasks = new ArrayBlockingQueue<>(100000);
-		this.replyUsers   = new ArrayBlockingQueue<>(10000);
-		this.similarUsers = new ArrayBlockingQueue<>(10000);
+		this.replyTasks   = new LinkedBlockingDeque<>(1000000);
+		this.similarTasks = new LinkedBlockingDeque<>(1000000);
+		this.replyUsers   = new LinkedBlockingDeque<>(10000);
+		this.similarUsers = new LinkedBlockingDeque<>(10000);
 		this.workers  = new ConcurrentHashMap<>();
 		this.tasks    = new ConcurrentHashMap<>();
 	}
@@ -139,13 +139,18 @@ public class WorkHandler {
 		return false;
 	}
 	
+	/**
+	 * pollLast is the key
+	 * @param worker
+	 * @return
+	 */
 	public TodoTask want(WorkerUser worker) {
 		try {
 			TodoTask todo = null;
 			if(worker.getType() == Type.Reply){
-				todo = replyTasks.poll();
+				todo = replyTasks.pollLast();
 			} else {
-				todo = similarTasks.poll();
+				todo = similarTasks.pollLast();
 			}
 			if(todo == null) {
 				worker.setFree();

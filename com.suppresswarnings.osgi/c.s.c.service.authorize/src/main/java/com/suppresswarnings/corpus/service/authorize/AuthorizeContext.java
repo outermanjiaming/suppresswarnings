@@ -9,6 +9,9 @@
  */
 package com.suppresswarnings.corpus.service.authorize;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
@@ -28,6 +31,7 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 public class AuthorizeContext extends WXContext {
 	public static final String CMD = "我要授权";
 	String qrScene = null;
+	Map<String, AuthHandler> handlers;
 	
 	State<Context<CorpusService>> enter = new State<Context<CorpusService>>() {
 
@@ -176,9 +180,9 @@ public class AuthorizeContext extends WXContext {
 			String authKey = String.join(Const.delimiter, Const.Version.V1, func, target, userId);
 			String authorized = u.content().account().get(authKey);
 			if("Authorized".equals(authorized)) {
-				u.output("该用户已经被授权：" + name + ", " + func + "," + target);
+				u.output("该用户已经被授权：" + name + ":" + target);
 			} else { 
-				u.output("你正在执行"+func+"授权" + target + "权限给'" + name + "', 请输入同意或者拒绝");
+				u.output("你正在执行授权" + target + "权限给'" + name + "', 请输入同意或者拒绝");
 			}
 		}
 
@@ -242,7 +246,12 @@ public class AuthorizeContext extends WXContext {
 			String authInfoKey = String.join(Const.delimiter, Const.Version.V1, "Info", func, target, userId);
 			u.content().account().put(authInfoKey, String.join(Const.delimiter, openid(), time()));
 			u.output("授权完成");
-			u.content().sendTxtTo(func + "_" + target, "授权同意(Code:" + target+")", userId);
+			AuthHandler handler = handlers.get(target);
+			if(handler != null) {
+				boolean handled = handler.apply(u, target, openid(), userId, time(), random());
+				logger.info("[AuthorizeContext] agree handle of " + target + ", apply: " + handled);
+			}
+			u.content().sendTxtTo(func + "_" + target, "授权同意(" + target + ")", userId);
 		}
 
 		@Override
@@ -388,7 +397,7 @@ public class AuthorizeContext extends WXContext {
 			String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", qrScene.toLowerCase());
 			u.content().account().put(nowCommandKey, "我要商铺客服");
 			u.output(String.format("Scene:%s\n二维码地址：\nhttps://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s\n任务完成，点击上面地址查看二维码。", qrScene, qrTicket.getTicket()));
-			u.appendLine("授权完成：\nopenid:" + userOpenId + "\nfunc:" + authFunc);
+			u.output("授权完成：\nopenid:" + userOpenId + "\nfunc:" + authFunc);
 			u.content().sendTxtTo("Auth ShopAuth", "恭喜，授权完成，二维码：https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket(), userOpenId);
 		}
 
@@ -410,6 +419,11 @@ public class AuthorizeContext extends WXContext {
 	public AuthorizeContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.state = enter;
+		handlers = new HashMap<>();
+		DaigouAuthHandler handler = new DaigouAuthHandler();
+		for(String func : DaigouAuthHandler.INTEREST) {
+			handlers.put(func, handler);
+		}
 	}
 
 }

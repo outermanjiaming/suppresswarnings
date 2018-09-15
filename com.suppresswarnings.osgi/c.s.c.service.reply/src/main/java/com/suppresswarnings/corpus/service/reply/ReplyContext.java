@@ -120,8 +120,7 @@ public class ReplyContext extends WXContext {
 			} else {
 				List<KeyValue> list = new ArrayList<>();
 				if(quizId == null) {
-					String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-					quizId = u.content().data().get(taskKey);
+					quizId = u.content().getTodoQuizid();
 				}
 				String head = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer");
 				String nextReply = u.content().data().get(nextKey);

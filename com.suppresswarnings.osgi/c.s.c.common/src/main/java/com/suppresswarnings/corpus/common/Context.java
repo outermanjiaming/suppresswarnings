@@ -117,7 +117,7 @@ public abstract class Context<T> implements Predicate<String> {
 	
 	@Override
 	public String toString() {
-		return "Context [content=" + content + ", state=" + state + ", output=" + output + ", time=" + time + ", rand=" + rand + "]";
+		return "Context [" + content.getClass().getSimpleName() + "@" + content.hashCode() + ", state=" + state.getClass().getSimpleName() + "-" + state.name() + ", output=" + output.toString() + ", time=" + time + ", rand=" + rand + "]";
 	}
 	
 }

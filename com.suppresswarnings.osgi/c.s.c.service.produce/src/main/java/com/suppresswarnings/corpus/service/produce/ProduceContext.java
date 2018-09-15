@@ -9,9 +9,11 @@
  */
 package com.suppresswarnings.corpus.service.produce;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
@@ -38,8 +40,7 @@ public class ProduceContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			if(quizId == null) {
-				String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-				quizId = u.content().data().get(taskKey);
+				quizId = u.content().getTodoQuizid();
 				if(quizId == null) {
 					u.output("无话题可说");
 					return;
@@ -79,13 +80,22 @@ public class ProduceContext extends WXContext {
 			return false;
 		}
 	};
-	
+	public static final int bear = 2;
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
 		Iterator<Quiz> askQuiz = null;
 		int pointer = 0;
-		String[] FORMAT = {"对了，有人曾经对我说：%s，我也是半天没想到怎么回答",
-				"难倒我了，就像上次，别人说：%s，我该咋说", "好吧，又把我问到了，还有人说：%s，我能说什么"};
-		int count = 2;
+		String[] FORMAT = {"有的主人说：%s",
+				"换个话题，比如说：%s", 
+				"又把我问倒了，你可以说：%s",
+				"我想一下哈，%s", 
+				"你咋说了那么多？你试试说：%s",
+				"我们说点别的，比如：%s",
+				"你觉得我安静好不好，%s",
+				"不好意思，呃，%s",
+				"刚刚思想开小差了，%s",
+				"对不起哈，你试一下这样说：%s"
+				};
+		int count = bear;
 		Map<String, AutoContext> contexts = new HashMap<>();
 		/**
 		 * 
@@ -96,6 +106,7 @@ public class ProduceContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			String reply = CheckUtil.cleanStr(t);
 			String aid = u.content().questionToAid.get(reply);
+			logger.info("[ProduceContext] after clean: " + reply + " = " + aid);
 			if(aid != null) {
 				HashSet<String> answers = u.content().aidToAnswers.get(aid);
 				if(answers != null && answers.size() > 0) {
@@ -106,6 +117,7 @@ public class ProduceContext extends WXContext {
 					}
 					context.test(t);
 					u.output(context.output());
+					count = bear;
 					return;
 				}
 			}
@@ -130,14 +142,17 @@ public class ProduceContext extends WXContext {
 				}
 				answers.add(result);
 				u.output(result);
+				count = bear;
 			} else {
 				//count to 2
 				//fetch a task todo
 				count --;
 				if(count < 0) {
-					count = 2;
+					count = bear;
 					if(askQuiz == null) {
-						askQuiz = u.content().assimilatedQuiz.iterator();
+						List<Quiz> quizs = u.content().assimilatedQuiz;
+						Collections.shuffle(quizs);
+						askQuiz = quizs.iterator();
 					}
 					if(askQuiz.hasNext()) {
 						Quiz ask = askQuiz.next();

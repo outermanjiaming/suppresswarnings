@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,6 +88,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
 	//
+	public static final int bear = 5;
 	public List<Quiz> assimilatedQuiz = new ArrayList<>();
 	public LevelDB account(){
 		if(account != null) {
@@ -234,8 +236,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(90), TimeUnit.MILLISECONDS);
 		logger.info("[corpus] scheduler admins info starts in 3 minutes");
 		
-		String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-		String quizId = data().get(taskKey);
+		String quizId = getTodoQuizid();
 		if(quizId != null) {
 			fillQuestionsAndAnswers(quizId);
 		}
@@ -354,6 +355,45 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 	}
+	
+	public String getTodoQuizid() {
+		String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
+		String quizId = data().get(taskKey);
+		return quizId;
+	}
+	
+	public int fillExam() {
+		AtomicInteger integer = new AtomicInteger(0);
+		assimilatedQuiz.forEach(quiz ->{
+			if(quiz.getReply().size() < bear) {
+				integer.incrementAndGet();
+				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
+			}
+			if(quiz.getSimilar().size() < bear) {
+				integer.incrementAndGet();
+				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
+			}
+		});
+		return integer.get();
+	}
+	
+	public int fillWork() {
+		AtomicInteger integer = new AtomicInteger(0);
+		assimilatedQuiz.forEach(quiz ->{
+			if(quiz.getReply().size() < bear) {
+				integer.incrementAndGet();
+				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
+			}
+			if(quiz.getSimilar().size() < bear) {
+				integer.incrementAndGet();
+				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
+			}
+		});
+		return integer.get();
+	}
+	
+	
+	
 	public void fillQuestionsAndAnswers(String quizId){
 		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
 		assimilatedQuiz.clear();
@@ -367,6 +407,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				allQuiz.add(quiz);
 			}
 		});
+		//fill the reply and similar into each quiz
 		allQuiz.forEach(quiz -> {
 			
 			String replyKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Reply");
@@ -386,7 +427,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			});
 		});
 		
-		
+		//assimilate quiz
 		allQuiz.forEach(quiz -> {
 			boolean assimilated = false;
 			for(int i=0;i<assimilatedQuiz.size();i++) {
@@ -402,6 +443,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 		logger.info("[fillQuestionsAndAnswers] done assimilate");
+		Collections.shuffle(assimilatedQuiz);
+		logger.info("[fillQuestionsAndAnswers] shuffle assimilate");
 		assimilatedQuiz.forEach(quiz -> {
 			logger.info("[fillQuestionsAndAnswers] assimilated quiz: " + quiz.toString());
 			this.questionToAid.put(CheckUtil.cleanStr(quiz.getQuiz().value()), quiz.getQuiz().key());
@@ -410,6 +453,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			quiz.getReply().forEach(reply -> {
 				answers.add(reply.value());
 			});
+			
 			this.aidToAnswers.put(quiz.getQuiz().key(), answers);
 			
 			HashSet<String> similars = new HashSet<>();
@@ -418,9 +462,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 				similars.add(value);
 				this.questionToAid.put(CheckUtil.cleanStr(value), quiz.getQuiz().key());
 			});
+			
 			this.aidToSimilars.put(quiz.getQuiz().key(), similars);
 		});
 		
+		fillWork();
 	}
 	public void _interception(CommandInterpreter ci) {
 		String quizId = ci.nextArgument();
@@ -464,11 +510,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			Gson gson = new Gson();
 			try {
-				if("quiz".equals(type)) {
+				if("index".equals(type)){
+					List<Quiz> quizs = examHandler.allQuiz();
+					return gson.toJson(quizs);
+				} else if("quiz".equals(type)) {
 					String quizKey = String.join(Const.delimiter, Const.Version.V2, "Collect","Corpus","Quiz", quizid, "Answer", openid, time);
 					data().put(quizKey, text);
 					examHandler.newJob(text, quizKey, openid);
-					return SUCCESS;
+					return quizKey;
 				} else {
 					if("reply".equals(type)) {
 						logger.info("[class_exam] reply");
@@ -495,6 +544,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 						Map<String, String> map = new HashMap<>();
 						map.put("quiz", todo.getQuiz());
 						map.put("quizid", todo.getQuizId());
+						map.put("deleteone", answerKey);
 						return gson.toJson(map);
 					} else if("similar".equals(type)) {
 						logger.info("[class_exam] similar");
@@ -520,7 +570,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 						Map<String, String> map = new HashMap<>();
 						map.put("quiz", todo.getQuiz());
 						map.put("quizid", todo.getQuizId());
+						map.put("deleteone", answerKey);
 						return gson.toJson(map);
+					} else if("delete".equals(type)) {
+						String delete = parameter.getParameter("quizid");
+						String value = data().get(delete);
+						String deleteKey = String.join(Const.delimiter, Const.Version.V2, "Corpus", "Delete", time, openid);
+						data().put(deleteKey, value);
+						int ret = data().del(delete);
+						value = data().get(delete);
+						logger.info("[class_exam] "+ ret + "delete " + value + " == " + delete);
+						return SUCCESS;
 					}
 					
 				}
@@ -667,12 +727,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					forgetIt(openid);
 					
 					String command = CheckUtil.cleanStr(input);
-//					
-//					String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-//					String quizId = data().get(taskKey);
-//					if(quizId != null) {
-//						logger.info("has task to do: " + quizId);
-//					}
 					ContextFactory<CorpusService> cf = factories.get(command);
 					if(cf == null) {
 						String exchange = globalCommand(command);
@@ -768,62 +822,110 @@ public class CorpusService implements HTTPService, CommandProvider {
 		} else if("daigou".equals(action)){
 			String random = parameter.getParameter("random");
 			if(random == null) {
-				logger.info("random == null");
+				logger.info("[daigou] random == null");
 				return "fail";
 			}
 			String todo = parameter.getParameter("todo");
 			if(todo == null) {
-				logger.info("todo == null");
+				logger.info("[daigou] todo == null");
 				return "fail";
 			}
 			String CODE = parameter.getParameter("ticket");
 			if(CODE == null) {
-				logger.info("ticket == null");
+				logger.info("[daigou] ticket == null");
 				return "fail";
+			}
+			
+			//lijiaming: it show be serious about openid
+			
+			if("manageorders".equals(todo)){
+				String state = parameter.getParameter("state");
+				if(state == null) {
+					logger.info("[daigou] state == null");
+					return "fail";
+				}
+				//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+				String APPID = System.getProperty("wx.appid");
+				String SECRET = System.getProperty("wx.secret");
+				
+				if(APPID == null || SECRET == null) {
+					logger.error("[daigou] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+					return "fail";
+				}
+				Gson gson = new Gson();
+				CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
+				String json = get.call();
+				JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
+				logger.info("[daigou access_token] " + accessToken.toString());
+				String openId = accessToken.getOpenid();
+				if(openId == null) {
+					logger.info("[daigou] get openid failed");
+					return "fail";
+				}
+				logger.info("[daigou] orders");
+				if(!authrized(openId, "ManageOrders")) {
+					logger.info("[daigou] check auth failed");
+					return "fail";
+				}
+				return gson.toJson(daigouHandler.listOrders(openId));
+			}
+			
+			if("changeorderstate".equals(todo)) {
+				String userid = parameter.getParameter("userid");
+				String orderid = parameter.getParameter("orderid");
+				String newstate = parameter.getParameter("newstate");
+				daigouHandler.updateOrderState(orderid, userid, newstate);
+				return newstate;
 			}
 			
 			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
 			String openid = token().get(code2OpenIdKey);
 			if(openid == null) {
-				logger.info("openid == null");
+				logger.info("[daigou] openid == null");
 				return "fail";
 			}
-			
+			String agentid = parameter.getParameter("state");
+			if(agentid == null) {
+				logger.info("[daigou] state == null");
+				return "fail";
+			}
 			/**
 			 * TODO: Daigou
 			 */
 			Gson gson = new Gson();
 			if("index".equals(todo)) {
-				logger.info("index");
-				return gson.toJson(daigouHandler.listGoods());
-			}
-			if("addgoodstocart".equals(todo)) {
-				logger.info("addgoodstocart");
-				String agentid = parameter.getParameter("state");
-				if(agentid == null) {
-					logger.info("state == null");
-					return "fail";
+				logger.info("[daigou] index");
+				List<Goods> list  = daigouHandler.listGoods();
+				if(daigouHandler.replacePricecentVIPPrice(list, openid)) {
+					logger.info("[daigou] use vip price");
+				} else if(daigouHandler.replacePricecentAgentPrice(list, agentid)){
+					logger.info("[daigou] use agent price");
 				}
+				return gson.toJson(list);
+			}
+
+			if("addgoodstocart".equals(todo)) {
+				logger.info("[daigou] addgoodstocart");
 				String goodsid = parameter.getParameter("goodsid");
 				if(goodsid == null) {
-					logger.info("goodsid == null");
+					logger.info("[daigou] goodsid == null");
 					return "fail";
 				}
 				Cart cart = daigouHandler.addGoodsToCart(agentid, openid, goodsid);
 				if(cart == null) {
-					logger.info("cart == null");
+					logger.info("[daigou] cart == null");
 					return "fail";
 				}
 				return SUCCESS;
 			}
 			if("mycarts".equals(todo)) {
-				logger.info("mycarts");
+				logger.info("[daigou] mycarts");
 				List<Cart> carts = daigouHandler.myCarts(openid);
 				daigouHandler.fillGoodsToCart(carts);
 				return gson.toJson(carts);
 			}
 			if("makeanorder".equals(todo)) {
-				logger.info("makeanorder");
+				logger.info("[daigou] makeanorder");
 				String username = parameter.getParameter("username");
 				if(username == null || username.length() < 1) return "fail";
 				String idcard = parameter.getParameter("idcard");
@@ -846,7 +948,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				int totaltype = 0;
 				for(Cart cart : carts) {
 					int count = Integer.parseInt(cart.getCount());
-					int price = Integer.parseInt(cart.getGoods().getPricecent());
+					int price = Integer.parseInt(cart.getActualpricecent());
 					long pricecent = price * count;
 					totaltype = totaltype + 1;
 					totalcent = totalcent + pricecent;
@@ -862,7 +964,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				sb.append(openid);
 				String detail = sb.toString();
 				String clientip = ip.split(",")[0];
-				String body = "新西兰代购:" + totaltype + "种" + totalcount + "件，共¥" + totalprice;
+				String body = orderid +" 共¥" + totalprice;
 				String attach = openid;
 				String prepay = prepay(orderid, body, detail, attach, ""+totalcent, clientip, openid, current);
 				if(prepay != null) {
@@ -890,25 +992,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if("goodsdetail".equals(todo)) {
 				String goodsid = parameter.getParameter("goodsid");
 				if(goodsid == null) {
-					logger.info("goodsid == null");
+					logger.info("[daigou] goodsid == null");
 					return "fail";
 				}
 				Goods goods = daigouHandler.getByGoodsid(goodsid);
+				if(daigouHandler.replacePricecentVIPPrice(goods, openid)) {
+					logger.info("[daigou] use vip price");
+				} else if(daigouHandler.replacePricecentAgentPrice(goods, agentid)){
+					logger.info("[daigou] use agent price");
+				}
 				return gson.toJson(goods);
 			}
 			
 			if("myorders".equals(todo)) {
 				//TODO check openid
-				logger.info("myorders");
+				logger.info("[daigou] myorders");
 				List<Order> myOrders = daigouHandler.myOrders(openid);
 				//TODO clean input for xss
 				return gson.toJson(myOrders);
 			}
 			if("removecart".equals(todo)) {
-				logger.info("remove cart");
+				logger.info("[daigou] remove cart");
 				String cartid = parameter.getParameter("cartid");
 				if(cartid == null) {
-					logger.info("cartid == null");
+					logger.info("[daigou] cartid == null");
 					return "fail";
 				}
 				String deleted = daigouHandler.deleteCart(openid, cartid);
@@ -1566,6 +1673,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 			logger.error("[corpus] fail to send text to user: " + openid, e);
 			return null;
 		}
+	}
+	
+	public boolean isAdmin(String openid, String whatfor, String time) {
+		String adminKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", "Admin", openid);
+		String admin = account().get(adminKey);
+		if(admin != null && !"None".equals(admin)) {
+			logger.info("[CorpusService authrized] Use Admin power, openid: " + openid + ", whatfor: " + whatfor + ", time: " + time);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean authrized(String openid, String auth) {
+		String time = "" + System.currentTimeMillis();
+		if(isAdmin(openid, "Check:" + auth, time)) {
+			return true;
+		}
+		String authKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", auth, openid);
+		String authrized = account().get(authKey);
+		if(authrized == null || "None".equals(authrized)) {
+			return false;
+		}
+		logger.info("[CorpusService authrized] Use auth power, openid: " + openid + ", auth: " + auth + ", time: " + time);
+		return true;
 	}
 	public void dealWithTicket(String ticket, String openid) {
 		if(ticket != null) {

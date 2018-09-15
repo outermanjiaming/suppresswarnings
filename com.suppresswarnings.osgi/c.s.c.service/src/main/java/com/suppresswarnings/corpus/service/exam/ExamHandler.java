@@ -9,8 +9,11 @@
  */
 package com.suppresswarnings.corpus.service.exam;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,8 +22,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.LoggerFactory;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
+import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.work.TodoTask;
 import com.suppresswarnings.corpus.service.work.WorkerUser;
 
@@ -37,6 +42,8 @@ public class ExamHandler {
 	ConcurrentHashMap<String, WorkerUser> workers;
 	ConcurrentHashMap<String, TodoTask> tasks;
 	AtomicBoolean on = new AtomicBoolean(true);
+	public List<Quiz> assimilatedQuiz = new ArrayList<>();
+	long lastTime = System.currentTimeMillis();
 	
 	public ExamHandler(CorpusService service, String wxid) {
 		this.service = service;
@@ -47,7 +54,98 @@ public class ExamHandler {
 		this.workers  = new ConcurrentHashMap<>();
 		this.tasks    = new ConcurrentHashMap<>();
 	}
-	
+	public List<Quiz> allQuiz(){
+		String start = String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus","Quiz", "T_Corpus_classExam_1536649615642_3131", "Answer");
+		
+		List<Quiz> allQuiz = new ArrayList<>();
+		service.data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
+			String left = t.substring(start.length());
+			if(!left.contains("Similar") && !left.contains("Reply")) {
+				Quiz quiz = new Quiz(t, u);
+				allQuiz.add(quiz);
+			}
+		});
+		//fill the reply and similar into each quiz
+		allQuiz.forEach(quiz -> {
+			
+			String replyKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Reply");
+			service.data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (t, u) -> {
+				String left = t.substring(replyKey.length());
+				if(!left.contains("Similar") && !left.contains("Reply")) {
+					quiz.reply(t, u);
+				}
+			});
+			
+			String similarKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Similar");
+			service.data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (t, u) -> {
+				String left = t.substring(similarKey.length());
+				if(!left.contains("Similar") && !left.contains("Reply")) {
+					quiz.similar(t, u);
+				}
+			});
+		});
+		
+		assimilatedQuiz.clear();
+		//assimilate quiz
+		allQuiz.forEach(quiz -> {
+			boolean assimilated = false;
+			for(int i=0;i<assimilatedQuiz.size();i++) {
+				Quiz host = assimilatedQuiz.get(i);
+				if(host.assimilate(quiz)) {
+					logger.info("[fillQuestionsAndAnswers] assimilate: " + host.toString());
+					assimilated = true;
+					break;
+				}
+			}
+			if(!assimilated) {
+				assimilatedQuiz.add(quiz);
+			}
+		});
+		logger.info("[fillQuestionsAndAnswers] done assimilate");
+		Collections.shuffle(assimilatedQuiz);
+		logger.info("[fillQuestionsAndAnswers] shuffle assimilate");
+		assimilatedQuiz.forEach(quiz -> {
+			logger.info("[fillQuestionsAndAnswers] assimilated quiz: " + quiz.toString());
+			this.questionToAid.put(CheckUtil.cleanStr(quiz.getQuiz().value()), quiz.getQuiz().key());
+			
+			HashSet<String> answers = new HashSet<>();
+			quiz.getReply().forEach(reply -> {
+				answers.add(reply.value());
+			});
+			
+			this.aidToAnswers.put(quiz.getQuiz().key(), answers);
+			
+			HashSet<String> similars = new HashSet<>();
+			quiz.getSimilar().forEach(similar -> {
+				String value = similar.value();
+				similars.add(value);
+				this.questionToAid.put(CheckUtil.cleanStr(value), quiz.getQuiz().key());
+			});
+			
+			this.aidToSimilars.put(quiz.getQuiz().key(), similars);
+		});
+		
+		return assimilatedQuiz;
+	}
+	public void batchJob(String quiz, String quizId, Type typeNullForBoth) {
+		TodoTask task = new TodoTask();
+		task.setOpenId("");
+		task.setQuiz(quiz);
+		task.setQuizId(quizId);
+		task.setTime(System.currentTimeMillis());
+		try {
+			if(typeNullForBoth == null) {
+				replyTasks.put(task);
+				similarTasks.put(task);
+			} else if(typeNullForBoth == Type.Reply) {
+				replyTasks.put(task);
+			} else if(typeNullForBoth == Type.Similar) {
+				similarTasks.put(task);
+			}
+		} catch (Exception e) {
+			logger.error("[WorkHandler] newJob Exception", e);
+		}
+	}
 	public boolean done(TodoTask task, Type type) {
 		if(type == Type.Reply) {
 			String reply = CheckUtil.cleanStr(task.getQuiz());

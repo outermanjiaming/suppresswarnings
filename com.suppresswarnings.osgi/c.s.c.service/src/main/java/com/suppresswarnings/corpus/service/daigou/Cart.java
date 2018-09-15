@@ -15,15 +15,37 @@ public class Cart {
 		String Done = "Done";
 		String Delete = "Delete";
 	}
+	public static interface Reason{
+		String Public = "Public";
+		String VIP = "VIP";
+		String Agent = "Agent";
+	}
 	String agentid;
 	String openid;
 	String cartid;
 	String state;
 	String goodsid;
 	String count;
+	//TODO
+	String actualpricecent;
+	//TODO
+	String actualreason;
 	String time;
 	Goods goods;
 	
+	
+	public String getActualpricecent() {
+		return actualpricecent;
+	}
+	public void setActualpricecent(String actualpricecent) {
+		this.actualpricecent = actualpricecent;
+	}
+	public String getActualreason() {
+		return actualreason;
+	}
+	public void setActualreason(String actualreason) {
+		this.actualreason = actualreason;
+	}
 	public Goods getGoods() {
 		return goods;
 	}
