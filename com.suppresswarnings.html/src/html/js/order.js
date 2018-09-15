@@ -8,6 +8,9 @@ function addorder(order) {
     	
     	'订单号：<span>' + order.orderid + '</span><br/>'+
     	'收货人：<span>' + order.username + '</span><br/>'+
+    	'地址：<span>' + order.address + '</span><br/>'+
+    	'手机：<span>' + order.mobile + '</span><br/>'+
+    	'备注：<span>' + order.comment + '</span><br/>'+
     	'时间：<span>' + order.time + '</span><br/>'
     if(order.state == "Paid") {
     	orderinfo = orderinfo +'状态：<span style="color:green;">已支付</span><br/>'
@@ -28,7 +31,7 @@ function addorder(order) {
 	for(var k=0;k<size;k++) {
 		var cart = carts[k]
 		var goods = cart.goods
-		var cent = parseFloat(goods.pricecent)
+		var cent = parseFloat(cart.actualpricecent)
     	var price = rate * cent
     	price = price.toFixed(2)
 		var goodsli = '<li>' +
