@@ -219,7 +219,7 @@ function loadCarts(){
 	        for (var k = 0; k < length; k++) {
 	        	var cart = cartslist[k]
 	        	var goods = cart.goods
-	        	var cent = parseFloat(goods.pricecent)
+	        	var cent = parseFloat(cart.actualpricecent)
 	        	var cnt = parseInt(cart.count)
 	        	var total = cent * cnt
 	        	sum = sum + total
