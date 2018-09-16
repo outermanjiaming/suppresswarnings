@@ -88,7 +88,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
 	//
-	public static final int bear = 5;
+	public AtomicInteger bear = new AtomicInteger(6);
+	public AtomicInteger corpusCount = new AtomicInteger(0);
 	public List<Quiz> assimilatedQuiz = new ArrayList<>();
 	public LevelDB account(){
 		if(account != null) {
@@ -227,6 +228,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				info.append("questionToAid: " + questionToAid.size()).append("\n");
 				info.append("aidToAnswers: " + aidToAnswers.size()).append("\n");
 				info.append("ttl: " + ttl.size()).append("\n");
+				info.append("corpus：" + corpusCount.get()).append("\n");
 				info.append("backup：" + backup.toString()).append("\n");
 				info.append("workHandler：" + workHandler.report());
 				for(String one : admin) {
@@ -365,11 +367,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public int fillExam() {
 		AtomicInteger integer = new AtomicInteger(0);
 		assimilatedQuiz.forEach(quiz ->{
-			if(quiz.getReply().size() < bear) {
+			if(quiz.getReply().size() < bear.get()) {
 				integer.incrementAndGet();
 				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
 			}
-			if(quiz.getSimilar().size() < bear) {
+			if(quiz.getSimilar().size() < bear.get()) {
 				integer.incrementAndGet();
 				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
 			}
@@ -380,11 +382,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public int fillWork() {
 		AtomicInteger integer = new AtomicInteger(0);
 		assimilatedQuiz.forEach(quiz ->{
-			if(quiz.getReply().size() < bear) {
+			if(quiz.getReply().size() < bear.get()) {
 				integer.incrementAndGet();
 				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
 			}
-			if(quiz.getSimilar().size() < bear) {
+			if(quiz.getSimilar().size() < bear.get()) {
 				integer.incrementAndGet();
 				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
 			}
@@ -396,6 +398,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	
 	public void fillQuestionsAndAnswers(String quizId){
 		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+		corpusCount.set(0);
 		assimilatedQuiz.clear();
 		workHandler.close();
 		workHandler.working();
@@ -403,6 +406,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
 			String left = t.substring(start.length());
 			if(!left.contains("Similar") && !left.contains("Reply")) {
+				corpusCount.incrementAndGet();
 				Quiz quiz = new Quiz(t, u);
 				allQuiz.add(quiz);
 			}
@@ -414,6 +418,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (t, u) -> {
 				String left = t.substring(replyKey.length());
 				if(!left.contains("Similar") && !left.contains("Reply")) {
+					corpusCount.incrementAndGet();
 					quiz.reply(t, u);
 				}
 			});
@@ -422,6 +427,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (t, u) -> {
 				String left = t.substring(similarKey.length());
 				if(!left.contains("Similar") && !left.contains("Reply")) {
+					corpusCount.incrementAndGet();
 					quiz.similar(t, u);
 				}
 			});
@@ -677,15 +683,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 						
 						if(subscribe == null) {
 							account().put(subscribeKey, time);
-							return xml(openid, "hi，如果你愿意，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
+							return xml(openid, "你好，请把我当作你的好朋友，陪我聊天，教我很多东西", fromOpenId);
 						} else {
 							String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
 							account().put(subscribeHistoryKey, time);
 							account().put(subscribeKey, time);
 							if(subscribe.contains("unsubscribe")) {
-								return xml(openid, "hi，如果你依然愿意，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
+								return xml(openid, "你又回来了，我很高兴，你愿意陪我聊天吗", fromOpenId);
 							} else {
-								return xml(openid, "hi，如果你还愿意的话，我会陪你聊天一直到永远，你首先想到说什么吗？", fromOpenId);
+								return xml(openid, "你很关注我，谢谢你，你愿意和我聊天，教我说话吗", fromOpenId);
 							}
 						}
 					} else if("unsubscribe".equals(event)) {
@@ -712,12 +718,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 						return xml(openid, "欢迎来到【" + where + "】", fromOpenId);
 					} else if("LOCATION".equals(event)) {
 						logger.info("[corpus] location: " + wxmsg.get("FromUserName") + " = (" + wxmsg.get("Latitude") + ", " + wxmsg.get("Longitude") + ") * " + wxmsg.get("Precision"));
+						String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Location", ""+System.currentTimeMillis(), openid);
+						data().put(mediaKey, sms);
 						return SUCCESS;
 					}
 				} else if("image".equals(msgType)) {
+					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Media", ""+System.currentTimeMillis(), openid);
+					data().put(mediaKey, sms);
 					String url = wxmsg.get("PicUrl");
 					input = "IMAGE_" + url;
 				} else {
+					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Other", ""+System.currentTimeMillis(), openid);
+					data().put(mediaKey, sms);
 					return SUCCESS;
 				}
 

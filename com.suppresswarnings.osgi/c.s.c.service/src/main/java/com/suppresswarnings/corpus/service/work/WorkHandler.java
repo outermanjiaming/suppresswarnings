@@ -280,7 +280,7 @@ public class WorkHandler {
 	}
 	
 	public String report(){
-		String report = "replyTasks: " + replyTasks.size() + "similarTasks: " + similarTasks.size() + ", replyUsers: " + replyUsers.size() + ", similarUsers: " + similarUsers.size() + ", workers: " + workers.size() + ", on: " + on;
+		String report = "replyTasks: " + replyTasks.size() + "\nsimilarTasks: " + similarTasks.size() + "\nreplyUsers: " + replyUsers.size() + "\nsimilarUsers: " + similarUsers.size() + "\nidle workers: " + workers.size() + ", on: " + on;
 		logger.info("[WorkHandler] report: " + report);
 		return report;
 	}

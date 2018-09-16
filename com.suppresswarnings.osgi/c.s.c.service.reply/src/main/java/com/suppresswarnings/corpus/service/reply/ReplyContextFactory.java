@@ -12,15 +12,10 @@ package com.suppresswarnings.corpus.service.reply;
 import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.common.ContextFactory;
+import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class ReplyContextFactory implements ContextFactory<CorpusService> {
-
-	@Override
-	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
-		return new ReplyContext(wxid, openid, content);
-	}
+public class ReplyContextFactory extends AbstractAuthContextFactory {
 
 	@Override
 	public String command() {
@@ -35,6 +30,16 @@ public class ReplyContextFactory implements ContextFactory<CorpusService> {
 	@Override
 	public long ttl() {
 		return TimeUnit.DAYS.toMillis(5);
+	}
+
+	@Override
+	public String[] requiredAuth() {
+		return ReplyContext.AUTH;
+	}
+
+	@Override
+	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
+		return new ReplyContext(wxid, openid, content);
 	}
 
 }

@@ -84,16 +84,16 @@ public class ProduceContext extends WXContext {
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
 		Iterator<Quiz> askQuiz = null;
 		int pointer = 0;
-		String[] FORMAT = {"有的主人说：%s",
-				"换个话题，比如说：%s", 
-				"又把我问倒了，你可以说：%s",
+		String[] FORMAT = {"我先说：\n%s",
+				"该我说了：\n%s", 
+				"轮到我了：\n%s",
 				"我想一下哈，%s", 
-				"你咋说了那么多？你试试说：%s",
-				"我们说点别的，比如：%s",
-				"你觉得我安静好不好，%s",
-				"不好意思，呃，%s",
-				"刚刚思想开小差了，%s",
-				"对不起哈，你试一下这样说：%s"
+				"你咋说了那么多？我说一句：\n%s",
+				"我们说点别的：\n%s",
+				"停，%s",
+				"呃，%s",
+				"刚刚思想开小差，%s",
+				"啥？%s"
 				};
 		int count = bear;
 		Map<String, AutoContext> contexts = new HashMap<>();

@@ -21,6 +21,7 @@ import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.daigou.Goods;
+import com.suppresswarnings.corpus.service.work.WorkHandler;
 
 public class ManageContext extends WXContext {
 	public static final String CMD = "我的后台管理";
@@ -38,12 +39,14 @@ public class ManageContext extends WXContext {
 			u.output("后台管理，等级森严，你可以输入以下指令：");
 			u.output("    " + goodsManage.name());
 			u.output("    " + examManage.name());
+			u.output("    " + corpusManage.name());
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(goodsManage.name().equals(t)) return goodsManage;
 			if(examManage.name().equals(t)) return examManage;
+			if(corpusManage.name().equals(t)) return corpusManage;
 			return enter;
 		}
 
@@ -57,7 +60,48 @@ public class ManageContext extends WXContext {
 			return false;
 		}
 	};
-	
+	State<Context<CorpusService>> corpusManage = new State<Context<CorpusService>>() {
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			if("刷新语料".equals(t)) {
+				String report = u.content().workHandler.report();
+				String quizId = u.content().getTodoQuizid();
+				u.content().fillQuestionsAndAnswers(quizId);
+				u.output("已刷新语料数据");
+				u.output(report);
+				u.output(u.content().workHandler.report());
+			} else if(t.startsWith("设置阈值")) {
+				if(t.length() == "设置阈值".length()) {
+					u.output("请带上参数N，比如 设置阈值5");
+				} else {
+					String N = t.substring("设置阈值".length());
+					int n = Integer.parseInt(N);
+					u.content().bear.set(n);
+					u.output("已设置阈值"+ n);
+				}
+			}
+			
+			u.output("你可以输入");
+			u.output("    刷新语料");
+			u.output("    设置阈值N");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return corpusManage;
+		}
+
+		@Override
+		public String name() {
+			return "语料管理";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
 	State<Context<CorpusService>> examManage = new State<Context<CorpusService>>() {
 
 

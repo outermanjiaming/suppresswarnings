@@ -23,6 +23,7 @@ import com.suppresswarnings.corpus.service.WXContext;
 
 public class ReplyContext extends WXContext {
 	public static final String CMD = "我要回答问题";
+	public static final String[] AUTH = {"Reply"};
 	
 	State<Context<CorpusService>> online = new State<Context<CorpusService>>() {
 		/**

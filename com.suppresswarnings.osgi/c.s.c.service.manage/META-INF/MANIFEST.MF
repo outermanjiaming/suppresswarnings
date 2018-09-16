@@ -7,6 +7,7 @@ Export-Package: com.suppresswarnings.corpus.service.manage
 Import-Package: com.suppresswarnings.corpus.common,
  com.suppresswarnings.corpus.service,
  com.suppresswarnings.corpus.service.daigou,
+ com.suppresswarnings.corpus.service.work,
  com.suppresswarnings.osgi.leveldb,
  org.slf4j
 Service-Component: OSGI-INF/component.xml

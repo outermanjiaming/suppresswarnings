@@ -23,6 +23,7 @@ import com.suppresswarnings.corpus.service.wx.WXnews;
 public class QRCodeContext extends WXContext {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public static final String CMD = "我要二维码";
+	public static final String[] AUTH = {"QRCode"};
 	
 	State<Context<CorpusService>> permanent = new State<Context<CorpusService>>() {
 
