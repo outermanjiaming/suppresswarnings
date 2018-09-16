@@ -103,4 +103,7 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#customphone").click(function() {
+		$("#customqrcode").toggle()
+	});
 });
