@@ -203,13 +203,13 @@ color: #666
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
-
+var indx = 0
 function addorder(order) {
 	var myorders = $("#myorders")
 	var repetition = parseFloat(order.repetition)
     	repetition = repetition.toFixed(2)
 	var orderinfo = '<div class="order_info">' +
-    	'ID：<span>' + order.openid + '</span><br/>'+
+    	indx +'. ID：<span>' + order.openid + '</span><br/>'+
     	'<span class="item_img"><img src="'+order.image+'" title="' +order.username+ '"></span><span>' + order.username + '</span><br/>'+
     	'重复数量：<span>' + order.exist + '</span> 重复度：<span>' + repetition + '</span><br/>'+
     	'提问数量：<span>' + order.quiz + '</span><br/>'+
@@ -267,6 +267,7 @@ $(document).ready(function(){
 			        var length = orderlist.length
 			        for (var k = 0; k < length; k++) {
 			        	var order = orderlist[k]
+			        	indx ++
 			        	addorder(order)
 			        }
 			        closeDiv()
