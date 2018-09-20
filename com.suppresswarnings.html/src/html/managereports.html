@@ -1,0 +1,282 @@
+<html><head><meta charset="UTF-8">
+<meta name="generator" content="ShopEx 4.8.5 For Mobile(MyShopEx.com)">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black" name="apple-mobile-web-app-status-bar-style">
+<meta name="format-detection" content="telephone=no">
+<title>语料统计管理（权限最高级）</title>
+<meta name="keywords" content="">
+<meta name="description" content="语料统计管理">
+<style>
+a {
+    text-decoration : none;
+    font-size : 14px;
+    color : #333;
+}
+
+a:visited {
+    font-family: "微软雅黑", "宋体", Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #999;
+    text-decoration: none;
+}
+
+.index-ad img{
+    width:100%;
+}
+.list-item{
+	height:100%;
+    margin-bottom: 100px;
+    padding-bottom: 100px;
+}
+.goods_images {
+    display: block;
+    width: 30%;
+    overflow: hidden;
+    float: left;
+    position: relative;
+}
+dl {
+    width: 68%;
+    margin: auto;
+    margin-top: 3px;
+    overflow: hidden;
+    float: right;
+}
+dl dt {
+    font-size: 14px;
+    width: 100%;
+    margin: auto;
+    height: 40px;
+    overflow: hidden;
+    text-align: left;
+    line-height: 20px;
+}
+.single_item li{
+    width: 100%;
+    float: left;
+    overflow: hidden;
+    margin-bottom: 5px;
+    position: relative;
+}
+.rbtn {
+    display: block;
+    width: 100px;
+    height: 30px;
+    border: none;
+    background: #E71F19;
+    text-align: center;
+    font-size: 14px;
+    line-height: 30px;
+    color: #FFF;
+    margin: auto;
+    border-radius: 3px;
+}
+.notice{ width:100%; margin-bottom:5px; background:#fcb1b7; background-size: auto 16px; font-size:12px; line-height:20px; color:#FFF; text-indent:40px;padding: 5px 0;font-weight: bold;}
+
+.flow_bottom { position: fixed; left: 0; bottom: 0; width: 100%; height: 50px; border-top: 1px solid #d7d7d7; background-color: #fff; z-index: 2; display: -webkit-box; display: -moz-box; display: -ms-box; display: -o-box; display: box; -webkit-box-align: center; -moz-box-align: center; -ms-box-align: center; -o-box-align: center; box-align: center; -webkit-box-pack: center; -moz-box-pack: center; -ms-box-pack: center; -o-box-pack: center; box-pack: center; min-width:320px; }
+.flow_bottom .info { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; width: 100%; color: #FF5778; font-size: 16px; text-align: right; margin-right: 5px; }
+.flow_bottom .quanxuan { -webkit-box-flex: 1; -moz-box-flex: 1; -ms-box-flex: 1; -o-box-flex: 1; box-flex: 1; margin-left: 9px; height: 40px; width: 60%; }
+.flow_bottom .quanxuan .check-wrapper {  margin-left: 0px;  width: 70px; padding-top:11px;}
+.flow_bottom .quanxuan .cart-checkbox { float: left; }
+.flow_bottom .quanxuan .cart-checktext { float: left; width: 35px; height: 20px; line-height: 20px; font-size: 14px; text-indent: 3px; color: #000; }
+.flow_bottom .info .hot { font-size: 16px; color: #c42a32; text-align: right; }
+.flow_bottom .info .hot em { font-size: 16px; color: #c42a32; }
+.flow_bottom .right { width: 100px; height: 50px;}
+.flow_bottom .right a { background: #f60; }
+.flow_bottom .xm-button {  background-color:#DD2726; text-align: center; height: 50px; line-height: 50px; font-size: 16px; color: #fff; width: 100%; border: none; font-family: 微软雅黑; display:block }
+
+/*返回首页*/
+.footer_nav{ width:100%; height:50px; position:fixed; z-index:100; bottom:0px;}
+.footer_nav ul{ margin: 0; padding: 0; list-style-type: none;}
+.footer_nav ul li{ margin: 0; padding: 0; list-style-type: none; width:50%; float:left; height:50px;text-align: center;}
+.footer_nav ul li span{ display:block; text-align:center; color:#666; font-size: 12;}
+.footer_nav ul li a{ text-decoration: none; font-size: 12;}
+.footer_nav ul li em{ display:block; width:30px; height:25px; margin:auto;background: url(pub_goods.png) no-repeat;background-size:auto 280px;}
+.footer_nav ul li .goods_nav1{ background-position:0 -190px;}
+
+.item dd i {
+    display: block;
+    float: left;
+    font-size: 16px;
+    line-height: 30px;
+    color: #F00;
+    font-style: normal;
+}
+.folw_shopmain {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 100px;
+    background: #FFF;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.inner {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.item_img {
+    width: 45px;
+    padding-left: 5px;
+    float: left;
+    overflow: hidden;
+}
+.item_img img {
+    display: block;
+    width: 40px;
+    height: auto;
+}
+.price span {
+    display: block;
+    float: left;
+    font-size: 14px;
+    line-height: 150%;
+    color: #E71F19;
+}
+
+.price em {
+    display: block;
+    float: right;
+    font-size: 14px;
+    line-height: 150%;
+    color: #666;
+}
+ul{ margin: 0; padding: 0; list-style-type: none;}
+ul li{ margin: 0; padding: 0; list-style-type: none;}
+
+.flow_bottom { position: fixed; left: 0; bottom: 0; width: 100%; height: 50px; border-top: 1px solid #d7d7d7; background-color: #fff; z-index: 2; display: -webkit-box; display: -moz-box; display: -ms-box; display: -o-box; display: box; -webkit-box-align: center; -moz-box-align: center; -ms-box-align: center; -o-box-align: center; box-align: center; -webkit-box-pack: center; -moz-box-pack: center; -ms-box-pack: center; -o-box-pack: center; box-pack: center; min-width:320px; }
+
+
+.dashedli {
+    margin: 10px 0px;
+    padding: 5px 5px;
+    list-style-type: none;
+    border: 1px dashed #ccc;
+}
+.dashedli:hover {
+    border-color: #02cfd4;
+}
+.smalla{
+text-decoration : none;
+font-size: 12;
+}
+.order_info span{
+font-size: 14;
+color: #666
+}
+</style>
+
+</head>
+<body>
+<div id="popWindow" class="popWindow" style="text-align:center;display: none;background-color:#9D9D9D;width: 100%;height: 100%;left: 0;top: 0;filter: alpha(opacity=30);opacity: 0.3;z-index: 100;position: absolute;">
+    <div style="margin-top:30%;background:url(/loading.gif) no-repeat;"></div>
+</div>
+<div class="notice">所有用户列表</div>
+<div class="list-item">
+	<div id="myorders">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	</div>
+<div style="width:100%;text-align:center;"><span style="font-size: 12;">--- 已经见底了 ---</span><img src="/loading.gif" style="width:100%;padding: 0px 0px 80px;"/></div>
+</div>
+
+<!-- JavaScript Includes -->
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/transition.js"></script>
+<script type="text/javascript" src="js/dropdown.js"></script>
+<script type="text/javascript" src="js/collapse.js"></script>
+<script type="text/javascript" src="js/suppresswarnings.js"></script>
+<script>
+
+function addorder(order) {
+	var myorders = $("#myorders")
+	var orderinfo = '<div class="order_info">' +
+    	'ID：<span>' + order.openid + '</span><br/>'+
+    	'<span class="item_img"><img src="'+order.image+'" title="' +order.username+ '"></span><span>' + order.username + '</span><br/>'+
+    	'提问数量：<span>' + order.quiz + '</span><br/>'+
+    	'回复数量：<span>' + order.reply + '</span><br/>'+
+    	'同义句数量：<span>' + order.similar + '</span><br/>'+
+    	'时间：<span>' + order.firsttime + '</span> - <span>' + order.lasttime + '</span></div>'
+	$('<li class="dashedli"><div>' + orderinfo + '</div></li>').appendTo(myorders)
+}
+
+function oauth2() {
+	window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/managereports.html&response_type=code&scope=snsapi_base&state=managereports#wechat_redirect'
+}
+
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+	
+$(document).ready(function(){
+	
+	var Request = GetRequest();
+	
+	if(Request.code === undefined || Request.state === undefined) {
+	  console.log('first time here without code')
+	  oauth2()
+	} else {
+	  ticket = Request.code
+	  state  = Request.state
+	  showDiv()
+	  $.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+		    action : "managereports",
+		    random : randnum,
+		    state : state,
+		    ticket : ticket
+		    },
+		    success: function( result ) {
+		    	closeDiv()
+		      if("fail" == result) {
+		    	  console.log('fail daigou manageorders')
+		      } else {
+		          console.log('good to manageorders: ' + result)
+		          showDiv()
+			        var orderlist = JSON.parse(result)
+			        var length = orderlist.length
+			        for (var k = 0; k < length; k++) {
+			        	var order = orderlist[k]
+			        	addorder(order)
+			        }
+			        closeDiv()
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		    	closeDiv()
+		        console.log("[lijiaming] manageorders err: " + result)
+		    }
+		  })
+	}
+    
+});
+</script>
+
+</body>
+</html>

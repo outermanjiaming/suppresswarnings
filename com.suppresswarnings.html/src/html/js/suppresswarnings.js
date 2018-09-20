@@ -40,10 +40,12 @@ function gethtml(uri, container) {
 	});
 }
 function showDiv() {
-    document.getElementById('popWindow').style.display = 'block';
+	$("#popWindow").attr("width", "100%");
+	$("#popWindow").attr("height", "100%");
+    $("#popWindow").show();
 }
 function closeDiv() {
-    document.getElementById('popWindow').style.display = 'none';
+	$("#popWindow").hide();
 }
 (function($) {
 	$.extend({
