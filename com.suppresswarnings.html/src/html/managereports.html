@@ -215,6 +215,7 @@ function addorder(order) {
     	'提问数量：<span>' + order.quiz + '</span><br/>'+
     	'回复数量：<span>' + order.reply + '</span><br/>'+
     	'同义句数量：<span>' + order.similar + '</span><br/>'+
+    	'总数：<span>' + order.sum + '</span><br/>'+
     	'时间：<span>' + order.firsttime + '</span> - <span>' + order.lasttime + '</span></div>'
 	$('<li class="dashedli"><div>' + orderinfo + '</div></li>').appendTo(myorders)
 }
