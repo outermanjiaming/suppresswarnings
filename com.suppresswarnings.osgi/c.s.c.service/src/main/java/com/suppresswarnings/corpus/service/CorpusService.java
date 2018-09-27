@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,7 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
@@ -38,6 +41,8 @@ import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
+import com.suppresswarnings.corpus.common.KeyValue;
+import com.suppresswarnings.corpus.service.aiiot.AIIoT;
 import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
@@ -50,6 +55,7 @@ import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
+import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.work.TodoTask;
 import com.suppresswarnings.corpus.service.work.WorkHandler;
@@ -77,20 +83,33 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, Provider<?>> providers = new HashMap<>();
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
+	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
+	
+	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
+	public AIIoT aiiot;
 	public DaigouHandler daigouHandler;
 	public WorkHandler workHandler;
-	
 	public ExamHandler examHandler;
 	ScheduledExecutorService scheduler;
+	public AtomicBoolean ready = new AtomicBoolean(false);
+	
+	public static final String[] formats = {
+			"001.Collect.Corpus.Quiz.{QuizId}.Answer.{AnswerOpenid}.{AnswerTime}.{_}.Reply.{ReplyOpenid}.{ReplyTime}.{_}", 
+			"001.Collect.Corpus.Quiz.{QuizId}.Answer.{AnswerOpenid}.{AnswerTime}.{_}.Similar.{SimilarOpenid}.{SimilarTime}.{_}"
+	};
+	public static final Format quizAnswerReplyOrSimilar = new Format(formats);
+	public Map<String, Counter> counters = new ConcurrentHashMap<>();
+	
 	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
+	public Map<String, String> aidToCommand = new ConcurrentHashMap<>();
 	//
-	public AtomicInteger bear = new AtomicInteger(6);
+	public AtomicInteger bear = new AtomicInteger(2);
 	public AtomicInteger corpusCount = new AtomicInteger(0);
-	public List<Quiz> assimilatedQuiz = new ArrayList<>();
+	public List<Quiz> assimilatedQuiz = Collections.synchronizedList(new ArrayList<>());
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -121,35 +140,122 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
+	public int informUsers(String message) {
+		return workHandler.informUsersExcept(message, users);
+	}
+	
 	
 	public String youGotMe(String openId, String quiz, String quizId) {
 		this.workHandler.clockOut(openId);
 		return this.workHandler.newJob(quiz, quizId, openId);
 	}
-	public void forgetIt(String openId) {
-		this.workHandler.forgetIt(openId);
+	public void forgetIt(String openid) {
+		logger.info("[corpus] forgetIt: " + openid);
+		this.workHandler.forgetIt(openid);
 	}
 	public boolean iWantJob(String openid, Type type) {
+		logger.info("[corpus] iWantJob: " + openid + ", type: " + type.name());
 		return this.workHandler.clockIn(openid, type);
 	}
+	public boolean offWork(String openid) {
+		logger.info("[corpus] offWork: " + openid);
+		return this.workHandler.clockOut(openid);
+	}
+	public String registerThings(){
+		return aiiot.registerCMD(this);
+	}
+	public String aiiot(String openid, String code, String input, String origin, Context<CorpusService> context) {
+		return aiiot.remoteCall(openid, code, input, origin, context);
+	}
+	
 	public void activate() {
 		logger.info("[corpus] activate.");
-		backup = new Server();
-		try {
-			backup.working();
-		} catch (Exception e) {
-			logger.error("[corpus] server backup fail to start working", e);
-		}
-		//daigou
-		daigouHandler = new DaigouHandler(this);
-		workHandler = new WorkHandler(this, Const.WXmsg.openid);
-		examHandler = new ExamHandler(this, "ClassExam");
-		try {
-			workHandler.working();
-		} catch (Exception e) {
-			logger.error("[corpus] workHandler fail to start working", e);
-		}
-		scheduler = Executors.newSingleThreadScheduledExecutor();
+		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
+			int index = 0;
+			@Override
+			public Thread newThread(Runnable r) {
+				index ++;
+				return new Thread(r, "scheduler-" + index);
+			}
+		});
+		
+		if(backup != null) backup.close();
+		if(aiiot != null) aiiot.close();
+		if(workHandler != null) workHandler.close();
+		//1
+		scheduler.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					logger.info("[corpus] it will execute after 2s");
+					Thread.sleep(2000);
+					logger.info("[corpus] start to execute");
+					backup = new Server();
+					backup.working();
+					logger.info("[corpus] backup working");
+				} catch (Exception e) {
+					logger.error("[corpus] fail to delay execute", e);
+				}
+			}
+		});
+		//2
+		scheduler.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					logger.info("[corpus] it will execute after 2s");
+					Thread.sleep(2000);
+					logger.info("[corpus] start to execute");
+					aiiot = new AIIoT();
+					aiiot.working();
+					logger.info("[corpus] aiiot working");
+				} catch (Exception e) {
+					logger.error("[corpus] fail to delay execute", e);
+				}
+			}
+		});
+		//3
+		scheduler.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					logger.info("[corpus] it will execute after 2s");
+					Thread.sleep(2000);
+					logger.info("[corpus] start to execute");
+					
+					workHandler = new WorkHandler(CorpusService.this, Const.WXmsg.openid);
+					workHandler.working();
+					String quizId = getTodoQuizid();
+					if(quizId != null) {
+						fillQuestionsAndAnswers(quizId);
+					}
+					logger.info("[corpus] workHandler working");
+				} catch (Exception e) {
+					logger.error("[corpus] fail to delay execute", e);
+				}
+			}
+		});
+		//4
+		scheduler.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					logger.info("[corpus] it will execute after 2s");
+					Thread.sleep(2000);
+					logger.info("[corpus] start to execute");
+					daigouHandler = new DaigouHandler(CorpusService.this);
+					examHandler = new ExamHandler(CorpusService.this, "ClassExam");
+					ready.set(true);
+				} catch (Exception e) {
+					logger.error("[corpus] fail to delay execute", e);
+				}
+			}
+		});
+		//5
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
 			@Override
@@ -176,9 +282,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 				int change = currentTTL - ttl.size();
 				logger.info(change > 0 ? "[corpus run] removed " + change + " TTLs" : "[corpus run] TTL not changed");
 			}
-		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(2), TimeUnit.MILLISECONDS);
-		logger.info("[corpus] TTL scheduler starts in 3 minutes");
+		}, TimeUnit.SECONDS.toMillis(6), TimeUnit.MINUTES.toMillis(5), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] TTL scheduler starts in 6s");
 		//NOTE access token
+		//6
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			int times = 0;
 			long last = System.currentTimeMillis();
@@ -195,7 +302,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[access token] start " + times + ", last: " + last + ", now: " + now + ", period: " + period);
 					last = now;
 					String json = get.call();
-					Gson gson = new Gson();
 					AccessToken at = gson.fromJson(json, AccessToken.class);
 					long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(7200);
 					int result = token().put(key, at.getAccess_token());
@@ -205,14 +311,27 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[access token] Exception when refresh", e);
 				}
 			}
-		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.SECONDS.toMillis(7200), TimeUnit.MILLISECONDS);
-		logger.info("[corpus] refresh access token scheduler starts in 3 minutes");
+		}, TimeUnit.SECONDS.toMillis(6), TimeUnit.SECONDS.toMillis(7200), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] refresh access token scheduler starts in 6s");
 		//NOTE notice report
+		//7
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			int times = 0;
 			@Override
 			public void run() {
 				times ++;
+				Calendar c = Calendar.getInstance();
+				int hour = c.get(Calendar.HOUR_OF_DAY);
+				if(hour < 7) {
+					logger.info("[corpus] it's too early, no need to send report");
+					return;
+				}
+				String quizId = getTodoQuizid();
+				if(quizId != null) {
+					fillQuestionsAndAnswers(quizId);
+				}
+				
+				
 				String admins = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Admins"));
 				if(admins == null) {
 					logger.error("[corpus] scheduler: the admins not set");
@@ -222,26 +341,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
 				info.append("周期汇报：第").append(times).append("次").append("\n");
-				info.append("contexts: " + contexts.size()).append("\n");
-				info.append("providers: " + providers.size()).append("\n");
+				info.append("当前对话: " + contexts.size()).append("\n");
+				info.append("providers：" + providers.size()).append("\n");
 				info.append("factories: " + factories.size()).append("\n");
-				info.append("questionToAid: " + questionToAid.size()).append("\n");
-				info.append("aidToAnswers: " + aidToAnswers.size()).append("\n");
-				info.append("ttl: " + ttl.size()).append("\n");
-				info.append("corpus：" + corpusCount.get()).append("\n");
-				info.append("backup：" + backup.toString()).append("\n");
-				info.append("workHandler：" + workHandler.report());
+				info.append("所有问题: " + questionToAid.size()).append("\n");
+				info.append("问题聚类: " + aidToAnswers.size()).append("\n");
+				info.append("空闲对话: " + ttl.size()).append("\n");
+				info.append("总数据量：" + corpusCount.get()).append("\n");
+				info.append("数据备份：" + backup.toString()).append("\n");
+				info.append("后台工作：\n" + workHandler.report());
 				for(String one : admin) {
-					sendTxtTo("schedule report", info.toString(), one);
+					sendTxtTo("schedule report " + one, info.toString(), one);
 				}
 			}
-		}, TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(90), TimeUnit.MILLISECONDS);
-		logger.info("[corpus] scheduler admins info starts in 3 minutes");
-		
-		String quizId = getTodoQuizid();
-		if(quizId != null) {
-			fillQuestionsAndAnswers(quizId);
-		}
+		}, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(120), TimeUnit.MILLISECONDS);
+		logger.info("[corpus] scheduler admins info starts in 5 minutes");
 	}
 
 	public void deactivate() {
@@ -250,8 +364,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 			backup.close();
 		}
 		backup = null;
+		if(aiiot != null) {
+			aiiot.close();
+		}
+		aiiot = null;
 		if(scheduler != null) {
 			scheduler.shutdownNow();
+		}
+		if(workHandler != null){
+			workHandler.close();
+		}
+		if(examHandler != null){
+			examHandler.close();
 		}
 		scheduler = null;
 		secondlife.clear();
@@ -259,6 +383,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		providers.clear();
 		factories.clear();
 		contexts.clear();
+		counters.clear();
+		questionToAid.clear();
+		aidToAnswers.clear();
+		aidToSimilars.clear();
+		assimilatedQuiz.clear();
 	}
 
 	public void modified() {
@@ -342,6 +471,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 			ci.println("[_deleten] " + index + ". remove key:" + k + " = " + v);
 		});
 	}
+	
+	public void _replacen(CommandInterpreter ci) {
+		logger.info("[_replacen] " + leveldb);
+		if(leveldb == null) return;
+		String target = ci.nextArgument();
+		String real = ci.nextArgument();
+		ci.println("[_replacen] target: " + target + ", real: " + real);
+		AtomicInteger i = new AtomicInteger(0);
+		leveldb.page(target, target, null, Integer.MAX_VALUE, (k, v) -> {
+			String key = k.replace(target, real);
+			leveldb.put(key, v);
+			leveldb.del(k);
+			int index = i.incrementAndGet();
+			ci.println("[_replacen] " + index + ". replace key:\n" + k + "\n -> \n" + key + "\n   = " + v);
+		});
+	}
+	
 	public void _listn(CommandInterpreter ci) {
 		logger.info("[_listn] " + leveldb);
 		if(leveldb == null) return;
@@ -394,14 +540,60 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return integer.get();
 	}
 	
+	public String myCounter(String openid) {
+		Counter counter = counters.get(openid);
+		if(counter == null) return "暂未统计";
+		return counter.report();
+	}
+	
+	public void fillCounter(Quiz quiz){
+		List<KeyValue> kvs = quizAnswerReplyOrSimilar.matches(quiz.getQuiz().key());
+		String openid = kvs.get(1).value();
+		
+		Counter counter = counters.get(openid);
+		if(counter == null) {
+			counter = new Counter(openid);
+			counters.put(openid, counter);
+		}
+		String time = kvs.get(2).value();
+		counter.quiz(Long.parseLong(time), quiz.getQuiz().value());
+		
+		List<KeyValue> replys = quiz.getReply();
+		for(KeyValue reply : replys) {
+			List<KeyValue> replyKV = quizAnswerReplyOrSimilar.matches(reply.key());
+			String openidReply = replyKV.get(4).value();
+			Counter counterReply = counters.get(openidReply);
+			if(counterReply == null) {
+				counterReply = new Counter(openidReply);
+				counters.put(openidReply, counterReply);
+			}
+			String timeReply = replyKV.get(5).value();
+			counterReply.reply(Long.parseLong(timeReply), reply.value());
+		}
+		
+		List<KeyValue> similars = quiz.getSimilar();
+		for(KeyValue similar : similars) {
+			List<KeyValue> similarKV = quizAnswerReplyOrSimilar.matches(similar.key());
+			String openidSimilar = similarKV.get(4).value();
+			Counter counterSimilar = counters.get(openidSimilar);
+			if(counterSimilar == null) {
+				counterSimilar = new Counter(openidSimilar);
+				counters.put(openidSimilar, counterSimilar);
+			}
+			String timeSimilar = similarKV.get(5).value();
+			counterSimilar.similar(Long.parseLong(timeSimilar), similar.value());
+		}
+	}
 	
 	
-	public void fillQuestionsAndAnswers(String quizId){
+	public synchronized void fillQuestionsAndAnswers(String quizId){
 		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+		counters.clear();
 		corpusCount.set(0);
 		assimilatedQuiz.clear();
 		workHandler.close();
 		workHandler.working();
+		logger.info("[fillQuestionsAndAnswers] start: " + start);
 		List<Quiz> allQuiz = new ArrayList<>();
 		data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
 			String left = t.substring(start.length());
@@ -413,8 +605,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		});
 		//fill the reply and similar into each quiz
 		allQuiz.forEach(quiz -> {
-			
-			String replyKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Reply");
+			String quizKey = quiz.getQuiz().key();
+			String replyKey = String.join(Const.delimiter, quizKey, "Reply");
 			data().page(replyKey, replyKey, null, Integer.MAX_VALUE, (t, u) -> {
 				String left = t.substring(replyKey.length());
 				if(!left.contains("Similar") && !left.contains("Reply")) {
@@ -423,7 +615,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				}
 			});
 			
-			String similarKey = String.join(Const.delimiter, quiz.getQuiz().key(), "Similar");
+			String similarKey = String.join(Const.delimiter, quizKey, "Similar");
 			data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (t, u) -> {
 				String left = t.substring(similarKey.length());
 				if(!left.contains("Similar") && !left.contains("Reply")) {
@@ -435,11 +627,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		//assimilate quiz
 		allQuiz.forEach(quiz -> {
+			
+			//TODO each quiz, count them
+			fillCounter(quiz);
+			
 			boolean assimilated = false;
 			for(int i=0;i<assimilatedQuiz.size();i++) {
 				Quiz host = assimilatedQuiz.get(i);
+				if(host == null) continue;
 				if(host.assimilate(quiz)) {
-					logger.info("[fillQuestionsAndAnswers] assimilate: " + host.toString());
 					assimilated = true;
 					break;
 				}
@@ -448,11 +644,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 				assimilatedQuiz.add(quiz);
 			}
 		});
-		logger.info("[fillQuestionsAndAnswers] done assimilate");
+		logger.info("[fillQuestionsAndAnswers] done assimilate: " + assimilatedQuiz.size());
 		Collections.shuffle(assimilatedQuiz);
 		logger.info("[fillQuestionsAndAnswers] shuffle assimilate");
 		assimilatedQuiz.forEach(quiz -> {
-			logger.info("[fillQuestionsAndAnswers] assimilated quiz: " + quiz.toString());
 			this.questionToAid.put(CheckUtil.cleanStr(quiz.getQuiz().value()), quiz.getQuiz().key());
 			
 			HashSet<String> answers = new HashSet<>();
@@ -514,7 +709,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[class_exam] null text: " + text);
 				return "fail";
 			}
-			Gson gson = new Gson();
+			
 			try {
 				if("index".equals(type)){
 					List<Quiz> quizs = examHandler.allQuiz();
@@ -594,6 +789,71 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[class_exam] Exception", e);
 			}
 			return "fail";
+		} else if("managereports".equals(action)){
+			logger.info("[managereports] lijiaming");
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.info("[managereports] random == null");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.info("[managereports] ticket == null");
+				return "fail";
+			}
+			String state = parameter.getParameter("state");
+			if(state == null) {
+				logger.info("[managereports] state == null");
+				return "fail";
+			}
+			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+			String APPID = System.getProperty("wx.appid");
+			String SECRET = System.getProperty("wx.secret");
+			
+			if(APPID == null || SECRET == null) {
+				logger.error("[managereports] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+				return "fail";
+			}
+
+			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
+			String json = get.call();
+			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
+			logger.info("[managereports access_token] " + accessToken.toString());
+			String openId = accessToken.getOpenid();
+			if(openId == null) {
+				logger.info("[managereports] get openid failed");
+				return "fail";
+			}
+			logger.info("[managereports] orders");
+			if(!authrized(openId, "ManageReports")) {
+				logger.info("[managereports] check auth failed");
+				return "fail";
+			}
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			List<Map<String, String>> list = new ArrayList<>();
+			counters.forEach((userid, counter) ->{
+				Map<String, String> map = new HashMap<>();
+				WXuser user = getWXuserByOpenId(userid);
+				map.put("username", user.getNickname());
+				map.put("image", user.getHeadimgurl());
+				map.put("openid", userid);
+				map.put("quiz", ""+counter.getQuizCounter().get());
+				map.put("reply", ""+counter.getReplyCounter().get());
+				map.put("exist", ""+counter.getExistCounter().get());
+				map.put("similar", ""+counter.getSimilarCounter().get());
+				map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
+				map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
+				map.put("openid", userid);
+				map.put("repetition", ""+counter.repetition());
+				map.put("sum", ""+counter.sum());
+				list.add(map);
+			});
+			//TODO lijiaming
+			Collections.sort(list, (Map<String, String> a, Map<String, String> b) ->{
+				return Integer.compare(Integer.parseInt(b.get("sum")),Integer.parseInt(a.get("sum")));
+			});
+			
+			return gson.toJson(list);
 		} else if("WX".equals(action)) {
 			logger.info("[WX] request: " + parameter.toString());
 			String msgSignature = parameter.getParameter("signature");
@@ -633,6 +893,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				String input = "";
 				if("text".equals(msgType)) {
 					input = wxmsg.get("Content");
+					logger.info("[corpus] text: " + input);
 				} else if("voice".equals(msgType)) {
 					input = wxmsg.get("Recognition");
 					if(input == null) {
@@ -734,6 +995,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				}
 
 				Context<?> context = context(openid);
+				logger.info("[corpus] context: " + context + ", openid: " + openid);
 				if(context == null) {
 					//lijiaming leave from worker user
 					forgetIt(openid);
@@ -823,7 +1085,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(random == null) {
 				return "Fail";
 			}
-			Gson gson = new Gson();
+
 			String accessToken = accessToken("login");
 			String result = qrCode(accessToken, 180, "QR_STR_SCENE", "‘素朴网联’官网");
 			logger.info("[corpus qrcode] " + result);
@@ -864,7 +1126,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[daigou] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
 					return "fail";
 				}
-				Gson gson = new Gson();
+
 				CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
 				String json = get.call();
 				JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
@@ -904,7 +1166,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			/**
 			 * TODO: Daigou
 			 */
-			Gson gson = new Gson();
 			if("index".equals(todo)) {
 				logger.info("[daigou] index");
 				List<Goods> list  = daigouHandler.listGoods();
@@ -1083,7 +1344,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[corpus access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
 				return "fail";
 			}
-			Gson gson = new Gson();
+
 			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
 			String json = get.call();
 			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
@@ -1116,7 +1377,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[corpus collect access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
 				return "fail";
 			}
-			Gson gson = new Gson();
+
 			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
 			String json = get.call();
 			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
@@ -1295,7 +1556,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 				}
 			});
 			logger.info("[corpus reply similar] " + result.size() + " openid:" + exist);
-			Gson gson = new Gson();
 			return gson.toJson(result);
 		} else if("user".equals(action)) {
 			String random = parameter.getParameter("random");
@@ -1319,7 +1579,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[corpus user access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
 				return "fail";
 			}
-			Gson gson = new Gson();
+
 			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
 			String json = get.call();
 			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
@@ -1353,7 +1613,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(openId == null) {
 				return "fail";
 			}
-			Gson gson = new Gson();
+
 			String next = parameter.getParameter("next");
 			if(next == null || "".equals(next)) {
 				String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus");
@@ -1489,7 +1749,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		result.put("paySign", sign);
 		logger.info("[corpus prepay] paySign ready");
 		
-		Gson gson = new Gson();
 		String unifiedOrder = gson.toJson(result);
 		logger.info("[corpus prepay] unifiedOrder OK: " + unifiedOrder);
 		String reqjson = gson.toJson(reqData);
@@ -1509,7 +1768,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		long time = System.currentTimeMillis()/1000;
 		if(msg.startsWith("news://")) {
-			Gson gson = new Gson();
 			String json = msg.substring(7);
 			WXnews news = gson.fromJson(json, WXnews.class);
 			return String.format(Const.WXmsg.news, openid, fromOpenId, "" + time, news.getTitle(), news.getDescription(), news.getPicUrl(), news.getUrl());
@@ -1527,7 +1785,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(state == null) state = "0";
 		String quizQRCodeKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "QRCode");
 		String qrCode = data().get(quizQRCodeKey);
-		Gson gson = new Gson();
+
 		QRCodeTicket ticket = gson.fromJson(qrCode, QRCodeTicket.class);
 		String quizPriceKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Price");
 		String price = data().get(quizPriceKey);
@@ -1633,8 +1891,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 	 * @return
 	 */
 	public WXuser getWXuserByOpenId(String openId) {
-		WXuser user = null;
-		Gson gson = new Gson();
+		WXuser user = users.get(openId);
+		if(user != null && user.getSubscribe() == 1) {
+			logger.info("[corpus] getWXuserByOpenId: " + user.getNickname());
+			return user;
+		}
+		
 		String accessToken = accessToken("User Info");
 		
 		String userKey = String.join(Const.delimiter, Const.Version.V1, openId, "User");
@@ -1670,16 +1932,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 			user.setSubscribe(0);
 			user.setOpenid(openId);
 		}
+		users.put(openId, user);
 		return user;
 	}
+	
 	public String sendTxtTo(String business, String message, String openid) {
+		if(message == null || openid == null || openid.length() < 2 || message.length() < 2 ) {
+			return null;
+		}
 		String accessToken = accessToken(business);
 		String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + accessToken;
 		String json = "{\"touser\":\"" + openid + "\",\"msgtype\":\"text\",\"text\":{\"content\":\"" + message + "\"}}";
 		CallablePost post = new CallablePost(url, json);
 		try {
 			String result = post.call();
-			logger.info("[corpus] send text to: " + openid + ", result: " + result);
+			logger.info("[corpus] send text to: " + openid + ", msg: " + message + ", result: " + result);
 			return result;
 		} catch (Exception e) {
 			logger.error("[corpus] fail to send text to user: " + openid, e);
@@ -1828,5 +2095,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		logger.info("[corpus] after clean TTL("+ttl.size()+")");
 	}
 	
-	public static void main(String[] args) {}
+	public static void main(String[] args) {
+		Calendar c = Calendar.getInstance();
+		System.out.println(c.get(Calendar.HOUR_OF_DAY));
+	}
 }

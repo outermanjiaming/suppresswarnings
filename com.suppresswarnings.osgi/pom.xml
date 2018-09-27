@@ -51,6 +51,8 @@
       <module>c.s.c.service.menu</module>
       <module>c.s.c.service.similar</module>
       <module>c.s.c.service.manage</module>
+      <module>com.suppresswarnings.things</module>
+      <module>c.s.c.service.aiiot</module>
   </modules>
   <dependencies>
   		<dependency>

@@ -11,12 +11,16 @@ package com.suppresswarnings.corpus.service.work;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,9 +30,11 @@ import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class WorkHandler {
 	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
+	Random random = new Random();
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	CorpusService service;
 	String wxid;
@@ -38,18 +44,13 @@ public class WorkHandler {
 	LinkedBlockingDeque<WorkerUser> similarUsers;
 	ConcurrentHashMap<String, WorkerUser> workers;
 	ConcurrentHashMap<String, TodoTask> tasks;
+	public Map<String, Long> informs;
 	ExecutorService executor;
 	AtomicBoolean on = new AtomicBoolean(true);
 	
 	public WorkHandler(CorpusService service, String wxid) {
 		this.service = service;
 		this.wxid = wxid;
-		this.replyTasks   = new LinkedBlockingDeque<>(1000000);
-		this.similarTasks = new LinkedBlockingDeque<>(1000000);
-		this.replyUsers   = new LinkedBlockingDeque<>(10000);
-		this.similarUsers = new LinkedBlockingDeque<>(10000);
-		this.workers  = new ConcurrentHashMap<>();
-		this.tasks    = new ConcurrentHashMap<>();
 	}
 	
 	public boolean lineUp(WorkerUser user) {
@@ -59,16 +60,18 @@ public class WorkHandler {
 		} else {
 			wait = similarUsers.offer(user);
 		}
-		logger.info("[WorkHandler] want user: " + user.toString() + " is free and wait here: " + wait);
+		logger.info("[WorkHandler] want user: " + user.toString() + " is free and wait here: " + wait + ", type: " + user.getType().name());
 		return wait;
 	}
 	public boolean clockOut(String openid) {
 		WorkerUser user = workers.get(openid);
 		if(user == null) {
+			logger.info("[WorkHandler] user has already off work");
 			return true;
 		}
 		user.setBusy();
 		workers.remove(openid);
+		logger.info("[WorkHandler] user is off work now");
 		return true;
 	}
 	public boolean clockIn(String openid, Type type) {
@@ -82,8 +85,13 @@ public class WorkHandler {
 		user.setType(type);
 		return lineUp(user);
 	}
-	public boolean done(TodoTask task, Type type) {
+	public boolean done(TodoTask task, Type type, Counter counter) {
+		long now = System.currentTimeMillis();
+		long time = task.getTime();
+		String result = task.getResult();
+		
 		if(type == Type.Reply) {
+			counter.reply(now, result);
 			String reply = CheckUtil.cleanStr(task.getQuiz());
 			String aid = service.questionToAid.get(reply);
 			if(aid == null) {
@@ -98,8 +106,8 @@ public class WorkHandler {
 			}
 		} else if(type == Type.Similar) {
 			//TODO maybe bug, like the quiz has its replys already
-			String similar = task.getResult();
-			String quiz = CheckUtil.cleanStr(similar);
+			counter.reply(now, task.getResult());
+			String quiz = CheckUtil.cleanStr(result);
 			String aid = service.questionToAid.get(quiz);
 			if(aid == null) {
 				service.questionToAid.put(quiz, task.getQuizId());
@@ -124,15 +132,22 @@ public class WorkHandler {
 		
 		TodoTask todo = tasks.get(task.getOpenId());
 		if(task.equals(todo)) {
-			long time = todo.getTime();
-			if(System.currentTimeMillis() - time > TimeUnit.MINUTES.toMillis(3)) {
+			//it is the same last one, reply immediately
+			String ret = "";
+			if(now - time > TimeUnit.MINUTES.toMillis(10)) {
 				logger.info("[WorkHandler done] it's too late: " + task.toString());
+				ret = service.sendTxtTo("online reply " + task.getOpenId(), "sorry久等了，\n" + task.getResult(), task.getOpenId());
 				return false;
+			} else {
+				ret = service.sendTxtTo("online reply " + task.getOpenId(), task.getResult(), task.getOpenId());
 			}
-			String result = service.sendTxtTo("online reply", task.getResult(), task.getOpenId());
-			if(SENDOK.equals(result)) {
+			
+			if(SENDOK.equals(ret)) {
 				return true;
 			}
+		} else {
+			//TODO lijiaming: just send reply to them
+			service.sendTxtTo("online reply", task.getResult(), task.getOpenId());
 		}
 		tasks.remove(task.getOpenId());
 		tasks.remove(task.getQuizId());
@@ -164,15 +179,32 @@ public class WorkHandler {
 	}
 	
 	public void working() {
+		logger.info("[WorkHandler] working start");
 		on.set(true);
-		executor = Executors.newFixedThreadPool(2);
+		executor = Executors.newFixedThreadPool(12);
+		replyTasks   = new LinkedBlockingDeque<>(1000000);
+		similarTasks = new LinkedBlockingDeque<>(1000000);
+		replyUsers   = new LinkedBlockingDeque<>(10000);
+		similarUsers = new LinkedBlockingDeque<>(10000);
+		workers  = new ConcurrentHashMap<>();
+		tasks    = new ConcurrentHashMap<>();
+		informs = new ConcurrentHashMap<String, Long>();
 		WorkCommand reply = new WorkCommand(this, Type.Reply, replyTasks, replyUsers, workers, tasks, on);
-		WorkCommand similar = new WorkCommand(this, Type.Reply, similarTasks, similarUsers, workers, tasks, on);
-		executor.execute(reply);
-		executor.execute(similar);
+		WorkCommand similar = new WorkCommand(this, Type.Similar, similarTasks, similarUsers, workers, tasks, on);
+		for(int i=0;i<5;i++) {
+			executor.execute(reply);
+		}
+		for(int i=0;i<5;i++) {
+			executor.execute(similar);
+		}
+		logger.info("[WorkHandler] working ready");
 	}
 	
 	public void close() {
+		if(!on.get()) {
+			logger.info("[WorkHandler] closed already");
+			return;
+		}
 		logger.info("[WorkHandler] closing");
 		on.set(false);
 		executor.shutdownNow();
@@ -182,14 +214,16 @@ public class WorkHandler {
 		similarUsers.clear();
 		workers.clear();
 		tasks.clear();
+		informs.clear();
 		logger.info("[WorkHandler] closed");
 	}
+	
 	public void batchJob(String quiz, String quizId, Type typeNullForBoth) {
 		TodoTask task = new TodoTask();
 		task.setOpenId("");
 		task.setQuiz(quiz);
 		task.setQuizId(quizId);
-		task.setTime(System.currentTimeMillis());
+		task.setTime(0);
 		try {
 			if(typeNullForBoth == null) {
 				replyTasks.put(task);
@@ -263,7 +297,7 @@ public class WorkHandler {
 		}
 		user.setBusy();
 		String type = user.getType() == Type.Reply ? "请回答：\n" : "同义句：\n";
-		String result = service.sendTxtTo("working", type + todo.getQuiz(), user.getOpenId());
+		String result = service.sendTxtTo("working " + user.getOpenId(), type + todo.getQuiz(), user.getOpenId());
 		if(SENDOK.equals(result)) {
 			String fromOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "WXID", "Token", "973rozg");
 			String wxid = service.account().get(fromOpenIdKey);
@@ -280,12 +314,46 @@ public class WorkHandler {
 	}
 	
 	public String report(){
-		String report = "replyTasks: " + replyTasks.size() + "\nsimilarTasks: " + similarTasks.size() + "\nreplyUsers: " + replyUsers.size() + "\nsimilarUsers: " + similarUsers.size() + "\nidle workers: " + workers.size() + ", on: " + on;
+		String report = "等待回复: " + replyTasks.size() + "\n剩余同义句: " + similarTasks.size() + "\n空闲用户-回复: " + replyUsers.size() + "\n空闲用户-同义句: " + similarUsers.size() + "\n正在工作用户: " + workers.size() + ", 运行中: " + on;
 		logger.info("[WorkHandler] report: " + report);
 		return report;
 	}
 
 	public void forgetIt(String openId) {
-		tasks.remove(openId);
+		if(tasks != null) {
+			TodoTask task = tasks.remove(openId);
+			if(task != null) tasks.remove(task.getQuizId());
+		}
+	}
+
+	public int informUsersExcept(String message, Map<String, WXuser> users) {
+		Set<String> set = workers.keySet();
+		AtomicInteger count = new AtomicInteger(0);
+		users.forEach((openid, user) ->{
+			if(set.contains(openid)) {
+				logger.info("[corpus] inform users except: " + openid);
+			} else {
+				
+				Long lasttime = informs.get(openid);
+				
+				boolean need = false;
+				if(lasttime == null) {
+					lasttime = System.currentTimeMillis();
+					informs.put(openid, lasttime);
+					need = true;
+				}
+				
+				if(System.currentTimeMillis() - lasttime > TimeUnit.HOURS.toMillis(1)) {
+					need = true;
+				}
+				
+				if(need) {
+					count.incrementAndGet();
+					String ret = service.sendTxtTo("Inform Users " + openid, message, openid);
+					logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+				}
+			}
+		});
+		return count.get();
 	}
 }

@@ -35,15 +35,19 @@ public class ReplyContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			boolean x = u.content().iWantJob(openid(), Type.Reply);
 			if(x) {
-				u.output("打卡成功，一会儿有在线任务优先派发给您,不想接任务就输入「打卡下班」");
+				u.output("打卡成功，一会儿有在线任务优先派发给您,\n不想接任务就输入「打卡下班」，\n如果发现错误数据就输入「删除这一条」，\n如果不知道怎么答就输入「跳过」");
 			} else {
-				u.output("现在暂时没有在线任务，你可以输入「打卡下班」");
+				u.output("现在暂时没有在线任务，\n不想接任务就输入「打卡下班」，\n如果发现错误数据就输入「删除这一条」，\n如果不知道怎么答就输入「跳过」");
 			}
+			int informed = u.content().informUsers("hi，我通过学习，现在会回答好多事情了，你想和我说什么？");
+			u.output("你上线之后通知了 " + informed + " 个用户");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if("打卡下班".equals(t)) {
+				boolean off = u.content().offWork(openid());
+				logger.info("[SimilarContext] off work: " + openid() + "= " + off);
 				return init;
 			}
 			return online;

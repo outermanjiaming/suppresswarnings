@@ -149,11 +149,9 @@ public class LevelDBImpl implements LevelDB {
 			String key = itr.key().toString();
 			next = key;
 			if(stop != null && stop.get()) {
-				logger.info("[leveldb] early stop while reading key: " + key + " stop: " + stop);
 				break;
 			}
 			if(key == null || !key.startsWith(head)) {
-				logger.info("[leveldb] early stop while reading key: " + key + " head: " + head);
 				break;
 			}
 			consumer.accept(next, itr.value().toString());

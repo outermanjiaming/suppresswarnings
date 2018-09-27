@@ -80,16 +80,22 @@ public class SSLSocket implements Runnable {
 				}
 			});
 			
-	        socket.close();
+	        
 		} catch (Exception e) {
 			logger.error("[SSLSocket] sync Exception", e);
 		} finally {
+			try {
+				socket.close();
+			} catch (Exception e) {
+				logger.error("[SSLSocket] fail to close socket", e);
+			}
 			this.status.rest();
 		}
 	}
 	
 	public void sync(File root) throws Exception {
 		if(blacklist.contains(root.getAbsolutePath())) {
+			logger.info("[SSLSocket] which is in blacklist: " + root.getAbsolutePath());
 			return;
 		}
 		File[] files = root.listFiles();

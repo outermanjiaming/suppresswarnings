@@ -13,15 +13,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.daigou.Goods;
-import com.suppresswarnings.corpus.service.work.WorkHandler;
+import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
+import com.suppresswarnings.corpus.service.wx.WXnews;
 
 public class ManageContext extends WXContext {
 	public static final String CMD = "我的后台管理";
@@ -40,6 +43,7 @@ public class ManageContext extends WXContext {
 			u.output("    " + goodsManage.name());
 			u.output("    " + examManage.name());
 			u.output("    " + corpusManage.name());
+			u.output("    " + thingsManage.name());
 		}
 
 		@Override
@@ -47,6 +51,7 @@ public class ManageContext extends WXContext {
 			if(goodsManage.name().equals(t)) return goodsManage;
 			if(examManage.name().equals(t)) return examManage;
 			if(corpusManage.name().equals(t)) return corpusManage;
+			if(thingsManage.name().equals(t)) return thingsManage;
 			return enter;
 		}
 
@@ -60,17 +65,139 @@ public class ManageContext extends WXContext {
 			return false;
 		}
 	};
-	State<Context<CorpusService>> corpusManage = new State<Context<CorpusService>>() {
+	
+	State<Context<CorpusService>> thingsManage = new State<Context<CorpusService>>() {
+		State<Context<CorpusService>> registerThings = new State<Context<CorpusService>>() {
 
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.content().registerThings();
+				u.output("已完成注册设备: " + u.content().aiiot.typesName);
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				return thingsManage;
+			}
+
+			@Override
+			public String name() {
+				return "注册设备";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
+		State<Context<CorpusService>> thingsQR = new State<Context<CorpusService>>() {
+			String type = null;
+			String types = null;
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				if(thingsQR.name().equals(t)) {
+					types = u.content().aiiot.typesName;
+					u.output("请输入设备类型：" + types);
+				} else {
+					type = t;
+					if(!types.contains(type)) {
+						u.output("不支持该设备类型：" + type);
+						return;
+					}
+					
+					String accessToken = u.content().accessToken("AIIoT QR for " + type);
+					String scene_str = "T_AIIoT_" + time() + "_" + random();
+					//TODO lijiaming time limit
+					int seconds = (int) TimeUnit.DAYS.toSeconds(30);
+					
+					String qrCode = u.content().qrCode(accessToken, seconds, "QR_STR_SCENE", scene_str);
+					Gson gson = new Gson();
+					QRCodeTicket qrTicket = gson.fromJson(qrCode, QRCodeTicket.class);
+
+					WXnews news = new WXnews();
+					news.setTitle(scene_str);
+					news.setDescription("Code:"+scene_str+", Type:"+type+"，设备启动时使用「Type,Code」注册设备，扫码绑定设备（有效期2天）");
+					news.setUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
+					news.setPicUrl(news.getUrl());
+					String json = gson.toJson(news);
+					
+					u.output("news://" + json);
+					
+					String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Type", scene_str);
+					u.content().account().put(keyType, type);
+					
+					String aiiotKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "QRCode", type, scene_str, openid());
+					u.content().account().put(aiiotKey, qrCode);
+					
+					u.content().setGlobalCommand(scene_str, "智能家居设备", openid(), time());
+				}
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if(type != null) return thingsManage;
+				return thingsQR;
+			}
+
+			@Override
+			public String name() {
+				return "生成二维码";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			u.output("你可以输入：");
+			u.output("    注册设备");
+			u.output("    生成二维码");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if("注册设备".equals(t)) {
+				return registerThings;
+			}
+			if("生成二维码".equals(t)) {
+				return thingsQR;
+			}
+			return thingsManage;
+		}
+
+		@Override
+		public String name() {
+			return "设备管理";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
+	State<Context<CorpusService>> corpusManage = new State<Context<CorpusService>>() {
+		long lastTime = 0;
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			if("刷新语料".equals(t)) {
-				String report = u.content().workHandler.report();
-				String quizId = u.content().getTodoQuizid();
-				u.content().fillQuestionsAndAnswers(quizId);
-				u.output("已刷新语料数据");
-				u.output(report);
-				u.output(u.content().workHandler.report());
+				if(System.currentTimeMillis() - lastTime < TimeUnit.MINUTES.toMillis(10)) {
+					String report = u.content().workHandler.report();
+					u.output(report);
+				} else {
+					lastTime = System.currentTimeMillis();
+					new Thread(() ->{
+						String quizId = u.content().getTodoQuizid();
+						u.content().fillQuestionsAndAnswers(quizId);
+					}).start();
+					u.output("已刷新语料数据，稍后查看");
+				}
 			} else if(t.startsWith("设置阈值")) {
 				if(t.length() == "设置阈值".length()) {
 					u.output("请带上参数N，比如 设置阈值5");
@@ -82,7 +209,7 @@ public class ManageContext extends WXContext {
 				}
 			}
 			
-			u.output("你可以输入");
+			u.output("\n你可以输入");
 			u.output("    刷新语料");
 			u.output("    设置阈值N");
 		}

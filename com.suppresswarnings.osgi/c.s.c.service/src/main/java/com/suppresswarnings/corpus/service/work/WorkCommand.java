@@ -45,13 +45,20 @@ public class WorkCommand implements Runnable {
 				logger.info("[WorkCommand] working to take one user");
 				WorkerUser user = users.take();
 				logger.info("[WorkCommand] working got one user: " + user.toString());
+				WorkerUser off = workers.get(user.getOpenId());
+				if(off == null || off.isBusy()) {
+					//lijiaming: bugfix
+					logger.info("[WorkCommand] user is off work");
+					continue;
+				}
+				
 				logger.info("[WorkCommand] working to take one task");
 				TodoTask todo = todos.take();
 				logger.info("[WorkCommand] working got one task: " + todo.toString());
 				boolean done = handler.assignJob(user, todo);
 				logger.info("[WorkCommand] working task result: " + done);
 			} catch (Exception e) {
-				logger.error("[WorkCommand] Exception", e);
+				logger.error("[WorkCommand] Exception: " + type.name(), e);
 			}
 		}
 		logger.info("[WorkCommand] done working... " + type.name());

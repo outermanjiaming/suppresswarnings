@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
@@ -22,6 +23,7 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
+import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
 
 public class ProduceContext extends WXContext {
@@ -29,7 +31,19 @@ public class ProduceContext extends WXContext {
 	
 	String quizId;
 	String userId;
-	
+	Counter counter;
+	Random random = new Random();
+	public Counter counter(CorpusService service) {
+		if(counter == null) {
+			counter = service.counters.get(openid());
+			if(counter == null) {
+				counter = new Counter(openid());
+				service.counters.put(openid(), counter);
+			}
+		}
+		//Counter the quiz answer
+		return counter;
+	}
 	State<Context<CorpusService>> produce = new State<Context<CorpusService>>() {
 
 		/**
@@ -67,6 +81,10 @@ public class ProduceContext extends WXContext {
 			if(CMD.equals(t)) {
 				return produce;
 			}
+			//TODO lijiaming: bugfix
+			if(quizId == null) {
+				quizId = u.content().getTodoQuizid();
+			}
 			return answer;
 		}
 
@@ -83,7 +101,6 @@ public class ProduceContext extends WXContext {
 	public static final int bear = 2;
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
 		Iterator<Quiz> askQuiz = null;
-		int pointer = 0;
 		String[] FORMAT = {"我先说：\n%s",
 				"该我说了：\n%s", 
 				"轮到我了：\n%s",
@@ -93,7 +110,10 @@ public class ProduceContext extends WXContext {
 				"停，%s",
 				"呃，%s",
 				"刚刚思想开小差，%s",
-				"啥？%s"
+				"啥？%s",
+				"等一下没事吧，%s",
+				"哦，%s",
+				"嗯，%s"
 				};
 		int count = bear;
 		Map<String, AutoContext> contexts = new HashMap<>();
@@ -108,6 +128,20 @@ public class ProduceContext extends WXContext {
 			String aid = u.content().questionToAid.get(reply);
 			logger.info("[ProduceContext] after clean: " + reply + " = " + aid);
 			if(aid != null) {
+				//TODO lijiaming: check cmd
+				String cmd = u.content().aidToCommand.get(reply);
+				if(cmd != null) {
+					String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", cmd);
+					String code = u.content().account().get(keyCMD);
+					//get my things code, which is unique for each things
+					if(code != null) {
+						String remote = u.content().aiiot(openid(), code, cmd, t, u);
+						logger.info("[ProduceContext] remote: " + remote);
+					} else {
+						logger.info("[ProduceContext] remote: 你还没有绑定设备");
+					}
+				}
+				
 				HashSet<String> answers = u.content().aidToAnswers.get(aid);
 				if(answers != null && answers.size() > 0) {
 					AutoContext context = contexts.get(aid);
@@ -126,6 +160,9 @@ public class ProduceContext extends WXContext {
 				//save new question
 				String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid(), time(), random());
 				u.content().data().put(answerKey, t);
+				//counter for quiz
+				counter(u.content()).quiz(System.currentTimeMillis(), t);
+				
 				String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
 				u.content().data().put(crewKey, time());
 				aid = answerKey;
@@ -155,11 +192,13 @@ public class ProduceContext extends WXContext {
 						askQuiz = quizs.iterator();
 					}
 					if(askQuiz.hasNext()) {
-						Quiz ask = askQuiz.next();
-						u.output(String.format(FORMAT[pointer], ask.getQuiz().value()));
-						pointer ++;
-						if(pointer >= FORMAT.length) {
-							pointer = 0;
+						try {
+							Quiz ask = askQuiz.next();
+							int pointer = random.nextInt(FORMAT.length);
+							u.output(String.format(FORMAT[pointer], ask.getQuiz().value()));
+						} catch (Exception e) {
+							askQuiz = null;
+							u.output("我有点笨，我得想想");
 						}
 					}
 				}
@@ -168,6 +207,11 @@ public class ProduceContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if("打卡下班".equals(t)) {
+				u.content().offWork(openid());
+				logger.info("[ProduceContext] off work");
+				u.output(counter(u.content()).report());
+			}
 			return answer;
 		}
 

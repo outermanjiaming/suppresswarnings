@@ -132,7 +132,7 @@ public class ExamHandler {
 		task.setOpenId("");
 		task.setQuiz(quiz);
 		task.setQuizId(quizId);
-		task.setTime(System.currentTimeMillis());
+		task.setTime(0);
 		try {
 			if(typeNullForBoth == null) {
 				replyTasks.put(task);
