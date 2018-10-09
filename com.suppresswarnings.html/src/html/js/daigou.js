@@ -37,6 +37,12 @@ function addtocart(obj) {
 function addone(goods) {
 	var price = rate * parseFloat(goods.pricecent)
 	price = price.toFixed(2)
+	var rbtn = '<a class="rbtn mini-addcart" href="javascript:;" onclick="addtocart(this)" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a>'
+	if(goods.state == 'DOWN') {
+		rbtn = '<span class="rbtn mini-addcart" style="background:#ccc;" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 已下架 </span>'
+	} else if(goods.state == 'LACK') {
+		rbtn = '<span class="rbtn mini-addcart" style="background:#ccc;" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 暂时缺货 </span>'
+	}
 	var li = '<li>' +
    '<div class="item">' +
     '<div class="goods_images">' +
@@ -48,7 +54,7 @@ function addone(goods) {
           '<dt><a href="/detail.html?state='+state+'&code='+ticket+'&goodsid='+goods.goodsid+'">'+goods.title+'</a></dt>' +
 	  	  '<dd style="font-size:12px;">'+goods.extra+'</dd>' + 
 	      '<dd><i>￥'+price+'</i></dd>' + 
-	      '<dd style="float:left;"><a class="rbtn mini-addcart" href="javascript:;" onclick="addtocart(this)" data-agentid="'+state+'" data-goodsid="' +goods.goodsid+ '"> 加入购物车 </a></dd>' +
+	      '<dd style="float:right;">' + rbtn + '</dd>' +
     '</dl>' +
   '</div>' +
 '</li>'
