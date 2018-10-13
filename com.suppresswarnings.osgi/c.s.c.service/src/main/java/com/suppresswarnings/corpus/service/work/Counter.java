@@ -49,7 +49,7 @@ public class Counter {
 	
 	public int increase(AtomicInteger counter, long time, String text) {
 		if(time > lastTime) lastTime = time;
-		else if(time < firstTime) firstTime = time;
+		if(time < firstTime) firstTime = time;
 		
 		if(!texts.add(text)) {
 			existCounter.incrementAndGet();

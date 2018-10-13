@@ -22,7 +22,7 @@ public class NN implements AI, Serializable {
 	int inputSize;
 	int outputSize;
 	int[] hiddenSize;
-	int max = 10;
+	int max = 1000;
 	double tolerate = 0.001;
 	double error = 0;
 	/**

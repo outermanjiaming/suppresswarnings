@@ -71,6 +71,7 @@ import com.suppresswarnings.corpus.common.SendMail;
 import com.suppresswarnings.corpus.common.TTL;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
+import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
@@ -430,6 +431,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t getkv - getkv <key> - get value by that key.\n");
 		buffer.append("\t listn - listn <startkey> <limit> - list some values by start limit.\n");
 		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
+		buffer.append("\t findn - findn <startkey> <what> <limit> - find them and delete some key-values by what value.\n");
+		
 		return buffer.toString();
 	}
 	LevelDB leveldb;
@@ -466,6 +469,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		ci.println("[_deleten] head: " + start + ", count: " + n);
 		AtomicInteger i = new AtomicInteger(0);
 		leveldb.page(start, start, null, n, (k, v) -> {
+			leveldb.put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "Delete", ""+System.currentTimeMillis(), "oDqlM1TyKpSulfMC2OsZPwhi-9Wk", "Quizid", k), v);
 			leveldb.del(k);
 			int index = i.incrementAndGet();
 			ci.println("[_deleten] " + index + ". remove key:" + k + " = " + v);
@@ -486,6 +490,40 @@ public class CorpusService implements HTTPService, CommandProvider {
 			int index = i.incrementAndGet();
 			ci.println("[_replacen] " + index + ". replace key:\n" + k + "\n -> \n" + key + "\n   = " + v);
 		});
+	}
+	
+	public void _findn(CommandInterpreter ci) {
+		logger.info("[_findn] " + leveldb);
+		ci.println("[_findn] startKey what n");
+		if(leveldb == null) return;
+		String start = ci.nextArgument();
+		String what  = ci.nextArgument();
+		String limit = ci.nextArgument();
+		int n = Integer.valueOf(limit);
+		AtomicInteger index = new AtomicInteger(0);
+		AtomicInteger count = new AtomicInteger(0);
+		leveldb.page(start, start, null, n, new BiConsumer<String, String>() {
+			@Override
+			public void accept(String t, String u) {
+				count.incrementAndGet();
+				if(u.equals(what)) {
+					index.incrementAndGet();
+					ci.println("[_findn] " + index.get() + ". " + t + " = " + u);
+					String[] ab = t.split("Similar|Reply");
+					if(ab.length == 2) {
+						AtomicInteger i = new AtomicInteger(0);
+						String key = ab[0];
+						leveldb.page(key, key, null, 10, (k, v) -> {
+							leveldb.put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "Delete", ""+System.currentTimeMillis(), "oDqlM1TyKpSulfMC2OsZPwhi-9Wk", "Quizid", k), v);
+							leveldb.del(k);
+							int x = i.incrementAndGet();
+							ci.println("        [delete] " + x + ". remove key:" + k + " = " + v);
+						});
+					}
+				}
+			}
+		});
+		ci.println("[_findn] find " + index.get() + " / " + count.get() + " from " + start + " for " + what);
 	}
 	
 	public void _listn(CommandInterpreter ci) {
@@ -532,7 +570,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				integer.incrementAndGet();
 				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
 			}
-			if(quiz.getSimilar().size() < bear.get()) {
+			if(quiz.getSimilar().size() < bear.get() * 5) {
 				integer.incrementAndGet();
 				workHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
 			}
@@ -679,6 +717,43 @@ public class CorpusService implements HTTPService, CommandProvider {
 		});
 	}
 	
+	public void _prepare(CommandInterpreter ci) {
+		ci.println("[prepare] start to write data");
+		LevelDB prepare = new LevelDBImpl("/prepare");
+		AtomicInteger integer = new AtomicInteger(0);
+		this.assimilatedQuiz.forEach(quiz ->{
+			String q = quiz.getQuiz().value();
+			if(!quiz.getReply().isEmpty()) {
+				List<KeyValue> reply = quiz.getReply();
+				int index = 0;
+				String a = "";
+				do{
+					a = reply.get(index).value();
+					
+					if(CheckUtil.hasChinese(a) && a.length() < 30) {
+						break;
+					}
+					
+					index ++;
+				} while(index < reply.size());
+				prepare.put("001." + q, a);
+				integer.incrementAndGet();
+				List<KeyValue> similar = quiz.getSimilar();
+				for(KeyValue kv : similar) {
+					String k = kv.value();
+					if(CheckUtil.hasChinese(k) && k.length() < 30) {
+						prepare.put("001." + k, a);
+						integer.incrementAndGet();
+					}
+				}
+			} else {
+				ci.println("[prepare] no reply for this: " + q);
+			}
+		});
+		prepare.close();
+		ci.println("[prepare] put QA count: " + integer.get() + " at " + prepare.toString());
+	}
+	
 	@Override
 	public String getName() {
 		return "wx.http";
@@ -807,17 +882,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-			String APPID = System.getProperty("wx.appid");
-			String SECRET = System.getProperty("wx.secret");
-			
-			if(APPID == null || SECRET == null) {
-				logger.error("[managereports] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[managereport access_token] accessToken == null");
 				return "fail";
 			}
-
-			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
-			String json = get.call();
-			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
+			
 			logger.info("[managereports access_token] " + accessToken.toString());
 			String openId = accessToken.getOpenid();
 			if(openId == null) {
@@ -1110,7 +1180,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			
-			//lijiaming: it show be serious about openid
+			//lijiaming: it should be serious about openid
 			
 			if("manageorders".equals(todo)){
 				String state = parameter.getParameter("state");
@@ -1119,18 +1189,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 					return "fail";
 				}
 				//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-				String APPID = System.getProperty("wx.appid");
-				String SECRET = System.getProperty("wx.secret");
-				
-				if(APPID == null || SECRET == null) {
-					logger.error("[daigou] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+				JsAccessToken accessToken = jsAccessToken(CODE);
+				if(accessToken == null) {
+					logger.info("[daigou] accessToken == null");
 					return "fail";
 				}
-
-				CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
-				String json = get.call();
-				JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
-				logger.info("[daigou access_token] " + accessToken.toString());
 				String openId = accessToken.getOpenid();
 				if(openId == null) {
 					logger.info("[daigou] get openid failed");
@@ -1337,17 +1400,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return SUCCESS;
 			}
 			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-			String APPID = System.getProperty("wx.appid");
-			String SECRET = System.getProperty("wx.secret");
-			
-			if(APPID == null || SECRET == null) {
-				logger.error("[corpus access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[daigou] accessToken == null");
 				return "fail";
 			}
-
-			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
-			String json = get.call();
-			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
+			
 			logger.info("[corpus access_token] " + accessToken.toString());
 			if(accessToken.getOpenid() == null) {
 				return "fail";
@@ -1370,17 +1428,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-			String APPID = System.getProperty("wx.appid");
-			String SECRET = System.getProperty("wx.secret");
-			
-			if(APPID == null || SECRET == null) {
-				logger.error("[corpus collect access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[corpus collect access_token] accessToken == null");
 				return "fail";
 			}
-
-			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
-			String json = get.call();
-			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
 			logger.info("[corpus collect access_token] " + accessToken.toString());
 			String openId = accessToken.getOpenid();
 			if(openId == null) {
@@ -1402,41 +1454,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 			data().page(start, start, null, Integer.MAX_VALUE, (t, u) -> {
 				String z = t.substring(start.length());
 				if(!z.contains("Similar") && !z.contains("Reply")) {
-					boolean need = false;
-					
-					String adminKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", "Admin", openId);
-					String admin = account().get(adminKey);
-					if(admin != null && !"None".equals(admin)) {
-						need = true;
-					}
-					String question = CheckUtil.cleanStr(u);
-					String aid = questionToAid.get(question);
-					
-					if(aid != null && !need) {
-						HashSet<String> answers = aidToAnswers.get(aid);
-						if(answers == null) {
-							need = true;
-						} else {
-							if(answers.size() < 1) {
-								need = true;
-							}
-						}
-						
-						HashSet<String> similars = aidToSimilars.get(aid);
-						if(similars == null) {
-							need = true;
-						} else {
-							if(similars.size() < 1) {
-								need = true;
-							}
-						}
-					}
-					if(need) {
-						Map<String, Object> e = new HashMap<>();
-						e.put("replyid", t);
-						e.put("reply", u);
-						replyinfo.add(e);
-					}
+					Map<String, Object> e = new HashMap<>();
+					e.put("replyid", t);
+					e.put("reply", u);
+					replyinfo.add(e);
 				}
 			});
 			map.put("replyinfo", replyinfo);
@@ -1549,7 +1570,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			String similarKey = String.join(Const.delimiter, replyId, "Similar");
 			List<String> result = new ArrayList<>();
-			data().page(similarKey, similarKey, null, 1000, (t, u) -> {
+			data().page(similarKey, similarKey, null, Integer.MAX_VALUE, (t, u) -> {
 				String z = t.substring(similarKey.length());
 				if(!z.contains("Reply")) {
 					result.add(u);
@@ -1572,17 +1593,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-			String APPID = System.getProperty("wx.appid");
-			String SECRET = System.getProperty("wx.secret");
-			
-			if(APPID == null || SECRET == null) {
-				logger.error("[corpus user access_token] wrong request with null parameters: appid=" + APPID + ", code=" + CODE);
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[corpus user access_token] accessToken == null");
 				return "fail";
 			}
-
-			CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, CODE);
-			String json = get.call();
-			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
 			logger.info("[corpus user access_token] " + accessToken.toString());
 			if(accessToken.getOpenid() == null) {
 				return "fail";
@@ -1677,7 +1692,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String quizPriceKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Price");
 			String totalcent = data().get(quizPriceKey);
 			if(totalcent == null) {
-				totalcent = "8";
+				totalcent = "8888888";
 			}
 			String openIdEnd = openid.substring(openid.length() - 7);
 			String randEnd = random.substring(random.length() - 4);
@@ -1707,6 +1722,29 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return SUCCESS;
 	}
 
+	public JsAccessToken jsAccessToken(String code) {
+		String APPID = System.getProperty("wx.appid");
+		String SECRET = System.getProperty("wx.secret");
+		
+		if(APPID == null || SECRET == null) {
+			logger.error("[daigou] wrong request with null parameters: appid=" + APPID + ", code=" + code);
+			return null;
+		}
+
+		CallableGet get = new CallableGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code", APPID, SECRET, code);
+		String json;
+		try {
+			json = get.call();
+			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
+			logger.info("[jsAccessToken] " + accessToken.toString());
+			return accessToken;
+		} catch (Exception e) {
+			logger.error("[jsAccessToken] fail to call get ", e);
+		}
+		
+		return null;
+	}
+	
 	public String prepay(String orderid, String body, String detail, String attach, String totalcent, String clientip, String openid, long current) throws Exception {
 		
 		long timeStamp = current / 1000;
@@ -2098,5 +2136,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public static void main(String[] args) {
 		Calendar c = Calendar.getInstance();
 		System.out.println(c.get(Calendar.HOUR_OF_DAY));
+		
+		String string = "23Similar456Reply67890";
+		System.out.println(string.split("Similar|Reply")[0]);
 	}
 }

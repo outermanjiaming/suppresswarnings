@@ -131,6 +131,14 @@ public class DaigouHandler {
 		if(pricecent == null) {
 			return null;
 		}
+		
+		String keyState = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "State");
+		String state = service.account().get(keyState);
+		if("DELETE".equals(state)) {
+			logger.info("[DaigouHandler] get goods: never show deleted goods");
+			return null;
+		}
+		
 		Goods goods = new Goods();
 		
 		String keyImage = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Image");
@@ -139,7 +147,6 @@ public class DaigouHandler {
 		String keyQuota = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Quota");
 		String keyListimages = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Listimages");
 		String keyTime = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "Time");
-		//\\\
 		
 		String image = service.account().get(keyImage);
 		String title = service.account().get(keyTitle);
@@ -156,6 +163,8 @@ public class DaigouHandler {
 		goods.setListimages(listimages);
 		goods.setQuota(quota);
 		goods.setTime(time);
+		//TODO lack or sell
+		goods.setState(state);
 		goods.setTitle(title);
 		return goods;
 	}

@@ -347,11 +347,9 @@ public class ManageContext extends WXContext {
 		Goods todo = null;
 		AtomicInteger mode = new AtomicInteger(0);
 		public String display(Goods todo) {
-			StringBuffer sb = new StringBuffer();
-			sb.append("标：" + todo.getTitle());
-			sb.append("\n").append("价：" + todo.getPricecent() + "," + todo.getPriceagent() + "," + todo.getPricevip() + "," + todo.getPricesecret() + "(单位：分)");
-			sb.append("\n").append("链：" + todo.getOuturl());
-			sb.append("\n").append("识: " + todo.getGoodsid());
+			StringBuffer sb = new StringBuffer(todo.getState());
+			sb.append(todo.getTitle());
+			sb.append("\n").append("¥：" + todo.getPricecent() + "," + todo.getPriceagent() + "," + todo.getPricevip() + "," + todo.getPricesecret());
 			return sb.toString();
 		}
 		
@@ -451,7 +449,7 @@ public class ManageContext extends WXContext {
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setExtra(t);
-				u.output("输入商品库存");
+				u.output("输入商品库存（数字）");
 				if(mode.get() == 1) {
 					u.output("旧：" + todo.getQuota());
 				}
@@ -749,13 +747,124 @@ public class ManageContext extends WXContext {
 			
 		};
 		
+		State<Context<CorpusService>> goodsOff = new State<Context<CorpusService>>() {
+			State<Context<CorpusService>> goodsLack = new State<Context<CorpusService>>() {
+
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					String goodsid = todo.getGoodsid();
+					String keyState = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "State");
+					u.content().account().put(keyState, "LACK");
+					u.output("商品状态已经设置为LACK，暂时缺货");
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					return goodsManage;
+				}
+
+				@Override
+				public String name() {
+					return "缺货";
+				}
+
+				@Override
+				public boolean finish() {
+					return false;
+				}
+				
+			};
+			
+			State<Context<CorpusService>> goodsDown = new State<Context<CorpusService>>() {
+
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					String goodsid = todo.getGoodsid();
+					String keyState = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "State");
+					u.content().account().put(keyState, "DOWN");
+					u.output("商品状态已经设置为DOWN，已下架");
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					return goodsManage;
+				}
+
+				@Override
+				public String name() {
+					return "下架";
+				}
+
+				@Override
+				public boolean finish() {
+					return false;
+				}
+				
+			};
+			
+			State<Context<CorpusService>> goodsDelete = new State<Context<CorpusService>>() {
+
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					String goodsid = todo.getGoodsid();
+					String keyState = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Detail", "Goods", goodsid, "State");
+					u.content().account().put(keyState, "DELETE");
+					u.output("商品状态已经设置为DELETE，已删除");
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					return goodsManage;
+				}
+
+				@Override
+				public String name() {
+					return "缺货";
+				}
+
+				@Override
+				public boolean finish() {
+					return false;
+				}
+				
+			};
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("下架-商品详情");
+				u.output(display(todo));
+				u.output("请输入下架理由：缺货、下架、删除\n如果不下架，则输入'不下架'");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if("缺货".equals(t)) return goodsLack;
+				if("下架".equals(t)) return goodsDown;
+				if("删除".equals(t)) return goodsDelete;
+				
+				
+				todo = null;
+				return goodsManage;
+			}
+
+			@Override
+			public String name() {
+				return "下架商品";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
 		State<Context<CorpusService>> goodsModify = new State<Context<CorpusService>>() {
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("商品详情");
 				u.output(display(todo));
-				u.output("请输入'确认'进行修改产品信息，根据提示直接输入新内容，如果不需要修改，就输入'不修改'");
+				u.output("请输入'确认'进行修改产品信息\n根据提示直接输入新内容\n如果不需要修改，就输入'不修改'\n输入'完成修改'则直接完成");
 			}
 
 			@Override
@@ -811,8 +920,7 @@ public class ManageContext extends WXContext {
 				u.output("    创建商品");
 				u.output("    修改商品+id");
 				u.output("    下架商品+id");
-				u.output("带参数的指令举例：修改商品1，下架商品3");
-				u.output("id和商品信息如下");
+				u.output("举例：修改商品1，下架商品3");
 				goodsMap.forEach((id, goods) ->{
 					u.output("id: " + id);
 					u.output(display(goods));
@@ -834,6 +942,10 @@ public class ManageContext extends WXContext {
 				return goodsModify;
 			} else if(t.startsWith("下架商品")) {
 				logger.info("[manage] goods off");
+				
+				String index = t.substring("下架商品".length());
+				todo = goodsMap.get(index);
+				return goodsOff;
 			}
 			return half;
 		}
