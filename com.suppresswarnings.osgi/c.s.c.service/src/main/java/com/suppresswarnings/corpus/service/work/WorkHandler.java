@@ -181,7 +181,7 @@ public class WorkHandler {
 	public void working() {
 		logger.info("[WorkHandler] working start");
 		on.set(true);
-		executor = Executors.newFixedThreadPool(12);
+		executor = Executors.newFixedThreadPool(2);
 		replyTasks   = new LinkedBlockingDeque<>(1000000);
 		similarTasks = new LinkedBlockingDeque<>(1000000);
 		replyUsers   = new LinkedBlockingDeque<>(10000);
@@ -191,12 +191,8 @@ public class WorkHandler {
 		informs = new ConcurrentHashMap<String, Long>();
 		WorkCommand reply = new WorkCommand(this, Type.Reply, replyTasks, replyUsers, workers, tasks, on);
 		WorkCommand similar = new WorkCommand(this, Type.Similar, similarTasks, similarUsers, workers, tasks, on);
-		for(int i=0;i<5;i++) {
-			executor.execute(reply);
-		}
-		for(int i=0;i<5;i++) {
-			executor.execute(similar);
-		}
+		executor.execute(reply);
+		executor.execute(similar);
 		logger.info("[WorkHandler] working ready");
 	}
 	
@@ -329,9 +325,10 @@ public class WorkHandler {
 	public int informUsersExcept(String message, Map<String, WXuser> users) {
 		Set<String> set = workers.keySet();
 		AtomicInteger count = new AtomicInteger(0);
+		logger.info("[WorkHandler] inform users size: " + users.size());
 		users.forEach((openid, user) ->{
 			if(set.contains(openid)) {
-				logger.info("[corpus] inform users except: " + openid);
+				logger.info("[WorkHandler] inform users except: " + openid);
 			} else {
 				
 				Long lasttime = informs.get(openid);
@@ -346,11 +343,21 @@ public class WorkHandler {
 				if(System.currentTimeMillis() - lasttime > TimeUnit.HOURS.toMillis(1)) {
 					need = true;
 				}
-				
+				logger.info("[WorkHandler] need inform users: " + need);
 				if(need) {
 					count.incrementAndGet();
-					String ret = service.sendTxtTo("Inform Users " + openid, message, openid);
-					logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+					if("online".equals(message)) {
+						TodoTask task = replyTasks.peek();
+						if(task == null) {
+							task = new TodoTask();
+							task.setQuiz("你今天过得怎么样？");
+						}
+						String ret = service.sendTxtTo("Inform Users Task " + openid, task.quiz, openid);
+						logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+					} else {
+						String ret = service.sendTxtTo("Inform Users Msg " + openid, message, openid);
+						logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+					}
 				}
 			}
 		});

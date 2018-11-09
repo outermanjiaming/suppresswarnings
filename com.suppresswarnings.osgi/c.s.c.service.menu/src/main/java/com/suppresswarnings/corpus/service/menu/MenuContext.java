@@ -54,7 +54,7 @@ public class MenuContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			u.content().factories.forEach((cmd, cf) ->{
-				u.output(cmd + "\n   |-->" + cf.description());
+				u.output(cmd + " (用途：" + cf.description() + ")");
 			});
 		}
 

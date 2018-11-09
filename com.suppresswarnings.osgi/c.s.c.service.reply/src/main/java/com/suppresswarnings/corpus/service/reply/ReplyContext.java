@@ -39,7 +39,7 @@ public class ReplyContext extends WXContext {
 			} else {
 				u.output("现在暂时没有在线任务，\n不想接任务就输入「打卡下班」，\n如果发现错误数据就输入「删除这一条」，\n如果不知道怎么答就输入「跳过」");
 			}
-			int informed = u.content().informUsers("hi，我通过学习，现在会回答好多事情了，你想和我说什么？");
+			int informed = u.content().informUsers("online");
 			u.output("你上线之后通知了 " + informed + " 个用户");
 		}
 

@@ -101,15 +101,15 @@ public class ProduceContext extends WXContext {
 	public static final int bear = 2;
 	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
 		Iterator<Quiz> askQuiz = null;
-		String[] FORMAT = {"我先说：\n%s",
+		String[] FORMAT = {"嗯嗯，%s",
 				"该我说了：\n%s", 
 				"轮到我了：\n%s",
 				"我想一下哈，%s", 
-				"你咋说了那么多？我说一句：\n%s",
-				"我们说点别的：\n%s",
+				"你咋说了那么多？\n%s",
+				"我们说点别的吧，\n%s",
 				"停，%s",
 				"呃，%s",
-				"刚刚思想开小差，%s",
+				"不好意思，%s",
 				"啥？%s",
 				"等一下没事吧，%s",
 				"哦，%s",

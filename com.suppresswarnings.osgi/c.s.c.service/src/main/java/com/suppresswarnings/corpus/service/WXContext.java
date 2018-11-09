@@ -9,12 +9,22 @@
  */
 package com.suppresswarnings.corpus.service;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
+import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
+import com.suppresswarnings.corpus.service.work.Counter;
+import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 
@@ -55,12 +65,46 @@ public class WXContext extends Context<CorpusService> {
 		}
 		
 	};
+	public static int bear = 2;
+	public String quizId = null;
+	public Counter counter = null;
+	Random random = new Random();
+	public Counter counter(CorpusService service) {
+		if(counter == null) {
+			counter = service.counters.get(openid());
+			if(counter == null) {
+				counter = new Counter(openid());
+				service.counters.put(openid(), counter);
+			}
+		}
+		//Counter the quiz answer
+		return counter;
+	}
 	public final State<Context<CorpusService>> init = new State<Context<CorpusService>>() {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -4836433217450201449L;
 
+		Iterator<Quiz> askQuiz = null;
+		String[] FORMAT = {"嗯嗯，%s",
+				"该我说了：\n%s", 
+				"轮到我了：\n%s",
+				"我想一下哈，%s", 
+				"你咋说了那么多？\n%s",
+				"我们说点别的吧，\n%s",
+				"停，%s",
+				"呃，%s",
+				"不好意思，%s",
+				"啥？%s",
+				"等一下没事吧，%s",
+				"哦，%s",
+				"嗯，%s"
+				};
+		int count = bear;
+		Map<String, AutoContext> contexts = new HashMap<>();
+
+		
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			Set<String> commands = u.content().factories.keySet();
@@ -96,20 +140,99 @@ public class WXContext extends Context<CorpusService> {
 				u.output(ctx.output());
 			} else {
 				logger.info("[WXContext] "+ openid() + "\tAccost words: " + t);
-				cf = u.content().factories.get("我要上报语料");
-				if(cf != null) {
-					Context<CorpusService> ctx = cf.getInstance(wxid, openid, u.content());
-					ctx.test(t);
-					u.output(ctx.output());
-					u.content().context(openid, ctx);
-					logger.info("[WXContex] auto response");
+				if(quizId == null) {
+					quizId = u.content().getTodoQuizid();
+					logger.info("[WXContext] quizId was null, Now = " + quizId);
+				}
+				String reply = CheckUtil.cleanStr(t);
+				String aid = u.content().questionToAid.get(reply);
+				logger.info("[ProduceContext] after clean: " + reply + " = " + aid);
+				if(aid != null) {
+					//TODO lijiaming: check cmd
+					String cmd = u.content().aidToCommand.get(reply);
+					if(cmd != null) {
+						String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", cmd);
+						String code = u.content().account().get(keyCMD);
+						//get my things code, which is unique for each things
+						if(code != null) {
+							String remote = u.content().aiiot(openid(), code, cmd, t, u);
+							logger.info("[ProduceContext] remote: " + remote);
+						} else {
+							logger.info("[ProduceContext] remote: 你还没有绑定设备");
+						}
+					}
+					
+					HashSet<String> answers = u.content().aidToAnswers.get(aid);
+					if(answers != null && answers.size() > 0) {
+						AutoContext context = contexts.get(aid);
+						if(context == null) {
+							context = new AutoContext(init, reply, aid, answers, wxid(), openid(), u.content());
+							contexts.put(aid, context);
+						}
+						context.test(t);
+						u.output(context.output());
+						count = bear;
+						return;
+					}
+				}
+				
+				if(aid == null) {
+					//save new question
+					String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid(), time(), random());
+					u.content().data().put(answerKey, t);
+					//counter for quiz
+					counter(u.content()).quiz(System.currentTimeMillis(), t);
+					
+					String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
+					u.content().data().put(crewKey, time());
+					aid = answerKey;
+				}
+				//save
+				u.content().questionToAid.put(reply, aid);
+				//send task
+				String result = u.content().youGotMe(openid(), t, aid);
+				if(result != null) {
+					HashSet<String> answers = u.content().aidToAnswers.get(aid);
+					if(answers == null) {
+						answers = new HashSet<>();
+						u.content().aidToAnswers.put(aid, answers);
+					}
+					answers.add(result);
+					u.output(result);
+					count = bear;
+				} else {
+					//count to 2
+					//fetch a task todo
+					count --;
+					if(count < 0) {
+						count = bear;
+						if(askQuiz == null) {
+							List<Quiz> quizs = u.content().assimilatedQuiz;
+							Collections.shuffle(quizs);
+							askQuiz = quizs.iterator();
+						}
+						if(askQuiz.hasNext()) {
+							try {
+								Quiz ask = askQuiz.next();
+								int pointer = random.nextInt(FORMAT.length);
+								u.output(String.format(FORMAT[pointer], ask.getQuiz().value()));
+							} catch (Exception e) {
+								askQuiz = null;
+								u.output("我有点笨，我得想想");
+							}
+						}
+					}
 				}
 			}
-			
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if("打卡下班".equals(t)) {
+				u.content().offWork(openid());
+				logger.info("[WXContext] off work");
+				u.output(counter(u.content()).report());
+			}
 			return this;
 		}
 
@@ -159,6 +282,7 @@ public class WXContext extends Context<CorpusService> {
 		this.wxid = wxid;
 		this.openid = openid;
 		this.state = init;
+		this.quizId = ctx.getTodoQuizid();
 	}
 	public WXuser user() {
 		if(user == null) user = content().getWXuserByOpenId(openid());

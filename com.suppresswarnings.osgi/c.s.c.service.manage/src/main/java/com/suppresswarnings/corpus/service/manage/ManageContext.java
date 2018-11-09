@@ -237,14 +237,12 @@ public class ManageContext extends WXContext {
 			u.output("你可以输入");
 			u.output("    关闭测试");
 			u.output("    打开测试");
-			u.output("    导入工作");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if("关闭测试".equals(t)) return examOff;
 			if("打开测试".equals(t)) return examOn;
-			if("导入工作".equals(t)) return examWork;
 			return examManage;
 		}
 
@@ -257,30 +255,6 @@ public class ManageContext extends WXContext {
 		public boolean finish() {
 			return false;
 		}
-	};
-	State<Context<CorpusService>> examWork = new State<Context<CorpusService>>() {
-
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			int x = u.content().fillExam();
-			u.output("已经导入 " + x + " 条问题和同义句任务");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return examManage;
-		}
-
-		@Override
-		public String name() {
-			return "导入工作";
-		}
-
-		@Override
-		public boolean finish() {
-			return true;
-		}
-		
 	};
 	State<Context<CorpusService>> examOff = new State<Context<CorpusService>>() {
 

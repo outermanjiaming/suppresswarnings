@@ -9,7 +9,6 @@
  */
 package com.suppresswarnings.corpus.service;
 
-import java.util.List;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,34 +42,31 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.common.KeyValue;
+import com.suppresswarnings.corpus.common.Provider;
+import com.suppresswarnings.corpus.common.SendMail;
+import com.suppresswarnings.corpus.common.TTL;
+import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
 import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.daigou.Order;
-import com.suppresswarnings.corpus.service.exam.ExamHandler;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfigImpl;
+import com.suppresswarnings.corpus.service.sdk.WXPayConstants.SignType;
 import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
 import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
-import com.suppresswarnings.corpus.service.work.TodoTask;
 import com.suppresswarnings.corpus.service.work.WorkHandler;
-import com.suppresswarnings.corpus.service.work.WorkerUser;
-import com.suppresswarnings.corpus.service.sdk.WXPayConstants.SignType;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
 import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
 import com.suppresswarnings.corpus.service.wx.WXnews;
 import com.suppresswarnings.corpus.service.wx.WXuser;
-import com.suppresswarnings.corpus.common.Provider;
-import com.suppresswarnings.corpus.common.SendMail;
-import com.suppresswarnings.corpus.common.TTL;
-import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 import com.suppresswarnings.osgi.network.http.HTTPService;
@@ -92,7 +89,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public AIIoT aiiot;
 	public DaigouHandler daigouHandler;
 	public WorkHandler workHandler;
-	public ExamHandler examHandler;
 	ScheduledExecutorService scheduler;
 	public AtomicBoolean ready = new AtomicBoolean(false);
 	
@@ -249,7 +245,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
 					daigouHandler = new DaigouHandler(CorpusService.this);
-					examHandler = new ExamHandler(CorpusService.this, "ClassExam");
 					ready.set(true);
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
@@ -374,9 +369,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		if(workHandler != null){
 			workHandler.close();
-		}
-		if(examHandler != null){
-			examHandler.close();
 		}
 		scheduler = null;
 		secondlife.clear();
@@ -547,22 +539,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String quizId = data().get(taskKey);
 		return quizId;
 	}
-	
-	public int fillExam() {
-		AtomicInteger integer = new AtomicInteger(0);
-		assimilatedQuiz.forEach(quiz ->{
-			if(quiz.getReply().size() < bear.get()) {
-				integer.incrementAndGet();
-				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Reply);
-			}
-			if(quiz.getSimilar().size() < bear.get()) {
-				integer.incrementAndGet();
-				examHandler.batchJob(quiz.getQuiz().value(), quiz.getQuiz().key(), Type.Similar);
-			}
-		});
-		return integer.get();
-	}
-	
 	public int fillWork() {
 		AtomicInteger integer = new AtomicInteger(0);
 		assimilatedQuiz.forEach(quiz ->{
@@ -763,108 +739,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		// TODO get action to do things
 		String action = parameter.getParameter("action");
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
-		if("class_exam".equals(action)){
-			String onKey = String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON");
-			String on = data().get(onKey);
-			if("off".equals(on)) {
-				return "fail";
-			}
-			examHandler.report();
-			String time = "" +System.currentTimeMillis();
-			String openid = parameter.getParameter("ticket");
-			String type = parameter.getParameter("type");
-			String random = parameter.getParameter("random");
-			String quizid = parameter.getParameter("quizid");
-			if(quizid == null || "".equals(quizid.trim())) {
-				logger.info("[class_exam] null quizid: " + quizid);
-				return "fail";
-			}
-			String text =  parameter.getParameter("text");
-			if(text == null || "".equals(text.trim())) {
-				logger.info("[class_exam] null text: " + text);
-				return "fail";
-			}
-			
-			try {
-				if("index".equals(type)){
-					List<Quiz> quizs = examHandler.allQuiz();
-					return gson.toJson(quizs);
-				} else if("quiz".equals(type)) {
-					String quizKey = String.join(Const.delimiter, Const.Version.V2, "Collect","Corpus","Quiz", quizid, "Answer", openid, time);
-					data().put(quizKey, text);
-					examHandler.newJob(text, quizKey, openid);
-					return quizKey;
-				} else {
-					if("reply".equals(type)) {
-						logger.info("[class_exam] reply");
-						TodoTask task = new TodoTask();
-						task.setOpenId(openid);
-						task.setQuizId(quizid);
-						task.setQuiz(text);
-						task.setResult(text);
-						
-						String answer = text;
-						String answerKey = String.join(Const.delimiter, task.getQuizId(), Type.Reply.name(), openid, time, random);
-						data().put(answerKey, answer);
-						task.finish(answer);
-						logger.info("[class_exam] reply： " + task.toString());
-						examHandler.done(task, Type.Reply);
-						
-						
-						WorkerUser worker = new WorkerUser();
-						worker.setOpenId(openid);
-						worker.setType(Type.Reply);
-						worker.setFree();
-						TodoTask todo = examHandler.want(worker);
-						if(todo == null) return "fail";
-						Map<String, String> map = new HashMap<>();
-						map.put("quiz", todo.getQuiz());
-						map.put("quizid", todo.getQuizId());
-						map.put("deleteone", answerKey);
-						return gson.toJson(map);
-					} else if("similar".equals(type)) {
-						logger.info("[class_exam] similar");
-						TodoTask task = new TodoTask();
-						task.setOpenId(openid);
-						task.setQuizId(quizid);
-						task.setResult(text);
-						task.setQuiz(text);
-						
-						String answer = text;
-						String answerKey = String.join(Const.delimiter, task.getQuizId(), Type.Similar.name(), openid, time, random);
-						data().put(answerKey, answer);
-						task.finish(answer);
-						logger.info("[class_exam] similar： " + task.toString());
-						examHandler.done(task, Type.Similar);
-						examHandler.newJob(text, quizid, openid);
-						
-						WorkerUser worker = new WorkerUser();
-						worker.setOpenId(openid);
-						worker.setType(Type.Similar);
-						TodoTask todo = examHandler.want(worker);
-						if(todo == null) return "fail";
-						Map<String, String> map = new HashMap<>();
-						map.put("quiz", todo.getQuiz());
-						map.put("quizid", todo.getQuizId());
-						map.put("deleteone", answerKey);
-						return gson.toJson(map);
-					} else if("delete".equals(type)) {
-						String delete = parameter.getParameter("quizid");
-						String value = data().get(delete);
-						String deleteKey = String.join(Const.delimiter, Const.Version.V2, "Corpus", "Delete", time, openid);
-						data().put(deleteKey, value);
-						int ret = data().del(delete);
-						value = data().get(delete);
-						logger.info("[class_exam] "+ ret + "delete " + value + " == " + delete);
-						return SUCCESS;
-					}
-					
-				}
-			} catch (Exception e) {
-				logger.error("[class_exam] Exception", e);
-			}
-			return "fail";
-		} else if("managereports".equals(action)){
+		if("managereports".equals(action)){
 			logger.info("[managereports] lijiaming");
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -881,7 +756,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[managereports] state == null");
 				return "fail";
 			}
-			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
 			JsAccessToken accessToken = jsAccessToken(CODE);
 			if(accessToken == null) {
 				logger.info("[managereport access_token] accessToken == null");
@@ -976,7 +850,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					String where = "素朴网联";
 					String event = wxmsg.get("Event");
 					String eventKey = wxmsg.get("EventKey");
-					String ticket = wxmsg.get("Ticket");
+//					String ticket = wxmsg.get("Ticket");
 					if(eventKey != null) {
 						if(eventKey.startsWith("qrscene_")){
 							where = eventKey.substring("qrscene_".length());
@@ -984,7 +858,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 							where = eventKey;
 						}
 					}
-					logger.info("[lijiaming] event: " + where);
+					logger.info("[lijiaming] where: " + where);
 					if("subscribe".equals(event)) {
 						String subscribeKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", openid);
 						String subscribe = account().get(subscribeKey);
@@ -1006,10 +880,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 								contextx(openid, contxt, cf.ttl());
 								return xml(openid, contxt.output(), fromOpenId);
 							}
-						}
-						
-						if(ticket != null) {
-							dealWithTicket(ticket, openid);
 						}
 						
 						if(subscribe == null) {
@@ -1034,7 +904,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 						account().put(subscribeKey, time + Const.delimiter + "unsubscribe");
 						return SUCCESS;
 					} else if("SCAN".equals(event)) {
-						dealWithTicket(ticket, openid);
 						//TODO different scene
 						String exchange = globalCommand(where);
 						logger.info("SCAN: " + exchange + " == " + where);
@@ -1057,6 +926,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Media", ""+System.currentTimeMillis(), openid);
 					data().put(mediaKey, sms);
 					String url = wxmsg.get("PicUrl");
+					//TODO lijiaming save image to server
 					input = "IMAGE_" + url;
 				} else {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Other", ""+System.currentTimeMillis(), openid);
@@ -1129,40 +999,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			token().put(lastKey, time);
 			token().put(entry, reportMsg + "\n数据来源：" + ip);
 			return SUCCESS;
-		} else if("login".equals(action)) {
-			//TODO BUG ticket should expire
-			String ticket = parameter.getParameter("ticket");
-			if(ticket != null) {
-				String openid = token().get(String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", ticket));
-				if(openid != null) {
-					return SUCCESS;
-				}
-				String expires = token().get(String.join(Const.delimiter, Const.Version.V1, "Temp", "QRCode", "Login", ticket));
-				if(expires != null) {
-					long expire = Long.parseLong(expires);
-					if(expire < System.currentTimeMillis()) {
-						return "Change";
-					} else {
-						return "Later";
-					}
-				}
-			} else {
-				return "";
-			}
-			
-		} else if("qrcode".equals(action)){
-			String random = parameter.getParameter("random");
-			if(random == null) {
-				return "Fail";
-			}
-
-			String accessToken = accessToken("login");
-			String result = qrCode(accessToken, 180, "QR_STR_SCENE", "‘素朴网联’官网");
-			logger.info("[corpus qrcode] " + result);
-			QRCodeTicket qrCodeTicket = gson.fromJson(result, QRCodeTicket.class);
-			long expire = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(qrCodeTicket.getExpire_seconds());
-			token().put(String.join(Const.delimiter, Const.Version.V1, "Temp", "QRCode", "Login", qrCodeTicket.getTicket()), "" + expire);
-			return result;
 		} else if("daigou".equals(action)){
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -2014,21 +1850,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		logger.info("[CorpusService authrized] Use auth power, openid: " + openid + ", auth: " + auth + ", time: " + time);
 		return true;
-	}
-	public void dealWithTicket(String ticket, String openid) {
-		if(ticket != null) {
-			String expires = token().get(String.join(Const.delimiter, Const.Version.V1, "Temp", "QRCode", "Login", ticket));
-			if(expires != null) {
-				if("1".equals(expires)) {
-					
-				}
-				long expire = Long.parseLong(expires);
-				if(expire > System.currentTimeMillis()) {
-					token().put(String.join(Const.delimiter, Const.Version.V1, "Temp", "QRCode", "Login", ticket), "1");
-					token().put(String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", ticket), openid);
-				}
-			}
-		}
 	}
 	public String accessToken(String business) {
 		logger.info("[corpus] get access token for " + business);
