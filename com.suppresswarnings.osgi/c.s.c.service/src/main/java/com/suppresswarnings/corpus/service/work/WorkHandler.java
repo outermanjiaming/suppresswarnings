@@ -322,21 +322,23 @@ public class WorkHandler {
 		}
 	}
 
-	public int informUsersExcept(String message, Map<String, WXuser> users) {
+	public void informUsersExcept(String openid, String message, Map<String, WXuser> users) {
 		Set<String> set = workers.keySet();
+		
 		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger success = new AtomicInteger(0);
 		logger.info("[WorkHandler] inform users size: " + users.size());
-		users.forEach((openid, user) ->{
-			if(set.contains(openid)) {
-				logger.info("[WorkHandler] inform users except: " + openid);
+		users.forEach((userid, user) ->{
+			if(set.contains(userid)) {
+				logger.info("[WorkHandler] inform users except: " + userid);
 			} else {
 				
-				Long lasttime = informs.get(openid);
+				Long lasttime = informs.get(userid);
 				
 				boolean need = false;
 				if(lasttime == null) {
 					lasttime = System.currentTimeMillis();
-					informs.put(openid, lasttime);
+					informs.put(userid, lasttime);
 					need = true;
 				}
 				
@@ -346,21 +348,27 @@ public class WorkHandler {
 				logger.info("[WorkHandler] need inform users: " + need);
 				if(need) {
 					count.incrementAndGet();
+					String ret = null;
 					if("online".equals(message)) {
 						TodoTask task = replyTasks.peek();
 						if(task == null) {
 							task = new TodoTask();
 							task.setQuiz("你今天过得怎么样？");
 						}
-						String ret = service.sendTxtTo("Inform Users Task " + openid, task.quiz, openid);
-						logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+						ret = service.sendTxtTo("Inform Users Task " + userid, task.quiz, userid);
+						logger.info("[WorkHandler] inform this user: " + userid + ", ret: " + ret);
 					} else {
-						String ret = service.sendTxtTo("Inform Users Msg " + openid, message, openid);
-						logger.info("[corpus] inform this user: " + openid + ", ret: " + ret);
+						ret = service.sendTxtTo("Inform Users Msg " + userid, message, userid);
+						logger.info("[WorkHandler] inform this user: " + userid + ", ret: " + ret);
+					}
+					
+					if(SENDOK.equals(ret)) {
+						success.incrementAndGet();
 					}
 				}
 			}
 		});
-		return count.get();
+		String ret = service.sendTxtTo("Inform Openid Result " + openid, "你通知了" + success.get() + "/" + count.get()+"个用户", openid);
+		logger.info("[WorkHandler] inform openid result: " + ret);
 	}
 }

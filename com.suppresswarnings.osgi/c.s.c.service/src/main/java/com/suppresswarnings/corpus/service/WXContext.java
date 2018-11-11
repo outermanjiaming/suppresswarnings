@@ -65,7 +65,7 @@ public class WXContext extends Context<CorpusService> {
 		}
 		
 	};
-	public static int bear = 2;
+	public static int bear = 1;
 	public String quizId = null;
 	public Counter counter = null;
 	Random random = new Random();
@@ -88,14 +88,16 @@ public class WXContext extends Context<CorpusService> {
 
 		Iterator<Quiz> askQuiz = null;
 		String[] FORMAT = {"嗯嗯，%s",
-				"该我说了：\n%s", 
-				"轮到我了：\n%s",
+				"该我说了,%s", 
+				"轮到我了,%s",
 				"我想一下哈，%s", 
 				"你咋说了那么多？\n%s",
 				"我们说点别的吧，\n%s",
 				"停，%s",
 				"呃，%s",
 				"不好意思，%s",
+				"知道了，%s",
+				"好的，%s",
 				"啥？%s",
 				"等一下没事吧，%s",
 				"哦，%s",

@@ -22,10 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -82,7 +84,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
-	
+	public ExecutorService threadpool = new ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
@@ -90,6 +92,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public DaigouHandler daigouHandler;
 	public WorkHandler workHandler;
 	ScheduledExecutorService scheduler;
+	
 	public AtomicBoolean ready = new AtomicBoolean(false);
 	
 	public static final String[] formats = {
@@ -137,8 +140,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
-	public int informUsers(String message) {
-		return workHandler.informUsersExcept(message, users);
+	public void informUsers(String openid, String message) {
+		threadpool.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				workHandler.informUsersExcept(openid, message, users);
+			}
+		});
 	}
 	
 	
@@ -1528,6 +1537,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String quizPriceKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Price");
 			String totalcent = data().get(quizPriceKey);
 			if(totalcent == null) {
+				//TODO lijiaming: default price
 				totalcent = "8888888";
 			}
 			String openIdEnd = openid.substring(openid.length() - 7);
@@ -1545,9 +1555,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String postbody = parameter.getParameter(Parameter.POST_BODY);
 			Map<String, String> map = WXPayUtil.xmlToMap(postbody);
 			logger.info("notify map: " + map.toString());
+			WXPayConfig config = new WXPayConfigImpl();
+			WXPay wxPay = new WXPay(config);
+			String check = wxPay.sign(map, SignType.HMACSHA256);
+			String sign = map.get("sign");
+			boolean equal = check.equals(sign);
+			logger.info("[corpus] lijiaming: equal = " + equal + "\ncheck = " + check + "\nsign=" + sign);
+			
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
-			daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+			
+			if(orderid.startsWith("DG")) {
+				daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+			} else {
+				String keyState = String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State");
+				String oldState = account().get(keyState);
+				logger.info("old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid);
+				account().put(keyState, "Paid");
+			}
 			long current = System.currentTimeMillis();
 			int random = new Random().nextInt(100000);
 			account().put(String.join(Const.delimiter, Const.Version.V1, "Notify", ""+current, ""+random, ip), postbody);
