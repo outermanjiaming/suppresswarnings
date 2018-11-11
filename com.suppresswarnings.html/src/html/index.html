@@ -51,7 +51,7 @@
           <!-- <li class="aboutus"><a href="#">关于我们</a></li> -->
           <!-- <li class="business"><a href="#business.html">数据商店</a></li> -->
           <li class="liuser"><a href="/user.html">用户中心</a></li>
-          <li class="lifeedback"><a href="/T_Corpus_oDqlM1TyKpSulfMC2OsZPwhi-9Wk_1535451780451_131.html">建议反馈</a></li>
+          <li class="lifeedback"><a href="/feedback.html">建议反馈</a></li>
           
         </ul>
       </div>
@@ -67,7 +67,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="sampleModalLabel" >查看样本</h4>
+                <h4 class="modal-title" id="sampleModalLabel" >支付成功</h4>
             </div>
             <div class="modal-body">
                 <form>
@@ -111,9 +111,6 @@
   <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src=""/><span id="ownername">语料所属</span></div>
   <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
   <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
-  <div class="form-group text-center">
-    <img id="qrcode" src="" style="width: 120px;height: 120px;border: 0px;"/><br/>长按识别二维码参与
-  </div>
   <div id="crewimg" class="form-group text-center"></div>
 
     <table style="text-align: center;width: 100%">
@@ -159,13 +156,6 @@
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 var bridgeReady = 0
-function sample(obj) {
-  var data = $(obj).attr('data-id')
-  console.log('sample: ' + data)
-  var smodal = $('#sampleModal')
-  $("#sampleData").html(data)
-  smodal.modal('show')
-}
 
 function buy(obj) {
   var data = $(obj).data('quizid')
@@ -199,6 +189,9 @@ function buy(obj) {
               console.log('res.err_msg'+res.err_msg)
               if(res.err_msg == "get_brand_wcpay_request:ok" ){
                   console.log('finish success')
+                  var smodal = $('#sampleModal')
+				  $("#sampleData").html("恭喜，您已经支付成功！")
+				  smodal.modal('show')
             }
       });
 
@@ -237,7 +230,6 @@ function next() {
 			var price = rate * parseFloat(onequiz.price)
 			price = price.toFixed(2)
 			$("#btnprice").text(price)
-			$("#qrcode").attr("src", onequiz.qrcode)
 			$("#btnbuy").data("quizid", onequiz.quizId)
 			mapindex = mapindex + 1
 			mapindex = mapindex % size
@@ -271,7 +263,6 @@ function next() {
 	        var price = rate * parseFloat(quiz.price)
 	        price = price.toFixed(2)
 	        $("#btnprice").text(price)
-	        $("#qrcode").attr("src", quiz.qrcode)
 	        $("#btnbuy").data("quizid", quiz.quizId)
 	        quizMap[quiz.quizId] = quiz
 	        quizMap.push(quiz.quizId)
