@@ -112,6 +112,8 @@
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
+var bridgeReady = 0
+
 function GetRequest() {
     var url = location.search; //获取url中"?"符后的字串
     var theRequest = new Object();
@@ -124,15 +126,114 @@ function GetRequest() {
     }
     return theRequest;
 }
-var Request = GetRequest();
 
-if(Request.code === undefined || Request.state === undefined) {
-	console.log("lijiaming: no code and state")
-} else {
-  ticket = Request.code
-  state  = Request.state
-  console.log("code: " + ticket + ", state: " + state)
+
+function buy() {
+  if(bridgeReady == 1) {
+	  console.log("lijiaming: bridgeReady = 1")
+    $.ajax({
+    url: "/wx.http?r=" + Math.random(),
+    data: {
+	    action : "pay",
+	    random : randnum,
+	    ticket : ticket,
+	    what  : state,
+	    amount: $("#amount").val()
+    },
+    success: function( result ) {
+      console.log('pay ok' + result)
+      
+      var prepay = JSON.parse(result)
+      
+      console.log('prepay.package = ' + prepay.package)
+      WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', {
+               "appId": prepay.appId,
+               "timeStamp":prepay.timeStamp,
+               "nonceStr":prepay.nonceStr,
+               "package":prepay.package,
+               "signType":prepay.signType,
+               "paySign":prepay.paySign
+            },
+            function(res){
+              console.log('res.err_msg'+res.err_msg)
+              if(res.err_msg == "get_brand_wcpay_request:ok" ){
+                  console.log('finish success')
+                  var smodal = $('#sampleModal')
+				  $("#sampleData").html("恭喜，您已经支付成功！")
+				  smodal.modal('show')
+            }
+      });
+
+    },
+    error: function( xhr, result, obj ) {
+      console.log("prepay err: " + obj )
+    }
+  })
+  } else {
+    $("#btnbuy").text("暂时无法支付")
+  }
 }
+
+function onBridgeOK(){
+  bridgeReady = 1
+}
+
+
+function onBridgeReady(state){
+	console.log('ready onBridgeReady')
+	window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/payment.html&response_type=code&scope=snsapi_base&state="+state+"#wechat_redirect"
+}
+
+if (typeof WeixinJSBridge == "undefined"){
+	if( document.addEventListener ){
+	    document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
+	} else if (document.attachEvent){
+	    document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
+	    document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
+	}
+}
+
+var Request = GetRequest();
+if(Request.state === undefined) {
+	state = "payment"
+	console.log("lijiaming: use default state=payment")
+} else {
+	state = Request.state
+	console.log("lijiaming: use state=" + state)
+}
+
+if(Request.code === undefined) {
+	console.log("lijiaming: no code")
+	onBridgeReady(state)
+} else {
+	ticket = Request.code
+	state  = Request.state
+	console.log("code: " + ticket + ", state: " + state)
+	
+	$.ajax({
+		    url: "/wx.http?r=" + Math.random(),
+		    data: {
+		    action : "payment",
+		    random : randnum,
+		    ticket : ticket,
+		    state : state
+		    },
+		    success: function( result ) {
+		      if("fail" == result) {
+		    	  console.log('fail to access_token: ' + result)
+		      } else {
+		          console.log('great lijiaming')
+		    	  jQuery.getScript("js/payment.js?r=" + Math.random());
+		      }
+		    },
+		    error: function( xhr, result, obj ) {
+		          console.log("[lijiaming] check payment err: " + result)
+		    }
+		  })
+}
+
+
 
 </script>
 </body>
