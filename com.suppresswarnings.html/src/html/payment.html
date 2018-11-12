@@ -70,10 +70,10 @@
   <div class="form-group">描述：<span id="reason">购买数据</span></div>
   <div class="form-group">商品：<span id="sample">数据(单价：¥0.01，单位：条)</span></div>
   <div id="crewimg" class="form-group text-center"></div>
-    <table style="text-align: center; width: 100%">
+    <table style="text-align: center; width: 110%; margin: 0 -5% 0;">
       <tbody>
       	<tr>
-          <td style="border-bottom: 2px solid #5cb85c;"><input id="amount" type="text" oninput="value=value.replace(/[^\d]/g,'')" class="btn" data-quizid="null" name="amount" value="100"/></td>
+          <td style="border-bottom: 1px solid #5cb85c;"><input id="amount" type="text" oninput="value=value.replace(/[^\d]/g,'')" class="btn" data-quizid="null" name="amount" value="100"/></td>
         </tr>
         <tr>
           <td><button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" data-quizid="null"  onclick="buy(this)">确认支付 ¥<span id="money">1.00</span></button></td>
