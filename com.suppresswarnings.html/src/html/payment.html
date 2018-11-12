@@ -20,10 +20,10 @@
 <body>
 
 <div class="container-fluid">
-<ul>
-<li>
-  <span class="navbar-brand">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=175>
+<ul style="list-style: none; padding: 0; margin:0;">
+<li style="list-style: none; float: left;">
+  <span>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=100>
         <path id="svg_ul" d="M4 2 L4 6"     style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_u"  d="M10 2 L10 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_ur" d="M16 2 L16 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
@@ -36,7 +36,9 @@
         </svg>
  </span>
  </li>
- <li><span><img alt="头像" src="/logo.png">用户中心</span></li>
+ <li style="list-style: none; float: right">
+     <span><img alt="图" style="width: 20px;height: 20px;" src="/black-logo.jpg">用户中心</span>
+ </li>
  </ul>
 </div>
 
@@ -71,8 +73,11 @@
 
     <table style="text-align: center;width: 100%">
       <tbody>
+      	<tr>
+          <td><input id="amount" type="text" class="text" data-quizid="null" value="1200"/></td>
+        </tr>
         <tr>
-          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-quizid="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</span></button></td>
+          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-quizid="null"  onclick="buy(this)">确认支付</button></td>
         </tr>
       </tbody>
     </table>
