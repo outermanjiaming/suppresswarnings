@@ -11,8 +11,6 @@
   <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
   <link rel="stylesheet" href="css/suppresswarnings.css">
 
-  <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
-
   <style type="text/css">
       pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
@@ -20,20 +18,10 @@
 <body>
 
 <div class="container-fluid">
-
-
-
-  <nav id="navbar-example" class="navbar navbar-default navbar-static" role="navigation">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-example-js-navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <span class="navbar-brand">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=175>
+<ul style="list-style: none; padding: 20px 0px 20px;">
+<li style="list-style: none; float: left;">
+  <span>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=100>
         <path id="svg_ul" d="M4 2 L4 6"     style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_u"  d="M10 2 L10 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_ur" d="M16 2 L16 6"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
@@ -42,86 +30,25 @@
         <path id="svg_dl" d="M4 14 L4 18"   style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_d"  d="M10 14 L10 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
         <path id="svg_dr" d="M16 14 L16 18" style="fill:white;stroke:#5cb85c;stroke-width:4"/>
-        <text x="25" y="17" fill="#5cb85c" id="inviteTitle">...素朴网联</text>
+        <text x="25" y="17" fill="#5cb85c" id="inviteTitle">素朴网联</text>
         </svg>
-        </span>
-      </div>
-      <div class="collapse navbar-collapse bs-example-js-navbar-collapse">
-        <ul class="nav navbar-nav">
-          <!-- <li class="aboutus"><a href="#">关于我们</a></li> -->
-          <!-- <li class="business"><a href="#business.html">数据商店</a></li> -->
-          <li class="liuser"><a href="/user.html">用户中心</a></li>
-          <li class="lifeedback"><a href="/feedback.html">建议反馈</a></li>
-          
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-
+ </span>
+ </li>
+ </ul>
 </div>
-
- 
-<div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel">
-    <div class="modal-dialog text-center" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="sampleModalLabel" >支付成功</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <div class="description" id="sampleData"></div>
-                    </div>
-                   
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    
-<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel">
-    <div class="modal-dialog text-center" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="buyModalLabel" >购买数据</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <div class="description" id="buyData"></div>
-                    </div>
-                    
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-  
-
-
- 
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
-<ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
-
-  <li class="boder_v1">
-  <div class="form-group"><img id="ownerimg" style="width: 20px;height: 20px;margin-right: 5px" src=""/><span id="ownername">语料所属</span></div>
-  <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
-  <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
-  <div id="crewimg" class="form-group text-center"></div>
-
-    <table style="text-align: center;width: 100%">
+<ul id="business" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
+  <li>
+    <table style="text-align: center; width: 110%; margin: 0 -5% 0;">
       <tbody>
-        <tr>
-          <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-quizid="null"  onclick="buy(this)">收购数据：¥<span id="btnprice">0.08</span></button></td>
+      	<tr>
+          <td style="border-bottom: 1px solid #5cb85c;"><input id="index" type="text" class="btn btn-large" name="amount" value="素朴网联"/></td>
         </tr>
       </tbody>
     </table>
     
-    <button id="btnnext" type="button" class="btn btn-xs" onclick="next()">下一个</button>
+    <button id="btnlike" type="button" class="btn btn-xs" onclick="like()">赞</button>
 </li>
 </ul>
 
@@ -130,9 +57,6 @@
    
    
    
-   
-
-       
    
    <footer class="footer navbar-fixed-bottom" style="z-index:-1">
      <div style="text-align:center;width:100%;margin:0 auto; padding:20px 0;">
@@ -154,204 +78,5 @@
 <script type="text/javascript" src="js/dropdown.js"></script>
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
-<script>
-var bridgeReady = 0
-
-function buy(obj) {
-  var data = $(obj).data('quizid')
-  console.log('buy: ' + data)
-  if(bridgeReady == 1) {
-    $.ajax({
-    url: "/wx.http?r=" + Math.random(),
-    data: {
-    action : "prepay",
-    random : randnum,
-    ticket : ticket,
-    title  : data,
-    goodsid: data
-    },
-    success: function( result ) {
-      console.log('prepay ok' + result)
-      
-      var prepay = JSON.parse(result)
-      
-      console.log('prepay.package = ' + prepay.package)
-      WeixinJSBridge.invoke(
-            'getBrandWCPayRequest', {
-               "appId": prepay.appId,
-               "timeStamp":prepay.timeStamp,
-               "nonceStr":prepay.nonceStr,
-               "package":prepay.package,
-               "signType":prepay.signType,
-               "paySign":prepay.paySign
-            },
-            function(res){
-              console.log('res.err_msg'+res.err_msg)
-              if(res.err_msg == "get_brand_wcpay_request:ok" ){
-                  console.log('finish success')
-                  var smodal = $('#sampleModal')
-				  $("#sampleData").html("恭喜，您已经支付成功！")
-				  smodal.modal('show')
-            }
-      });
-
-    },
-    error: function( xhr, result, obj ) {
-      console.log("prepay err: " + obj )
-    }
-  })
-  } else {
-    var bmodal = $('#buyModal')
-    bmodal.modal('show')
-  }
-  
-}
-
-
-var quizId
-var quizIds
-var quizMap = []
-var rate = 0.01
-var nextindex = 0
-var mapindex = 0
-function next() {
-	if(quizIds == undefined) {
-	  quizId = ""
-	} else {
-	  if(nextindex >= quizIds.length) {
-		  var size = quizMap.length
-	      var oneid = quizMap[mapindex]
-		  var onequiz = quizMap[oneid]
-		  
-	      $("#quiz").text(onequiz.quiz)
-			if(onequiz.sample == undefined) onequiz.sample = ""
-			$("#sample").text(onequiz.sample)
-			$("#ownerimg").attr("src", onequiz.ownerimg)
-			var price = rate * parseFloat(onequiz.price)
-			price = price.toFixed(2)
-			$("#btnprice").text(price)
-			$("#btnbuy").data("quizid", onequiz.quizId)
-			mapindex = mapindex + 1
-			mapindex = mapindex % size
-			return
-	  }
-	  quizId = quizIds[nextindex]
-	  nextindex = nextindex + 1
-	}
-	jQuery.ajax({
-	    url: "/wx.http?r=" + Math.random(),
-	    data: {
-	      action : "next",
-	      random : randnum,
-	      ticket : ticket,
-	      state : state,
-	      next  : quizId
-	    },
-	    success: function( result ) {
-	      if("fail" == result) {
-	        console.log('fail to next: ' + result)
-	      } else {
-	        var map = JSON.parse(result)
-	        var quiz = map.quiz
-	        if(quizIds == undefined) {
-	          quizIds = map.array
-	        }
-	        $("#quiz").text(quiz.quiz)
-	        if(quiz.sample == undefined) quiz.sample = ""
-	        $("#sample").text(quiz.sample)
-	        $("#ownerimg").attr("src", quiz.ownerimg)
-	        var price = rate * parseFloat(quiz.price)
-	        price = price.toFixed(2)
-	        $("#btnprice").text(price)
-	        $("#btnbuy").data("quizid", quiz.quizId)
-	        quizMap[quiz.quizId] = quiz
-	        quizMap.push(quiz.quizId)
-	      }
-	      
-	    },
-	    error: function( xhr, result, obj ) {
-	      console.log("[lijiaming] user err: " + result)
-	      $('#inviteTitle').text('!个人中心')
-	    }
-	  })
-}
-
-function confirmBuy(obj) {
- var bmodal = $('#buyModal')
-  bmodal.modal('hide')
-}
-
-
-function GetRequest() {
-    var url = location.search; //获取url中"?"符后的字串
-    var theRequest = new Object();
-    if (url.indexOf("?") != -1) {
-        var str = url.substr(1);
-        strs = str.split("&");
-        for(var i = 0; i < strs.length; i ++) {
-            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-        }
-    }
-    return theRequest;
-}
-var Request = GetRequest();
-function onBridgeReady(){
-  console.log('ready onBridgeReady')
-  window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/&response_type=code&scope=snsapi_base&state=suppresswarnings#wechat_redirect'
-}
-
-function onBridgeOK(){
-  bridgeReady = 1
-}
-
-function checkBridge() {
-  if (typeof WeixinJSBridge == "undefined"){
-   if( document.addEventListener ){
-       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-   } else if (document.attachEvent){
-       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
-       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-   }
-  }
-}
-
-if(Request.code === undefined || Request.state === undefined) {
-  console.log('first time here without code')
-  checkBridge()
-} else {
-  if (typeof WeixinJSBridge == "undefined"){
-   if( document.addEventListener ){
-       document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
-   } else if (document.attachEvent){
-       document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
-       document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
-   }
-  }
-  ticket = Request.code
-  state  = Request.state
-  $.ajax({
-    url: "/wx.http?r=" + Math.random(),
-    data: {
-    action : "access_token",
-    random : randnum,
-    ticket : ticket
-    },
-    success: function( result ) {
-      if("success" == result) {
-        $('#inviteTitle').text('素朴网联')
-        next()
-      } else {
-        console.log('fail to access_token: ' + result)
-        checkBridge()
-      }
-    },
-    error: function( xhr, result, obj ) {
-      console.log("[lijiaming] check logon err: " + result)
-      checkBridge()
-    }
-  })
-}
-
-</script>
 </body>
 </html>

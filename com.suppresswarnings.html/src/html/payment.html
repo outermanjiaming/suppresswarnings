@@ -128,17 +128,17 @@ function GetRequest() {
 }
 
 
-function buy() {
+function pay() {
   if(bridgeReady == 1) {
 	  console.log("lijiaming: bridgeReady = 1")
     $.ajax({
     url: "/wx.http?r=" + Math.random(),
     data: {
-	    action : "pay",
+	    action : "prepay",
 	    random : randnum,
 	    ticket : ticket,
-	    what  : state,
-	    amount: $("#amount").val()
+	    goodsid: state,
+	    amount : $("#amount").val()
     },
     success: function( result ) {
       console.log('pay ok' + result)
