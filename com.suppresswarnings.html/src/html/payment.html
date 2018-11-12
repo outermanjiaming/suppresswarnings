@@ -20,7 +20,7 @@
 <body>
 
 <div class="container-fluid">
-<ul style="list-style: none; padding: 0; margin:0;">
+<ul style="list-style: none; padding: 20px 0px 20px;">
 <li style="list-style: none; float: left;">
   <span>
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height=20 width=100>
@@ -64,17 +64,16 @@
 
 <div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
-<ul id="business" style="list-style: none; position: relative;margin: 0px;padding: 0px;">
+<ul id="business" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
 
-  <li class="boder_v1">
-  <div class="form-group">描述：<span id="quiz">{{问题描述}}</span></div>
-  <div class="form-group">举例：<span id="sample">{{示例回答}}</span></div>
+  <li>
+  <div class="form-group">理由：<span id="reason">购买数据</span></div>
+  <div class="form-group">商品：<span id="sample">数据</span></div>
   <div id="crewimg" class="form-group text-center"></div>
-
-    <table style="text-align: center;width: 100%">
+    <table style="text-align: center; width: 100%">
       <tbody>
       	<tr>
-          <td><input id="amount" type="text" class="text" data-quizid="null" value="1200"/></td>
+          <td style="border-bottom: 1px solid #5cb85c;"><input id="amount" type="text" class="btn" data-quizid="null" value="1200"/></td>
         </tr>
         <tr>
           <td><button id="btnbuy" type="button" class="btn btn-ms btn-info" data-quizid="null"  onclick="buy(this)">确认支付</button></td>
