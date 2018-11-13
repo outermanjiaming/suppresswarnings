@@ -14,6 +14,7 @@ $.ajax({
 			var goods = JSON.parse(result)
 			$("#reason").text(goods.reason)
 			$("#what").text(goods.what)
+			$("#userimg").attr("src", goods.userimg)
 		}
 	},
 	error : function(xhr, result, obj) {

@@ -37,7 +37,7 @@
  </span>
  </li>
  <li style="list-style: none; float: right">
-     <span><img alt="图" style="width: 20px;height: 20px;" src="/black-logo.jpg">用户中心</span>
+     <span><img id="userimg" alt="图" style="width: 20px;height: 20px;" src="/black-logo.jpg"><a href="/user.html">用户中心</a></span>
  </li>
  </ul>
 </div>
@@ -73,10 +73,14 @@
     <table style="text-align: center; width: 110%; margin: 0 -5% 0;">
       <tbody>
       	<tr>
-          <td style="border-bottom: 1px solid #5cb85c;"><input id="amount" type="text" oninput="changeval(this)" class="btn" name="amount" value="100"/></td>
+          <td style="border-bottom: 1px solid #5cb85c;">
+          	<input id="amount" type="text" oninput="changeval(this)" class="btn" name="amount" value="100"/>
+          </td>
         </tr>
         <tr>
-          <td><button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" data-quizid="null"  onclick="buy(this)">确认支付 ¥<span id="money">1.00</span></button></td>
+          <td>
+          	<button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" onclick="pay()">确认支付 ¥<span id="money">1.00</span></button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -204,7 +208,7 @@ if (typeof WeixinJSBridge == "undefined"){
 
 var Request = GetRequest();
 if(Request.state === undefined) {
-	state = "payment"
+	state = "Data0001"
 	console.log("lijiaming: use default state=payment")
 } else {
 	state = Request.state
