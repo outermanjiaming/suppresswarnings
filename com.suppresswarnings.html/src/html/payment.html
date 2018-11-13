@@ -223,6 +223,7 @@ if(Request.code === undefined) {
 	state  = Request.state
 	console.log("code: " + ticket + ", state: " + state)
 	jQuery.getScript("js/payment.js?r=" + Math.random());
+	$("#amount").focus();
 }
 
 
