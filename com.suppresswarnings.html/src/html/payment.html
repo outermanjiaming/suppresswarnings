@@ -68,12 +68,12 @@
 
   <li>
   <div class="form-group">描述：<span id="reason">购买数据</span></div>
-  <div class="form-group">商品：<span id="sample">数据(单价：¥0.01，单位：条)</span></div>
+  <div class="form-group">商品：<span id="what">数据(单价：¥0.01，单位：条)</span></div>
   <div id="crewimg" class="form-group text-center"></div>
     <table style="text-align: center; width: 110%; margin: 0 -5% 0;">
       <tbody>
       	<tr>
-          <td style="border-bottom: 1px solid #5cb85c;"><input id="amount" type="text" oninput="value=value.replace(/[^\d]/g,'')" class="btn" data-quizid="null" name="amount" value="100"/></td>
+          <td style="border-bottom: 1px solid #5cb85c;"><input id="amount" type="text" oninput="changeval(this)" class="btn" name="amount" value="100"/></td>
         </tr>
         <tr>
           <td><button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" data-quizid="null"  onclick="buy(this)">确认支付 ¥<span id="money">1.00</span></button></td>
@@ -179,6 +179,14 @@ function onBridgeOK(){
   bridgeReady = 1
 }
 
+function changeval(obj) {
+	var val = $(obj).val()
+	val = val.replace(/[^\d]/g,'')
+	$(obj).val(val)
+	var price = 0.01 * parseFloat(val)
+	price = price.toFixed(2)
+	$("#money").val(price)
+}
 
 function onBridgeReady(state){
 	console.log('ready onBridgeReady')
@@ -210,27 +218,7 @@ if(Request.code === undefined) {
 	ticket = Request.code
 	state  = Request.state
 	console.log("code: " + ticket + ", state: " + state)
-	
-	$.ajax({
-		    url: "/wx.http?r=" + Math.random(),
-		    data: {
-		    action : "payment",
-		    random : randnum,
-		    ticket : ticket,
-		    state : state
-		    },
-		    success: function( result ) {
-		      if("fail" == result) {
-		    	  console.log('fail to access_token: ' + result)
-		      } else {
-		          console.log('great lijiaming')
-		    	  jQuery.getScript("js/payment.js?r=" + Math.random());
-		      }
-		    },
-		    error: function( xhr, result, obj ) {
-		          console.log("[lijiaming] check payment err: " + result)
-		    }
-		  })
+	jQuery.getScript("js/payment.js?r=" + Math.random());
 }
 
 
