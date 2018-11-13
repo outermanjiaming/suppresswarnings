@@ -185,7 +185,7 @@ function changeval(obj) {
 	$(obj).val(val)
 	var price = 0.01 * parseFloat(val)
 	price = price.toFixed(2)
-	$("#money").val(price)
+	$("#money").text(price)
 }
 
 function onBridgeReady(state){
