@@ -17,6 +17,7 @@ $.ajax({
 			$("#userimg").attr("src", goods.userimg)
 			var price = 0.01 * parseFloat(goods.pricecent)
 			price = price.toFixed(2)
+			$("#amount").val(goods.pricecent)
 			$("#money").text(price)
 			closeDiv()
 		}
