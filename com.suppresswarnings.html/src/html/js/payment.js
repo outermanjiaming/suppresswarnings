@@ -15,6 +15,9 @@ $.ajax({
 			$("#reason").text(goods.reason)
 			$("#what").text(goods.what)
 			$("#userimg").attr("src", goods.userimg)
+			var price = 0.01 * parseFloat(goods.pricecent)
+			price = price.toFixed(2)
+			$("#money").text(price)
 			closeDiv()
 		}
 	},
