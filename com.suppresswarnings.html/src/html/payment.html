@@ -90,7 +90,7 @@
     </table>
     
     <button id="btnmore" type="button" class="btn btn-xs" onclick="more()">更多商品</button>
-    <div id="moregoods" style="display:none">
+    <div id="moregoods" style="display:none; margin:20px;">
     <p><a href="http://suppresswarnings.com/payment.html?state=DaigouAgent">申请代购Agent权限</a></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=Reply">申请回答问题权限</a></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=Similar">申请回答同义句权限</a></p>
@@ -237,6 +237,7 @@ if(Request.code === undefined) {
 } else {
 	ticket = Request.code
 	state  = Request.state
+	showDiv()
 	console.log("code: " + ticket + ", state: " + state)
 	jQuery.getScript("js/payment.js?r=" + Math.random());
 	var input = $("#amount")
@@ -246,7 +247,6 @@ if(Request.code === undefined) {
 	} else {
 		input.hide()
 	}
-	closeDiv()
 }
 
 
