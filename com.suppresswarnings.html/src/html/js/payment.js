@@ -15,6 +15,7 @@ $.ajax({
 			$("#reason").text(goods.reason)
 			$("#what").text(goods.what)
 			$("#userimg").attr("src", goods.userimg)
+			closeDiv()
 		}
 	},
 	error : function(xhr, result, obj) {
