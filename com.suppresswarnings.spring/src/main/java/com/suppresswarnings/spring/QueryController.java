@@ -8,6 +8,6 @@ public class QueryController {
 
 	@RequestMapping("/hello")
     public String index() {
-        return "Hello from Spring Boot!";
+        return "index.html";
     }
 }

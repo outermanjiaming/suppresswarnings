@@ -148,7 +148,7 @@ public class WXContext extends Context<CorpusService> {
 				}
 				String reply = CheckUtil.cleanStr(t);
 				String aid = u.content().questionToAid.get(reply);
-				logger.info("[ProduceContext] after clean: " + reply + " = " + aid);
+				logger.info("[WXContext] after clean: " + reply + " = " + aid);
 				if(aid != null) {
 					//TODO lijiaming: check cmd
 					String cmd = u.content().aidToCommand.get(reply);
@@ -156,11 +156,12 @@ public class WXContext extends Context<CorpusService> {
 						String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", cmd);
 						String code = u.content().account().get(keyCMD);
 						//get my things code, which is unique for each things
+						logger.info("Key: " + keyCMD + " => " + code);
 						if(code != null) {
 							String remote = u.content().aiiot(openid(), code, cmd, t, u);
-							logger.info("[ProduceContext] remote: " + remote);
+							logger.info("[WXContext] remote: " + remote);
 						} else {
-							logger.info("[ProduceContext] remote: 你还没有绑定设备");
+							logger.info("[WXContext] remote: 你还没有绑定设备");
 						}
 					}
 					

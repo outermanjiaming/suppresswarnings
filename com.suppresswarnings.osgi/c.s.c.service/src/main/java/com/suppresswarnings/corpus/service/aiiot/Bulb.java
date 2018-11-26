@@ -12,7 +12,6 @@ package com.suppresswarnings.corpus.service.aiiot;
 import java.net.Socket;
 
 public class Bulb extends Things {
-	public Bulb(){}
 	public Bulb(String code, Socket socket) {
 		super(code, socket);
 	}

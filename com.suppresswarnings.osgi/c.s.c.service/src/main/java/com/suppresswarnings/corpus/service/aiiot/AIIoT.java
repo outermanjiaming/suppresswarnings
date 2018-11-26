@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ import com.suppresswarnings.corpus.service.backup.Config;
 public class AIIoT implements ThingsFactory, Closeable {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Map<String, Things> things = new ConcurrentHashMap<String, Things>();
-	public Map<String, Class<?>> types = new HashMap<>();
+	public Map<String, Class<? extends Things>> types = new HashMap<>();
 	public Map<String, List<String>> typesCMD = new HashMap<>();
 	public String typesName = null;
 	
@@ -86,6 +88,7 @@ public class AIIoT implements ThingsFactory, Closeable {
 	        	if(annotation == null) continue;
 	        	
 	        	String cmd = annotation.value();
+	        	service.aidToCommand.put(cmd, cmd);
 	        	cmds.add(cmd);
 				String aid = service.questionToAid.get(cmd);
 				logger.info("[AIIoT] register cmd: " + cmd + ", aid " + aid);
@@ -113,8 +116,8 @@ public class AIIoT implements ThingsFactory, Closeable {
 	//TODO lijiaming: important
 	public int registerThings() {
 		types.put(Bulb.class.getSimpleName(), Bulb.class);
-		//put more
-		
+		//TODO put more
+		types.put(TrafficLight.class.getSimpleName(), TrafficLight.class);
 		
 		return types.size();
 	}
@@ -178,9 +181,29 @@ public class AIIoT implements ThingsFactory, Closeable {
 			logger.info("[AIIoT] socket is closed");
 			return null;
 		}
-		if(Bulb.class.getSimpleName().equals(type)) {
-			return new Bulb(code, socket);
+		Class<? extends Things> clazz = types.get(type);
+		if(clazz == null) {
+			logger.error("type unknown: " + type);
+			return null;
 		}
+		try {
+			Constructor<? extends Things> cons = clazz.getConstructor(String.class, Socket.class);
+			Things things = cons.newInstance(code, socket);
+			return things;
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		logger.error("fail to create things: "+ type);
 		return null;
 	}
 

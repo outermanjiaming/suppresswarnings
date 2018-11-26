@@ -22,12 +22,17 @@ public abstract class Things {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	Socket socket;
 	String code;
-	public Things(){}
 	public Things(String code, Socket socket){
 		this.code = code;
 		this.socket = socket;
 	}
 	
+	public void setSocket(Socket socket) {
+		this.socket = socket;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
 	public String code(){
 		return code;
 	}

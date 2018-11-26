@@ -72,6 +72,7 @@ public class AIIoTContext extends WXContext {
 			public void accept(String t, Context<CorpusService> u) {
 				String keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
 				String mine = u.content().account().get(keyMine);
+				logger.info("[AIIoTContext] Key: " + keyMine + " => " + mine);
 				if(mine == null) {
 					//new things register
 					mine = time();
@@ -106,7 +107,7 @@ public class AIIoTContext extends WXContext {
 
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				return done;
+				return init;
 			}
 
 			@Override
@@ -156,6 +157,7 @@ public class AIIoTContext extends WXContext {
 						u.output("你是设备的主人，你解除绑定之后，别人可以绑定该设备");
 					} else {
 						//1.send text to owner
+						u.content().sendTxtTo("ask auth aiiot", user().getNickname() + "请求控制设备" + type, ownerid);
 						u.output("已经通知设备的主人");
 						return;
 					}
@@ -171,7 +173,7 @@ public class AIIoTContext extends WXContext {
 
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				return done;
+				return init;
 			}
 
 			@Override
@@ -210,6 +212,7 @@ public class AIIoTContext extends WXContext {
 			
 			String keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
 			String mine = u.content().account().get(keyMine);
+			logger.info("[AIIoTContext] Key: " + keyMine + " => " + mine);
 			if(mine == null) {
 				u.output("    绑定设备");
 			} else {
@@ -236,34 +239,6 @@ public class AIIoTContext extends WXContext {
 		@Override
 		public boolean finish() {
 			return false;
-		}
-	};
-	
-	State<Context<CorpusService>> done = new State<Context<CorpusService>>() {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -8682282892710656687L;
-
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			u.output("现在试试几个对话或者命令吧");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return init;
-		}
-
-		@Override
-		public String name() {
-			return "绑定完成";
-		}
-
-		@Override
-		public boolean finish() {
-			return true;
 		}
 	};
 	

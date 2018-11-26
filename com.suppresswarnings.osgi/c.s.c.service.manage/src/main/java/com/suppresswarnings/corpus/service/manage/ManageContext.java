@@ -258,7 +258,6 @@ public class ManageContext extends WXContext {
 	};
 	State<Context<CorpusService>> examOff = new State<Context<CorpusService>>() {
 
-
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			String onKey = String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON");

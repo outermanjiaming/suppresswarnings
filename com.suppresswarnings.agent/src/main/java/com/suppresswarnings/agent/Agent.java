@@ -61,7 +61,7 @@ public class Agent {
 	    LOG.info(Agent.class, "Client Connected");
 	    String knock = String.join(",", this.identity, "" + this.capacity, this.which) + "\n";
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(),"UTF-8"));    
-        out.write(knock);  
+        out.write(knock);
         out.flush();
         LOG.info(Agent.class, "Msg Sent = " + knock);
         InputStream is = sslsocket.getInputStream();

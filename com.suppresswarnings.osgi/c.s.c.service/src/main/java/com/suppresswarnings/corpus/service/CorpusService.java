@@ -54,6 +54,7 @@ import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.daigou.Order;
+import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
@@ -175,7 +176,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	
 	public void activate() {
-		logger.info("[corpus] activate.");
+		logger.info("[corpus] activate");
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
 			int index = 0;
 			@Override
@@ -217,6 +218,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 					aiiot = new AIIoT();
 					aiiot.working();
 					logger.info("[corpus] aiiot working");
+					registerThings();
+					logger.info("[corpus] aiiot register things");
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
 				}
@@ -785,21 +788,26 @@ public class CorpusService implements HTTPService, CommandProvider {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			List<Map<String, String>> list = new ArrayList<>();
 			counters.forEach((userid, counter) ->{
-				Map<String, String> map = new HashMap<>();
-				WXuser user = getWXuserByOpenId(userid);
-				map.put("username", user.getNickname());
-				map.put("image", user.getHeadimgurl());
-				map.put("openid", userid);
-				map.put("quiz", ""+counter.getQuizCounter().get());
-				map.put("reply", ""+counter.getReplyCounter().get());
-				map.put("exist", ""+counter.getExistCounter().get());
-				map.put("similar", ""+counter.getSimilarCounter().get());
-				map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
-				map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
-				map.put("openid", userid);
-				map.put("repetition", ""+counter.repetition());
-				map.put("sum", ""+counter.sum());
-				list.add(map);
+				try {
+					logger.info("[managereports] counter for " + userid);
+					Map<String, String> map = new HashMap<>();
+					WXuser user = getWXuserByOpenId(userid);
+					map.put("username", user.getNickname());
+					map.put("image", user.getHeadimgurl());
+					map.put("openid", userid);
+					map.put("quiz", ""+counter.getQuizCounter().get());
+					map.put("reply", ""+counter.getReplyCounter().get());
+					map.put("exist", ""+counter.getExistCounter().get());
+					map.put("similar", ""+counter.getSimilarCounter().get());
+					map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
+					map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
+					map.put("openid", userid);
+					map.put("repetition", ""+counter.repetition());
+					map.put("sum", ""+counter.sum());
+					list.add(map);
+				} catch (Exception e) {
+					logger.error("[managereports] error while foreach", e);
+				}
 			});
 			//TODO lijiaming
 			Collections.sort(list, (Map<String, String> a, Map<String, String> b) ->{
@@ -936,7 +944,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 					data().put(mediaKey, sms);
 					String url = wxmsg.get("PicUrl");
 					//TODO lijiaming save image to server
-					input = "IMAGE_" + url;
+					String downloadFolder = "download/";
+					String saveTo = System.getProperty("path.html") + downloadFolder;
+					CallableDownload download = new CallableDownload(url, CallableDownload.MB10, saveTo, ".jpg", true, TimeUnit.HOURS.toMillis(48));
+					scheduler.submit(download);
+					String futureUrl = "http://suppresswarnings.com/" + downloadFolder + download.getFileName();
+					input = "IMAGE_" + futureUrl;
 				} else {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Other", ""+System.currentTimeMillis(), openid);
 					data().put(mediaKey, sms);
@@ -1147,7 +1160,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				String clientip = ip.split(",")[0];
 				String body = orderid +" 共¥" + totalprice;
 				String attach = openid;
-				String prepay = prepay(orderid, body, detail, attach, ""+totalcent, clientip, openid, current);
+				String prepay = prepay(orderid, body, detail, attach, ""+ totalcount, ""+totalcent, clientip, openid, current, "DG");
 				if(prepay != null) {
 					Order order = new Order();
 					order.setAddress(address);
@@ -1523,34 +1536,99 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			String ticket = parameter.getParameter("ticket");
 			if(ticket == null) {
+				logger.error("[prepay] ticket null");
 				return "fail";
 			}
 			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", ticket);
 			String openid = token().get(code2OpenIdKey);
 			if(openid == null) {
+				logger.error("[prepay] openid null");
 				return "fail";
 			}
-			String quizId= parameter.getParameter("goodsid");
-			String title  = parameter.getParameter("title");
-			String body = "素朴网联-语料";
-			String detail = "[" + quizId + ", 1]";
-			String quizPriceKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Price");
-			String totalcent = data().get(quizPriceKey);
+			String goodsid= parameter.getParameter("goodsid");
+			String amount  = parameter.getParameter("amount");
+			
+			String detail = "[" + goodsid + ", " + amount + "]";
+			String reason =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Reason"));
+			String what =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "What"));
+			String body = "素朴网联-" + reason + "-" +amount + "-" + what;
+			String goodsPriceKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Price");
+			String totalcent = account().get(goodsPriceKey);
 			if(totalcent == null) {
-				//TODO lijiaming: default price
-				totalcent = "8888888";
+				logger.error("[prepay] totalcent null");
+				return "fail";
 			}
+			
+			String goodsTypeKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Type");
+			String type = account().get(goodsTypeKey);
+			if(type == null) {
+				logger.error("[prepay] type null");
+				return "fail";
+			}
+			if("Data".equals(type)) {
+				long price = Integer.parseInt(amount) * 1L * Integer.parseInt(totalcent);
+				totalcent = "" + price;
+			}
+			
 			String openIdEnd = openid.substring(openid.length() - 7);
 			String randEnd = random.substring(random.length() - 4);
 			long current = System.currentTimeMillis(); 
-			String orderid = current + openIdEnd + randEnd;
+			String orderid = type + current + openIdEnd + randEnd;
 			String clientip = ip.split(",")[0];
-			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + quizId + ", title:" + title);
+			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", amount:" + amount);
 			try {
-				return prepay(orderid, body, detail, openid, totalcent, clientip, openid, current);
+				return prepay(orderid, body, detail, goodsid, amount, totalcent, clientip, openid, current, type);
 			} catch (Exception e) {
 				return "fail";
 			}
+		}  else if("payment".equals(action)) {
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				return "fail";
+			}
+			
+			String state = parameter.getParameter("state");
+			if(state == null) {
+				return "fail";
+			}
+			
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			String exist = token().get(code2OpenIdKey);
+			if(exist != null) {
+				return "fail";
+			}
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[payment] accessToken == null");
+				return "fail";
+			}
+			
+			logger.info("[corpus access_token] " + accessToken.toString());
+			if(accessToken.getOpenid() == null) {
+				return "fail";
+			}
+			
+			token().put(code2OpenIdKey, accessToken.getOpenid());
+			
+			String goodsid = state;
+			String reason =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Reason"));
+			String what =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "What"));
+			String goodsTypeKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Type");
+			String type = account().get(goodsTypeKey);
+			String pricecent =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Price"));
+			WXuser user = getWXuserByOpenId(accessToken.getOpenid());
+			Map<String, String> goods = new HashMap<>();
+			goods.put("reason", reason);
+			goods.put("what", what);
+			goods.put("type", type);
+			goods.put("pricecent", pricecent);
+			goods.put("userimg", user.getHeadimgurl());
+			goods.put("username", user.getNickname());
+			return gson.toJson(goods);
 		} else if("notify".equals(action)) {
 			String postbody = parameter.getParameter(Parameter.POST_BODY);
 			Map<String, String> map = WXPayUtil.xmlToMap(postbody);
@@ -1564,14 +1642,27 @@ public class CorpusService implements HTTPService, CommandProvider {
 			
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
+			String result = map.get("result_code");
+			String transactionid = map.get("transaction_id");
+			String goodsid = map.get("attach");
 			
 			if(orderid.startsWith("DG")) {
 				daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
 			} else {
 				String keyState = String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State");
 				String oldState = account().get(keyState);
-				logger.info("old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid);
-				account().put(keyState, "Paid");
+				String newState = "Fail";
+				if("SUCCESS".equals(result)) {
+					newState = "Paid";
+					if(orderid.startsWith("Auth")) {
+						String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
+						account().put(paidKey, newState);
+					}
+				}
+				logger.info("[notify] new state: " + newState + ", old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid + ", transactionid: " + transactionid);
+				account().put(keyState, newState);
+				account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Transactionid"), transactionid);
+				account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Notify"), postbody);
 			}
 			long current = System.currentTimeMillis();
 			int random = new Random().nextInt(100000);
@@ -1606,7 +1697,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return null;
 	}
 	
-	public String prepay(String orderid, String body, String detail, String attach, String totalcent, String clientip, String openid, long current) throws Exception {
+	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) throws Exception {
 		
 		long timeStamp = current / 1000;
 		WXPayConfig config = new WXPayConfigImpl();
@@ -1617,7 +1708,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		reqData.put("device_info", "WEB");
 		reqData.put("body", body);
 		reqData.put("detail", detail);
-		reqData.put("attach", attach);
+		reqData.put("attach", goodsid);
 		reqData.put("out_trade_no", orderid);
 		reqData.put("fee_type", "CNY");
 		reqData.put("total_fee", totalcent);
@@ -1657,9 +1748,26 @@ public class CorpusService implements HTTPService, CommandProvider {
 		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Reqjson"), reqjson);
 		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Resultjson"), resultjson);
 		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State"), "Wait");
-		return unifiedOrder;
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Openid"), openid);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Goodsid"), goodsid);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Amount"), amount);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Pricecent"), totalcent);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Type"), type);
 		
+		account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid), orderid);
+		account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid, "Body"), body);
+		
+		if(orderid.startsWith("Auth")) {
+			String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
+			String paidState = account().get(paidKey);
+			if(paidState == null) {
+				account().put(paidKey, orderid);
+				logger.info("[prepay] note orderid for auth pay: " + goodsid + ", " + openid + ", orderid" + orderid);
+			}
+		}
+		return unifiedOrder;
 	}
+	
 	public String xml(String openid, String msg, String fromOpenId) {
 		if(msg == null || msg.length() < 1) {
 			logger.error("[Corpus] empty response");
@@ -1800,8 +1908,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		String userKey = String.join(Const.delimiter, Const.Version.V1, openId, "User");
 		String json = account().get(userKey);
-		if(json == null) {
-			logger.info("[Corpus] get WXuser info: " + openId);
+		if(debug() || json == null) {
+			logger.info("[corpus] get WXuser info: " + openId);
 			CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
 			try {
 				json = get.call();
@@ -1811,6 +1919,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[WXContext] fail to get user info: " + openId, e);
 			}
 		} else {
+			logger.info("[corpus] getWXuserByOpenId using exist json: " + json);
 			user = gson.fromJson(json, WXuser.class);
 			if(user.getSubscribe() == 0) {
 				logger.info("[Corpus] get WXuser info: " + openId);
@@ -1833,6 +1942,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		users.put(openId, user);
 		return user;
+	}
+	
+	public boolean debug(){
+		return "on".equals(data().get(String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON")));
 	}
 	
 	public String sendTxtTo(String business, String message, String openid) {
