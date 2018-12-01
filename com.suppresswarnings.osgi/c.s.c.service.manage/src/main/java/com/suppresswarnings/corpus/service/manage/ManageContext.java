@@ -67,22 +67,22 @@ public class ManageContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> thingsManage = new State<Context<CorpusService>>() {
-		State<Context<CorpusService>> registerThings = new State<Context<CorpusService>>() {
+		String thingInfo = null;
+		State<Context<CorpusService>> thingsDesc = new State<Context<CorpusService>>() {
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
-				u.content().registerThings();
-				u.output("已完成注册设备: " + u.content().aiiot.typesName);
+				u.output("请输入设备的描述信息：（比如 床头灯）");
 			}
 
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				return thingsManage;
+				return thingsQR;
 			}
 
 			@Override
 			public String name() {
-				return "注册设备";
+				return "设备信息";
 			}
 
 			@Override
@@ -93,52 +93,48 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> thingsQR = new State<Context<CorpusService>>() {
-			String type = null;
-			String types = null;
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
-				if(thingsQR.name().equals(t)) {
-					types = u.content().aiiot.typesName;
-					u.output("请输入设备类型：" + types);
-				} else {
-					type = t;
-					if(!types.contains(type)) {
-						u.output("不支持该设备类型：" + type);
-						return;
-					}
-					
-					String accessToken = u.content().accessToken("AIIoT QR for " + type);
-					String scene_str = "T_AIIoT_" + time() + "_" + random();
-					//TODO lijiaming time limit
-					int seconds = (int) TimeUnit.DAYS.toSeconds(30);
-					
-					String qrCode = u.content().qrCode(accessToken, seconds, "QR_STR_SCENE", scene_str);
-					Gson gson = new Gson();
-					QRCodeTicket qrTicket = gson.fromJson(qrCode, QRCodeTicket.class);
+				thingInfo = t;
+				String scene_str = "T_AIIoT_" + time() + "_" + random();
+				String accessToken = u.content().accessToken("AIIoT QR for " + scene_str);
+				//TODO lijiaming time limit
+				int seconds = (int) TimeUnit.DAYS.toSeconds(30);
 
-					WXnews news = new WXnews();
-					news.setTitle(scene_str);
-					news.setDescription("Code:"+scene_str+", Type:"+type+"，设备启动时使用「Type,Code」注册设备，扫码绑定设备（有效期2天）");
-					news.setUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
-					news.setPicUrl(news.getUrl());
-					String json = gson.toJson(news);
-					
-					u.output("news://" + json);
-					
-					String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Type", scene_str);
-					u.content().account().put(keyType, type);
-					
-					String aiiotKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "QRCode", type, scene_str, openid());
-					u.content().account().put(aiiotKey, qrCode);
-					
-					u.content().setGlobalCommand(scene_str, "智能家居设备", openid(), time());
-				}
+				String qrCode = u.content().qrCode(accessToken, seconds, "QR_STR_SCENE", scene_str);
+				Gson gson = new Gson();
+				QRCodeTicket qrTicket = gson.fromJson(qrCode, QRCodeTicket.class);
+
+				WXnews news = new WXnews();
+				news.setTitle(scene_str);
+				news.setDescription("Code:"+scene_str+", 设备启动时使用Code注册设备，扫码绑定设备（有效期30天）");
+				news.setUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
+				news.setPicUrl(news.getUrl());
+				String json = gson.toJson(news);
+				
+				u.output("news://" + json);
+				
+				String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Creator", scene_str);
+				u.content().account().put(keyType, openid());
+				
+				String myThings = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "Creator", time());
+				u.content().account().put(myThings, scene_str);
+				
+				String aiiotKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "QRCode", scene_str);
+				u.content().account().put(aiiotKey, qrCode);
+				
+				String url2scene = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "URLScene", qrTicket.getUrl());
+				u.content().account().put(url2scene,  scene_str);
+				
+				String keyInfo = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", scene_str);
+				u.content().account().put(keyInfo, thingInfo);
+				
+				u.content().setGlobalCommand(scene_str, "智能家居设备", openid(), time());
 			}
 
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				if(type != null) return thingsManage;
-				return thingsQR;
+				return thingsManage;
 			}
 
 			@Override
@@ -155,18 +151,23 @@ public class ManageContext extends WXContext {
 		
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			String myThingsHead = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "Creator");
+			List<String> codes = new ArrayList<>();
+			u.content().account().page(myThingsHead, myThingsHead, null, 20, (x, y) ->{
+				codes.add(y);
+			});
+			
+			if(!codes.isEmpty()) {
+				u.output("你已经创建了这些设备：" + codes.toString());
+			}
 			u.output("你可以输入：");
-			u.output("    注册设备");
 			u.output("    生成二维码");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if("注册设备".equals(t)) {
-				return registerThings;
-			}
 			if("生成二维码".equals(t)) {
-				return thingsQR;
+				return thingsDesc;
 			}
 			return thingsManage;
 		}

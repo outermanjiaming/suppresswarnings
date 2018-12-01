@@ -17,14 +17,23 @@ import java.net.Socket;
 
 import org.slf4j.LoggerFactory;
 
-public abstract class Things {
+public class Things implements Cloneable {
 	public static final String FAIL = "fail";
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	Socket socket;
 	String code;
-	public Things(String code, Socket socket){
+	String desc;
+	public Things(String desc, String code, Socket socket){
+		this.desc = desc;
 		this.code = code;
 		this.socket = socket;
+		try {
+			socket.setSoTimeout(6000);
+			socket.setKeepAlive(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("[Things] error", e);
+		}
 	}
 	
 	public void setSocket(Socket socket) {
@@ -43,25 +52,24 @@ public abstract class Things {
 	public boolean isClosed(){
 		return socket == null || socket.isClosed();
 	}
-	public abstract String type();
+	
 	public String execute(String cmd) {
 		if(socket == null || socket.isClosed()) {
-			logger.info("Things ["+type()+"] socket is null or closed");
+			logger.info("Things ["+code()+"] socket is null or closed");
 			return FAIL;
 		}
-		
 		try {
-			logger.info("Things ["+type()+"] send msg: " + cmd);
+			logger.info("Things ["+code()+"] send msg: " + cmd);
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));    
 	        out.write(cmd + "\n");
 	        out.flush();
-	        logger.info("Things [" + type() + "] waiting to read status");
+	        logger.info("Things [" + code() + "] waiting to read status");
 	        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 		    String msg = in.readLine();
-            logger.info("Things [" + type() + "] " + msg);
+            logger.info("Things [" + code() + "] " + msg);
             return msg;
 		} catch (Exception e) {
-			logger.error("Things [" + type() + "] Exception while communicating, now close it", e);
+			logger.error("Things [" + code() + "] Exception while communicating, now close it", e);
 			close();
 			return FAIL;
 		}
@@ -72,15 +80,15 @@ public abstract class Things {
 		try {
 			socket.close();
 			socket = null;
-			logger.info("Things [" + type() + "] closed");
+			logger.info("Things [" + code() + "] closed");
 		} catch (Exception e) {
-			logger.error("Things [" + type() + "] Exception while close", e);
+			logger.error("Things [" + code() + "] Exception while close", e);
 		}
 		return true;
 	}
 	
 	@Override
 	public String toString() {
-		return "Things [" + type() + "," + code + "]";
+		return "Things("+desc+") [" + code + "]";
 	}
 }

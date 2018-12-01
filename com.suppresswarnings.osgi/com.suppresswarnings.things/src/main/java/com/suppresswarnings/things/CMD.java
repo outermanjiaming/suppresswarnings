@@ -7,7 +7,7 @@
  *  SuppressWarnings
  * 
  */
-package com.suppresswarnings.corpus.service.aiiot;
+package com.suppresswarnings.things;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

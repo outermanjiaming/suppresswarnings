@@ -69,6 +69,7 @@ public class Mouth {
 	}
 	
 	public void speak(AudioInputStream audioInputStream) {
+		if(audioInputStream == null) return;
 		SourceDataLine line = null;
 		try {
 	 		AudioFormat targetFormat = audioInputStream.getFormat();
@@ -82,16 +83,14 @@ public class Mouth {
 	        while ((bytesRead = audioInputStream.read(buffer, 0, length)) != -1) {
 	            line.write(buffer, 0, bytesRead);
 	        }
-	        
 	        line.flush();
-	        
-	        
+	        line.stop();
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        System.out.println("audio problem " + ex);
 	    } finally {
-			line.stop();
 	        line.close();
+	        System.out.println("line closed");
 		}
 	}
 
@@ -114,7 +113,7 @@ public class Mouth {
 				listenLock.lock();
 		        try {
 		        	System.out.println(System.currentTimeMillis() + "Mouth brain.notSpeak.signalAll();");
-		        	Thread.sleep(200);
+		        	Thread.sleep(500);
 		        	brain.notSpeak.signalAll();
 		        	System.out.println(System.currentTimeMillis() + "Mouth brain.notSpeak");
 		        } finally {

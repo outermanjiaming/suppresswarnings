@@ -32,7 +32,7 @@ import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
-public class WorkHandler {
+public class WorkHandler implements Cloneable {
 	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
 	Random random = new Random();
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");

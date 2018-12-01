@@ -9,8 +9,6 @@
  */
 package com.suppresswarnings.corpus.service.things;
 
-import java.util.List;
-
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
@@ -59,8 +57,14 @@ public class AIIoTContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> things = new State<Context<CorpusService>>() {
-		String type = null;
-		List<String> cmds = null;
+		String info = null;
+		String mine = null;
+		String ownerid = null;
+		String keyMine = null;
+		String keyInfo = null;
+		String keyOwner = null;
+		String keyCmds = null;
+		String cmds = null;
 		State<Context<CorpusService>> bind = new State<Context<CorpusService>>() {
 
 			/**
@@ -70,37 +74,45 @@ public class AIIoTContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
-				String keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
-				String mine = u.content().account().get(keyMine);
-				logger.info("[AIIoTContext] Key: " + keyMine + " => " + mine);
 				if(mine == null) {
 					//new things register
 					mine = time();
 					//3.check owner
-					String ownerKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Owner", code);
-					String ownerid = u.content().account().get(ownerKey);
 					if(ownerid != null) {
 						if(ownerid.equals(openid())) {
 							//save owner
 							u.content().account().put(keyMine, mine);
-							u.output("你绑定了该设备");
+							u.output("你绑定了该设备: " + info);
 						} else {
 							//ask the owner to accept it
 							//1.send text to owner
 							//2.ask owner first
-							u.output("请联系主人同意你绑定该设备");
+							
+							//1.send text to owner
+							u.content().sendTxtTo("ask auth aiiot", user().getNickname() + "请求控制设备:" + info, ownerid);
+							u.output("已经通知主人你想绑定该设备");
 							return;
 						}
 					} else {
 						//new things registered
-						u.content().account().put(ownerKey, openid());
+						u.content().account().put(keyOwner, openid());
 						u.content().account().put(keyMine, mine);
-						String keyCMDFormat = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "%s");
-						for(String cmd : cmds) {
-							String keyCmd = String.format(keyCMDFormat, cmd);
-							u.content().account().put(keyCmd, code);
+						String[] commands = cmds.split(";");
+						for(String cmd : commands) {
+							String keyCmd = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", cmd);
+							String exist = u.content().account().get(keyCmd);
+							if(exist != null) {
+								if(exist.contains(code)) {
+									//
+									logger.info("[AIIoTContext] no need to add");
+								} else {
+									u.content().account().put(keyCmd, exist + ";" + code);
+								}
+							} else {
+								u.content().account().put(keyCmd, code);
+							}
 						}
-						u.output("你已经绑定该设备，你可以通过命令进行控制：" + cmds.toString());
+						u.output("你绑定了该设备，你可以通过命令进行控制: " + cmds);
 					}
 				}
 			}
@@ -130,45 +142,30 @@ public class AIIoTContext extends WXContext {
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("正在解除绑定");
-				
-				String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Type", code);
-				String type = u.content().account().get(keyType);
-				if(type == null) {
-					u.output("未知设备代码");
-					return;
+				if(info == null) {
+					u.output("未知设备");
 				}
-				//2.check mine
-				List<String> cmds = u.content().aiiot.typesCMD.get(type);
-				
-				String keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
-				String mine = u.content().account().get(keyMine);
+				u.output("设备信息："  + info);
 				if(mine != null) {
 					u.content().account().del(keyMine);
 					//TODO usage inform
 					u.output("你解除了该设备");
 				}
-				
-				String ownerKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Owner", code);
-				String ownerid = u.content().account().get(ownerKey);
 				if(ownerid != null) {
 					if(ownerid.equals(openid())) {
 						//delete owner
-						u.content().account().del(ownerKey);
+						u.content().account().del(keyOwner);
 						u.output("你是设备的主人，你解除绑定之后，别人可以绑定该设备");
 					} else {
-						//1.send text to owner
-						u.content().sendTxtTo("ask auth aiiot", user().getNickname() + "请求控制设备" + type, ownerid);
 						u.output("已经通知设备的主人");
 						return;
 					}
 				}
-
-				String keyCMDFormat = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "%s");
-				for(String cmd : cmds) {
-					String keyCmd = String.format(keyCMDFormat, cmd);
-					u.content().account().del(keyCmd);
+				String left = u.content().account().get(keyMine);
+				if(left!= null) {
+					u.content().account().put(keyMine, "");
 				}
-				u.output("已经解除绑定");
+				u.output("已经解除绑定" + left);
 			}
 
 			@Override
@@ -200,19 +197,22 @@ public class AIIoTContext extends WXContext {
 			}
 			
 			//1.check type
-			String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Type", code);
-			type = u.content().account().get(keyType);
-			if(type == null) {
-				u.output("未知设备代码");
-				return;
-			}
-			cmds = u.content().aiiot.typesCMD.get(type);
-			
+			keyInfo = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code);
+			info = u.content().account().get(keyInfo);
+			u.output("设备信息：" + info);
 			u.output("你可以输入：");
 			
-			String keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
-			String mine = u.content().account().get(keyMine);
+			keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
+			mine = u.content().account().get(keyMine);
 			logger.info("[AIIoTContext] Key: " + keyMine + " => " + mine);
+			
+			keyOwner = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Owner", code);
+			ownerid = u.content().account().get(keyOwner);
+			logger.info("[AIIoTContext] owner : " + keyOwner + " => " + ownerid);
+			
+			keyCmds = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code);
+			cmds = u.content().account().get(keyCmds);
+			logger.info("[AIIoTContext] owner : " + keyOwner + " => " + ownerid);
 			if(mine == null) {
 				u.output("    绑定设备");
 			} else {

@@ -151,18 +151,14 @@ public class WXContext extends Context<CorpusService> {
 				logger.info("[WXContext] after clean: " + reply + " = " + aid);
 				if(aid != null) {
 					//TODO lijiaming: check cmd
-					String cmd = u.content().aidToCommand.get(reply);
-					if(cmd != null) {
-						String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", cmd);
-						String code = u.content().account().get(keyCMD);
-						//get my things code, which is unique for each things
-						logger.info("Key: " + keyCMD + " => " + code);
-						if(code != null) {
-							String remote = u.content().aiiot(openid(), code, cmd, t, u);
-							logger.info("[WXContext] remote: " + remote);
-						} else {
-							logger.info("[WXContext] remote: 你还没有绑定设备");
-						}
+					String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", reply);
+					String code = u.content().account().get(keyCMD);
+					//get my things code, which is unique for each things
+					logger.info("Key: " + keyCMD + " => " + code);
+					if(code != null) {
+						String remote = u.content().aiiot(openid(), code, reply, t, u);
+						logger.info("[WXContext] remote: " + remote);
+						u.output("远程状态："+ remote);
 					}
 					
 					HashSet<String> answers = u.content().aidToAnswers.get(aid);

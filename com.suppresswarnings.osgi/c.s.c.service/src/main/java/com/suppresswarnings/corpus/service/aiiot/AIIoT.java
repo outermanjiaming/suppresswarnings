@@ -13,14 +13,7 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,99 +25,40 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import org.slf4j.LoggerFactory;
 
-import com.suppresswarnings.corpus.common.CheckUtil;
+import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.backup.Config;
 
-public class AIIoT implements ThingsFactory, Closeable {
+public class AIIoT implements Closeable {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Map<String, Things> things = new ConcurrentHashMap<String, Things>();
-	public Map<String, Class<? extends Things>> types = new HashMap<>();
-	public Map<String, List<String>> typesCMD = new HashMap<>();
-	public String typesName = null;
-	
+	CorpusService service;
 	int sslPort;
 	AtomicBoolean on = new AtomicBoolean(true);
 	SSLServerSocket serverSocket;
+	public AIIoT(){}
+	public AIIoT(CorpusService service) {
+		this.service = service;
+	}
 	
 	public String remoteCall(String openid, String code, String input, String origin, Context<CorpusService> context) {
 		Things thing = things.get(code);
 		if(thing == null) {
 			logger.info("[AIIoT] remoteCall but thing is null for code: " + code);
+			context.output("该设备不存在或离线");
 			return null;
 		}
 		if(thing.isClosed()) {
 			logger.info("[AIIoT] thing is closed: " + thing.toString());
+			context.output("该设备离线");
 			return null;
 		}
-		logger.info("[AIIoT] remoteCall("+openid+","+code+", " +input+ ", " +context.state().name()+ ")");
-		Method[] methods = thing.getClass().getDeclaredMethods();
-        for(Method method : methods) {
-        	CMD annotation = method.getAnnotation(CMD.class);
-        	logger.info("[AIIoT] method: " + method + ", cmd: " + annotation);
-        	if(annotation == null) continue;
-        	if(annotation.value().equals(input)) {
-        		try {
-        			String cmd = (String) method.invoke(thing, origin);
-					return thing.execute(cmd);
-				} catch (Exception e) {
-					logger.error("[AIIoT] invoke Exception: " + method.getName(), e);
-				}
-        	}
-        }
-		return null;
-	}
-	public String registerCMD(CorpusService service) {
-		if(types.isEmpty()) {
-			registerThings();
-		}
-		types.forEach((type, klass) ->{
-			List<String> cmds = new ArrayList<>();
-			logger.info("[AIIoT] register cmd for this type: " + type);
-			Method[] methods = klass.getDeclaredMethods();
-	        for(Method method : methods) {
-	        	CMD annotation = method.getAnnotation(CMD.class);
-	        	if(annotation == null) continue;
-	        	
-	        	String cmd = annotation.value();
-	        	service.aidToCommand.put(cmd, cmd);
-	        	cmds.add(cmd);
-				String aid = service.questionToAid.get(cmd);
-				logger.info("[AIIoT] register cmd: " + cmd + ", aid " + aid);
-				if(aid != null) {
-					HashSet<String> similars = service.aidToSimilars.get(aid);
-					if(similars == null || similars.size() == 0) {
-						logger.info("[AIIoT] registerCMD find no similars: " + cmd);
-					} else {
-						for(String similar : similars) {
-							String key = CheckUtil.cleanStr(similar);
-							service.aidToCommand.put(key, cmd);
-							logger.info("[AIIoT] register " + key + " to " + cmd);
-						}
-					}
-				} else {
-					logger.info("[AIIoT] registerCMD find no such cmd: " + cmd);
-				}
-	        }
-	        typesCMD.put(type, cmds);
-		});
-		typesName = types.keySet().toString();
-		return typesName;
-	}
-	
-	//TODO lijiaming: important
-	public int registerThings() {
-		types.put(Bulb.class.getSimpleName(), Bulb.class);
-		//TODO put more
-		types.put(TrafficLight.class.getSimpleName(), TrafficLight.class);
-		
-		return types.size();
+		logger.info("[AIIoT] remoteCall("+openid+", "+code+", " +input+ ", " +context.state().name()+ ")");
+		return thing.execute(input);
 	}
 	
 	public void working() throws Exception {
-		logger.info("[AIIoT] start working, types: " + registerThings());
-		
 		Properties config = new Properties();
 		config.load(new FileInputStream(Config.serverConfigFilePath));
 		logger.info("[AIIoT] load config: " + config.size());
@@ -153,14 +87,20 @@ public class AIIoT implements ThingsFactory, Closeable {
 			try {
 				Socket socket = serverSocket.accept();
 				logger.info("[AIIoT] accept socket: " + socket);
-				//1.read from,capacity,WhichDB
 				String knock = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8")).readLine();
 				logger.info("[AIIoT] knock knock: " + knock);
 				String[] args = knock.split(",");
-				String type = args[0];
+				String description = args[0];
 				String code = args[1];
+				String commands = args[2];
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
+				Things exist = things.get(code);
+				if(exist != null) {
+					exist.close();
+					logger.info("[AIIoT] close previos things");
+				}
 				//TODO lijiaming check code
-				Things thing = newThings(type, code, socket);
+				Things thing = newThings(description, code, socket);
 				if(thing != null) {
 					things.put(code, thing);
 					logger.info("[AIIoT] new things register: " + thing.toString());
@@ -173,38 +113,15 @@ public class AIIoT implements ThingsFactory, Closeable {
 	    }
 	}
 
-
-	@Override
-	public Things newThings(String type, String code, Socket socket) {
+	public Things newThings(String desc, String code, Socket socket) {
 		if(socket == null) return null;
 		if(socket.isClosed()) {
 			logger.info("[AIIoT] socket is closed");
 			return null;
 		}
-		Class<? extends Things> clazz = types.get(type);
-		if(clazz == null) {
-			logger.error("type unknown: " + type);
-			return null;
-		}
-		try {
-			Constructor<? extends Things> cons = clazz.getConstructor(String.class, Socket.class);
-			Things things = cons.newInstance(code, socket);
-			return things;
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		logger.error("fail to create things: "+ type);
-		return null;
+		//check code 
+		Things things = new Things(desc, code, socket);
+		return things;
 	}
 
 	@Override
@@ -224,14 +141,4 @@ public class AIIoT implements ThingsFactory, Closeable {
 		}
 	}
 	
-	
-	public static void main(String[] args) {
-		Bulb thing = new Bulb("T_Code_123", null);
-		Method[] methods = thing.getClass().getDeclaredMethods();
-        for(Method method : methods) {
-        	CMD annotation = method.getAnnotation(CMD.class);
-        	System.out.println(method + " == " + annotation);
-        	if(annotation == null) continue;
-        }
-	}
 }

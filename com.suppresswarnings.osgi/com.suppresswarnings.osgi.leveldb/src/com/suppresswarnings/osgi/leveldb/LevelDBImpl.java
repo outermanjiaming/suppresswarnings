@@ -15,6 +15,8 @@ import com.leveldb.common.options.WriteOptions;
 
 public class LevelDBImpl implements LevelDB {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	ReadOptions roption = new ReadOptions();
+	WriteOptions woption = new WriteOptions();
 	boolean inited = false;
 	String dbname_;
 	DB db_;
@@ -23,12 +25,14 @@ public class LevelDBImpl implements LevelDB {
 		this.dbname_ = dbname;
 		this.inited = true;
 	}
+	
 	public LevelDBImpl(){
 		String HB_HOME = System.getenv("HB_HOME");
 		logger.info("[leveldb] default path: " + HB_HOME + "/leveldb");
 		init(HB_HOME + "/leveldb", true);
 		logger.info("[leveldb] created.");
 	}
+	
 	public LevelDBImpl(String leveldb){
 		String HB_HOME = System.getenv("HB_HOME");
 		logger.info("[leveldb] path: " + HB_HOME + leveldb);
@@ -38,7 +42,6 @@ public class LevelDBImpl implements LevelDB {
 	
 	@Override
 	public int put(String key, String value) {
-		WriteOptions woption = new WriteOptions();
 		Status s = db_.Put(woption, new Slice(key), new Slice(value));
 		if(s.ok()) return OK;
 		return 0;
@@ -55,7 +58,6 @@ public class LevelDBImpl implements LevelDB {
 	@Override
 	public String get(String key) {
 		Status status = new Status();
-		ReadOptions roption = new ReadOptions();
 		Slice ret = db_.Get(roption, new Slice(key), status);
 		if(status.ok()) return ret.toString();
 		return null;
@@ -87,6 +89,9 @@ public class LevelDBImpl implements LevelDB {
 			}
 			logger.info("[leveldb] to init a new db");
 		}
+		//TODO lijiaming: important for sync after delete, it still can get
+		roption.fill_cache = false;
+		woption.sync = true;
 		Options options = new Options();
 		options.create_if_missing = create_if_missing;
 		dbname_ = dbname;

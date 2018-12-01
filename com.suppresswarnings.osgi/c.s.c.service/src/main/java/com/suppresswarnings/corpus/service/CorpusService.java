@@ -164,18 +164,28 @@ public class CorpusService implements HTTPService, CommandProvider {
 		logger.info("[corpus] iWantJob: " + openid + ", type: " + type.name());
 		return this.workHandler.clockIn(openid, type);
 	}
+	
 	public boolean offWork(String openid) {
 		logger.info("[corpus] offWork: " + openid);
 		return this.workHandler.clockOut(openid);
 	}
-	public String registerThings(){
-		return aiiot.registerCMD(this);
-	}
+
 	public String aiiot(String openid, String code, String input, String origin, Context<CorpusService> context) {
-		return aiiot.remoteCall(openid, code, input, origin, context);
+		if(code.contains(";")) {
+			StringBuffer sb = new StringBuffer();
+			String[] codes = code.split(";");
+			for(String thing : codes) {
+				String ret = aiiot.remoteCall(openid, thing, input, origin, context);
+				sb.append(thing).append("=").append(ret).append(";");
+			}
+			return sb.toString();
+		} else {
+			return aiiot.remoteCall(openid, code, input, origin, context);
+		}
 	}
 	
 	public void activate() {
+		CorpusService that = this;
 		logger.info("[corpus] activate");
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
 			int index = 0;
@@ -215,11 +225,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[corpus] it will execute after 2s");
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
-					aiiot = new AIIoT();
+					aiiot = new AIIoT(that);
 					aiiot.working();
 					logger.info("[corpus] aiiot working");
-					registerThings();
-					logger.info("[corpus] aiiot register things");
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
 				}
@@ -398,6 +406,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void modified() {
 		logger.info("[corpus] modified.");
 	}
+	
 	public void provide(Provider<?> provider) {
 		logger.info("provider: " + provider.description());
 		String id = provider.identity();

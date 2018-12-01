@@ -11,7 +11,6 @@ package com.suppresswarnings.corpus.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -47,9 +46,9 @@ public class Ear {
 					final ReentrantLock listenLock = brain.listenLock;
 					listenLock.lock();
 			        try {
-			        	System.out.println("brain.notSpeak.await();");
+			        	System.out.println("Ear brain.notSpeak.await();");
 			        	brain.notSpeak.await();
-			        	System.out.println("brain.notSpeak");
+			        	System.out.println("Ear brain.notSpeak");
 			        } finally {
 			        	listenLock.unlock();
 			        }
@@ -73,7 +72,7 @@ public class Ear {
 						if (listen || threshold > weight) {
 							listen = true;
 							baos.write(fragment);
-							System.out.println(downSum + "\t首位:" + fragment[0] + ",末尾:" + Arrays.toString(lastbyte) + ",lenght:" + fragment.length);
+							System.out.print(".");
 							if (threshold <= weight) {
 								downSum++;
 							} else {
@@ -97,9 +96,10 @@ public class Ear {
 					final ReentrantLock speakLock = brain.speakLock;
 					speakLock.lock();
 			        try {
-			        	System.out.println("brain.notListen.signalAll();");
+			        	System.out.println("Ear brain.notListen.signalAll();");
+			        	Thread.sleep(500);
 			        	brain.notListen.signalAll();
-			        	System.out.println("brain.notListen");
+			        	System.out.println("Ear brain.notListen");
 			        } finally {
 			        	speakLock.unlock();
 			        }
