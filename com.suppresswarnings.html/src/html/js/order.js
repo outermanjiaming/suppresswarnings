@@ -4,7 +4,7 @@ function toggleordergoods(obj) {
 }
 
 function timestampToTime(timestamp) {
-    var date = new Date(timestamp);
+    var date = new Date(Number(timestamp));
     var Y = date.getFullYear() + '-';
     var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
     var D = date.getDate() + ' ';
