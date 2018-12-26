@@ -2,6 +2,18 @@ function toggleordergoods(obj) {
 	var goods = $(obj).parent().siblings(".order_goods")[0]
 	$(goods).slideToggle()
 }
+
+function timestampToTime(timestamp) {
+    var date = new Date(timestamp);
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = date.getDate() + ' ';
+    var h = date.getHours() + ':';
+    var m = date.getMinutes() + ':';
+    var s = date.getSeconds();
+    return Y+M+D+h+m+s;
+}
+
 function addorder(order) {
 	var myorders = $("#myorders")
 	var orderinfo = '<div class="order_info">' +
@@ -10,8 +22,8 @@ function addorder(order) {
     	'收货人：<span>' + order.username + '</span><br/>'+
     	'地址：<span>' + order.address + '</span><br/>'+
     	'手机：<span>' + order.mobile + '</span><br/>'+
-    	'备注：<span>' + order.comment + '</span><br/>'+
-    	'时间：<span>' + order.time + '</span><br/>'
+    	'备注：<span>' + (order.comment == undefined ? "无" : order.comment) + '</span><br/>'+
+    	'时间：<span>' + timestampToTime(order.time) + '</span><br/>'
     if(order.state == "Paid") {
     	orderinfo = orderinfo +'状态：<span style="color:green;">已支付</span><br/>'
     } else if(order.state == "Closed"){
