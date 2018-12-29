@@ -23,9 +23,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class Mouth {
 	Brain brain;
-	
+	Baidu baidu;
 	public Mouth(Brain brain) {
 		this.brain = brain;
+		this.baidu = new Baidu();
 	}
 
 	public void speak(String waveFilePath){
@@ -109,6 +110,9 @@ public class Mouth {
 		        }
 				byte[] listen = brain.memory.take();
 				speak(listen);
+				String words = baidu.listen(listen);
+				System.err.println(";;;;;;;;;;;;;;;;;;;;;;;;;;  "+ words);
+				
 				final ReentrantLock listenLock = brain.listenLock;
 				listenLock.lock();
 		        try {

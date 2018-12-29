@@ -11,6 +11,8 @@ package com.suppresswarnings.corpus.common;
 
 import java.io.File;
 
+import org.json.JSONObject;
+
 import com.baidu.aip.speech.AipSpeech;
 import com.baidu.aip.speech.TtsResponse;
 import com.baidu.aip.util.Util;
@@ -29,6 +31,14 @@ public class Baidu {
 	public static void main(String[] args) {
 		Baidu baidu = new Baidu();
 		baidu.speak("这是做什么的东西？");
+	}
+	
+	public String listen(byte[] data) {
+		JSONObject res = client.asr(data, "pcm", 16000, null);
+		if(res.getInt("err_no") == 0) {
+			return (String) res.getJSONArray("result").get(0);
+		}
+		return "";
 	}
 	
 	public void speak(String words) {
