@@ -12,7 +12,28 @@
   <link rel="stylesheet" href="css/suppresswarnings.css">
 
   <style type="text/css">
-      pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
+  .copyright {
+	padding: 50px 10px;
+	text-align: center;
+	border-top: 1px solid #CCC;
+	color: #FFF;
+}
+
+.copyright p {
+	line-height: 25px;
+}
+
+.copyright a {
+	font-family: 'Montserrat', sans-serif;
+	color: #FFF;
+	font-weight: 600;
+}
+
+.copyright a:hover {
+	color: #000;
+}
+
+pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
 </head>
 <body>
@@ -44,11 +65,11 @@
       <tbody>
       <tr>
      	 <td>
-     	 	<img style="width:140px;height:140px;" src="/suppresswarnings.jpg" alt="微信公众号：素朴网联"/>
+     	 	<img style="width:140px;height:140px;" id="index_image" src="/suppresswarnings.jpg" alt="微信公众号：素朴网联"/>
      	 </td>
       </tr>
       	<tr>
-          <td style="border-bottom: 1px solid #5cb85c;">微信公众号：素朴网联</td>
+          <td style="border-bottom: 1px solid #5cb85c;"><span id="index_text">微信公众号：素朴网联</span></td>
         </tr>
       </tbody>
     </table>
@@ -75,6 +96,10 @@
        </a>
      </div>
    </footer>
+   
+   <div class="copyright">
+	<p>© 2018 素朴网联. All Rights Reserved | Created by <a href="http://SuppressWarnings.com/" target="_blank"> 素朴网联 </a><a href="#home" class="to-top scroll" title="To Top"><span class="fa fa-chevron-up"></span></a></p>
+   </div>
 
 <!-- JavaScript Includes -->
 <script type="text/javascript" src="js/jquery.min.js"></script>
