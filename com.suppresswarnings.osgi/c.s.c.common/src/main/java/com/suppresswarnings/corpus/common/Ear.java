@@ -23,13 +23,13 @@ import javax.sound.sampled.TargetDataLine;
 public class Ear {
 	ByteArrayOutputStream cache;
 	Brain brain;
-	
-	public Ear(Brain brain){
+
+	public Ear(Brain brain) {
 		this.brain = brain;
 		this.cache = new ByteArrayOutputStream();
 	}
-	
-	public void listen(){
+
+	public void listen() {
 		try {
 			AudioFormat audioFormat = new AudioFormat(16000, 16, 1, true, false);
 			DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
@@ -42,18 +42,15 @@ public class Ear {
 				ByteArrayInputStream bais = null;
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				AudioInputStream ais = null;
-				if(brain.memory.size() > 0) {
-					final ReentrantLock listenLock = brain.listenLock;
-					listenLock.lock();
-			        try {
-			        	System.out.println("Ear brain.notSpeak.await();");
-			        	brain.notSpeak.await();
-			        	System.out.println("Ear brain.notSpeak");
-			        } finally {
-			        	listenLock.unlock();
-			        }
-				}
+				final ReentrantLock listenLock = brain.lock;
+				listenLock.lock();
 				try {
+					if (brain.memory.size() > 0) {
+						System.out.println("Ear brain.notSpeak.await();");
+						brain.notSpeak.await();
+						System.out.println("Ear brain.notSpeak");
+					}
+
 					targetDataLine.open(audioFormat);
 					targetDataLine.start();
 					byte[] fragment = new byte[1024];
@@ -63,9 +60,10 @@ public class Ear {
 					boolean listen = false;
 					while (flag) {
 						targetDataLine.read(fragment, 0, fragment.length);
-						if(!ready) {
+						if (!ready) {
 							ready = true;
 							System.out.println("Ready !");
+							brain.ready();
 						}
 						int threshold = Math.abs(fragment[fragment.length - 1]);
 						System.arraycopy(fragment, fragment.length - 16, lastbyte, 0, 16);
@@ -93,19 +91,13 @@ public class Ear {
 					flag = false;
 					brain.memory.put(cache.toByteArray());
 					cache.reset();
-					final ReentrantLock speakLock = brain.speakLock;
-					speakLock.lock();
-			        try {
-			        	System.out.println("Ear brain.notListen.signalAll();");
-			        	Thread.sleep(500);
-			        	brain.notListen.signalAll();
-			        	System.out.println("Ear brain.notListen");
-			        } finally {
-			        	speakLock.unlock();
-			        }
-				} catch (Exception e) {
-					e.printStackTrace();
+					System.out.println("Ear brain.notListen.signalAll();");
+					Thread.sleep(500);
+					brain.notListen.signal();
+					System.out.println("Ear brain.notListen");
 				} finally {
+					listenLock.unlock();
+					System.out.println("Ear unlock");
 					try {
 						ais.close();
 						bais.close();
@@ -115,7 +107,6 @@ public class Ear {
 					}
 				}
 				
-				System.out.println("===================");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

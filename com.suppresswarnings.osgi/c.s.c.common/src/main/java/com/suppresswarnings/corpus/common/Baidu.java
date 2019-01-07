@@ -34,10 +34,15 @@ public class Baidu {
 	}
 	
 	public String listen(byte[] data) {
-		JSONObject res = client.asr(data, "pcm", 16000, null);
-		if(res.getInt("err_no") == 0) {
-			return (String) res.getJSONArray("result").get(0);
+		try {
+			JSONObject res = client.asr(data, "pcm", 16000, null);
+			if(res.getInt("err_no") == 0) {
+				return (String) res.getJSONArray("result").get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
 		return "";
 	}
 	
