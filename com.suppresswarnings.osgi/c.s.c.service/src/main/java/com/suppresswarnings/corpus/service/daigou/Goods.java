@@ -121,5 +121,8 @@ public class Goods {
 	public String getState() {
 		return state == null ? "" : state;
 	}
+	public boolean isDeleted() {
+		return "DELETE".equals(state);
+	}
 	
 }

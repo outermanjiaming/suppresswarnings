@@ -97,12 +97,15 @@ public class NN implements AI, Serializable {
 	public void train(double[][] inputs, double[][] outputs) {
 		int size = inputs.length;
 		int step = 0;
+		long start;
 		while(step ++ < max) {
+			start = System.currentTimeMillis();
 			double err = 0;
 			for(int i=0;i<size;i++) {
 				err += train(inputs[i], outputs[i]);
 			}
-			System.out.println(step + "\tErr: " + err);
+			long time = System.currentTimeMillis() - start;
+			System.out.println(time + "ms\t" + step + "\tErr: " + err);
 			if(err < tolerate) {
 				break;
 			}

@@ -93,6 +93,7 @@ public class AIIoT implements Closeable {
 				String description = args[0];
 				String code = args[1];
 				String commands = args[2];
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code), description);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
 				Things exist = things.get(code);
 				if(exist != null) {

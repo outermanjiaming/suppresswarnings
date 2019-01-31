@@ -26,12 +26,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.imageio.ImageIO;
-
 public class Thinker {
 	private String serializeTo;
+	private AI nn;
 	public Thinker(){
-		this.serializeTo = "/Users/lijiaming/Learn/meyou/more.nn";
+		this.serializeTo = "/Users/lijiaming/Learn/meyou/20190125.nn";
 	}
 	public Thinker(String nn) {
 		this.serializeTo = nn;
@@ -63,8 +62,8 @@ public class Thinker {
 	class Supply implements Spliterator<Piece> {
 		int startx = 0;
 		int starty = 0;
-		int width = 100;
-		int height = 240;
+		int width;
+		int height;
 		int stepx;
 		int stepy;
 		int w;
@@ -109,7 +108,7 @@ public class Thinker {
 					starty =0;
 				}
 			}
-			int[][] frame = frame(width, height, startx, starty, D);
+			int[][] frame = Util.frame(width, height, startx, starty, D);
 			size --;
 			Piece p = new Piece(frame, startx, starty);
 			action.accept(p);
@@ -175,53 +174,20 @@ public class Thinker {
 		}
 	}
 	
-	public static int[][] frame(int w, int h, int x, int y, int[][] image) {
-		int width = image.length;
-		int height = image[0].length;
-		int[][] frame = new int[w][h];
-		for(int i=0;i<w;i++) {
-			if(i+x >= width) {
-				break;
-			}
-			for(int j=0;j<h;j++) {
-				if(j+y >= height) {
-					break;
-				}
-				frame[i][j] = image[i+x][j+y];
-			}
-		}
-		return frame;
-	}
-	public static int[][] readImage(File file) {
-		try {
-			BufferedImage bi = ImageIO.read(file);
-			int width = bi.getWidth();
-			int height = bi.getHeight();
-			int[][] pixels = new int[width][height];
-			for(int x =0;x <width;x ++) {
-				for(int y=0;y<height;y++) {
-					pixels[x][y] = bi.getRGB(x, y);
-				}
-			}
-			return pixels;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-	}
 	public int decide(BufferedImage bi) {
-		
+		long t1 = System.currentTimeMillis();
 		List<List<Double>> lists = slide(readImage(bi));
+		long t2 = System.currentTimeMillis();
 		List<Double> arr = lists.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
+		long t3 = System.currentTimeMillis();
 		D d = new D(arr, new double[]{0,0});
-		AI nn = (AI)Util.deserialize(serializeTo);
+		long t4 = System.currentTimeMillis();
+		if(nn==null) nn = (AI)Util.deserialize(serializeTo);
+		long t5 = System.currentTimeMillis();
 		double[] y = nn.test(d.x);
-		if(y[0] > y[1]) {
-			return 0;
-		} else {
-			return 1;
-		}
+		long t6 = System.currentTimeMillis();
+		System.out.println(String.format("++++++++++++++++++++++++++++++++++++++\nslide:%s\tflatMap:%s\tserialize:%s\ttest:%s\t++++++++++++++++++++++++++++++++++++++", (t2-t1), (t3-t2), (t5-t4),(t6-t5)));
+		return Util.argmax(y);
 	}
 	public static int[][] readImage(BufferedImage bi) {
 		int width = bi.getWidth();
@@ -252,12 +218,13 @@ public class Thinker {
 		});
 		return list;
 	}
+	
 	public List<List<Double>> slide(File file) {
-		int[][] D = readImage(file);
+		int[][] D = Util.readImage(file);
 		return slide(D);
 	}
+	
 	public void decide() throws IOException{
-		String serializeTo = "/Users/lijiaming/Learn/meyou/meyou.nn";
 		Files.list(Paths.get("/Users/lijiaming/Learn/meyou/test/"))
 		.peek(path -> System.out.println(path))
 		.filter(path -> path.toString().endsWith("jpg"))
@@ -275,10 +242,10 @@ public class Thinker {
 		});
 	}
 	public void learn() throws IOException{
-		String serializeTo = "/Users/lijiaming/Learn/meyou/more.nn";
-		String[] yesno = {"/Users/lijiaming/Learn/meyou/me/", "/Users/lijiaming/Learn/meyou/you/"};
-		double[] yes = {1,0};
-		double[] no  = {0,1};
+		String[] yesno = {"/Users/lijiaming/Learn/meyou/me/", "/Users/lijiaming/Learn/meyou/you/", "/Users/lijiaming/Learn/meyou/none/"};
+		double[] yes   = {1,0,0};
+		double[] no    = {0,1,0};
+		double[] none  = {0,0,1};
 		int epochs = 10000;
 		System.out.println("Start to learn us");
 		List<D> all = new ArrayList<D>();
@@ -303,6 +270,16 @@ public class Thinker {
 			all.add(d);
 		});
 		
+		Files.list(Paths.get(yesno[2]))
+		.peek(file -> System.out.println(file))
+		.filter(path -> path.toString().endsWith("jpg"))
+		.map(path -> slide(path.toFile()))
+		.flatMap(list -> list.stream())
+		.forEach(arr -> {
+			D d = new D(arr, none);
+			all.add(d);
+		});
+		
 		D d0 = all.get(0);
 		
 		Collections.shuffle(all);
@@ -324,7 +301,7 @@ public class Thinker {
 			}
 			long time = System.currentTimeMillis();
 			
-			System.out.println(serializeTo + new Date(time) + " [" +(time - start) + "ms] " + "\t" + n + "\tTotal Error: " + error);
+			System.out.println(serializeTo + new Date(time) + " [" +(time - start) /1000 + "s] " + all.size() + "\t" + n + "\tTotal Error: " + error);
 			if(error < 1e-4) break;
 			if(n % 10 == 0) {
 				if(new File(serializeTo).exists()){

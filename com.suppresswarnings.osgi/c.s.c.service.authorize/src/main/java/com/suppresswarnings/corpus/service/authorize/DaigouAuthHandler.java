@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.wx.WXnews;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class DaigouAuthHandler implements AuthHandler {
@@ -65,7 +67,10 @@ public class DaigouAuthHandler implements AuthHandler {
 					try {
 						List<String> lines = Files.lines(Paths.get(daigou.getAbsolutePath())).map(line -> {
 							if(line.contains("agentlijiaming")) {
-								return line.replace("agentlijiaming", userid);
+								line =  line.replace("agentlijiaming", userid);
+							}
+							if(line.contains("daigou.html")) {
+								line = line.replaceAll("daigou.html", filename);
 							}
 							return line;
 						}).collect(Collectors.toList());
@@ -82,7 +87,13 @@ public class DaigouAuthHandler implements AuthHandler {
 				StringBuffer sb = new StringBuffer("你的专属代购页面\n");
 				sb.append("http://suppresswarnings.com/" + filename);
 				sb.append("\n用户通过你的专属代购页面购买价格较低，用户下单并支付成功之后你将得到利润。");
-				service.content().sendTxtTo("DaigouAgent", sb.toString(), userid);
+				WXnews news = new WXnews();
+				news.setTitle("你的专属代购页面");
+				news.setDescription("用户通过你的专属代购页面购买价格较低，用户下单并支付成功之后你将得到利润。");
+				news.setUrl("http://suppresswarnings.com/" + filename);
+				news.setPicUrl("http://suppresswarnings.com/ads.png");
+				Gson gson = new Gson();
+				service.content().sendNewsTo("DaigouAgent", gson.toJson(news), userid);
 			}
 			
 			return true;

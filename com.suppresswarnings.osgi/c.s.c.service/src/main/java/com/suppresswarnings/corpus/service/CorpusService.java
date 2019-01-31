@@ -85,7 +85,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
-	public ExecutorService threadpool = new ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
+	public ExecutorService threadpool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
@@ -243,7 +243,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
 					
-					workHandler = new WorkHandler(CorpusService.this, Const.WXmsg.openid);
+					workHandler = new WorkHandler(that, Const.WXmsg.openid);
 					workHandler.working();
 					String quizId = getTodoQuizid();
 					if(quizId != null) {
@@ -264,7 +264,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[corpus] it will execute after 2s");
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
-					daigouHandler = new DaigouHandler(CorpusService.this);
+					daigouHandler = new DaigouHandler(that);
 					ready.set(true);
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
@@ -1956,7 +1956,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public boolean debug(){
 		return "on".equals(data().get(String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON")));
 	}
-	
+	public String sendNewsTo(String business, String newsJson, String openid) {
+		if(newsJson == null || openid == null || openid.length() < 2 || newsJson.length() < 2 ) {
+			return null;
+		}
+		String json = "{\"touser\":\""+openid+"\",\"msgtype\":\"news\",\"news\":{\"articles\": ["+newsJson+"]}}";
+		String accessToken = accessToken(business);
+		String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + accessToken;
+		CallablePost post = new CallablePost(url, json);
+		try {
+			String result = post.call();
+			logger.info("[corpus] send news to: " + openid + ", newsJson: " + newsJson + ", result: " + result);
+			return result;
+		} catch (Exception e) {
+			logger.error("[corpus] fail to send news to user: " + openid, e);
+			return null;
+		}
+    }
+
 	public String sendTxtTo(String business, String message, String openid) {
 		if(message == null || openid == null || openid.length() < 2 || message.length() < 2 ) {
 			return null;

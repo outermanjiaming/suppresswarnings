@@ -141,16 +141,16 @@ public class ShopContext extends WXContext {
 			if(status == ANSWER) {
 				if(itr.hasNext()) {
 					current = itr.next();
-					u.appendLine(current.value());
+					u.output(current.value());
 					String questionKey = String.join(Const.delimiter, Const.Version.V1, openid(), current.key(), qrScene);
 					String existAnswer = u.content().account().get(questionKey);
 					if(existAnswer != null) {
-						u.appendLine("(旧：" + existAnswer + "，将会被覆盖)");
+						u.output("(旧：" + existAnswer + "，将会被覆盖)");
 					}
 					logger.info("[lijiaming] shop: " + questionKey + " = " + existAnswer);
 					status = QUESTION;
 				} else {
-					u.appendLine("现在你可以把二维码打印出来给顾客使用了。\n" + qrcode);
+					u.output("现在你可以把二维码打印出来给顾客使用了。\n" + qrcode);
 					status = DONE;
 				}
 			}

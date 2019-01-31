@@ -53,6 +53,7 @@
       <module>c.s.c.service.manage</module>
       <module>com.suppresswarnings.things</module>
       <module>c.s.c.service.aiiot</module>
+      <module>c.s.c.service.daigou</module>
   </modules>
   <dependencies>
   		<dependency>

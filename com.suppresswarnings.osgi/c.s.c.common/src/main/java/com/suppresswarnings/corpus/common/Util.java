@@ -265,6 +265,44 @@ public class Util {
 		double[][] ave = averagepooling(result, 2, 2, 2);
 		print(ave);
 	}
+	
+	public static int[][] frame(int w, int h, int x, int y, int[][] image) {
+		int width = image.length;
+		int height = image[0].length;
+		int[][] frame = new int[w][h];
+		for(int i=0;i<w;i++) {
+			if(i+x >= width) {
+				break;
+			}
+			for(int j=0;j<h;j++) {
+				if(j+y >= height) {
+					break;
+				}
+				frame[i][j] = image[i+x][j+y];
+			}
+		}
+		return frame;
+	}
+	
+	public static int[][] readImage(File file) {
+		try {
+			BufferedImage bi = ImageIO.read(file);
+			int width = bi.getWidth();
+			int height = bi.getHeight();
+			int[][] pixels = new int[width][height];
+			for(int x =0;x <width;x ++) {
+				for(int y=0;y<height;y++) {
+					pixels[x][y] = bi.getRGB(x, y);
+				}
+			}
+			return pixels;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
 	public static double print(double[] array) {
 		double max = 0;
 		int index = 0;

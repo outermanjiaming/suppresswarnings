@@ -113,14 +113,18 @@ public class Brain {
 	public static final String DIR = "/Users/lijiaming/Learn/meyou/test/";
 	public void see(BufferedImage image) {
 		this.image = image;
-		System.out.println("I can see this: " + image);
 		this.face.setTitle("让我想一想");
 		long time = System.currentTimeMillis();
 		int i = thinker.decide(image);
-		String name = "";
+		String name;
 		if(i==0) name = "李嘉铭";
-		else name = "胡兰兰";
+		else if(i==1) name = "胡兰兰";
+		else name = "背景";
 		
+		this.mouth.speak("这是");
+		this.mouth.speak(name);
+		
+		System.out.println("I can see this: " + name);
 		time = System.currentTimeMillis() - time;
 		time = time / 1000;
 		this.face.setTitle(time + "s " + name);
