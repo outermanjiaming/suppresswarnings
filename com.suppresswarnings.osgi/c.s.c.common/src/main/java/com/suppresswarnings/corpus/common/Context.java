@@ -27,10 +27,17 @@ public abstract class Context<T> implements Predicate<String> {
 	StringBuffer output = new StringBuffer();
 	String time;
 	String rand;
+	TTL ttl;
 	public Context(T ctx) {
 		this.content = ctx;
 		this.time = "" + System.currentTimeMillis();
 		this.rand = "" + new Random().nextInt(1000);
+	}
+	public void setTTL(TTL ttl) {
+		this.ttl = ttl;
+	}
+	public TTL ttl() {
+		return this.ttl;
 	}
 	public T content() {
 		return content;

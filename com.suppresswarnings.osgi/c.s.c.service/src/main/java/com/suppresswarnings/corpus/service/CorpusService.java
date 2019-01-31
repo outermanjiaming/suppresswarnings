@@ -2068,10 +2068,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		contexts.put(openid, context);
 	}
 	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
-		expire(openid, timeToLiveMillis);
+		TTL e = expire(openid, timeToLiveMillis);
 		contexts.put(openid, context);
+		context.setTTL(e);
 	}
-	public void expire(String name, long timeToLiveMillis) {
+	public TTL expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
 		TTL old = secondlife.remove(name);
@@ -2096,6 +2097,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			});
 			ttl.offer(e);
 		}
+		return e;
 	}
 	
 	public void clear(){
