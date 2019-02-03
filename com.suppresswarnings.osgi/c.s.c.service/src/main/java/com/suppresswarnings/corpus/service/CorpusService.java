@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -65,6 +66,7 @@ import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
 import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.work.WorkHandler;
+import com.suppresswarnings.corpus.service.wx.ATuser;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
 import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
@@ -86,6 +88,22 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
 	public ExecutorService threadpool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
+	public ThreadPoolExecutor atUserPool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100000), new ThreadFactory() {
+		int index = 0;
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "@User-" + index++);
+		}
+	}, new RejectedExecutionHandler(){
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			if(r instanceof ATuser) {
+				ATuser user = (ATuser) r;
+				user.save();
+			}
+		}
+	});
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
@@ -141,6 +159,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
+	
+	public void atUser(String openid, String message) {
+		ATuser user = new ATuser(this, openid, message, System.currentTimeMillis());
+		atUserPool.execute(user);
+	}
+	
 	public void informUsers(String openid, String message) {
 		threadpool.execute(new Runnable() {
 			
@@ -183,7 +207,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return aiiot.remoteCall(openid, code, input, origin, context);
 		}
 	}
-	
+	public String toJson(Object obj) {
+		return gson.toJson(obj);
+	}
+	public void log(String clazz, String info) {
+		logger.info("[" + clazz + "] " + info);
+	}
 	public void activate() {
 		CorpusService that = this;
 		logger.info("[corpus] activate");
@@ -1652,11 +1681,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
 			String result = map.get("result_code");
+			if("SUCCESS".equals(result)) {
+				atUser(openid, "您已支付成功。\n谢谢您的信任！\n订单ID：" + orderid);
+			} else {
+				atUser(openid, "支付失败。\n稍后再试！\n订单ID：" + orderid);
+			}
 			String transactionid = map.get("transaction_id");
 			String goodsid = map.get("attach");
 			
 			if(orderid.startsWith("DG")) {
-				daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+				if("SUCCESS".equals(result)) {
+					daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+					daigouHandler.afterPaidAtAgentAndUser(orderid, openid);
+				} else {
+					daigouHandler.updateOrderState(orderid, openid, Order.State.Failed);
+				}
 			} else {
 				String keyState = String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State");
 				String oldState = account().get(keyState);
@@ -1666,7 +1705,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 					if(orderid.startsWith("Auth")) {
 						String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
 						account().put(paidKey, newState);
+						//authorize 
+						if(goodsid != null) {
+							String authKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", goodsid, openid);
+							String value = System.currentTimeMillis() + "." + orderid;
+							account().put(authKey, value);
+							logger.info("[notify] lijiaming: authorize " + openid + " with " + goodsid + ", orderid: " + orderid);
+						}					
 					}
+				} else {
+					logger.error("[notify] 支付失败！" + map);
 				}
 				logger.info("[notify] new state: " + newState + ", old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid + ", transactionid: " + transactionid);
 				account().put(keyState, newState);

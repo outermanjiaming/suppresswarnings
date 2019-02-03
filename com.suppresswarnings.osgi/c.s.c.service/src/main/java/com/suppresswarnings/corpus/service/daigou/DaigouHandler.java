@@ -517,6 +517,14 @@ public class DaigouHandler {
 		service.account().put(keyState, paid);
 	}
 	
+	public void afterPaidAtAgentAndUser(String orderid, String openid) {
+		Order order = getByOpenidOrderid(openid, orderid);
+		List<Cart> carts = order.getCarts();
+		carts.stream().map(cart -> cart.getAgentid()).filter(agent -> agent != null).distinct().forEach(agent ->{
+			service.atUser(agent, "[通知]尊敬的代理：用户支付成功！订单ID：" + order.getOrderid());
+		});
+	}
+	
 	public Order getByOpenidOrderid(String openid, String orderid) {
 		Order order = new Order();
 		order.setOpenid(openid);
