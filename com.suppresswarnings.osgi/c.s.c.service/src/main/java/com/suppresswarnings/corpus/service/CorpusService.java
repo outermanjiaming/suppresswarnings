@@ -79,6 +79,8 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class CorpusService implements HTTPService, CommandProvider {
 	public static final String SUCCESS = "success";
+	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
+	
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Format format = new Format(Const.WXmsg.msgFormat);
 	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
@@ -180,6 +182,25 @@ public class CorpusService implements HTTPService, CommandProvider {
 		this.workHandler.clockOut(openId);
 		return this.workHandler.newJob(quiz, quizId, openId);
 	}
+	
+	public void connectChat(String wxid, String openid, String ask) {
+		java.util.Set<String> set = users.keySet();
+		for(String userid : set) {
+			if(openid.equals(userid)) {
+				logger.info("[connect chat] myself");
+				continue;
+			}
+			String ret = sendTxtTo("connect chat", "[来自素友]" + ask, userid);
+			if(SENDOK.equals(ret)) {
+				ChatContext chatContext = new ChatContext(wxid, userid, openid, this);
+				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(5));
+			} else {
+				WXuser wXuser = users.remove(userid);
+				logger.info("[connect chat] fail to connect user: " + wXuser.toString());
+			}
+		}
+	}
+	
 	public void forgetIt(String openid) {
 		logger.info("[corpus] forgetIt: " + openid);
 		this.workHandler.forgetIt(openid);
@@ -1936,6 +1957,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void subscribe(String openId, String time) {
 		String userKey = String.join(Const.delimiter, Const.Version.V1, "User", openId);
 		account().put(userKey, time);
+		userOnline(openId);
+	}
+	public void userOnline(String openid) {
+		if(users.containsKey(openid)) {
+			WXuser user = getWXuserByOpenId(openid);
+			logger.info("[user online] already online: " + user.toString());
+		}
+		WXuser user = getWXuserByOpenId(openid);
+		users.put(openid, user);
+		logger.info("[user online] new online: " + user.toString());
 	}
 	public String globalCommand(String sceneOrCommand) {
 		String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", sceneOrCommand.toLowerCase());

@@ -116,4 +116,9 @@ public class WXuser {
 	public void setQr_scene_str(String qr_scene_str) {
 		this.qr_scene_str = qr_scene_str;
 	}
+	@Override
+	public String toString() {
+		return "WXuser [subscribe=" + subscribe + ", openid=" + openid + ", nickname=" + nickname + ", sex=" + sex
+				+ "]";
+	}
 }

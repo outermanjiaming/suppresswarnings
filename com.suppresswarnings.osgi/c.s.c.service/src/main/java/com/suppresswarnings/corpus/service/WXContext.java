@@ -200,6 +200,7 @@ public class WXContext extends Context<CorpusService> {
 					u.output(result);
 					count = bear;
 				} else {
+					u.content().connectChat(wxid(), openid(), t);
 					//count to 2
 					//fetch a task todo
 					count --;
@@ -282,6 +283,7 @@ public class WXContext extends Context<CorpusService> {
 		this.openid = openid;
 		this.state = init;
 		this.quizId = ctx.getTodoQuizid();
+		ctx.userOnline(openid);
 	}
 	public WXuser user() {
 		if(user == null) user = content().getWXuserByOpenId(openid());
