@@ -30,7 +30,7 @@ public class Thinker {
 	private String serializeTo;
 	private AI nn;
 	public Thinker(){
-		this.serializeTo = "/Users/lijiaming/Learn/meyou/20190125.nn";
+		this.serializeTo = "/Users/lijiaming/Learn/meyou/more.nn";
 	}
 	public Thinker(String nn) {
 		this.serializeTo = nn;

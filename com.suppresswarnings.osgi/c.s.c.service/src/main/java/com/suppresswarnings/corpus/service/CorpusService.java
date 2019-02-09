@@ -185,18 +185,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 	
 	public void connectChat(String wxid, String openid, String ask) {
 		java.util.Set<String> set = users.keySet();
+		WXuser myself = getWXuserByOpenId(openid);
+		logger.info("[coonect chat] users set: " + set);
 		for(String userid : set) {
 			if(openid.equals(userid)) {
 				logger.info("[connect chat] myself");
 				continue;
 			}
-			String ret = sendTxtTo("connect chat", "[来自素友]" + ask, userid);
+			String ret = sendTxtTo("connect chat", "["+myself.getNickname()+"]" + ask, userid);
+			WXuser user = users.remove(userid);
+			logger.info("[coonect chat] after remove, users set: " + users.keySet());
 			if(SENDOK.equals(ret)) {
 				ChatContext chatContext = new ChatContext(wxid, userid, openid, this);
-				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(5));
+				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(3));
+				logger.info("[connect chat] sent msg to user, ready to connect chat: " + user);
+				break;
 			} else {
-				WXuser wXuser = users.remove(userid);
-				logger.info("[connect chat] fail to connect user: " + wXuser.toString());
+				logger.info("[connect chat] fail to connect user: " + user);
 			}
 		}
 	}
@@ -336,7 +341,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 						if(out.marked()) {
 							logger.info("[corpus run] remove key: " + out.key());
 							secondlife.remove(out.key());
-							contexts.remove(out.key());
+							Context<?> context = contexts.remove(out.key());
+							context.exit();
 							return true;
 						} else {
 							out.mark();
@@ -2177,26 +2183,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			ttl.offer(e);
 		}
 		return e;
-	}
-	
-	public void clear(){
-		long now = System.currentTimeMillis();
-		logger.info("[corpus] start clean TTL("+ttl.size()+")");
-		ttl.removeIf(out -> {
-			if(out.ttl() < now) {
-				if(out.marked()) {
-					logger.info("[corpus] remove key: " + out.key());
-					secondlife.remove(out.key());
-					contexts.remove(out.key());
-					return true;
-				} else {
-					out.mark();
-					secondlife.put(out.key(), out);
-				}
-			}
-			return false;
-		});
-		logger.info("[corpus] after clean TTL("+ttl.size()+")");
 	}
 	
 	public static void main(String[] args) {

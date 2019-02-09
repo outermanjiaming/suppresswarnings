@@ -10,6 +10,7 @@
 package com.suppresswarnings.corpus.common;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,13 @@ public abstract class Context<T> implements Predicate<String> {
 		this.ttl = ttl;
 	}
 	public TTL ttl() {
-		return this.ttl;
+		return ttl;
+	}
+	public void refresh(){
+		if(ttl == null) return;
+		if(ttl.marked()) {
+			this.ttl.increase(TimeUnit.MINUTES.toMillis(3));
+		}
 	}
 	public T content() {
 		return content;
@@ -62,19 +69,6 @@ public abstract class Context<T> implements Predicate<String> {
 		this.output.append(string);
 	}
 	
-	/**
-	 * use output instead as the same function append line
-	 * @param line
-	 * @return
-	 */
-	@Deprecated
-	public Context<T> appendLine(String line) {
-		if(this.output.length() > 0) {
-			this.output.append("\n");
-		}
-		this.output.append(line);
-		return this;
-	}
 	public State<Context<T>> state(){
 		return state;
 	}
@@ -110,6 +104,7 @@ public abstract class Context<T> implements Predicate<String> {
 			if(exit(t, "exit()")) {
 				state = exit();
 			} else {
+				refresh();
 				state = state.apply(t, this);
 			}
 			logger.info(random() + "->state:" + state);

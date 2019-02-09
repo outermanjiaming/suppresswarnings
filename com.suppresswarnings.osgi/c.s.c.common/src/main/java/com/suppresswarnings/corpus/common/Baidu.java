@@ -29,8 +29,8 @@ public class Baidu {
     public static final String SECRET_KEY = System.getProperty("baidu.secret.key");
     public static String STORE_PATH = System.getProperty("mp3.store.path");
 	public static void main(String[] args) {
-		Baidu baidu = new Baidu();
-		baidu.speak("这是做什么的东西？");
+		Mouth mouth = new Mouth(null);
+		mouth.speak("这是什么玩意的？");
 	}
 	
 	public String listen(byte[] data) {

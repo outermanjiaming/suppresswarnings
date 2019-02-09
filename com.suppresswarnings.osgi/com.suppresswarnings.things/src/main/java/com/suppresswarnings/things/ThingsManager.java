@@ -87,7 +87,7 @@ public class ThingsManager {
 			out.flush();
 			InputStream is = sslsocket.getInputStream();
 			InputStreamReader reader = new InputStreamReader(is,"UTF-8");
-			while(!sslsocket.isClosed()) {
+			while(sslsocket.isConnected() && !sslsocket.isClosed()) {
 			    try {
 					BufferedReader in = new BufferedReader(reader);
 					String msg = in.readLine();
@@ -98,6 +98,7 @@ public class ThingsManager {
 					out.write(ret + "\n");
 					out.flush();
 				} catch (Exception e) {
+					sslsocket.close();
 					e.printStackTrace();
 				}
 			}

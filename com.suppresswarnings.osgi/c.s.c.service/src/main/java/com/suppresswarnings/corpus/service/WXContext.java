@@ -32,6 +32,7 @@ public class WXContext extends Context<CorpusService> {
 	String openid;
 	String wxid;
 	WXuser user;
+
 	public final State<Context<CorpusService>> reject = new State<Context<CorpusService>>() {
 
 		/**
@@ -298,9 +299,12 @@ public class WXContext extends Context<CorpusService> {
 	
 	@Override
 	public State<Context<CorpusService>> exit() {
+		content().sendTxtTo("close " + getClass().getSimpleName(), "感谢您使用本次服务，下次再聊！", openid());
 		return init;
 	}
 	public void state(State<Context<CorpusService>> state) {
 		this.state = state;
 	}
+	
+	
 }

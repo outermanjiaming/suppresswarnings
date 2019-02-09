@@ -3,13 +3,125 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
 <meta charset="UTF-8" />
-<title>Insert title here</title>
+<title>World Pop Trading Limited</title>
+
+<link rel="stylesheet" href="bootstrap.min.css">
+<link rel="stylesheet" href="styles.css">
+<style type="text/css">
+input[type=file]{display:inline;margin: 0 0 10px}
+.deadline{
+	color : #c00; margin: 0 0 20px;}
+	
+.highlight {
+		background: yellow;
+}
+</style>
 </head>
 <body>
-    <h1 th:inlines="text">文件上传</h1>
-    <form action="fileUpload" method="post" enctype="multipart/form-data">
-        <p>选择文件: <input type="file" name="fileName"/></p>
-        <p><input type="submit" value="提交"/></p>
-    </form>
+
+	<div class="row">
+	    	<h1 th:inlines="text">Upload File Here</h1>
+	        <img src="loading.gif" style="display:none" id="imgWait" />
+	        <div><input type="file" id="fileName" name="fileName"/><br/><b>Maximum Size: 50 MB</b></div>
+	        <p><button class="upload" id="upload"  type="button">Upload Now</button></p>
+	    
+	</div>
+    <div id="downloads">
+    
+    		<div class="row">
+                <hr>
+                <h1 th:inlines="text">Download New File</h1>
+            </div>
+            
+    </div>
+    <div class="row">
+    <hr/>
+    				<div class="form-group">
+                        <div class="description" id="sampleData">Enter your email as identity: <input type="text" id="email" name="email" placeholder="Your Email" value=""/></div>
+                        
+                    </div>
+	    <b><input type="checkbox" id="agree" name="agree"/> I have read and agree to the Terms and Conditions listed above</b>
+	<hr/>
+	</div>
+    
+    <script type="text/javascript"  src="jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap.min.js"></script>
+    
+    <script>
+    function openemail(){
+    	var email = $("#email").val()
+    	var checked = $("#agree").is(':checked');
+    	if(!checked) {
+    		$("#agree").focus()
+    		alert("please agree to the Terms and Conditions")
+    		return 0;
+    	}
+    	console.log(email)
+    	if(email.length > 1) {
+    		return 1;
+    	} else {
+    		$("#email").focus()
+    		alert("please enter your email as identity")
+        	return 0;
+    	}
+    }
+    
+     $(function () {
+     	$(".downloadbtn").click(function () {
+     		openemail()
+     		console.log("lijiaming submit")
+     		$(this).parent().submit()
+     	})
+     	
+     	$("form").submit(function() {
+		  alert($(this).serialize());
+		  return true;
+		});
+     	
+         $("#upload").click(function () {
+         	var n = openemail()
+         	if(n == 0) {
+         		return
+         	}
+             $("#imgWait").show();
+             var formData = new FormData();
+             formData.append("fileName", document.getElementById("fileName").files[0]);   
+             formData.append("email", $("#email").val());   
+             $.ajax({
+                 url: "fileUpload",
+                 type: "POST",
+                 data: formData,
+                 /**
+                 *必须false才会自动加上正确的Content-Type
+                 */
+                 contentType: false,
+                 /**
+                 * 必须false才会避开jQuery对 formdata 的默认处理
+                 * XMLHttpRequest会对 formdata 进行正确的处理
+                 */
+                 processData: false,
+                 success: function (data) {
+                     if (data == "false") {
+                         alert("fail to upload！");
+                     }
+                     $("#imgWait").hide();
+                     $("#fileName").val("")
+                     alert("uploaded success, Thank you!")
+                 },
+                 error: function () {
+                     alert("upload failed！");
+                     $("#imgWait").hide();
+                     $("#fileName").val("")
+                 }
+             });
+         });
+     });
+    </script>
+    <script>
+    $(document).ready(function(){
+    	jQuery.getScript("excel.js?r=" + Math.random());
+    })
+    
+    </script>
 </body>
 </html>

@@ -60,4 +60,8 @@ public class TTL implements Comparable<TTL> {
 	public boolean marked(){
 		return this.ttl == Long.MIN_VALUE;
 	}
+	public long increase(long increment) {
+		ttl = ttl + increment;
+		return ttl;
+	}
 }
