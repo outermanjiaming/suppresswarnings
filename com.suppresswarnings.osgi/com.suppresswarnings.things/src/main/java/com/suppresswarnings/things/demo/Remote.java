@@ -27,9 +27,10 @@ public class Remote implements Things {
 	        Runtime.getRuntime().exec("open " + tmp.getAbsolutePath());
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ERROR;
 		}
 		
-		return "OK";
+		return SUCCESS;
 	}
 	
 	@CMD("说我爱你")
@@ -54,9 +55,10 @@ public class Remote implements Things {
 	        
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ERROR;
 		}
 		
-		return "OK";
+		return SUCCESS;
 	}
 	
 	@Override
