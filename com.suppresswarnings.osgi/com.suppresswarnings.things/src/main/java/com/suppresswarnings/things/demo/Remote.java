@@ -2,6 +2,10 @@ package com.suppresswarnings.things.demo;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,8 +19,21 @@ import com.suppresswarnings.things.ThingsManager;
 
 public class Remote implements Things {
 
-	@CMD("说我爱你")
+	@CMD("打开记事本")
 	public String openTxt(String input) {
+		try {
+			File tmp = new File("/Users/lijiaming/tmp.txt");
+			Files.write(Paths.get(tmp.getAbsolutePath()), Arrays.asList("亲爱的", "我爱你"));
+	        Runtime.getRuntime().exec("open " + tmp.getAbsolutePath());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "OK";
+	}
+	
+	@CMD("说我爱你")
+	public String love(String input) {
 		try {
 			JFrame frame = new JFrame("新消息");
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -39,7 +56,7 @@ public class Remote implements Things {
 			e.printStackTrace();
 		}
 		
-		return "GET";
+		return "OK";
 	}
 	
 	@Override
