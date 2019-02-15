@@ -10,8 +10,8 @@
 package com.suppresswarnings.corpus.common;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.sampled.AudioFormat;
@@ -29,12 +29,16 @@ public class Mouth {
 		this.baidu = new Baidu();
 	}
 
-	public void speak(String waveFilePath){
+	public void speak(String words) {
+		String mp3 = this.baidu.speak(words);
+		speak(MP3Wave.audioInputStream(mp3));
+	}
+	public void speak(Path waveFilePath){
 	    
 	    AudioInputStream audioInputStream = null;
 	    
 	    try {
-			audioInputStream = AudioSystem.getAudioInputStream(new File(waveFilePath));
+			audioInputStream = AudioSystem.getAudioInputStream(waveFilePath.toFile());
 			speak(audioInputStream);
 		} catch (UnsupportedAudioFileException e) {
 			e.printStackTrace();
@@ -50,6 +54,10 @@ public class Mouth {
 	}
 	
 	public void speak(byte[] bytes) {
+		if(bytes == null) {
+			System.err.println("data[] is null");
+			return;
+		}
 		System.out.println("bytes.length "+ bytes.length);
 		AudioInputStream audioInputStream = null;
 		try {
@@ -99,29 +107,34 @@ public class Mouth {
 		boolean flag = true;
 		do{
 			try {
-				final ReentrantLock speakLock = brain.speakLock;
+				final ReentrantLock speakLock = brain.lock;
 				speakLock.lock();
 		        try {
-		        	System.out.println("Mouth brain.notListen.await();");
-		        	brain.notListen.await();
-		        	System.out.println("Mouth brain.notListen");
-		        } finally {
-		        	speakLock.unlock();
-		        }
-				byte[] listen = brain.memory.take();
-				speak(listen);
-				String words = baidu.listen(listen);
-				System.err.println(";;;;;;;;;;;;;;;;;;;;;;;;;;  "+ words);
-				
-				final ReentrantLock listenLock = brain.listenLock;
-				listenLock.lock();
-		        try {
-		        	System.out.println(System.currentTimeMillis() + "Mouth brain.notSpeak.signalAll();");
+		        	if(brain.memory.size() == 0) {
+			        	System.out.println("Mouth brain.notListen.await();");
+			        	brain.notListen.await();
+			        	System.out.println("Mouth brain.notListen");
+		        	}
+					byte[] listen = brain.memory.take();
+					String words = baidu.listen(listen);
+					if(words.length() > 1) {
+						speak(listen);
+						
+						System.err.println("####### Heard #######"+ words);
+						if(words.contains("拍照") || words.contains("是谁") || words.contains("茄子") ){
+							brain.look();
+						}
+						if(words.contains("学习")) {
+							brain.learn();
+						}
+					}
+					System.out.println(System.currentTimeMillis() + "Mouth brain.notSpeak.signalAll();");
 		        	Thread.sleep(500);
-		        	brain.notSpeak.signalAll();
+		        	brain.notSpeak.signal();
 		        	System.out.println(System.currentTimeMillis() + "Mouth brain.notSpeak");
 		        } finally {
-		        	listenLock.unlock();
+		        	speakLock.unlock();
+		        	System.out.println("Mouth unlock");
 		        }
 			} catch (InterruptedException e) {
 				e.printStackTrace();

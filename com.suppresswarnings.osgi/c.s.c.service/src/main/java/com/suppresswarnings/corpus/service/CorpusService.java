@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -65,6 +66,7 @@ import com.suppresswarnings.corpus.service.sdk.WXPayUtil;
 import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.work.WorkHandler;
+import com.suppresswarnings.corpus.service.wx.ATuser;
 import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
 import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
@@ -77,6 +79,8 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class CorpusService implements HTTPService, CommandProvider {
 	public static final String SUCCESS = "success";
+	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
+	
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Format format = new Format(Const.WXmsg.msgFormat);
 	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
@@ -85,7 +89,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
-	public ExecutorService threadpool = new ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
+	public ExecutorService threadpool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
+	public ThreadPoolExecutor atUserPool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100000), new ThreadFactory() {
+		int index = 0;
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "@User-" + index++);
+		}
+	}, new RejectedExecutionHandler(){
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			if(r instanceof ATuser) {
+				ATuser user = (ATuser) r;
+				user.save();
+			}
+		}
+	});
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
@@ -141,6 +161,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
+	
+	public void atUser(String openid, String message) {
+		ATuser user = new ATuser(this, openid, message, System.currentTimeMillis());
+		atUserPool.execute(user);
+	}
+	
 	public void informUsers(String openid, String message) {
 		threadpool.execute(new Runnable() {
 			
@@ -156,6 +182,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 		this.workHandler.clockOut(openId);
 		return this.workHandler.newJob(quiz, quizId, openId);
 	}
+	
+	public void connectChat(String wxid, String openid, String ask) {
+		java.util.Set<String> set = users.keySet();
+		WXuser myself = getWXuserByOpenId(openid);
+		logger.info("[coonect chat] users set: " + set);
+		for(String userid : set) {
+			if(openid.equals(userid)) {
+				logger.info("[connect chat] myself");
+				continue;
+			}
+			String ret = sendTxtTo("connect chat", "["+myself.getNickname()+"]" + ask, userid);
+			WXuser user = users.remove(userid);
+			logger.info("[coonect chat] after remove, users set: " + users.keySet());
+			if(SENDOK.equals(ret)) {
+				ChatContext chatContext = new ChatContext(wxid, userid, openid, this);
+				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(3));
+				logger.info("[connect chat] sent msg to user, ready to connect chat: " + user);
+				break;
+			} else {
+				logger.info("[connect chat] fail to connect user: " + user);
+			}
+		}
+	}
+	
 	public void forgetIt(String openid) {
 		logger.info("[corpus] forgetIt: " + openid);
 		this.workHandler.forgetIt(openid);
@@ -183,7 +233,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return aiiot.remoteCall(openid, code, input, origin, context);
 		}
 	}
-	
+	public String toJson(Object obj) {
+		return gson.toJson(obj);
+	}
+	public void log(String clazz, String info) {
+		logger.info("[" + clazz + "] " + info);
+	}
 	public void activate() {
 		CorpusService that = this;
 		logger.info("[corpus] activate");
@@ -243,7 +298,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
 					
-					workHandler = new WorkHandler(CorpusService.this, Const.WXmsg.openid);
+					workHandler = new WorkHandler(that, Const.WXmsg.openid);
 					workHandler.working();
 					String quizId = getTodoQuizid();
 					if(quizId != null) {
@@ -264,7 +319,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[corpus] it will execute after 2s");
 					Thread.sleep(2000);
 					logger.info("[corpus] start to execute");
-					daigouHandler = new DaigouHandler(CorpusService.this);
+					daigouHandler = new DaigouHandler(that);
 					ready.set(true);
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
@@ -286,7 +341,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 						if(out.marked()) {
 							logger.info("[corpus run] remove key: " + out.key());
 							secondlife.remove(out.key());
-							contexts.remove(out.key());
+							Context<?> context = contexts.remove(out.key());
+							context.exit();
 							return true;
 						} else {
 							out.mark();
@@ -1652,11 +1708,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
 			String result = map.get("result_code");
+			if("SUCCESS".equals(result)) {
+				atUser(openid, "您已支付成功。\n谢谢您的信任！\n订单ID：" + orderid);
+			} else {
+				atUser(openid, "支付失败。\n稍后再试！\n订单ID：" + orderid);
+			}
 			String transactionid = map.get("transaction_id");
 			String goodsid = map.get("attach");
 			
 			if(orderid.startsWith("DG")) {
-				daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+				if("SUCCESS".equals(result)) {
+					daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
+					daigouHandler.afterPaidAtAgentAndUser(orderid, openid);
+				} else {
+					daigouHandler.updateOrderState(orderid, openid, Order.State.Failed);
+				}
 			} else {
 				String keyState = String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State");
 				String oldState = account().get(keyState);
@@ -1666,7 +1732,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 					if(orderid.startsWith("Auth")) {
 						String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
 						account().put(paidKey, newState);
+						//authorize 
+						if(goodsid != null) {
+							String authKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", goodsid, openid);
+							String value = System.currentTimeMillis() + "." + orderid;
+							account().put(authKey, value);
+							logger.info("[notify] lijiaming: authorize " + openid + " with " + goodsid + ", orderid: " + orderid);
+						}					
 					}
+				} else {
+					logger.error("[notify] 支付失败！" + map);
 				}
 				logger.info("[notify] new state: " + newState + ", old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid + ", transactionid: " + transactionid);
 				account().put(keyState, newState);
@@ -1888,6 +1963,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void subscribe(String openId, String time) {
 		String userKey = String.join(Const.delimiter, Const.Version.V1, "User", openId);
 		account().put(userKey, time);
+		userOnline(openId);
+	}
+	public void userOnline(String openid) {
+		if(users.containsKey(openid)) {
+			WXuser user = getWXuserByOpenId(openid);
+			logger.info("[user online] already online: " + user.toString());
+		}
+		WXuser user = getWXuserByOpenId(openid);
+		users.put(openid, user);
+		logger.info("[user online] new online: " + user.toString());
 	}
 	public String globalCommand(String sceneOrCommand) {
 		String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", sceneOrCommand.toLowerCase());
@@ -1956,7 +2041,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public boolean debug(){
 		return "on".equals(data().get(String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "ON")));
 	}
-	
+	public String sendNewsTo(String business, String newsJson, String openid) {
+		if(newsJson == null || openid == null || openid.length() < 2 || newsJson.length() < 2 ) {
+			return null;
+		}
+		String json = "{\"touser\":\""+openid+"\",\"msgtype\":\"news\",\"news\":{\"articles\": ["+newsJson+"]}}";
+		String accessToken = accessToken(business);
+		String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + accessToken;
+		CallablePost post = new CallablePost(url, json);
+		try {
+			String result = post.call();
+			logger.info("[corpus] send news to: " + openid + ", newsJson: " + newsJson + ", result: " + result);
+			return result;
+		} catch (Exception e) {
+			logger.error("[corpus] fail to send news to user: " + openid, e);
+			return null;
+		}
+    }
+
 	public String sendTxtTo(String business, String message, String openid) {
 		if(message == null || openid == null || openid.length() < 2 || message.length() < 2 ) {
 			return null;
@@ -2051,10 +2153,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		contexts.put(openid, context);
 	}
 	public void contextx(String openid, Context<?> context, long timeToLiveMillis) {
-		expire(openid, timeToLiveMillis);
+		TTL e = expire(openid, timeToLiveMillis);
 		contexts.put(openid, context);
+		context.setTTL(e);
 	}
-	public void expire(String name, long timeToLiveMillis) {
+	public TTL expire(String name, long timeToLiveMillis) {
 		long now = System.currentTimeMillis();
 		TTL e = new TTL(now + timeToLiveMillis, name);
 		TTL old = secondlife.remove(name);
@@ -2079,26 +2182,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			});
 			ttl.offer(e);
 		}
-	}
-	
-	public void clear(){
-		long now = System.currentTimeMillis();
-		logger.info("[corpus] start clean TTL("+ttl.size()+")");
-		ttl.removeIf(out -> {
-			if(out.ttl() < now) {
-				if(out.marked()) {
-					logger.info("[corpus] remove key: " + out.key());
-					secondlife.remove(out.key());
-					contexts.remove(out.key());
-					return true;
-				} else {
-					out.mark();
-					secondlife.put(out.key(), out);
-				}
-			}
-			return false;
-		});
-		logger.info("[corpus] after clean TTL("+ttl.size()+")");
+		return e;
 	}
 	
 	public static void main(String[] args) {

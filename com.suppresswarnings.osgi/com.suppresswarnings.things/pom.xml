@@ -5,6 +5,5 @@
     <artifactId>com.suppresswarnings.osgi</artifactId>
     <version>${suppresswarnings.version}</version>
   </parent>
-  <groupId>com.suppresswarnings.things</groupId>
   <artifactId>com.suppresswarnings.things</artifactId>
 </project>

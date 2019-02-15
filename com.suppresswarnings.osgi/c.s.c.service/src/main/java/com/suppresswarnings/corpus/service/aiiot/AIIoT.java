@@ -93,12 +93,14 @@ public class AIIoT implements Closeable {
 				String description = args[0];
 				String code = args[1];
 				String commands = args[2];
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code), description);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
 				Things exist = things.get(code);
 				if(exist != null) {
 					exist.close();
 					logger.info("[AIIoT] close previos things");
 				}
+				checkCMD(code, commands.split(";"));
 				//TODO lijiaming check code
 				Things thing = newThings(description, code, socket);
 				if(thing != null) {
@@ -113,6 +115,19 @@ public class AIIoT implements Closeable {
 	    }
 	}
 
+	public void checkCMD(String code, String[] commands){
+		String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Creator", code);
+		String openid = service.account().get(keyType);
+		for(String cmd : commands) {
+			String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid, "AIIoT", cmd);
+			String codes = service.account().get(keyCMD);
+			if(codes != null) {
+				logger.info("[AIIoT] " +openid+ " already registered cmd: " + cmd + " for " + code);
+			} else {
+				service.account().put(keyCMD, code);
+			}
+		}
+	}
 	public Things newThings(String desc, String code, Socket socket) {
 		if(socket == null) return null;
 		if(socket.isClosed()) {

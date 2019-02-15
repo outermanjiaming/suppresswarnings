@@ -80,7 +80,7 @@ public class Demo extends JFrame implements Things {
 		return "模拟灯具";
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new Demo(), "demo.properties");
 	}
 }

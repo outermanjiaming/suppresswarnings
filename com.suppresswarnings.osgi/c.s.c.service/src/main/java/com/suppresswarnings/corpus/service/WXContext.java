@@ -32,6 +32,7 @@ public class WXContext extends Context<CorpusService> {
 	String openid;
 	String wxid;
 	WXuser user;
+
 	public final State<Context<CorpusService>> reject = new State<Context<CorpusService>>() {
 
 		/**
@@ -200,6 +201,7 @@ public class WXContext extends Context<CorpusService> {
 					u.output(result);
 					count = bear;
 				} else {
+					u.content().connectChat(wxid(), openid(), t);
 					//count to 2
 					//fetch a task todo
 					count --;
@@ -282,6 +284,7 @@ public class WXContext extends Context<CorpusService> {
 		this.openid = openid;
 		this.state = init;
 		this.quizId = ctx.getTodoQuizid();
+		ctx.userOnline(openid);
 	}
 	public WXuser user() {
 		if(user == null) user = content().getWXuserByOpenId(openid());
@@ -296,9 +299,12 @@ public class WXContext extends Context<CorpusService> {
 	
 	@Override
 	public State<Context<CorpusService>> exit() {
+		content().sendTxtTo("close " + getClass().getSimpleName(), "感谢您使用本次服务，下次再聊！", openid());
 		return init;
 	}
 	public void state(State<Context<CorpusService>> state) {
 		this.state = state;
 	}
+	
+	
 }

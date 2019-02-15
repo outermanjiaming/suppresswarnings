@@ -136,7 +136,8 @@ public class DaigouHandler {
 		String state = service.account().get(keyState);
 		if("DELETE".equals(state)) {
 			logger.info("[DaigouHandler] get goods: never show deleted goods");
-			return null;
+			logger.info("[DaigouHandler] get goods: be careful about deleted goods");
+//			return null;
 		}
 		
 		Goods goods = new Goods();
@@ -175,7 +176,7 @@ public class DaigouHandler {
 		service.account().page(listKey, listKey, null, Integer.MAX_VALUE, (k,v) ->{
 			String goodsid = v;
 			Goods goods = getByGoodsid(goodsid);
-			if(goods != null) {
+			if(goods != null && !goods.isDeleted()) {
 				list.add(goods);
 			}
 		});
@@ -304,7 +305,7 @@ public class DaigouHandler {
 		for(Cart cart : carts) {
 			Goods goods = getByGoodsid(cart.goodsid);
 			cart.setGoods(goods);
-			logger.info("fill goods to cart: " + goods.toString());
+			logger.info("fill goods to cart: " + goods);
 		}
 	}
 	public void fillOuturl(Goods goods) {
@@ -516,6 +517,14 @@ public class DaigouHandler {
 		service.account().put(keyState, paid);
 	}
 	
+	public void afterPaidAtAgentAndUser(String orderid, String openid) {
+		Order order = getByOpenidOrderid(openid, orderid);
+		List<Cart> carts = order.getCarts();
+		carts.stream().map(cart -> cart.getAgentid()).filter(agent -> agent != null).distinct().forEach(agent ->{
+			service.atUser(agent, "[通知]尊敬的代理：用户支付成功！订单ID：" + order.getOrderid());
+		});
+	}
+	
 	public Order getByOpenidOrderid(String openid, String orderid) {
 		Order order = new Order();
 		order.setOpenid(openid);
@@ -595,7 +604,10 @@ public class DaigouHandler {
 
 	public List<Order> listOrders(String adminid) {
 		boolean isAdmin = service.isAdmin(adminid, "daigouHandler.listOrders", ""+System.currentTimeMillis());
-		if(!isAdmin) return null;
+		if(!isAdmin) {
+			logger.info("[DaigouHandler] only admin can visit");
+			return new ArrayList<>();
+		}
 		
 		String keyOrderids = String.join(Const.delimiter, Const.Version.V1, "Daigou", "Order", "Orderid", "Openid");
 		List<KeyValue> orderidOpenids = new ArrayList<>();
@@ -604,7 +616,7 @@ public class DaigouHandler {
 			KeyValue orderidOpenid = new KeyValue(orderid, openid);
 			orderidOpenids.add(orderidOpenid);
 		});
-		
+		logger.info("[DaigouHandler] orderidOpenids: " + orderidOpenids.size());
 		List<Order> orders = new ArrayList<>();
 		for(KeyValue orderidOpenid : orderidOpenids) {
 			Order order = getByOpenidOrderid(orderidOpenid.value(), orderidOpenid.key());

@@ -8,10 +8,50 @@
 	</parent>
 	<artifactId>c.s.c.common</artifactId>
 	<dependencies>
+	<dependency>
+	<groupId>com.google.zxing</groupId>
+	<version>3.3.0</version>
+	<artifactId>core</artifactId>
+	</dependency>
+	<dependency>
+	<groupId>com.google.zxing</groupId>
+	<version>3.3.0</version>
+	<artifactId>javase</artifactId>
+	</dependency>
+	<dependency>
+	  <groupId>com.googlecode.soundlibs</groupId>
+	  <artifactId>jlayer</artifactId>
+	  <version>1.0.1.4</version>
+	</dependency>
+	<dependency>
+	<groupId>com.googlecode.soundlibs</groupId>
+  <artifactId>tritonus-share</artifactId>
+  <version>0.3.7.4</version>
+	</dependency>
+	<dependency>
+	<groupId>com.googlecode.soundlibs</groupId>
+  <artifactId>mp3spi</artifactId>
+  <version>1.9.5.4</version>
+	</dependency>
+	<dependency>
+    <groupId>com.baidu.aip</groupId>
+    <artifactId>java-sdk</artifactId>
+    <version>4.1.1</version>
+	</dependency>
+	<dependency>
+	<version>1.5.0</version>
+    <groupId>com.sun.mail</groupId>
+    <artifactId>javax.mail</artifactId>
+	</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.10</version>
+		</dependency>
+		<dependency>
+		  <groupId>com.github.sarxos</groupId>
+		  <artifactId>webcam-capture</artifactId>
+		  <version>0.3.12</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

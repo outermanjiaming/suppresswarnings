@@ -115,7 +115,7 @@ public class TrafficLed implements Things {
 		return "树莓派红绿灯";
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new TrafficLed(), "agent.properties");
 	}
 }

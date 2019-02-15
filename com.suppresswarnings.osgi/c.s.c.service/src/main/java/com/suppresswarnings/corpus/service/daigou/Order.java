@@ -18,6 +18,7 @@ public class Order {
 		String Paid = "Paid";
 		String Closed = "Closed";
 		String Deleted = "Deleted";
+		String Failed = "Failed";
 	}
 	String orderid;
 	String openid;

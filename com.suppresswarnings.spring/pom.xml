@@ -30,6 +30,10 @@
 	            <artifactId>mybatis-spring-boot-starter</artifactId>
 	            <version>1.3.0</version>
 	        </dependency>
+	        <dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-thymeleaf</artifactId>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -44,6 +48,16 @@
 				<version>2.0.0.RELEASE</version>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+                <mainClass>com.suppresswarnings.spring.App</mainClass>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
 			</plugin>
 		</plugins>
 	</build>
