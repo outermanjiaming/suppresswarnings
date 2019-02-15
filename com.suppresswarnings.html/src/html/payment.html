@@ -17,7 +17,7 @@
       pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
 </head>
-<body>
+<body onclick="callkeyboard()">
 
 <div id="popWindow" class="popWindow" style="text-align:center;display: none;background-color:#9D9D9D;width: 100%;height: 100%;left: 0;top: 0;filter: alpha(opacity=30);opacity: 0.3;z-index: 100;position: absolute;">
     <div style="margin-top:30%;background:url(/loading.gif) no-repeat;"></div>
@@ -66,9 +66,9 @@
     </div>
 </div>
 
-<div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
+<div onclick="callkeyboard()" class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
-<ul id="business" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
+<ul id="business" onclick="callkeyboard()" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
 
   <li>
   <div class="form-group">描述：<span id="reason"></span></div>
@@ -78,12 +78,12 @@
       <tbody>
       	<tr>
           <td style="border-bottom: 1px solid #5cb85c;">
-          	<input id="amount" type="text" oninput="changeval(this)" class="btn" name="amount" value="100"/>
+          	<input id="amount" type="number" pattern="[0-9]*" oninput="changeval(this)" class="btn" name="amount" value="100" autofocus="autofocus"/>
           </td>
         </tr>
         <tr>
           <td>
-          	<button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" onclick="pay()">确认支付 ¥<span id="money">1.00</span></button>
+          	<button id="btnbuy" type="button" class="btn btn-ms btn-success" style="margin:20px 0 10px;" onclick="pay()"><span id="info">确认支付</span> ¥<span id="money">1.00</span></button>
           </td>
         </tr>
       </tbody>
@@ -104,22 +104,6 @@
 
 </div>
    
-   
-   
-   
-   <footer class="footer navbar-fixed-bottom" style="z-index:-1">
-     <div style="text-align:center;width:100%;margin:0 auto; padding:20px 0;">
-     <a href='mailto:email@suppresswarnings.com'>email@suppresswarnings.com</a><br/>
-     <span>珠海市横琴新区宝华路6号105室</span><br/>
-       <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44049102496289" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;">
-         <img src="beian.png" class="icon" style="float:left;"/>
-         <p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">
-                                   粤公网安备 44049102496289号
-         </p>
-       </a>
-     </div>
-   </footer>
-
 <!-- JavaScript Includes -->
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
@@ -204,11 +188,17 @@ function onBridgeOK(){
 function changeval(obj) {
 	var val = $(obj).val()
 	val = val.replace(/[^\d]/g,'')
-	if(val.length < 1) val = "1"
-	$(obj).val(val)
-	var price = 0.01 * parseFloat(val)
-	price = price.toFixed(2)
-	$("#money").text(price)
+	if(val.length < 1) {
+	    val = ""
+            $("#info").text("请输入数字")
+            $("#money").text("0.00")
+        } else {
+	    $(obj).val(val)
+	    var price = 0.01 * parseFloat(val)
+	    price = price.toFixed(2)
+	    $("#info").text("确认支付")
+            $("#money").text(price)
+	}
 }
 
 function onBridgeReady(state){
