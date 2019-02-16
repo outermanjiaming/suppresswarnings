@@ -37,6 +37,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class ThingsManager {
 
+	public static final int retry = 3;
 	public static String execute(Things things, Map<String, Method> cmds, String call, String msg) {
 		Method method = cmds.get(call);
 		if(method == null) {
@@ -56,6 +57,7 @@ public class ThingsManager {
 		return "error";
 	}
 	public static void connect(Things things, String configPath) {
+		String error = "";
 		Map<String, Method> cmds = new HashMap<>();
 		Method[] methods = things.getClass().getDeclaredMethods();
 		List<String> commands = new ArrayList<>();
@@ -69,7 +71,7 @@ public class ThingsManager {
 		Prepare prepare = new Prepare();
 		try {
 			Properties config = new Properties();
-			config.load(new FileInputStream(configPath));
+			if(configPath != null) config.load(new FileInputStream(configPath));
 			System.out.println(config.toString());
 			String server = config.getProperty("server.ssl.host", "139.199.104.224");
 			String sslPorts = config.getProperty("aiiot.ssl.port", "6617");
@@ -81,46 +83,55 @@ public class ThingsManager {
 			System.setProperty("javax.net.ssl.trustStore", prepare.trustDir);
 			System.setProperty("javax.net.ssl.keyStorePassword", prepare.keyPwd);    
 			System.setProperty("javax.net.ssl.trustStorePassword",prepare.trustPwd);
-			
-			SocketFactory factory = SSLSocketFactory.getDefault();    
-			Socket sslsocket = factory.createSocket(server, sslPort);
-			String knock = String.join(",", things.description(), code, String.join(";", commands)) + "\n";
-			System.out.println("knock ======== " + knock);
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(),"UTF-8"));    
-			out.write(knock);
-			out.flush();
-			InputStream is = sslsocket.getInputStream();
-			InputStreamReader reader = new InputStreamReader(is,"UTF-8");
-			System.out.println("Connected!");
-			
-			//TODO pull & show QRCode?
-			
-			while(sslsocket.isConnected() && !sslsocket.isClosed()) {
-			    try {
-					BufferedReader in = new BufferedReader(reader);
-					String msg = in.readLine();
-					System.out.println("msg ========= " + msg);
-					String call = msg.trim();
-					String ret = execute(things, cmds, call, msg);
-					System.out.println("ret ========= " + ret);
-					out.write(ret + "\n");
-					out.flush();
-				} catch (Exception e) {
-					sslsocket.close();
-					e.printStackTrace();
+			int tried = 0;
+			while(tried ++ < retry) {
+				SocketFactory factory = SSLSocketFactory.getDefault();    
+				Socket sslsocket = factory.createSocket(server, sslPort);
+				String knock = String.join(",", things.description(), code, String.join(";", commands)) + "\n";
+				System.out.println("knock ======== " + knock);
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(),"UTF-8"));    
+				out.write(knock);
+				out.flush();
+				InputStream is = sslsocket.getInputStream();
+				InputStreamReader reader = new InputStreamReader(is,"UTF-8");
+				System.out.println("Connected!");
+				
+				//TODO pull & show QRCode?
+				
+				while(sslsocket.isConnected() && !sslsocket.isClosed()) {
+				    try {
+						BufferedReader in = new BufferedReader(reader);
+						String msg = in.readLine();
+						System.out.println("msg ========= " + msg);
+						String call = msg.trim();
+						String ret = execute(things, cmds, call, msg);
+						System.out.println("ret ========= " + ret);
+						out.write(ret + "\n");
+						out.flush();
+					} catch (Exception e) {
+						sslsocket.close();
+						e.printStackTrace();
+						System.out.println(e.getMessage() + "网络异常，准备重试 第" + tried + "次");
+					}
 				}
 			}
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
+			error += e.getMessage();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			error += e.getMessage();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+			error += e.getMessage();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			error += e.getMessage();
 		} catch (IOException e) {
 			e.printStackTrace();
+			error += e.getMessage();
 		}
+		System.out.println(error + ", 程序退出");
 	}
 	
 	public static class Prepare {
@@ -158,17 +169,9 @@ public class ThingsManager {
 			return sb.toString();
 		}
 		
-		
 		@Override
 		public String toString() {
 			return "Prepare [tmpDir=" + tmpDir + ", keyDir=" + keyDir + ", trustDir=" + trustDir + ", keyPwd=" + "**** , trustPwd=" + "**** ]";
 		}
-
-
-		public static void main(String[] args) {
-			Prepare prepare = new Prepare();
-			System.out.println(prepare);
-		}
-		
 	}
 }
