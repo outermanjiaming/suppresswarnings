@@ -9,28 +9,28 @@
  */
 package com.suppresswarnings.corpus.service.shop;
 
-import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
-import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
+import com.suppresswarnings.corpus.service.work.Quiz;
 
 public class ShopContext extends WXContext {
-	public static final String CMD = "我要商铺客服";
-	String func = null;
-	String userOpenId = null;
-	List<KeyValue> quiz = new ArrayList<KeyValue>();
+	public static final String CMD = "我的商铺";
+	public static final String Wait = "Wait";
+	public static final String None = "None";
+	String qrcode = null;
+	List<KeyValue> quiz = new ArrayList<>();
 	State<Context<CorpusService>> shop = new State<Context<CorpusService>>() {
-
+		boolean finish = false;
 		/**
 		 * 
 		 */
@@ -38,25 +38,100 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("如果需要申请商铺客服二维码请联系我们，将为您分配工作人员。谢谢");
+			u.output("管理你的商铺，你可以输入一下命令：");
+			//check binded?
+			u.output("    " + bind.name());
+			u.output("    " + ad.name());
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			//check exist shop assistant
 			logger.info("input: " + t);
-			if(t.startsWith("SCAN_")) {
-				func = t.substring("SCAN_".length());
-				userOpenId = func.substring("p_shopauth_".length());
-				logger.info("user openid: " + userOpenId);
-				return create;
-			} 
+			if(t.startsWith("SCAN_")) return scan;
+			if(CMD.equals(t)) return shop;
+			if(bind.name().equals(t)) return bind;
+			if(ad.name().equals(t)) return ad;
+			return shop;
+		}
+
+		@Override
+		public String name() {
+			return "我的商铺";
+		}
+
+		@Override
+		public boolean finish() {
+			return finish;
+		}
+		
+	};
+	State<Context<CorpusService>> bind = new State<Context<CorpusService>>() {
+		boolean finish = false;
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			String keyBind = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Bind");
+			String keyBindTime = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "BindTime");
+			u.content().account().put(keyBind, Wait);
+			u.content().account().put(keyBindTime, time());
+			u.output("请扫描商铺二维码（请联系[素朴网联]工作人员索取商铺二维码）");
+			finish = true;
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(name().equals(t)) return bind;
 			return init;
 		}
 
 		@Override
 		public String name() {
-			return "创建商铺客服";
+			return "绑定二维码";
+		}
+
+		@Override
+		public boolean finish() {
+			return finish;
+		}
+		
+		
+		
+	};
+	
+	State<Context<CorpusService>> ad = new State<Context<CorpusService>>() {
+		boolean finish = false;
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			//1.check if I am Boss
+			//2.Y check binded, N go to 10 quiz
+			u.output("发广告" + t);
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(!finish) {
+				return ad;
+			}
+			//get out
+			finish = false;
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "发广告";
 		}
 
 		@Override
@@ -65,119 +140,180 @@ public class ShopContext extends WXContext {
 		}
 		
 	};
-	State<Context<CorpusService>> create = new State<Context<CorpusService>>() {
-		final int INITIAL = -1, ANSWER = 1, QUESTION = 2, DONE = 3;
-		int status = INITIAL;
-		Iterator<KeyValue> itr = null;
-		KeyValue current = null;
-		String qrScene = null;
-		String qrcode = null;
+	
+	State<Context<CorpusService>> scan = new State<Context<CorpusService>>() {
+		boolean finish = false;
+		boolean isCustomer = false;
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 2261677273563400377L;
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			if(status == INITIAL) {
-				//start create shop qr
-				//create authorization code for userOpenId
-				String myShopKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop");
-				String qrKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", "P", "Shop", openid());
-				String qrSceneKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", "P", "Shop", "Scene", openid());
-				String exist = u.content().data().get(qrKey);
-				Gson gson = new Gson();
-				QRCodeTicket qrTicket = null;
-				if(exist != null) {
-					qrTicket = gson.fromJson(exist, QRCodeTicket.class);
-					qrScene = u.content().data().get(qrSceneKey);
-					logger.info("Use exist permanent qrcode: " + qrTicket.getUrl());
+			finish = true;
+			String qrScene = t.substring("SCAN_".length());
+			qrcode = qrScene;
+			//1.check if I am Boss
+			String keyBind = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Bind");
+			String binded = u.content().account().get(keyBind);
+			
+			String keyOwnerid = String.join(Const.delimiter, Const.Version.V1, "Shop", "Ownerid", qrScene);
+			String ownerid = u.content().account().get(keyOwnerid);
+			
+			logger.info("[Shop scan] bind: " + binded);
+			//not binded, customer
+			if(binded == null || None.equals(binded)) {
+				logger.info("[Shop scan] ownerid: " + ownerid);
+				if(ownerid == null) {
+					u.output("该商铺二维码还未绑定！");
 				} else {
-					qrScene = String.join("_", "P", "Shop", openid(), time(), random());
-					String access = u.content().accessToken("Generate Permanent QRCode");
-					String json = u.content().qrCode(access, Integer.MAX_VALUE, "QR_LIMIT_STR_SCENE", qrScene);
-					String shopKey = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene);
-					u.content().data().put(qrKey, json);
-					u.content().data().put(qrSceneKey, qrScene);
-					Map<String, String> map = new HashMap<>();
-					map.put("openid", openid());
-					map.put("agentid", userOpenId);
-					map.put("time", time());
-					map.put("random", random());
-					map.put("qrcodejson", json);
-					u.content().data().put(shopKey, gson.toJson(map));
-					
-					String shopOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "Shop", "OpenId", qrScene);
-					u.content().account().put(shopOpenIdKey, openid());
-					
-					String qrMyKey = String.join(Const.delimiter, Const.Version.V1, openid(), "QRCode", "P", "Shop", time(), random());
-					u.content().account().put(qrMyKey, json);
-					u.content().account().put(myShopKey, qrScene);
-					String agentKey = String.join(Const.delimiter, Const.Version.V1, userOpenId, "Agent", "Shop", time(), random());
-					u.content().account().put(agentKey, qrScene);
-					
-					qrTicket = gson.fromJson(json, QRCodeTicket.class);
-					logger.info("Create permanent qrcode: " + qrTicket.getUrl());
+					String keyCustomer = String.join(Const.delimiter, Const.Version.V1, ownerid, "Shop", "Customer", time(), random());
+					u.content().account().put(keyCustomer, openid());
+					isCustomer = true;
+					u.output("请留下您的手机号，中奖后需要凭手机号领奖！");
 				}
-				u.content().setGlobalCommand(qrScene, "商铺客服", openid(), time());
-				
-				//end--
-				
-				qrcode = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+qrTicket.getTicket();
-				itr = quiz.iterator();
-				u.output("创建商铺客服二维码，\n" + qrcode + "\n请回答几个简单问题进行配置：");
-				status = ANSWER;
+				return;
 			}
 			
-			if(status == QUESTION) {
-				String value = t;
-				String questionKey = String.join(Const.delimiter, Const.Version.V1, openid(), current.key(), qrScene);
-				u.content().account().put(questionKey, value);
-				String shopKey = String.join(Const.delimiter, Const.Version.V1, current.key(), qrScene);
-				u.content().account().put(shopKey, value);
-				status = ANSWER;
-			}
-			
-			if(status == ANSWER) {
-				if(itr.hasNext()) {
-					current = itr.next();
-					u.output(current.value());
-					String questionKey = String.join(Const.delimiter, Const.Version.V1, openid(), current.key(), qrScene);
-					String existAnswer = u.content().account().get(questionKey);
-					if(existAnswer != null) {
-						u.output("(旧：" + existAnswer + "，将会被覆盖)");
+			if(qrScene.equals(binded)) {
+				if(ownerid == null) {
+					u.content().account().put(keyOwnerid, openid());
+				}
+				u.output("您已成为该商铺的主人");
+			} else if(Wait.equals(binded) && ownerid == null){
+				//onetime flag, reset to None
+				u.content().account().put(keyBind, None);
+				//1.check binded by others
+				String keyBindTime = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "BindTime");
+				String bindTime = u.content().account().get(keyBindTime);
+				logger.info("[Shop scan] bindTime: " + bindTime);
+				try {
+					long time = Long.parseLong(bindTime);
+					if(System.currentTimeMillis() - time > TimeUnit.DAYS.toMillis(1)) {
+						u.output("超过24小时，绑定二维码命令失效！请重新进入我的商铺->绑定二维码");
+					} else {
+						//2.bind
+						u.content().account().put(keyBind, qrScene);
+						u.content().account().put(keyBindTime, time());
+						u.content().account().put(keyOwnerid, openid());
+						u.output("绑定成功！");
 					}
-					logger.info("[lijiaming] shop: " + questionKey + " = " + existAnswer);
-					status = QUESTION;
-				} else {
-					u.output("现在你可以把二维码打印出来给顾客使用了。\n" + qrcode);
-					status = DONE;
+				} catch (Exception e) {
+					u.output("绑定异常，请稍后重试！");
 				}
+			} else {
+				//reset onetime flag
+				u.content().account().put(keyBind, None);
+				if(openid().equals(ownerid)){
+					u.output("你已经绑定该商铺");
+				} else {
+					u.output("该二维码已经被其他商铺老板绑定了！");
+				}
+			}
+			
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(isCustomer) return customer;
+			if(!finish) {
+				return scan;
+			}
+			//get out
+			finish = false;
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "扫描商铺二维码";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
+	
+	State<Context<CorpusService>> customer = new State<Context<CorpusService>>() {
+		boolean finish = false;
+		boolean first = true;
+		Iterator<Quiz> quiz = null;
+		Quiz next = null;
+		String lastQuizId = null;
+		int i=0;
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3937145686042893179L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			
+			i ++;
+			if(first) {
+				String keyPhone = String.join(Const.delimiter, Const.Version.V1, openid(), "Contact", "Phone");
+				String phone = u.content().account().get(keyPhone);
+				if(phone != null) {
+					String keyHistory = String.join(Const.delimiter, Const.Version.V1, openid(), "Contact", "PhoneHistory", time());
+					u.content().account().put(keyHistory, phone);
+				}
+				u.content().account().put(keyPhone, t);
+				logger.info("[Shop customer] save phone: " + openid() + " => " + t);
+				u.output("请回答10个问题，大奖等你来拿！");
+				first = false;
+				quiz = getQuiz(u.content(), 10);
+			} else {
+				String keyReply = String.join(Const.delimiter, lastQuizId, "Reply", openid(), time(), random());
+				u.content().data().put(keyReply, t);
+			}
+			if(quiz != null && quiz.hasNext()) {
+				next = quiz.next();
+				u.output(i + ". " + next.getQuiz().value());
+				lastQuizId = next.getQuiz().key();
+			} else {
+				finish = true;
+				u.output("感谢您回复这些问题，请稍后留意我们的中奖通知！");
+			}
+		}
+		
+		public Iterator<Quiz> getQuiz(CorpusService service, int n) {
+			List<Quiz> all = new ArrayList<>();
+			all.addAll(service.assimilatedQuiz);
+			Collections.shuffle(all);
+			if(all.size() <= n) return all.iterator();
+			else {
+				List<Quiz> little = new ArrayList<>();
+				for(int i=0;i<n;i++) {
+					little.add(all.get(i));
+				}
+				return little.iterator();
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(status == DONE) return init;
-			return create;
+			if(finish) return init;
+			return customer;
 		}
 
 		@Override
 		public String name() {
-			return "创建商铺客服二维码";
+			return "顾客回复问题";
 		}
 
 		@Override
 		public boolean finish() {
-			return false;
+			return finish;
 		}
-		
 	};
 	public ShopContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.state = shop;
-		quiz.add(new KeyValue("Shop.Name", "你的商铺名称？"));
-		quiz.add(new KeyValue("Shop.Goods", "你的商铺主要卖哪些商品或服务？"));
+		quiz.add(new KeyValue(String.join(Const.delimiter, Const.Version.V1, "Shop","Name", time()), "你的商铺名称？"));
+		quiz.add(new KeyValue(String.join(Const.delimiter, Const.Version.V1, "Shop","Goods", time()), "你的商铺主要经营哪些商品或服务？"));
 	}
 
 }

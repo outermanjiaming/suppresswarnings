@@ -29,7 +29,7 @@ public class ShopContextFactory implements ContextFactory<CorpusService>{
 
 	@Override
 	public String description() {
-		return "商家扫码创建商铺客服二维码";
+		return "用户进入我的商铺";
 	}
 
 	@Override
