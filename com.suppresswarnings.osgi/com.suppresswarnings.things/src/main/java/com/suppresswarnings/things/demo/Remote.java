@@ -70,4 +70,9 @@ public class Remote implements Things {
 		Remote object = new Remote();
 		ThingsManager.connect(object, "remote.properties");
 	}
+
+	@Override
+	public String code() {
+		return "T_AIIoT_1542963026305_945";
+	}
 }

@@ -11,14 +11,33 @@ $.ajax({
 			console.log('fail to access_token: ' + result)
 		} else {
 			console.log('great lijiaming')
+			
 			var goods = JSON.parse(result)
-			$("#reason").text(goods.reason)
-			$("#what").text(goods.what)
-			$("#userimg").attr("src", goods.userimg)
-			var price = 0.01 * parseFloat(goods.pricecent)
-			price = price.toFixed(2)
-			$("#amount").val(goods.pricecent)
-			$("#money").text(price)
+			
+			var input = $("#amount")
+			if(goods.type == "Auth") {
+				input.hide()
+				$("#reason").text(goods.reason)
+				$("#what").text(goods.what)
+				$("#userimg").attr("src", goods.userimg)
+				var price = 0.01 * parseFloat(goods.pricecent);
+				price = price.toFixed(2)
+				$("#amount").val(total)
+				$("#money").text(price)
+			} else {
+				input.show()
+				input.val(1);
+				input.focus()
+				var amount = input.val()
+				rate = parseFloat(goods.pricecent)
+				var total = amount * rate
+				var price = 0.01 * total
+				price = price.toFixed(2)
+				$("#amount").val(total)
+				$("#money").text(price)
+			}
+			
+			
 			closeDiv()
 		}
 	},

@@ -92,11 +92,16 @@
     <button id="btnmore" type="button" class="btn btn-xs" onclick="more()">更多商品</button>
     <div id="moregoods" style="display:none; margin:20px;">
     <p><span style="width:100%;border:1px dotted #ccc;">开通权限</span></p>
+    <p><a href="http://suppresswarnings.com/payment.html?state=Shop">申请我的商铺权限</a></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=DaigouAgent">申请代购Agent权限</a></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=Reply">申请回答问题权限</a></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=Similar">申请回答同义句权限</a></p>
+    
     <p><span style="width:100%;border:1px dotted #ccc;">购买数据</span></p>
     <p><a href="http://suppresswarnings.com/payment.html?state=Data0001">购买散装数据</a></p>
+    
+    <p><span style="width:100%;border:1px dotted #ccc;">商铺支付</span></p>
+    <p><a href="http://suppresswarnings.com/payment.html?state=Money">面对面支付</a></p>
     </div>
 </li>
 </ul>
@@ -113,7 +118,7 @@
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 var bridgeReady = 0
-
+var rate = 1
 showDiv()
 
 function more(){
@@ -193,7 +198,7 @@ function changeval(obj) {
             $("#money").text("0.00")
         } else {
 	    $(obj).val(val)
-	    var price = 0.01 * parseFloat(val)
+	    var price = 0.01 * parseFloat(val) * rate
 	    price = price.toFixed(2)
 	    $("#info").text("确认支付")
             $("#money").text(price)
@@ -232,13 +237,6 @@ if(Request.code === undefined) {
 	showDiv()
 	console.log("code: " + ticket + ", state: " + state)
 	jQuery.getScript("js/payment.js?r=" + Math.random());
-	var input = $("#amount")
-	if(state.indexOf("Data") != -1) {
-		input.show()
-		input.focus()
-	} else {
-		input.hide()
-	}
 }
 
 
