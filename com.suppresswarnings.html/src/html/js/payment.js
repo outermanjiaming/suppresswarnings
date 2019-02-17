@@ -15,11 +15,11 @@ $.ajax({
 			var goods = JSON.parse(result)
 			
 			var input = $("#amount")
+			$("#reason").text(goods.reason)
+			$("#what").text(goods.what)
+			$("#userimg").attr("src", goods.userimg)
 			if(goods.type == "Auth") {
 				input.hide()
-				$("#reason").text(goods.reason)
-				$("#what").text(goods.what)
-				$("#userimg").attr("src", goods.userimg)
 				var price = 0.01 * parseFloat(goods.pricecent);
 				price = price.toFixed(2)
 				$("#amount").val(total)
@@ -30,8 +30,8 @@ $.ajax({
 				input.focus()
 				var amount = input.val()
 				rate = parseFloat(goods.pricecent)
-				var total = amount * rate
-				var price = 0.01 * total
+				var total = amount
+				var price = 0.01 * total * rate
 				price = price.toFixed(2)
 				$("#amount").val(total)
 				$("#money").text(price)
