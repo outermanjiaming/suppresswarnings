@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
@@ -25,10 +24,10 @@ import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ShopContext extends WXContext {
+	public static final String[] AUTH = {"Shop"};
 	public static final String CMD = "我的商铺";
 	public static final String Wait = "Wait";
 	public static final String None = "None";
-	List<KeyValue> quiz = new ArrayList<>();
 	State<Context<CorpusService>> shop = new State<Context<CorpusService>>() {
 		boolean finish = false;
 		/**
@@ -138,10 +137,10 @@ public class ShopContext extends WXContext {
 						logger.error("[Shop ad] user gone: " + user);
 					}
 				}
+				//2.Y check binded, N go to 10 quiz
+				logger.info("[Shop ad] has user size: " + openids.size());
+				u.output("请输入要发送的广告内容（请仔细阅读好再发送）：");
 			}
-			//2.Y check binded, N go to 10 quiz
-			logger.info("[Shop ad] has user size: " + openids.size());
-			u.output("请输入要发送的广告内容（请仔细阅读好再发送）：");
 		}
 
 		@Override
@@ -387,11 +386,10 @@ public class ShopContext extends WXContext {
 			return finish;
 		}
 	};
+	
 	public ShopContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.state = shop;
-		quiz.add(new KeyValue(String.join(Const.delimiter, Const.Version.V1, "Shop","Name", time()), "你的商铺名称？"));
-		quiz.add(new KeyValue(String.join(Const.delimiter, Const.Version.V1, "Shop","Goods", time()), "你的商铺主要经营哪些商品或服务？"));
 	}
 
 }
