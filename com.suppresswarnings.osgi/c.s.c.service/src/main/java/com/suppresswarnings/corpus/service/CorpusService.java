@@ -1631,8 +1631,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			if("Data".equals(type)) {
-				long price = Integer.parseInt(amount) * 1L * Integer.parseInt(totalcent);
-				totalcent = "" + price;
+				double price = Double.parseDouble(amount) * Integer.parseInt(totalcent);
+				totalcent = "" + (long) price;
 			}
 			
 			String openIdEnd = openid.substring(openid.length() - 7);
