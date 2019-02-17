@@ -9,14 +9,18 @@
  */
 package com.suppresswarnings.corpus.service.shop;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
+import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
@@ -49,6 +53,11 @@ public class ShopContext extends WXContext {
 			//check exist shop assistant
 			logger.info("input: " + t);
 			if(t.startsWith("SCAN_")) return scan;
+			
+			if(!u.content().authrized(openid(), AUTH[0])) {
+				return reject;
+			}
+			
 			if(CMD.equals(t)) return shop;
 			if(bind.name().equals(t)) return bind;
 			if(ad.name().equals(t)) return ad;
@@ -107,6 +116,7 @@ public class ShopContext extends WXContext {
 	State<Context<CorpusService>> ad = new State<Context<CorpusService>>() {
 		long limit = 100;
 		boolean finish = false;
+		boolean noneed = false;
 		
 		/**
 		 * 
@@ -121,6 +131,7 @@ public class ShopContext extends WXContext {
 			String binded = u.content().account().get(keyBind);
 			if(binded == null || None.equals(binded)) {
 				u.output("您还没有绑定商铺二维码，发广告给谁呀？");
+				noneed = true;
 			} else {
 				String qrScene = binded;
 				String head = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Customer");
@@ -145,9 +156,8 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(!finish) {
-				return ad;
-			}
+			if(!finish) return ad;
+			if(noneed) return init;
 			//get out
 			finish = false;
 			return send;
@@ -207,7 +217,7 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public String name() {
-			return null;
+			return "发送";
 		}
 
 		@Override
@@ -321,8 +331,8 @@ public class ShopContext extends WXContext {
 		boolean finish = false;
 		boolean first = true;
 		Iterator<Quiz> quiz = null;
+		List<KeyValue> qa = new ArrayList<>();
 		Quiz next = null;
-		String lastQuizId = null;
 		int i=0;
 		/**
 		 * 
@@ -343,15 +353,36 @@ public class ShopContext extends WXContext {
 				first = false;
 				quiz = getQuiz(u.content(), 10);
 			} else {
-				String keyReply = String.join(Const.delimiter, lastQuizId, "Reply", openid(), time(), random());
+				String keyReply = String.join(Const.delimiter, next.getQuiz().key(), "Reply", openid(), time(), random());
 				u.content().data().put(keyReply, t);
+				qa.add(new KeyValue(next.getQuiz().value(), t));
 			}
 			if(quiz != null && quiz.hasNext()) {
 				next = quiz.next();
 				u.output(i + ". " + next.getQuiz().value());
-				lastQuizId = next.getQuiz().key();
 			} else {
 				finish = true;
+				int lable = 0;
+				int code = new Random().nextInt(49) + 1;
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				String date = sdf.format(new Date());
+				String keyRand = String.join(Const.delimiter, Const.Version.V1, "Shop", "Reply", date, openid(), time());
+				StringBuffer sb = new StringBuffer();
+				sb.append("抽奖号码：" + code).append("\n");
+				String keyMycode = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Lotus", date);
+				u.content().account().put(keyMycode, ""+code);
+				u.output("抽奖号码：" + code);
+				for(KeyValue kv : qa) {
+					lable ++;
+					sb.append(lable + ".\t" + kv.key()).append("\n");
+					u.output(lable + ".\t" + kv.key());
+					sb.append("\t\t" + kv.value()).append("\n");
+					u.output("\t\t" + kv.value());
+				}
+				u.content().data().put(keyRand, sb.toString());
+				String keyCode = String.join(Const.delimiter, Const.Version.V1, "Shop", "Lotus", date, ""+code, openid());
+				u.content().account().put(keyCode, openid());
+				qa.clear();
 				u.output("感谢您回复这些问题，请稍后留意我们的中奖通知！");
 			}
 		}
