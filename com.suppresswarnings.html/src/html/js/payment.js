@@ -28,7 +28,7 @@ $.ajax({
 				input.show()
 				input.val(1);
 				input.focus()
-				new KeyBoard(input, 2);
+				new KeyBoard(document.getElementById('amount'), 2);
 				var amount = input.val()
 				rate = parseFloat(goods.pricecent)
 				var total = amount
