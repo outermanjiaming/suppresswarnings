@@ -375,8 +375,6 @@ if(Request.code === undefined) {
 	state  = Request.state
 	showDiv()
 	console.log("code: " + ticket + ", state: " + state)
-  var input1 = document.getElementById('amount');
-  new KeyBoard(input1, 2);
 	jQuery.getScript("js/payment.js?r=" + Math.random());
 }
 
