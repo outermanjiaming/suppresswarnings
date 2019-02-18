@@ -1,4 +1,3 @@
-<script type="text/javascript">
 (function(exports) {
 	var KeyBoard = function(input,n,options) {
 		var body = document.getElementsByTagName('body')[0];
@@ -138,5 +137,3 @@
 	}
 	exports.KeyBoard = KeyBoard;
 })(window);
-
-</script>
