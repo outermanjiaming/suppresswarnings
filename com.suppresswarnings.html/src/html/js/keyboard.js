@@ -100,31 +100,30 @@
 	
 		function addEvent(e) {
 			var ev = e || window.event;
-			var _input = input;
 			var clickEl = ev.element || ev.target;
 			var value = clickEl.textContent || clickEl.innerText;
 			if (clickEl.tagName.toLocaleLowerCase() === 'td' && value !== "删除") {
 				if (input) {
 					if (clickEl.tagName.toLocaleLowerCase() === 'td' && value === ".") {
 						if(n <= 0){
-							_input.value = _input.value;
+							input.value = input.value;
 						}else{
-							_input.value += value;
-							clearNoNum(_input);
+							input.value += value;
+							clearNoNum(input);
 						}
 					}else{
-						_input.value += value;
-						clearNoNum(_input);
+						input.value += input;
+						clearNoNum(input);
 					}
 				}
 			} else if (clickEl.tagName.toLocaleLowerCase() === 'td' && value === "删除") {
-				var num = _input.value;
+				var num = input.value;
 				if (num) {
 					var newNum = num.substr(0, num.length - 1);
-					_input.value = newNum;
+					input.value = newNum;
 				}
 			}
-			input.value = _input.value
+			input.fireEvent("oninput");
 		}
 		
 		if (mobile) {
