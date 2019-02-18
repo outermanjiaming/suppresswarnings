@@ -17,7 +17,7 @@
       pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
 </head>
-<body onclick="callkeyboard()">
+<body>
 
 <div id="popWindow" class="popWindow" style="text-align:center;display: none;background-color:#9D9D9D;width: 100%;height: 100%;left: 0;top: 0;filter: alpha(opacity=30);opacity: 0.3;z-index: 100;position: absolute;">
     <div style="margin-top:30%;background:url(/loading.gif) no-repeat;"></div>
@@ -66,9 +66,9 @@
     </div>
 </div>
 
-<div onclick="callkeyboard()" class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
+<div class="container-fluid" style="background: white;margin-bottom: 88px;" id="main">
 
-<ul id="business" onclick="callkeyboard()" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
+<ul id="business" style="list-style: none; position: relative; margin: 20px 0;padding: 0;">
 
   <li>
   <div class="form-group">描述：<span id="reason"></span></div>
@@ -78,7 +78,7 @@
       <tbody>
       	<tr>
           <td style="border-bottom: 1px solid #5cb85c;">
-          	<input id="amount" type="number" pattern="[0-9.]*" oninput="changeval(this)" class="btn" name="amount" value="100" autofocus="autofocus"/>
+          	<input id="amount"  readonly="readonly" unselectable="on" onfocus="this.blur()" type="number" pattern="[0-9.]*" oninput="changeval(this)" class="btn" name="amount" value="100" autofocus="autofocus"/>
           </td>
         </tr>
         <tr>
@@ -116,14 +116,12 @@
 <script type="text/javascript" src="js/dropdown.js"></script>
 <script type="text/javascript" src="js/collapse.js"></script>
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
+<script type="text/javascript" src="js/keyboard.js"></script>
 <script>
 var bridgeReady = 0
 var rate = 1
 showDiv()
 
-function callkeyboard(){
-	$("#amount").focus()
-}
 function more(){
 	$("#moregoods").toggle()
 }
@@ -239,6 +237,7 @@ if(Request.code === undefined) {
 	state  = Request.state
 	showDiv()
 	console.log("code: " + ticket + ", state: " + state)
+  new KeyBoard($("#amount"), 2);
 	jQuery.getScript("js/payment.js?r=" + Math.random());
 }
 
