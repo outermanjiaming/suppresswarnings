@@ -206,6 +206,10 @@ function changeval(obj) {
 	}
 }
 
+$('input').bind('input propertychange', function() { 
+    changeval(this)
+});
+
 function onBridgeReady(state){
 	console.log('ready onBridgeReady')
 	window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/payment.html&response_type=code&scope=snsapi_base&state="+state+"#wechat_redirect"

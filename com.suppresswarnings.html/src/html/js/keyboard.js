@@ -123,7 +123,7 @@
 					input.value = newNum;
 				}
 			}
-			input.fireEvent("oninput");
+			input.fireEvent("onchange");
 		}
 		
 		if (mobile) {
