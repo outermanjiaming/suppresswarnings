@@ -112,7 +112,7 @@
 							clearNoNum(input);
 						}
 					}else{
-						input.value += input;
+						input.value += value;
 						clearNoNum(input);
 					}
 				}
