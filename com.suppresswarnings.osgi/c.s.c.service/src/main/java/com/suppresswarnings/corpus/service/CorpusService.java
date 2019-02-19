@@ -1704,14 +1704,25 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String sign = map.get("sign");
 			boolean equal = check.equals(sign);
 			logger.info("[corpus] lijiaming: equal = " + equal + "\ncheck = " + check + "\nsign=" + sign);
-			
+			String goodid = map.get("attach");
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
 			String result = map.get("result_code");
+			String cashfee = map.get("cash_fee");
 			if("SUCCESS".equals(result)) {
-				atUser(openid, "您已支付成功。\n谢谢您的信任！\n订单ID：" + orderid);
+				if(goodid != null) {
+					String keyBossid = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodid, "Bossid");
+					String bossid = account().get(keyBossid);
+					double fee = Double.valueOf(cashfee) / 100;
+					if(bossid != null) {
+						atUser(bossid, "收款成功：" + fee + "元");
+					} else {
+						logger.info("[notify] bossid is null, orderid: " + orderid);
+					}
+				}
+				atUser(openid, "您已支付成功。\n谢谢您的信任！");
 			} else {
-				atUser(openid, "支付失败。\n稍后再试！\n订单ID：" + orderid);
+				atUser(openid, "支付失败。\n稍后再试！");
 			}
 			String transactionid = map.get("transaction_id");
 			String goodsid = map.get("attach");

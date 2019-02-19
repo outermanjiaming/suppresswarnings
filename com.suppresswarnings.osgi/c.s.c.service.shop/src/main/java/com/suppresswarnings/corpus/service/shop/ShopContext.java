@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.KeyValue;
@@ -25,6 +27,7 @@ import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.work.Quiz;
+import com.suppresswarnings.corpus.service.wx.WXnews;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ShopContext extends WXContext {
@@ -261,7 +264,25 @@ public class ShopContext extends WXContext {
 					String keyUser = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Customer", time(), random());
 					u.content().account().put(keyUser, openid());
 					isCustomer = true;
-					u.output("请留下您的手机号，中奖后需要凭手机号领奖！");
+					String keyGoodid = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Goodid");
+					String goodid = u.content().account().get(keyGoodid);
+					if(goodid != null) {
+						WXuser owner = u.content().getWXuserByOpenId(goodid);
+						String payment = "http://suppresswarnings.com/payment.html?state=" + goodid;
+						Gson gson = new GsonBuilder().disableHtmlEscaping().create(); 
+						WXnews news = new WXnews();
+						news.setDescription("点击进入支付页面");
+						news.setTitle("商铺收银台");
+						news.setUrl(payment);
+						news.setPicUrl(owner.getHeadimgurl());
+						String newsJson = gson.toJson(news);
+						//TODO async
+						String ret = u.content().sendNewsTo("Shop payment", newsJson, openid());
+						logger.info("[Shop payment] sent: " + ret);
+					} else {
+						logger.info("[Shop scan] goodid is null, qrScene: " + qrScene);
+					}
+					u.output("答题抽奖！请留下您的手机号，中奖后需要凭手机号领奖！");
 				}
 				return;
 			}
@@ -270,6 +291,14 @@ public class ShopContext extends WXContext {
 				if(ownerid == null) {
 					u.content().account().put(keyOwnerid, openid());
 				}
+				String keyGoodid = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Goodid");
+				String goodid = u.content().account().get(keyGoodid);
+				if(goodid == null) {
+					goodid = openid();
+					u.content().account().put(keyGoodid, goodid);
+					saveSell(u.content(), goodid);
+				}
+				u.content().account().put(keyBind, None);
 				u.output("您已成为该商铺的主人");
 			} else if(Wait.equals(binded) && ownerid == null){
 				//onetime flag, reset to None
@@ -287,6 +316,11 @@ public class ShopContext extends WXContext {
 						u.content().account().put(keyBind, qrScene);
 						u.content().account().put(keyBindTime, time());
 						u.content().account().put(keyOwnerid, openid());
+						String goodid = openid();
+						String keyGoodid = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Goodid");
+						u.content().account().put(keyGoodid, goodid);
+						
+						saveSell(u.content(), goodid);
 						u.output("绑定成功！");
 					}
 				} catch (Exception e) {
@@ -326,6 +360,14 @@ public class ShopContext extends WXContext {
 		}
 		
 	};
+	
+	private void saveSell(CorpusService service, String bossid) {
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Price"), "100");
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Reason"), "商铺支付");
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "What"), "面对面支付");
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Type"), "Data");
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Bossid"), bossid);
+	}
 	
 	State<Context<CorpusService>> customer = new State<Context<CorpusService>>() {
 		boolean finish = false;
