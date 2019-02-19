@@ -26,16 +26,9 @@ $.ajax({
 				$("#money").text(price)
 			} else {
 				input.show()
-				input.val(1);
+				input.val("");
 				input.focus()
 				new KeyBoard(document.getElementById('amount'), 2);
-				var amount = input.val()
-				rate = parseFloat(goods.pricecent)
-				var total = amount
-				var price = 0.01 * total * rate
-				price = price.toFixed(2)
-				$("#amount").val(total)
-				$("#money").text(price)
 			}
 			
 			closeDiv()
