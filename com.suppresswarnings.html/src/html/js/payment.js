@@ -29,6 +29,7 @@ $.ajax({
 				input.val("");
 				input.focus()
 				new KeyBoard(document.getElementById('amount'), 2);
+				changeval(input)
 			}
 			
 			closeDiv()
