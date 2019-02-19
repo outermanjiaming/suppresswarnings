@@ -20,9 +20,9 @@ $.ajax({
 			$("#userimg").attr("src", goods.userimg)
 			if(goods.type == "Auth") {
 				input.hide()
-				var rate = 1
-				var total = goods.pricecent
-				var price = 0.01 * parseFloat(goods.pricecent);
+				rate = 1
+				var total = parseFloat(goods.pricecent);
+				var price = 0.01 * total
 				price = price.toFixed(2)
 				$("#amount").val(total)
 				$("#money").text(price)
@@ -30,7 +30,7 @@ $.ajax({
 				input.show()
 				input.val("");
 				input.focus()
-				rate = goods.pricecent
+				rate = parseFloat(goods.pricecent);
 				new KeyBoard(document.getElementById('amount'), 2);
 				changeval(input)
 			}
