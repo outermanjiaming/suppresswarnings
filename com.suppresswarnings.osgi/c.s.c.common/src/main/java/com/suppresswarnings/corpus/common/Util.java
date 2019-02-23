@@ -13,6 +13,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -489,5 +493,71 @@ public class Util {
 			}
 		}
 		return bi;
+	}
+	
+	public static void printImage(int[][] image, String saveTo){
+		int w = image.length;
+		int h = image[0].length;
+		BufferedImage nbi=new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);  
+	    for (int x = 0; x < w; x++) {
+	        for (int y = 0; y < h; y++) {
+	        	int b = image[x][y];
+	        	nbi.setRGB(x, y, b);
+	        }  
+	    }
+	    try {
+			ImageIO.write(nbi, "jpg", new File(saveTo));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * cutting the image into pieces
+	 * @param image
+	 * @param n number of pieces according to x
+	 * @param m number of pieces according to y
+	 * @param prefix path prefix
+	 * @return
+	 */
+	public static int[][] [][] cutting(int[][] image, int n, int m, String prefix) {
+		int[][] [][] result = new int[n][m] [][];
+		int w = image.length;
+		int h = image[0].length;
+		int stepx = w / n;
+		int stepy = h / m;
+		int startx = 0;
+		for(int i=0;i<n;i++) {
+			int starty = 0;
+			for(int j=0;j<m;j++) {
+				int[][] frame = frame(stepx, stepy, startx, starty, image);
+				result[i][j] = frame;
+				String saveTo = prefix + "_" + i + "_" + j + ".jpg";
+				printImage(frame, saveTo);
+				starty += stepy;
+			}
+			startx += stepx;
+		}
+		return result;
+	}
+	
+	public static String getLocalMac() throws Exception {
+		try {
+			byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+			StringBuffer sb = new StringBuffer();
+			for(int i=0; i<mac.length; i++) {
+				String str = Integer.toHexString(mac[i] & 0xff);
+				sb.append(str.length()==1 ? "0"+str : str);
+			}
+			return sb.toString();
+		} catch (SocketException e) {
+			throw new Exception("没有联网吗？请打开网络。");
+		} catch (UnknownHostException e) {
+			throw new Exception("本机网卡异常，检查一下正常联网吗？");
+		} catch (NullPointerException e) {
+			throw new Exception("请打开网络，不然没法确认身份！");
+		} catch (Exception e) {
+			throw new Exception("获取本机身份异常，请联系素朴网联客服！");
+		}
 	}
 }
