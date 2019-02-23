@@ -291,22 +291,23 @@ public class Util {
 	public static int[][] readImage(File file) {
 		try {
 			BufferedImage bi = ImageIO.read(file);
-			int width = bi.getWidth();
-			int height = bi.getHeight();
-			int[][] pixels = new int[width][height];
-			for(int x =0;x <width;x ++) {
-				for(int y=0;y<height;y++) {
-					pixels[x][y] = bi.getRGB(x, y);
-				}
-			}
-			return pixels;
+			return readImage(bi);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
-		
 	}
-	
+	public static int[][] readImage(BufferedImage bi) {
+		int width = bi.getWidth();
+		int height = bi.getHeight();
+		int[][] pixels = new int[width][height];
+		for(int x =0;x <width;x ++) {
+			for(int y=0;y<height;y++) {
+				pixels[x][y] = bi.getRGB(x, y);
+			}
+		}
+		return pixels;
+	}
 	public static double print(double[] array) {
 		double max = 0;
 		int index = 0;
