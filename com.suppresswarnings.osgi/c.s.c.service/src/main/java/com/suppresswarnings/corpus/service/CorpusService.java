@@ -1536,6 +1536,33 @@ public class CorpusService implements HTTPService, CommandProvider {
 			List<Map<String, Object>> quizs = userQuizByOpenId(openId);
 			map.put("datas", quizs);
 			return gson.toJson(map);
+		} else if("validate".equals(action)) {
+			String identity = parameter.getParameter("identity");
+			if(identity == null||"".equals(identity)) {
+				return "fail";
+			} else {
+				String existKey = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Identity", identity);
+				String exist = account().get(existKey);
+				if("Paid".equals(exist)) {
+					return "Paid";
+				}
+			}
+			String token = parameter.getParameter("token");
+			if(token == null || "".equals(token)) {
+				return "fail";
+			} else {
+				String key = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", token);
+				String exist = account().get(key);
+				if("Used".equals(exist) || "".equals(exist) || null == exist) {
+					return "fail";
+				} else {
+					account().put(key, "Used");
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Bind", token), identity);
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Identity", identity), "Paid");
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", token, ""+ System.currentTimeMillis()), exist);
+					return "Paid";
+				}
+			}
 		} else if("next".equals(action)){
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -1750,6 +1777,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 							account().put(authKey, value);
 							logger.info("[notify] lijiaming: authorize " + openid + " with " + goodsid + ", orderid: " + orderid);
 						}					
+					} else if(orderid.startsWith("Software")) {
+						String code = generateActivateCode(openid);
+						atUser(openid, code);
 					}
 				} else {
 					logger.error("[notify] 支付失败！" + map);
@@ -1769,6 +1799,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return SUCCESS;
 	}
 
+	public String generateActivateCode(String openid) {
+		String key = "";
+		int x = new Random().nextInt(99999999);
+		AtomicInteger integer = new AtomicInteger(1);
+		String exist = "";
+		String code = "";
+		while(exist != null) {
+			x = x + integer.getAndIncrement();
+			code = Integer.toHexString(x).toUpperCase();
+			key = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", code);
+			exist = account().get(key);
+		}
+		account().put(key, openid);
+		String mykey = String.join(Const.delimiter, Const.Version.V1, openid, "Code", "Activate", "Software");
+		account().put(mykey, code);
+		return code;
+	}
 	public JsAccessToken jsAccessToken(String code) {
 		String APPID = System.getProperty("wx.appid");
 		String SECRET = System.getProperty("wx.secret");

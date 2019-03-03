@@ -25,6 +25,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -522,12 +524,12 @@ public class Util {
 	 * @return
 	 */
 	public static int[][] [][] cutting(int[][] image, int n, int m, String prefix) {
-		int[][] [][] result = new int[n][m] [][];
 		int w = image.length;
 		int h = image[0].length;
 		int stepx = w / n;
 		int stepy = h / m;
 		int startx = 0;
+		int[][] [][] result = new int[n][m] [][];
 		for(int i=0;i<n;i++) {
 			int starty = 0;
 			for(int j=0;j<m;j++) {
@@ -540,6 +542,28 @@ public class Util {
 			startx += stepx;
 		}
 		return result;
+	}
+	
+	public static Supplier<int[][]> slide(int[][] image, int width, int height, int stepx, int stepy, String prefix, BiConsumer<String, int[][]> frameConsumer) {
+		int w = image.length;
+		int h = image[0].length;
+		int n = w / stepx;
+		int m = h / stepy;
+		int startx = 0;
+		int size = n*m;
+		ImageFrameSupplier supplier = new ImageFrameSupplier(size);
+		for(int i=0;i<n;i++) {
+			int starty = 0;
+			for(int j=0;j<m;j++) {
+				int[][] frame = frame(width, height, startx, starty, image);
+				String saveTo = prefix + "_" + i + "_" + j + ".jpg";
+				frameConsumer.accept(saveTo, frame);
+				supplier.put(frame);
+				starty += stepy;
+			}
+			startx += stepx;
+		}
+		return supplier;
 	}
 	
 	public static String getLocalMac() throws Exception {

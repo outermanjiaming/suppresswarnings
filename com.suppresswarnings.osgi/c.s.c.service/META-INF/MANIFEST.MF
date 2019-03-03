@@ -3,6 +3,20 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Service
 Bundle-SymbolicName: c.s.c.service
 Bundle-Version: 0.0.3.osgi
+Bundle-Vendor: LIJIAMING
+Export-Package: com,
+ com.suppresswarnings,
+ com.suppresswarnings.corpus,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.corpus.service.aiiot,
+ com.suppresswarnings.corpus.service.backup,
+ com.suppresswarnings.corpus.service.daigou,
+ com.suppresswarnings.corpus.service.http,
+ com.suppresswarnings.corpus.service.main,
+ com.suppresswarnings.corpus.service.sdk,
+ com.suppresswarnings.corpus.service.work,
+ com.suppresswarnings.corpus.service.wx
+Require-Bundle: org.apache.httpcomponents.httpcore
 Import-Package: com.google.gson;version="2.2.4",
  com.suppresswarnings.corpus.common,
  com.suppresswarnings.osgi.leveldb,
@@ -37,10 +51,3 @@ Import-Package: com.google.gson;version="2.2.4",
  org.w3c.dom,
  org.w3c.dom.xpath
 Service-Component: OSGI-INF/component.xml
-Bundle-Vendor: LIJIAMING
-Export-Package: com.suppresswarnings.corpus.service,
- com.suppresswarnings.corpus.service.aiiot,
- com.suppresswarnings.corpus.service.daigou,
- com.suppresswarnings.corpus.service.work,
- com.suppresswarnings.corpus.service.wx
-Require-Bundle: org.apache.httpcomponents.httpcore

@@ -23,6 +23,7 @@ import com.suppresswarnings.corpus.service.WXContext;
  */
 public class SettingContext extends WXContext {
 	public static final String CMD = "全局设置";
+	public static final String[] AUTH = {"Setting"};
 	State<Context<CorpusService>> start = new State<Context<CorpusService>>() {
 
 		/**

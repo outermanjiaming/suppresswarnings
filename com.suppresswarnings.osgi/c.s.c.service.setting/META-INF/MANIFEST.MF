@@ -6,5 +6,6 @@ Bundle-Version: 0.0.1.osgi
 Export-Package: com.suppresswarnings.corpus.service.setting
 Import-Package: com.suppresswarnings.corpus.common,
  com.suppresswarnings.corpus.service,
- com.suppresswarnings.osgi.leveldb
+ com.suppresswarnings.osgi.leveldb,
+ org.slf4j;version="1.7.2"
 Service-Component: OSGI-INF/component.xml

@@ -29,12 +29,22 @@ import java.util.stream.StreamSupport;
 public class Thinker {
 	private String serializeTo;
 	private AI nn;
+	int width = 640;
+	int height = 480;
 	public Thinker(){
 		this.serializeTo = "/Users/lijiaming/Learn/meyou/more.nn";
 	}
+	
 	public Thinker(String nn) {
 		this.serializeTo = nn;
 	}
+	
+	public Thinker(String nn, int w, int h) {
+		this(nn);
+		this.width = w;
+		this.height = h;
+	}
+	
 	class Piece {
 		int[][] d;
 		int x;
@@ -176,7 +186,7 @@ public class Thinker {
 	
 	public int decide(BufferedImage bi) {
 		long t1 = System.currentTimeMillis();
-		List<List<Double>> lists = slide(readImage(bi));
+		List<List<Double>> lists = slide(readImage(bi), width, height);
 		long t2 = System.currentTimeMillis();
 		List<Double> arr = lists.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
 		long t3 = System.currentTimeMillis();
@@ -200,9 +210,9 @@ public class Thinker {
 		}
 		return pixels;
 	}
-	public List<List<Double>> slide(int[][] D) {
+	public List<List<Double>> slide(int[][] D, int width, int height) {
 		List<List<Double>> list = new ArrayList<List<Double>>();
-		StreamSupport.stream(new Supply(D, 640,480,10,10), false)
+		StreamSupport.stream(new Supply(D, width,height,10,10), false)
 		.map(f100x240 -> new Supply(f100x240.getD(), 20, 20, 20, 20))
 		.forEach(supply20x20 -> {
 			List<Double> e = StreamSupport.stream(supply20x20, false)
@@ -221,7 +231,7 @@ public class Thinker {
 	
 	public List<List<Double>> slide(File file) {
 		int[][] D = Util.readImage(file);
-		return slide(D);
+		return slide(D, width, height);
 	}
 	
 	public void decide() throws IOException{

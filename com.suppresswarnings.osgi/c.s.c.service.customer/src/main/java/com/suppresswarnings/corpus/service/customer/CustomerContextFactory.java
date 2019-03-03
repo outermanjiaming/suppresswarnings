@@ -29,12 +29,12 @@ public class CustomerContextFactory implements ContextFactory<CorpusService>{
 
 	@Override
 	public String description() {
-		return "商铺客服，不同商铺的二维码扫码进去之后不同的商品服务";
+		return "购买带验证码的软件";
 	}
 
 	@Override
 	public long ttl() {
-		return TimeUnit.HOURS.toMillis(1);
+		return TimeUnit.MINUTES.toMillis(2);
 	}
 
 }
