@@ -36,7 +36,7 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 public class ThingsManager {
-
+	
 	public static final int retry = 3;
 	public static String execute(Things things, Map<String, Method> cmds, String call, String msg) {
 		Method method = cmds.get(call);
