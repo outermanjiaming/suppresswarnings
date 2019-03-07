@@ -25,4 +25,18 @@ public class HTTPUtil {
         in.close();
         return sb.toString();
 	}
+	
+	public static String translate(String cmd) {
+		String[] action_input = cmd.split(",");
+		String action = action_input[0];
+		String input = null;
+		if(action_input.length > 1) input = action_input[1];
+		return translate(action, input);
+	}
+	
+	public static String translate(String action, String input) {
+		ActionType ac = ActionType.valueOf(action.toUpperCase());
+		if(ac != null) return ac.action() + ac.input(input);
+		return null;
+	}
 }

@@ -21,22 +21,22 @@ public class CMDService extends Service {
 	}
 	AtomicBoolean on = new AtomicBoolean(false);
 	String[] commands = {
-    		"input keyevent 3", 
-    		"input keyevent 4",
-    		"am start -n cn.weli.story/cn.etouch.ecalendar.MainActivity",
-    		"input keyevent 4",
-    		"input touchscreen swipe 400 400 400 1290 1000",
-    		"input touchscreen swipe 400 790 400 530 1000",
-    		"input tap 400 400",
-    		"input touchscreen swipe 400 1290 400 400 1000",
-    		"input touchscreen swipe 400 400 400 1290 1000",
-    		"input touchscreen swipe 400 1290 400 400 1000",
-    		"input touchscreen swipe 400 400 400 1290 1000",
-    		"input touchscreen swipe 400 1290 400 400 1000",
-    		"input touchscreen swipe 400 400 400 1290 1000",
-    		"input touchscreen swipe 400 1290 400 400 1000",
-    		"input touchscreen swipe 400 400 400 1290 1000",
-    		"input keyevent 4"
+    		"HOME", 
+    		"BACK",
+    		"OPEN,cn.weli.story/cn.etouch.ecalendar.MainActivity",
+    		"BACK",
+    		"SWIPE0",
+    		"SCOLL",
+    		"CLICK,400 400",
+    		"SWIPE0",
+    		"SWIPE1",
+    		"SWIPE0",
+    		"SWIPE1",
+    		"SWIPE0",
+    		"SWIPE1",
+    		"SWIPE0",
+    		"SWIPE1",
+    		"BACK"
     };
 	boolean started = false;
 	TimerTask task;
@@ -95,7 +95,9 @@ public class CMDService extends Service {
 			        			unit.sleep(1);
 			        			continue;
 			        		}
-							os.write((cmd+"\n").getBytes());
+			        		String action = HTTPUtil.translate(cmd);
+			        		if(action == null) continue;
+							os.write((action+"\n").getBytes());
 			        		os.flush();
 			        		unit.sleep(1);
 						}

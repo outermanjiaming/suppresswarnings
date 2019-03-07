@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
         //不支持js的alert弹窗，需要自己监听然后通过dialog弹窗
     	 
         @Override
-        public boolean onJsAlert(WebView webView, String url, String message, JsResult result) {
+        public boolean onJsAlert(WebView webView, String url, final String message, JsResult result) {
         	
             AlertDialog.Builder localBuilder = new AlertDialog.Builder(webView.getContext());
             
@@ -188,14 +188,26 @@ public class MainActivity extends Activity {
 		        });
 		        localBuilder.setCancelable(false);
 		        localBuilder.create().show();
-            } else {
-		        localBuilder.setMessage(message)
+            } else if("直接运行".equals(message)) {
+            	localBuilder.setMessage(message)
 		        .setPositiveButton("直接运行", new OnClickListener() {
 		
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						Intent intent = new Intent(MainActivity.this, CMDService.class);
 						startService(intent);
+					}
+		        	
+		        });
+		        localBuilder.setCancelable(false);
+		        localBuilder.create().show();
+            } else {
+            	localBuilder.setMessage(message)
+		        .setPositiveButton("确定", new OnClickListener() {
+		
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						System.out.println("收到消息:" + message);
 					}
 		        	
 		        });
