@@ -34,12 +34,12 @@ public enum ActionType {
 	},CLICK {
 		@Override
 		String action() {
-			return "input tap";
+			return "input tap ";
 		}
 
 		@Override
 		String input(String input) {
-			return empty(input) ? " 400 400" : input.replace(";", " ");
+			return empty(input) ? "400 400" : input.replace(";", " ");
 		}
 	},HOME {
 		@Override
