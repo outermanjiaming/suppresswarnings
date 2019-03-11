@@ -1,12 +1,16 @@
 package com.suppresswarnings.android;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ClipboardManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -14,6 +18,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -42,7 +48,16 @@ public class MainActivity extends Activity {
     private String openid;
     private String token;
     private int version;
+    AtomicBoolean ok = new AtomicBoolean(false);
 
+    //用于处理和发送消息的Hander
+    private Handler handler=new Handler(){
+        public void handleMessage(Message msg){
+            //如果返现msg.what=SHOW_RESPONSE，则进行制定操作，如想进行其他操作，则在子线程里将SHOW_RESPONSE改变
+            Log("what:"+msg.what +" obj:" +(String)msg.obj);
+        }
+    };
+    
     private String createOpenid() {
     	return version + "A" + new Random().nextInt(1000);
     }
@@ -76,6 +91,29 @@ public class MainActivity extends Activity {
         	boolean commited = editor.commit();
         	if(commited) this.openid = temp;
         }
+        
+        new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					String x = HTTPUtil.checkValid(getToken(), "");
+					ok.set("Paid".equals(x));
+					if(!ok.get()) {
+						Message message=new Message();
+						message.what=0;
+						message.obj="未激活：请到公众号素朴网联获取激活码";
+						handler.sendMessage(message);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					Message message=new Message();
+					message.what=1;
+					message.obj="Exception: " + e.getMessage();
+					handler.sendMessage(message);
+				}
+			}
+        }).start();
         
         progressBar= (ProgressBar)findViewById(R.id.progressbar);//进度条
 
@@ -160,24 +198,64 @@ public class MainActivity extends Activity {
             
             final EditText inputServer = new EditText(MainActivity.this);
             
-            if("输入激活码".equals(message)) {
+            if(!ok.get() && "输入激活码".equals(message)) {
             	inputServer.setGravity(Gravity.CENTER);
-            	inputServer.setText(getToken());
             	localBuilder.setMessage(message)
                 .setView(inputServer)
-                .setPositiveButton("复制激活码", new DialogInterface.OnClickListener() {
+                .setNegativeButton("取消", new OnClickListener() {
 
-                    @SuppressWarnings("deprecation")
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
-                    	ClipboardManager cmb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    	cmb.setText(getToken());
+						
+					}
+		        })
+                .setPositiveButton("激活", new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+						final String code = inputServer.getText().toString();
+						Log("激活码: " + code);
+						if(code == null || code.trim().length() < 1) {
+							Log("请到素朴网联公众号获取激活码");
+							return;
+						}
+						new Thread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									String x = HTTPUtil.checkValid(getToken(), code);
+									ok.set("Paid".equals(x));
+									Message message=new Message();
+									message.what=0;
+									message.obj=ok.get()?"恭喜，激活成功":"未激活：请到公众号素朴网联获取激活码";
+									handler.sendMessage(message);
+								} catch (Exception e) {
+									e.printStackTrace();
+									Message message=new Message();
+									message.what=1;
+									message.obj="Exception: " + e.getMessage();
+									handler.sendMessage(message);
+								}
+							}
+				        }).start();
+                    	
                     }
                 });
                 localBuilder.setCancelable(false);
                 localBuilder.create().show();
             } else if("输入命令".equals(message)) {
+            	inputServer.setVerticalScrollBarEnabled(true);
+            	inputServer.setLines(10);
+            	inputServer.setGravity(Gravity.LEFT);
             	localBuilder.setMessage(message)
 		        .setView(inputServer)
+		        .setNegativeButton("取消", new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						
+					}
+		        })
 		        .setPositiveButton("输入命令", new DialogInterface.OnClickListener() {
 		
 		            public void onClick(DialogInterface dialog, int which) {
@@ -235,6 +313,27 @@ public class MainActivity extends Activity {
             progressBar.setProgress(newProgress);
         }
     };
+    
+    public String checkValid(String mac, String token) throws Exception {
+		URL url = new URL("http://suppresswarnings.com/wx.http?action=validate&identity="+mac+"&token="+token);
+		Log("1:"+url.toString());
+        URLConnection connection = url.openConnection();
+        InputStream in = connection.getInputStream();
+        InputStreamReader isr = new InputStreamReader(in,"utf-8");
+        BufferedReader br = new BufferedReader(isr);
+        String line;
+        StringBuilder sb = new StringBuilder();
+        while((line = br.readLine()) != null)
+        {
+            sb.append(line);
+        }
+        Log("2:" + line);
+        br.close();
+        isr.close();
+        in.close();
+        Log("3:" + sb);
+        return sb.toString();
+	}
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
