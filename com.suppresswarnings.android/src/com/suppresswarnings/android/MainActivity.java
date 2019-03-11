@@ -1,10 +1,5 @@
 package com.suppresswarnings.android;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -54,7 +49,7 @@ public class MainActivity extends Activity {
     private Handler handler=new Handler(){
         public void handleMessage(Message msg){
             //如果返现msg.what=SHOW_RESPONSE，则进行制定操作，如想进行其他操作，则在子线程里将SHOW_RESPONSE改变
-            Log("what:"+msg.what +" obj:" +(String)msg.obj);
+            Log((String)msg.obj);
         }
     };
     
@@ -197,8 +192,12 @@ public class MainActivity extends Activity {
             AlertDialog.Builder localBuilder = new AlertDialog.Builder(webView.getContext());
             
             final EditText inputServer = new EditText(MainActivity.this);
-            
-            if(!ok.get() && "输入激活码".equals(message)) {
+           
+            if("输入激活码".equals(message)) {
+            	if(ok.get()) {
+             		result.confirm();
+             		return true;
+             	}
             	inputServer.setGravity(Gravity.CENTER);
             	localBuilder.setMessage(message)
                 .setView(inputServer)
@@ -313,27 +312,6 @@ public class MainActivity extends Activity {
             progressBar.setProgress(newProgress);
         }
     };
-    
-    public String checkValid(String mac, String token) throws Exception {
-		URL url = new URL("http://suppresswarnings.com/wx.http?action=validate&identity="+mac+"&token="+token);
-		Log("1:"+url.toString());
-        URLConnection connection = url.openConnection();
-        InputStream in = connection.getInputStream();
-        InputStreamReader isr = new InputStreamReader(in,"utf-8");
-        BufferedReader br = new BufferedReader(isr);
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while((line = br.readLine()) != null)
-        {
-            sb.append(line);
-        }
-        Log("2:" + line);
-        br.close();
-        isr.close();
-        in.close();
-        Log("3:" + sb);
-        return sb.toString();
-	}
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
