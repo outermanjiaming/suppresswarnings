@@ -18,7 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import com.suppresswarnings.things.CMD;
+import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
 
@@ -61,14 +61,14 @@ public class Demo extends JFrame implements Things {
 		return status;
 	}
 	
-	@CMD("开灯")
+	@SuppressWarnings("开灯")
 	public String on(String input){
 		status=true;
 		bulb.setIcon(imageOn);
 		return "ON";
 	}
 	
-	@CMD("关灯")
+	@SuppressWarnings("关灯")
 	public String off(String input){
 		status=false;
 		bulb.setIcon(imageOff);

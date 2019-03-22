@@ -13,13 +13,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import com.suppresswarnings.things.CMD;
+import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
 
 public class Remote implements Things {
 
-	@CMD("打开记事本")
+	@SuppressWarnings("打开记事本")
 	public String openTxt(String input) {
 		try {
 			File tmp = new File("/Users/lijiaming/tmp.txt");
@@ -33,7 +33,7 @@ public class Remote implements Things {
 		return SUCCESS;
 	}
 	
-	@CMD("说我爱你")
+	@SuppressWarnings("说我爱你")
 	public String love(String input) {
 		try {
 			JFrame frame = new JFrame("新消息");

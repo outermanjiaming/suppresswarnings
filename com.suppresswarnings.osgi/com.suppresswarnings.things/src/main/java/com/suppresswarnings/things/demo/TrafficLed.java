@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
-import com.suppresswarnings.things.CMD;
+import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
 
@@ -27,7 +27,7 @@ public class TrafficLed implements Things {
 			e.printStackTrace();
 		}
 	}
-	@CMD("红灯亮")
+	@SuppressWarnings("红灯亮")
 	public String red(String input) {
 		try {
 			int ret = exec("1", "/sys/class/gpio/gpio12/value");
@@ -40,7 +40,7 @@ public class TrafficLed implements Things {
 		return "off";
 	}
 
-	@CMD("绿灯亮")
+	@SuppressWarnings("绿灯亮")
 	public String green(String input) {
 		try {
 			int ret = exec("1", "/sys/class/gpio/gpio16/value");
@@ -53,7 +53,7 @@ public class TrafficLed implements Things {
 		return "off";
 	}
 	
-	@CMD("黄灯亮")
+	@SuppressWarnings("黄灯亮")
 	public String yellow(String input) {
 		try {
 			int ret = exec("1", "/sys/class/gpio/gpio16/value");
@@ -66,7 +66,7 @@ public class TrafficLed implements Things {
 		return "off";
 	}
 	
-	@CMD("关灯")
+	@SuppressWarnings("关灯")
 	public String off(String input) {
 		try {
 			int ret = exec("0", "/sys/class/gpio/gpio12/value");

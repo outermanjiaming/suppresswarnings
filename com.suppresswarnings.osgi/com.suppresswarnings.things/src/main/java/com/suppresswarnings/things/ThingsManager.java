@@ -62,7 +62,7 @@ public class ThingsManager {
 		Method[] methods = things.getClass().getDeclaredMethods();
 		List<String> commands = new ArrayList<>();
 		for(Method method : methods) {
-			CMD cmd = method.getDeclaredAnnotation(CMD.class);
+			SuppressWarnings cmd = method.getDeclaredAnnotation(SuppressWarnings.class);
 			if(cmd == null) continue;
 			String command = cmd.value();
 			commands.add(command);
