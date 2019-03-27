@@ -68,7 +68,7 @@ public class Remote implements Things {
 
 	public static void main(String[] args) {
 		Remote object = new Remote();
-		ThingsManager.connect(object, "remote.properties");
+		ThingsManager.connect(object);
 	}
 
 	@Override

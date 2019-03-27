@@ -42,6 +42,7 @@ public class Demo extends JFrame implements Things {
 		imageCode = new ImageIcon("demo.jpg");
 		bulb = new JButton(imageOff);
 		qrCode = new JLabel(imageCode);
+		qrCode.setSize(width, width);
 		bulb.addActionListener(new ActionListener() {
 			
 			@Override
@@ -50,11 +51,13 @@ public class Demo extends JFrame implements Things {
 				bulb.setIcon(status?imageOn:imageOff);
 			}
 		});
-		add(bulb,BorderLayout.NORTH);
-		add(qrCode,BorderLayout.SOUTH);
+		add(bulb, BorderLayout.NORTH);
+		add(qrCode, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.pack();
+		setIconImage(new ImageIcon("icon.gif").getImage());
 		setVisible(true);
+		repaint();
 	}
 	
 	public boolean getCommand(){
@@ -80,14 +83,8 @@ public class Demo extends JFrame implements Things {
 		return "模拟灯具";
 	}
 	
-	@Override
-	public String code() {
-		return "T_AIIoT_1542963026305_945";
-	}
-	
-	
 	public static void main(String[] args) throws Exception {
-		ThingsManager.connect(new Demo(), "demo.properties");
+		ThingsManager.connect(new Demo());
 	}
 	
 }

@@ -121,7 +121,7 @@ public class TrafficLed implements Things {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		ThingsManager.connect(new TrafficLed(), "agent.properties");
+		ThingsManager.connect(new TrafficLed());
 	}
 	
 }

@@ -12,7 +12,6 @@ package com.suppresswarnings.things;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -56,7 +54,7 @@ public class ThingsManager {
 		}
 		return "error";
 	}
-	public static void connect(Things things, String configPath) {
+	public static void connect(Things things) {
 		String error = "";
 		Map<String, Method> cmds = new HashMap<>();
 		Method[] methods = things.getClass().getDeclaredMethods();
@@ -70,14 +68,8 @@ public class ThingsManager {
 		}
 		Prepare prepare = new Prepare();
 		try {
-			Properties config = new Properties();
-			if(configPath != null) config.load(new FileInputStream(configPath));
-			System.out.println(config.toString());
-			String server = config.getProperty("server.ssl.host", "139.199.104.224");
-			String sslPorts = config.getProperty("aiiot.ssl.port", "6617");
-			String code = config.getProperty("thing.code", things.code()); 
-			int sslPort = Integer.parseInt(sslPorts);
-			String debug = config.getProperty("debug");
+			String code = System.getProperty(Things.Config.CODE, things.code()); 
+			String debug = System.getProperty("debug");
 			if("true".equals(debug)) System.setProperty("javax.net.debug", "ssl,handshake");
 			System.setProperty("javax.net.ssl.keyStore", prepare.keyDir);
 			System.setProperty("javax.net.ssl.trustStore", prepare.trustDir);
@@ -86,14 +78,14 @@ public class ThingsManager {
 			int tried = 0;
 			while(tried ++ < retry) {
 				SocketFactory factory = SSLSocketFactory.getDefault();    
-				Socket sslsocket = factory.createSocket(server, sslPort);
+				Socket sslsocket = factory.createSocket(Things.Const.HOST, Things.Const.PORT);
 				String knock = String.join(",", things.description(), code, String.join(";", commands)) + "\n";
 				System.out.println("knock ======== " + knock);
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(),"UTF-8"));    
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(), Things.Const.UTF8));    
 				out.write(knock);
 				out.flush();
 				InputStream is = sslsocket.getInputStream();
-				InputStreamReader reader = new InputStreamReader(is,"UTF-8");
+				InputStreamReader reader = new InputStreamReader(is, Things.Const.UTF8);
 				System.out.println("Connected!");
 				
 				//TODO pull & show QRCode?
