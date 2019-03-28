@@ -28,9 +28,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class AutoJump {
-	public static final String serializeTo = "D:/tmp/jump/autojumper.dnn.nn";
+	public static final String serializeTo = "autojumper.dnn.nn";
 	public static final String[] yesno = {"D:/tmp/jump/yes/", "D:/tmp/jump/no/"};
-	public static final String adb = "C:/Users/lijiaming/AppData/Local/Android/Sdk/platform-tools/adb.exe";
+	public static final String adb = "/Users/lijiaming/tmp/adb";
 	public final static double[] yes = {1,0};
 	public final static double[] no = {0,1};
 	public static final double confidence = 0.9;
@@ -42,7 +42,7 @@ public class AutoJump {
 	public static int index = 0;
 	public static Random rand = new Random();
 	public static void main(String[] args) throws Exception {
-		show();//decide(new File("p1523238626151.png"), "D:/tmp/collect/");//collect();//train();//autojump();//
+		autojump();//show();//decide(new File("p1523238626151.png"), "D:/tmp/collect/");//collect();//train();//autojump();//
 	}
 	
 	public static void train() throws Exception {

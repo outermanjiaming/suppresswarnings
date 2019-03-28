@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="c.s.c.service.warehouse">
-   <implementation class="com.suppresswarnings.corpus.service.warehouse.WarehouseContextFactory"/>
-   <service>
-      <provide interface="com.suppresswarnings.corpus.common.ContextFactory"/>
-   </service>
-</scr:component>

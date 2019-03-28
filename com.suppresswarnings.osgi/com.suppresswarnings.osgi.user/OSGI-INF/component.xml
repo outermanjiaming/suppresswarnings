@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.suppresswarnings.osgi.user">
-   <implementation class="com.suppresswarnings.osgi.user.UserService"/>
-   <service>
-      <provide interface="com.suppresswarnings.osgi.network.http.HTTPService"/>
-   </service>
-   <reference bind="account" cardinality="0..1" interface="com.suppresswarnings.osgi.user.AccountService" name="com.suppresswarnings.osgi.account" policy="dynamic" unbind="clearAccount"/>
-   <reference bind="token" cardinality="0..1" interface="com.suppresswarnings.osgi.user.TokenService" name="com.suppresswarnings.osgi.token" policy="dynamic" unbind="clearToken"/>
-</scr:component>
