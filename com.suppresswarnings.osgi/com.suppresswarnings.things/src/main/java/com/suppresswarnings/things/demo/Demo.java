@@ -83,6 +83,11 @@ public class Demo extends JFrame implements Things {
 		return "模拟灯具";
 	}
 	
+	@Override
+	public String code() {
+		return "T_AIIoT_1542963026305_945";
+	}
+	
 	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new Demo());
 	}
