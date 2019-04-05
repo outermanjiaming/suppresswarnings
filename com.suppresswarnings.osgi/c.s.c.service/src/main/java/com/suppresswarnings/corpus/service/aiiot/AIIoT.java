@@ -14,6 +14,8 @@ import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,16 +94,22 @@ public class AIIoT implements Closeable {
 	    long time = System.currentTimeMillis() - start;
 	    logger.info("[AIIoT] server socket prepared: " + time + "ms");
 	    scheduledExecutorService.scheduleWithFixedDelay(() -> {
+	    	List<String> remove = new ArrayList<>();
 	    	things.forEach((code, thing) ->{
 				try {
 					long diff = thing.diff();
 					if(diff > TimeUnit.SECONDS.toMillis(30)) {
-						logger.info("[AIIoT] checking " + thing.toString() + " closed: " + thing.close());
+						logger.info("[AIIoT] checking " + thing + " closed: " + thing.close());
+						if(thing.close()) {
+							logger.info("[AIIoT] going to remove " + thing);
+							remove.add(code);
+						}
 					}
 				} catch (Exception e) {
 					logger.error("[AIIoT] checking things client socket Exception");
 				}
 			});
+	    	remove.forEach(code -> things.remove(code));
 	    }, 2, 10, TimeUnit.SECONDS);
 	    while(on.get()) {
 	    	if(serverSocket.isClosed()) {
@@ -119,7 +127,7 @@ public class AIIoT implements Closeable {
 				String commands = args[2];
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code), description);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
-				Things exist = things.get(code);
+				Things exist = things.remove(code);
 				if(exist != null) {
 					exist.close();
 					logger.info("[AIIoT] close previos things");
@@ -153,10 +161,11 @@ public class AIIoT implements Closeable {
 		}
 	}
 	public Things newThings(String desc, String code, Socket socket) {
-		if(socket == null) return null;
+		if(socket == null) {
+			logger.info("[AIIoT] socket is null");
+		}
 		if(socket.isClosed()) {
 			logger.info("[AIIoT] socket is closed");
-			return null;
 		}
 		//check code 
 		Things things = new Things(desc, code, socket);

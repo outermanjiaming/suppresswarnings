@@ -2,7 +2,6 @@ package com.suppresswarnings.corpus.service;
 
 import org.slf4j.LoggerFactory;
 
-import com.suppresswarnings.corpus.service.aiiot.Things;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class PingHandlerFactory {
