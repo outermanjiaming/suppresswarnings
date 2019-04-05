@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Data
 Bundle-SymbolicName: c.s.c.service.data
 Bundle-Version: 0.0.1.osgi
-Import-Package: com.suppresswarnings.corpus.common,
- com.suppresswarnings.corpus.service,
- com.suppresswarnings.osgi.leveldb,
- com.suppresswarnings.osgi.neuralnetwork,
- org.slf4j
-Service-Component: OSGI-INF/component.xml
 Export-Package: com.suppresswarnings.corpus.service.data
+Import-Package: com.suppresswarnings.corpus.common,
+  com.suppresswarnings.corpus.service,
+  com.suppresswarnings.osgi.leveldb,
+  com.suppresswarnings.osgi.neuralnetwork,
+  org.slf4j
+Service-Component: OSGI-INF/component.xml

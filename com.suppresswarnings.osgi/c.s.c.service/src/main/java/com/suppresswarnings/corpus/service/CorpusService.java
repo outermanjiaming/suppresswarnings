@@ -224,10 +224,19 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(code.contains(";")) {
 			StringBuffer sb = new StringBuffer();
 			String[] codes = code.split(";");
+			StringBuffer now = new StringBuffer();
 			for(String thing : codes) {
 				String ret = aiiot.remoteCall(openid, thing, input, origin, context);
-				sb.append(thing).append("=").append(ret).append(";");
+				if(ret == null) {
+					
+				} else {
+					now.append(thing).append(";");
+					sb.append(thing).append("=").append(ret).append(";");
+				}
 			}
+			if(now.length() > 1) now.deleteCharAt(now.length() - 1);
+			String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid, "AIIoT", input);
+			context.content().account().put(keyCMD, now.toString());
 			return sb.toString();
 		} else {
 			return aiiot.remoteCall(openid, code, input, origin, context);
@@ -816,7 +825,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 		// TODO get action to do things
 		String action = parameter.getParameter("action");
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
-		if("managereports".equals(action)){
+		if("ping".equals(action)) {
+			return PingHandlerFactory.handle(parameter, this);
+		} else if("managereports".equals(action)){
 			logger.info("[managereports] lijiaming");
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -926,9 +937,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 						input = "听不清说了啥？";
 					}
 				} else if("event".equals(msgType)) {
-					//lijiaming leave from worker user
-					forgetIt(openid);
-					
 					String where = "素朴网联";
 					String event = wxmsg.get("Event");
 					String eventKey = wxmsg.get("EventKey");
@@ -940,6 +948,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 							where = eventKey;
 						}
 					}
+					
 					logger.info("[lijiaming] where: " + where);
 					if("subscribe".equals(event)) {
 						String subscribeKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", openid);
@@ -990,6 +999,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 						String exchange = globalCommand(where);
 						logger.info("SCAN: " + exchange + " == " + where);
 						if(exchange != null) {
+							//lijiaming leave from worker user
+							forgetIt(openid);
 							ContextFactory<CorpusService> cf = factories.get(exchange);
 							Context<CorpusService> contxt = cf.getInstance(fromOpenId, openid, this);
 							contxt.test("SCAN_" + where);
@@ -1002,6 +1013,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 						logger.info("[corpus] location: " + wxmsg.get("FromUserName") + " = (" + wxmsg.get("Latitude") + ", " + wxmsg.get("Longitude") + ") * " + wxmsg.get("Precision"));
 						String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Location", ""+System.currentTimeMillis(), openid);
 						data().put(mediaKey, sms);
+						return SUCCESS;
+					} else if("user_view_card".equals(event)) {
+						account().put(String.join(Const.delimiter, Const.Version.V1, "Keep", "ViewCard", openid, ""+System.currentTimeMillis()), wxmsg.get("UserCardCode"));
+						return SUCCESS;
+					} else if("user_enter_session_from_card".equals(event)) {
+						account().put(String.join(Const.delimiter, Const.Version.V1, "Keep", "FromCard", openid, ""+System.currentTimeMillis()), wxmsg.get("UserCardCode"));
 						return SUCCESS;
 					}
 				} else if("image".equals(msgType)) {

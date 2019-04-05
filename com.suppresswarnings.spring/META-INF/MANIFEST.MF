@@ -1,2 +1,8 @@
-Main-Class: org.springframework.boot.loader.JarLauncher
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring
+Bundle-SymbolicName: com.suppresswarnings.spring
+Bundle-Version: 1.0.0.qualifier
 Start-Class: com.suppresswarnings.spring.App
+Main-Class: org.springframework.boot.loader.JarLauncher
+Export-Package: com.suppresswarnings.spring

@@ -23,7 +23,12 @@ public class Things implements Cloneable {
 	Socket socket;
 	String code;
 	String desc;
+	long diff = 0;
+	long last = System.currentTimeMillis();
+	long update;
 	public Things(String desc, String code, Socket socket){
+		this.update = System.currentTimeMillis();
+		this.diff = update - last;
 		this.desc = desc;
 		this.code = code;
 		this.socket = socket;
@@ -89,6 +94,17 @@ public class Things implements Cloneable {
 	
 	@Override
 	public String toString() {
-		return "Things("+desc+") [" + code + "]";
+		return "Things("+desc+") [" + code + "]{"+socket+"}" + diff();
+	}
+
+	public long ping() {
+		this.last = update;
+		this.update = System.currentTimeMillis();
+		this.diff = update - last;
+		return diff;
+	}
+	
+	public long diff() {
+		return System.currentTimeMillis() - update;
 	}
 }

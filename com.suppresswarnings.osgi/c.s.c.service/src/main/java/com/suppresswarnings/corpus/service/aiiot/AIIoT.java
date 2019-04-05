@@ -17,6 +17,9 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ServerSocketFactory;
@@ -37,13 +40,23 @@ public class AIIoT implements Closeable {
 	int sslPort;
 	AtomicBoolean on = new AtomicBoolean(true);
 	SSLServerSocket serverSocket;
+	ScheduledExecutorService scheduledExecutorService;
 	public AIIoT(){}
 	public AIIoT(CorpusService service) {
 		this.service = service;
+		this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 	}
-	
+	public String ping(String code) {
+		Things things = service.aiiot.things.get(code);
+		if(things == null) return "null";
+		if(things.isClosed()) return "closed";
+		long diff = things.ping();
+		logger.info(code + " has diff " + diff);
+		return "success";
+	}
 	public String remoteCall(String openid, String code, String input, String origin, Context<CorpusService> context) {
-		Things thing = things.get(code);
+		Things thing = service.aiiot.things.get(code);
+		logger.info("[AIIoT] remoteCall "+ thing);
 		if(thing == null) {
 			logger.info("[AIIoT] remoteCall but thing is null for code: " + code);
 			context.output("该设备不存在或离线");
@@ -54,7 +67,7 @@ public class AIIoT implements Closeable {
 			context.output("该设备离线");
 			return null;
 		}
-		logger.info("[AIIoT] remoteCall("+openid+", "+code+", " +input+ ", " +context.state().name()+ ")");
+		logger.info("[AIIoT] remoteCall("+openid+", "+thing+", " +input+ ", " +context.state().name()+ ")");
 		return thing.execute(input);
 	}
 	
@@ -78,7 +91,18 @@ public class AIIoT implements Closeable {
 	    serverSocket.setNeedClientAuth(true);
 	    long time = System.currentTimeMillis() - start;
 	    logger.info("[AIIoT] server socket prepared: " + time + "ms");
-	    
+	    scheduledExecutorService.scheduleWithFixedDelay(() -> {
+	    	things.forEach((code, thing) ->{
+				try {
+					long diff = thing.diff();
+					if(diff > TimeUnit.SECONDS.toMillis(30)) {
+						logger.info("[AIIoT] checking " + thing.toString() + " closed: " + thing.close());
+					}
+				} catch (Exception e) {
+					logger.error("[AIIoT] checking things client socket Exception");
+				}
+			});
+	    }, 2, 10, TimeUnit.SECONDS);
 	    while(on.get()) {
 	    	if(serverSocket.isClosed()) {
 	    		on.set(false);
@@ -154,6 +178,5 @@ public class AIIoT implements Closeable {
 		} catch (Exception e) {
 			logger.error("[AIIoT] close serverSocket Exception", e);
 		}
-	}
-	
+	}	
 }

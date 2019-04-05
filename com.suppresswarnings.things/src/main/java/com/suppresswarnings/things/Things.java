@@ -70,4 +70,6 @@ public interface Things {
 			return code();
 		}
 	}
+	
+	String exception(String error);
 }

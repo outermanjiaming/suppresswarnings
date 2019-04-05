@@ -75,4 +75,9 @@ public class Remote implements Things {
 	public String code() {
 		return "T_AIIoT_1542963026305_945";
 	}
+
+	@Override
+	public String exception(String error) {
+		return "";
+	}
 }

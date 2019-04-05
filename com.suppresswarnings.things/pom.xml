@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.suppresswarnings</groupId>
-    <artifactId>com.suppresswarnings.osgi</artifactId>
+    <artifactId>suppresswarnings-parent</artifactId>
     <version>${suppresswarnings.version}</version>
   </parent>
   <artifactId>com.suppresswarnings.things</artifactId>

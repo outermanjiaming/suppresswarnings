@@ -5,6 +5,6 @@ Bundle-SymbolicName: c.s.c.service.token
 Bundle-Version: 0.0.1.osgi
 Export-Package: com.suppresswarnings.corpus.service.token
 Import-Package: com.suppresswarnings.corpus.common,
- com.suppresswarnings.osgi.leveldb,
- org.slf4j
+  com.suppresswarnings.osgi.leveldb,
+  org.slf4j
 Service-Component: OSGI-INF/component.xml

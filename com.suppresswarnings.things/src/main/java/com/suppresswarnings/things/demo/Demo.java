@@ -12,6 +12,7 @@ package com.suppresswarnings.things.demo;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -33,6 +34,7 @@ public class Demo extends JFrame implements Things {
 	public Demo(){
 		init();
 	}
+	
 	public void init(){
 		setTitle("client");
 		setSize(width, height);
@@ -77,7 +79,26 @@ public class Demo extends JFrame implements Things {
 		bulb.setIcon(imageOff);
 		return "OFF";
 	}
-
+	
+	@Override
+	public String exception(String error) {
+		for(int i=0;i<30;i++) {
+			on(error);
+			try {
+				TimeUnit.MILLISECONDS.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			off(error);
+			try {
+				TimeUnit.MILLISECONDS.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return FAIL;
+	}
+	
 	@Override
 	public String description() {
 		return "模拟灯具";
@@ -91,5 +112,4 @@ public class Demo extends JFrame implements Things {
 	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new Demo());
 	}
-	
 }

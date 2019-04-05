@@ -123,5 +123,9 @@ public class TrafficLed implements Things {
 	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new TrafficLed());
 	}
+	@Override
+	public String exception(String error) {
+		return "";
+	}
 	
 }

@@ -4,9 +4,9 @@ Bundle-Name: c.s.c.common
 Bundle-SymbolicName: c.s.c.common
 Bundle-Version: 0.0.2.osgi
 Bundle-ClassPath: libs/core-3.3.0.jar,
- libs/javax-ssl-1.1.0.jar,
- libs/javax.activation-1.1.0.v201105071233.jar,
- libs/javax.mail-1.5.0.jar,
- .
-Export-Package: com.suppresswarnings.corpus.common
+  libs/javax-ssl-1.1.0.jar,
+  libs/javax.activation-1.1.0.v201105071233.jar,
+  libs/javax.mail-1.5.0.jar,
+  .
 Import-Package: org.slf4j
+Export-Package: com.suppresswarnings.corpus.common

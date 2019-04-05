@@ -5,8 +5,8 @@ Bundle-SymbolicName: c.s.c.service.reply
 Bundle-Version: 0.0.1.osgi
 Export-Package: com.suppresswarnings.corpus.service.reply
 Import-Package: com.suppresswarnings.corpus.common,
- com.suppresswarnings.corpus.service,
- com.suppresswarnings.corpus.service.work,
- com.suppresswarnings.osgi.leveldb,
- org.slf4j
+  com.suppresswarnings.corpus.service,
+  com.suppresswarnings.corpus.service.work,
+  com.suppresswarnings.osgi.leveldb,
+  org.slf4j
 Service-Component: OSGI-INF/component.xml
