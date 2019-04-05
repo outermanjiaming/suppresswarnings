@@ -58,15 +58,16 @@ public class Things implements Cloneable {
 		return socket == null || socket.isClosed();
 	}
 	
-	public String execute(String cmd) {
+	public String execute(String cmd, String input) {
 		if(socket == null || socket.isClosed()) {
 			logger.info("Things ["+code()+"] socket is null or closed");
 			return FAIL;
 		}
 		try {
 			logger.info("Things ["+code()+"] send msg: " + cmd);
+			String command = String.join(";", cmd, input);
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));    
-	        out.write(cmd + "\n");
+	        out.write(command + "\n");
 	        out.flush();
 	        logger.info("Things [" + code() + "] waiting to read status");
 	        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));

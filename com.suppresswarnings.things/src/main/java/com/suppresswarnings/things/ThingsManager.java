@@ -148,7 +148,6 @@ public class ThingsManager {
 			out.write(knock);
 			out.flush();
 			InputStream is = sslsocket.getInputStream();
-			InputStreamReader reader = new InputStreamReader(is, Things.Const.UTF8);
 			System.out.println("Connected!");
 			
 			service.scheduleWithFixedDelay(() -> {
@@ -170,15 +169,18 @@ public class ThingsManager {
 			
 		    try {
 		    	while(run.get() && sslsocket.isConnected() && !sslsocket.isClosed()) {
-					BufferedReader in = new BufferedReader(reader);
+					BufferedReader in = new BufferedReader(new InputStreamReader(is, Things.Const.UTF8));
 					String msg = in.readLine();
 					System.out.println("msg ========= " + msg);
 					if(msg == null) {
 						run.set(false);
 						continue;
 					}
-					String call = msg.trim();
-					String ret = execute(call, msg);
+					String command = msg.trim();
+					String[] callInput = command.split(";");
+					String call = callInput[0];
+					String input = callInput[1];
+					String ret = execute(call, input);
 					System.out.println("ret ========= " + ret);
 					out.write(ret + "\n");
 					out.flush();

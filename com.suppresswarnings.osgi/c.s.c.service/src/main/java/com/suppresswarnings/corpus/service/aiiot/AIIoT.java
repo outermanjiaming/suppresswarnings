@@ -56,7 +56,7 @@ public class AIIoT implements Closeable {
 		logger.info(code + " has diff " + diff);
 		return "success";
 	}
-	public String remoteCall(String openid, String code, String input, String origin, Context<CorpusService> context) {
+	public String remoteCall(String openid, String code, String cmd, String input, Context<CorpusService> context) {
 		Things thing = service.aiiot.things.get(code);
 		logger.info("[AIIoT] remoteCall "+ thing);
 		if(thing == null) {
@@ -70,7 +70,7 @@ public class AIIoT implements Closeable {
 			return null;
 		}
 		logger.info("[AIIoT] remoteCall("+openid+", "+thing+", " +input+ ", " +context.state().name()+ ")");
-		return thing.execute(input);
+		return thing.execute(cmd, input);
 	}
 	
 	public void working() throws Exception {
