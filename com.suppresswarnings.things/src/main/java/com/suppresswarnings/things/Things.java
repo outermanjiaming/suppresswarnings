@@ -30,6 +30,7 @@ public interface Things {
 		Integer PORT = 6617;
 		String UTF8 = "UTF-8";
 		String CODE_FILE = "suppresswarnings.code";
+		String PING_FORAMT = "http://suppresswarnings.com/wx.http?action=ping&type=things&token=%s";
 	}
 	/**
 	 * description of this thing

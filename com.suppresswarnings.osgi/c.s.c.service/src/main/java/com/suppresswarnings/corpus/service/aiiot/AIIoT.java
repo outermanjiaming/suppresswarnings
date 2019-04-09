@@ -56,7 +56,7 @@ public class AIIoT implements Closeable {
 		logger.info(code + " has diff " + diff);
 		return "success";
 	}
-	public String remoteCall(String openid, String code, String cmd, String input, Context<CorpusService> context) {
+	public String remoteCall(String openid, String code, String cmd, String input, Context<?> context) {
 		Things thing = service.aiiot.things.get(code);
 		logger.info("[AIIoT] remoteCall "+ thing);
 		if(thing == null) {
@@ -69,7 +69,7 @@ public class AIIoT implements Closeable {
 			context.output("该设备离线");
 			return null;
 		}
-		logger.info("[AIIoT] remoteCall("+openid+", "+thing+", " +input+ ", " +context.state().name()+ ")");
+		logger.info("[AIIoT] remoteCall("+openid+", "+thing+", " +input+ ", " +context+ ")");
 		return thing.execute(cmd, input);
 	}
 	

@@ -47,6 +47,7 @@ import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.corpus.common.SendMail;
+import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.common.TTL;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
@@ -122,7 +123,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	};
 	public static final Format quizAnswerReplyOrSimilar = new Format(formats);
 	public Map<String, Counter> counters = new ConcurrentHashMap<>();
-	
+	public Map<String, AtomicInteger> atomicIds = new ConcurrentHashMap<>();
 	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
@@ -248,9 +249,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void log(String clazz, String info) {
 		logger.info("[" + clazz + "] " + info);
 	}
+	
 	public void activate() {
 		CorpusService that = this;
 		logger.info("[corpus] activate");
+		System.out.println("服务正在启动");
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
 			int index = 0;
 			@Override
@@ -510,6 +513,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t listn - listn <startkey> <limit> - list some values by start limit.\n");
 		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
 		buffer.append("\t findn - findn <startkey> <what> <limit> - find them and delete some key-values by what value.\n");
+		buffer.append("\t aiiot - aiiot <exam> <word> - speak words on things\n");
 		
 		return buffer.toString();
 	}
@@ -529,6 +533,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String value = ci.nextArgument();
 		int result = leveldb.put(key, value);
 		ci.println("[putkv] " + result + " put: "+ key + " = " + value);
+	}
+	AtomicInteger start = new AtomicInteger(0);
+	public void _aiiot(CommandInterpreter ci) {
+		String cmd = ci.nextArgument();
+		String length = ci.nextArgument();
+		int size = Integer.valueOf(length);
+		String code = "Robot_AIIoT_0001";
+		Context<CorpusService> context = new Context<CorpusService>(this) {
+			
+			@Override
+			public State<Context<CorpusService>> exit() {
+				return null;
+			}
+			
+		};
+		if("exam".equals(cmd)) {
+			for(int i=0;i<size && start.get() < assimilatedQuiz.size();i++) {
+				String input = assimilatedQuiz.get(start.getAndIncrement()).getQuiz().value();
+				String ret = aiiot.remoteCall("myself", code, cmd, input, context);
+				logger.info("generate mp3 remote: " + ret);
+			}
+		}
+		
+		ci.println("[aiiot] " + length + ", " + cmd + ", " + start.get());
 	}
 	
 	public void _getkv(CommandInterpreter ci) {
@@ -730,7 +758,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			
 			//TODO each quiz, count them
 			fillCounter(quiz);
-			
 			boolean assimilated = false;
 			for(int i=0;i<assimilatedQuiz.size();i++) {
 				Quiz host = assimilatedQuiz.get(i);
@@ -1020,6 +1047,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 					} else if("user_enter_session_from_card".equals(event)) {
 						account().put(String.join(Const.delimiter, Const.Version.V1, "Keep", "FromCard", openid, ""+System.currentTimeMillis()), wxmsg.get("UserCardCode"));
 						return SUCCESS;
+					} else if("user_del_card".equals(event)) {
+						account().put(String.join(Const.delimiter, Const.Version.V1, "Keep", "DeleteCard", openid, ""+System.currentTimeMillis()), wxmsg.get("UserCardCode"));
+						return SUCCESS;
+					} else {
+						logger.info("unhandled event: " + event + ", " + eventKey);
+						return SUCCESS;
 					}
 				} else if("image".equals(msgType)) {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Media", ""+System.currentTimeMillis(), openid);
@@ -1075,8 +1108,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 				if(finish) {
 					logger.info("[WX] this stage finished: " + context.state());
 				}
-				
-				return xml(openid, context.output(), fromOpenId);
+				String out = context.output();
+				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis())) {
+					logger.info("管理员发话了： " + out);
+					aiiot.remoteCall(openid, "Robot_AIIoT_0001", "exam", out, context);
+				}
+				return xml(openid, out, fromOpenId);
 			}
 		} else if("backup".equals(action)) {
 			String from = parameter.getParameter("from");
@@ -2266,5 +2303,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		String string = "23Similar456Reply67890";
 		System.out.println(string.split("Similar|Reply")[0]);
+	}
+	
+	public String uniqueKey(String string) {
+		synchronized (atomicIds) {
+			String key = String.join(Const.delimiter, Const.Version.V1, "Unique", "Key", string);
+			AtomicInteger id = atomicIds.get(string);
+			if(id == null) {
+				String value = account().get(key);
+				if(value == null) {
+					value = "0";
+					account().put(key, value);
+				}
+				int v = Integer.valueOf(value);
+				id = new AtomicInteger(v);
+				atomicIds.put(string, id);
+			}
+			
+			return string + Const.delimiter + id.getAndIncrement();
+		}
 	}
 }

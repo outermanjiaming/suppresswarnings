@@ -229,6 +229,7 @@ public class ManageContext extends WXContext {
 		public boolean finish() {
 			return false;
 		}
+		
 	};
 	State<Context<CorpusService>> examManage = new State<Context<CorpusService>>() {
 

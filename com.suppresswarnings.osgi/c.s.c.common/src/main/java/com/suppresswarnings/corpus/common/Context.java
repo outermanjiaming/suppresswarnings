@@ -9,6 +9,7 @@
  */
 package com.suppresswarnings.corpus.common;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -119,7 +120,7 @@ public abstract class Context<T> implements Predicate<String> {
 	
 	@Override
 	public String toString() {
-		return "Context [" + content.getClass().getSimpleName() + "@" + content.hashCode() + ", state=" + state.getClass().getSimpleName() + "-" + state.name() + ", output=" + output.toString() + ", time=" + time + ", rand=" + rand + "]";
+		return "Context [" + content.getClass().getSimpleName() + "@" + content.hashCode() + ", state=" + Objects.toString(state) + ", output=" + output.toString() + ", time=" + time + ", rand=" + rand + "]";
 	}
 	
 }

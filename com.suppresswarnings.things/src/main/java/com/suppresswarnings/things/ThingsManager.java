@@ -49,26 +49,16 @@ public class ThingsManager {
 	        InputStream is = null;
 	        BufferedReader br = null;
 	        String result = null;
-	        // 返回结果字符串
 	        try {
-	            // 创建远程url连接对象
 	            URL url = new URL(httpurl);
-	            // 通过远程url连接对象打开一个连接，强转成httpURLConnection类
 	            connection = (HttpURLConnection) url.openConnection();
-	            // 设置连接方式：get
 	            connection.setRequestMethod("GET");
-	            // 设置连接主机服务器的超时时间：毫秒
 	            connection.setConnectTimeout(1500);
-	            // 设置读取远程返回的数据时间：毫秒
 	            connection.setReadTimeout(3000);
-	            // 发送请求
 	            connection.connect();
-	            // 通过connection连接，获取输入流
 	            if (connection.getResponseCode() == 200) {
 	                is = connection.getInputStream();
-	                // 封装输入流is，并指定字符集
 	                br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-	                // 存放数据
 	                StringBuffer sbf = new StringBuffer();
 	                String temp = null;
 	                while ((temp = br.readLine()) != null) {
@@ -82,7 +72,6 @@ public class ThingsManager {
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        } finally {
-	            // 关闭资源
 	            if (null != br) {
 	                try {
 	                    br.close();
@@ -99,11 +88,12 @@ public class ThingsManager {
 	                }
 	            }
 
-	            connection.disconnect();// 关闭远程连接
+	            connection.disconnect();
 	        }
 
 	        return result;
 	    }
+		
 		String execute(String call, String msg) {
 			Method method = cmds.get(call);
 			
@@ -152,9 +142,9 @@ public class ThingsManager {
 			
 			service.scheduleWithFixedDelay(() -> {
 				try {
-					String ret = doGet("http://suppresswarnings.com/wx.http?action=ping&type=things&token=" + code);
+					String ret = doGet(String.format(Things.Const.PING_FORAMT, code));
 					System.out.println(start + " ping = " + ret);
-					if("closed".equals(ret.trim())) {
+					if(ret == null || "closed".equals(ret.trim())) {
 						System.out.println("restart");
 						things.exception("restart");
 						service.shutdown();
@@ -162,9 +152,8 @@ public class ThingsManager {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					things.exception("ping,"+e.getMessage());
+					things.exception("ping = " + e.getMessage());
 				}
-				System.out.println(start + " ping running...");
 			}, 1, 3, TimeUnit.SECONDS);
 			
 		    try {
@@ -178,12 +167,18 @@ public class ThingsManager {
 					}
 					String command = msg.trim();
 					String[] callInput = command.split(";");
-					String call = callInput[0];
-					String input = callInput[1];
-					String ret = execute(call, input);
-					System.out.println("ret ========= " + ret);
-					out.write(ret + "\n");
-					out.flush();
+					if(callInput.length == 2) {
+						String call = callInput[0];
+						String input = callInput[1];
+						String ret = execute(call, input);
+						System.out.println("ret ========= " + ret);
+						out.write(ret + "\n");
+						out.flush();
+					} else {
+						execute(callInput[0], "我什么也没有说");
+						out.write("WRONG_FORMAT\n");
+						out.flush();
+					}
 		    	}
 			} catch (Exception e) {
 				run.set(false);
@@ -191,6 +186,7 @@ public class ThingsManager {
 				is.close();
 				sslsocket.close();
 				e.printStackTrace();
+				things.exception("网络异常，请重启！" + e.getMessage());
 				System.out.println(e.getMessage() + "网络异常，请重启！");
 			}
 			

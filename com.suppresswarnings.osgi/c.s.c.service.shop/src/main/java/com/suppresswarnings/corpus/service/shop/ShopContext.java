@@ -9,25 +9,17 @@
  */
 package com.suppresswarnings.corpus.service.shop;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
-import com.suppresswarnings.corpus.service.work.Quiz;
-import com.suppresswarnings.corpus.service.wx.WXnews;
+import com.suppresswarnings.corpus.service.shop.game.ReplyAndBonus;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ShopContext extends WXContext {
@@ -35,8 +27,12 @@ public class ShopContext extends WXContext {
 	public static final String CMD = "我的商铺";
 	public static final String Wait = "Wait";
 	public static final String None = "None";
+	AtomicBoolean finish = new AtomicBoolean(false);
+	AtomicBoolean noneed = new AtomicBoolean(false);
+	AtomicBoolean consumer = new AtomicBoolean(false);
+	AtomicBoolean first = new AtomicBoolean(true);
+	ReplyAndBonus game;
 	State<Context<CorpusService>> shop = new State<Context<CorpusService>>() {
-		boolean finish = false;
 		/**
 		 * 
 		 */
@@ -74,12 +70,11 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public boolean finish() {
-			return finish;
+			return finish.get();
 		}
 		
 	};
 	State<Context<CorpusService>> bind = new State<Context<CorpusService>>() {
-		boolean finish = false;
 		
 		/**
 		 * 
@@ -93,7 +88,7 @@ public class ShopContext extends WXContext {
 			u.content().account().put(keyBind, Wait);
 			u.content().account().put(keyBindTime, time());
 			u.output("请扫描商铺二维码（请联系【素朴网联】工作人员申请商铺二维码）");
-			finish = true;
+			finish.compareAndSet(false, true);
 		}
 
 		@Override
@@ -109,7 +104,7 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public boolean finish() {
-			return finish;
+			return finish.get();
 		}
 		
 		
@@ -118,8 +113,6 @@ public class ShopContext extends WXContext {
 	List<String> openids = new ArrayList<>();
 	State<Context<CorpusService>> ad = new State<Context<CorpusService>>() {
 		long limit = 100;
-		boolean finish = false;
-		boolean noneed = false;
 		
 		/**
 		 * 
@@ -128,13 +121,13 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			finish = true;
+			finish.compareAndSet(false, true);
 			//1.check if I am Boss
 			String keyBind = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Bind");
 			String binded = u.content().account().get(keyBind);
 			if(binded == null || None.equals(binded)) {
 				u.output("您还没有绑定商铺二维码，发广告给谁呀？");
-				noneed = true;
+				noneed.compareAndSet(false, true);
 			} else {
 				String qrScene = binded;
 				String head = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Customer");
@@ -159,10 +152,10 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(!finish) return ad;
-			if(noneed) return init;
+			if(!finish.get()) return ad;
+			if(noneed.get()) return init;
 			//get out
-			finish = false;
+			finish.set(false);
 			return send;
 		}
 
@@ -232,8 +225,6 @@ public class ShopContext extends WXContext {
 	
 	
 	State<Context<CorpusService>> scan = new State<Context<CorpusService>>() {
-		boolean finish = false;
-		boolean isCustomer = false;
 		/**
 		 * 
 		 */
@@ -241,7 +232,7 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			finish = true;
+			finish.compareAndSet(false, true);
 			String qrScene = t.substring("SCAN_".length());
 			//1.check if I am Boss
 			String keyBind = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Bind");
@@ -257,32 +248,8 @@ public class ShopContext extends WXContext {
 				if(ownerid == null) {
 					u.output("该商铺二维码还未绑定！");
 				} else {
-					String keyCustomer = String.join(Const.delimiter, Const.Version.V1, ownerid, "Shop", "Customer", openid());
-					u.content().account().put(keyCustomer, openid());
-					String keyHistoryCustomer = String.join(Const.delimiter, Const.Version.V1, ownerid, "Shop", "History", "Customer", time(), random());
-					u.content().account().put(keyHistoryCustomer, openid());
-					String keyUser = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Customer", time(), random());
-					u.content().account().put(keyUser, openid());
-					isCustomer = true;
-					String keyGoodid = String.join(Const.delimiter, Const.Version.V1, "Shop", qrScene, "Goodid");
-					String goodid = u.content().account().get(keyGoodid);
-					if(goodid != null) {
-						WXuser owner = u.content().getWXuserByOpenId(goodid);
-						String payment = "http://suppresswarnings.com/payment.html?state=" + goodid;
-						Gson gson = new GsonBuilder().disableHtmlEscaping().create(); 
-						WXnews news = new WXnews();
-						news.setDescription("点击进入支付页面");
-						news.setTitle("商铺收银台");
-						news.setUrl(payment);
-						news.setPicUrl(owner.getHeadimgurl());
-						String newsJson = gson.toJson(news);
-						//TODO async
-						String ret = u.content().sendNewsTo("Shop payment", newsJson, openid());
-						logger.info("[Shop payment] sent: " + ret);
-					} else {
-						logger.info("[Shop scan] goodid is null, qrScene: " + qrScene);
-					}
-					u.output("答题抽奖！请留下您的手机号，中奖后需要凭手机号领奖！");
+					game = new ReplyAndBonus(consumer, ownerid, openid(), qrScene, init, u.content());
+					game.state().accept(t, u);
 				}
 				return;
 			}
@@ -340,12 +307,14 @@ public class ShopContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(isCustomer) return customer;
-			if(!finish) {
+			if(consumer.get()) {
+				return game.state().apply(t, u);
+			}
+			if(!finish.get()) {
 				return scan;
 			}
 			//get out
-			finish = false;
+			finish.set(false);
 			return init;
 		}
 
@@ -368,97 +337,6 @@ public class ShopContext extends WXContext {
 		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Type"), "Data");
 		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", bossid, "Bossid"), bossid);
 	}
-	
-	State<Context<CorpusService>> customer = new State<Context<CorpusService>>() {
-		boolean finish = false;
-		boolean first = true;
-		Iterator<Quiz> quiz = null;
-		List<KeyValue> qa = new ArrayList<>();
-		Quiz next = null;
-		int i=0;
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 3937145686042893179L;
-
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			
-			i ++;
-			if(first) {
-				String keyPhone = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Contact", "Phone");
-				String keyHistory = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Contact", "History", "Phone", time());
-				u.content().account().put(keyHistory, t);
-				u.content().account().put(keyPhone, t);
-				logger.info("[Shop customer] save phone: " + openid() + " => " + t);
-				u.output("请回答10个问题，大奖等你来拿！");
-				first = false;
-				quiz = getQuiz(u.content(), 10);
-			} else {
-				String keyReply = String.join(Const.delimiter, next.getQuiz().key(), "Reply", openid(), time(), random());
-				u.content().data().put(keyReply, t);
-				qa.add(new KeyValue(next.getQuiz().value(), t));
-			}
-			if(quiz != null && quiz.hasNext()) {
-				next = quiz.next();
-				u.output(i + ". " + next.getQuiz().value());
-			} else {
-				finish = true;
-				int lable = 0;
-				int code = new Random().nextInt(49) + 1;
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-				String date = sdf.format(new Date());
-				String keyRand = String.join(Const.delimiter, Const.Version.V1, "Shop", "Reply", date, openid(), time());
-				StringBuffer sb = new StringBuffer();
-				sb.append("抽奖号码：" + code).append("\n");
-				String keyMycode = String.join(Const.delimiter, Const.Version.V1, openid(), "Shop", "Lotus", date);
-				u.content().account().put(keyMycode, ""+code);
-				u.output("抽奖号码：" + code);
-				for(KeyValue kv : qa) {
-					lable ++;
-					sb.append(lable + ".\t" + kv.key()).append("\n");
-					u.output(lable + ".\t" + kv.key());
-					sb.append("\t\t" + kv.value()).append("\n");
-					u.output("\t\t" + kv.value());
-				}
-				u.content().data().put(keyRand, sb.toString());
-				String keyCode = String.join(Const.delimiter, Const.Version.V1, "Shop", "Lotus", date, ""+code, openid());
-				u.content().account().put(keyCode, openid());
-				qa.clear();
-				u.output("感谢您回复这些问题，请稍后留意我们的中奖通知！");
-			}
-		}
-		
-		public Iterator<Quiz> getQuiz(CorpusService service, int n) {
-			List<Quiz> all = new ArrayList<>();
-			all.addAll(service.assimilatedQuiz);
-			Collections.shuffle(all);
-			if(all.size() <= n) return all.iterator();
-			else {
-				List<Quiz> little = new ArrayList<>();
-				for(int i=0;i<n;i++) {
-					little.add(all.get(i));
-				}
-				return little.iterator();
-			}
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(finish) return init;
-			return customer;
-		}
-
-		@Override
-		public String name() {
-			return "顾客回复问题";
-		}
-
-		@Override
-		public boolean finish() {
-			return finish;
-		}
-	};
 	
 	public ShopContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
