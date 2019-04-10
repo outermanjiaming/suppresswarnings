@@ -1,15 +1,18 @@
 package com.suppresswarnings.corpus.service.game;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.LoggerFactory;
 
-import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.work.Quiz;
 
-public class Guard {
+public class Guard implements Runnable {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	AtomicReference<WaitingRoom> current = new AtomicReference<WaitingRoom>(null);
 	Map<String, WaitingRoom> active = new ConcurrentHashMap<>();
@@ -19,37 +22,43 @@ public class Guard {
 		this.service = service;
 		this.start = System.currentTimeMillis();
 		logger.info("create Guard from " + start);
+		this.service.schedule.scheduleWithFixedDelay(this, 3, 10, TimeUnit.SECONDS);
 	}
 	
 	public String roomKey() {
 		return service.uniqueKey("Waiting.Room");
 	}
 	
-	public synchronized Ally joinOrCreateWaitingRoom(Context<CorpusService> context, String openid, String ownerid, String qrScene) {
+	public synchronized Ally joinOrCreateWaitingRoom(String openid, String ownerid, String qrScene) {
 		WaitingRoom room = current.get();
 		Ally ally;
 		if(room == null) {
+			List<Quiz> quiz = service.getQuiz(3);
 			Ally me = new Ally();
-			me.context = context;
 			me.openid = openid;
 			me.ownerid = ownerid;
 			me.qrScene = qrScene;
-			room = new WaitingRoom(roomKey(), me); 
-			me.room = room;
+			room = new WaitingRoom(roomKey(), me, quiz); 
+			me.setRoom(room);
 			ally = me;
 			current.compareAndSet(null, room);
 			logger.info("create waiting room: " + room);
 		} else {
 			Ally you = new Ally();
-			you.context = context;
 			you.openid = openid;
 			you.ownerid = ownerid;
 			you.qrScene = qrScene;
-			room.join(you);
-			you.room = room;
-			ally = you;
+			if(you.equals(room.me)) {
+				logger.info("only one ally: " + room);
+				ally = room.me;
+			} else {
+				room.join(you);
+				you.setRoom(room);
+				ally = you;
+				current.compareAndSet(room, null);
+				logger.info("join waiting room: " + room);
+			}
 		}
-		room = current.get();
 		active.put(room.key(), room);
 		return ally;
 	}
@@ -58,6 +67,25 @@ public class Guard {
 	public String toString() {
 		return "Guard [current=" + current + ", active=" + active + ", service=" + service + ", start=" + start + "]";
 	}
-	
+
+	@Override
+	public void run() {
+		try {
+			logger.info("guard schedule every 10s to check waiting room finished and remove completed ones");
+			List<String> remove = new ArrayList<>();
+			active.forEach((key, room) ->{
+				if(room.finish(service)) {
+					remove.add(key);
+					logger.info("to remove room " + key);
+				}
+			});
+			remove.forEach(key -> {
+				WaitingRoom room = active.remove(key);
+				room.clear();
+			});
+		} catch (Exception e) {
+			logger.error("guard schedule error", e);
+		}
+	}
 	
 }

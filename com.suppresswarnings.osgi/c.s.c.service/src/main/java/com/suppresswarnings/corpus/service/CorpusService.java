@@ -56,6 +56,7 @@ import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.daigou.Order;
+import com.suppresswarnings.corpus.service.game.Guard;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
@@ -107,10 +108,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		}
 	});
+	public ScheduledExecutorService schedule = Executors.newScheduledThreadPool(10, new ThreadFactory() {
+		int index = 0;
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "schedule-" + index++);
+		}
+	});
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	Server backup;
 	public AIIoT aiiot;
+	public Guard guard;
 	public DaigouHandler daigouHandler;
 	public WorkHandler workHandler;
 	ScheduledExecutorService scheduler;
@@ -124,6 +133,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public static final Format quizAnswerReplyOrSimilar = new Format(formats);
 	public Map<String, Counter> counters = new ConcurrentHashMap<>();
 	public Map<String, AtomicInteger> atomicIds = new ConcurrentHashMap<>();
+	public Map<String, AtomicBoolean> atomicSwitches = new ConcurrentHashMap<>();
 	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToSimilars = new ConcurrentHashMap<>();
@@ -162,7 +172,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
-	
+	public AtomicBoolean switches(String key) {
+		AtomicBoolean switches = atomicSwitches.get(key);
+		if(switches == null) {
+			switches = new AtomicBoolean(false);
+			atomicSwitches.put(key, switches);
+		}
+		return switches;
+	}
 	public void atUser(String openid, String message) {
 		ATuser user = new ATuser(this, openid, message, System.currentTimeMillis());
 		atUserPool.execute(user);
@@ -249,9 +266,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void log(String clazz, String info) {
 		logger.info("[" + clazz + "] " + info);
 	}
-	
+	public Guard guard() {
+		return guard;
+	}
 	public void activate() {
 		CorpusService that = this;
+		
 		logger.info("[corpus] activate");
 		System.out.println("服务正在启动");
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
@@ -266,14 +286,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(backup != null) backup.close();
 		if(aiiot != null) aiiot.close();
 		if(workHandler != null) workHandler.close();
+		if(guard == null) guard = new Guard(that);
 		//1
 		scheduler.submit(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					logger.info("[corpus] it will execute after 2s");
-					Thread.sleep(2000);
+					logger.info("[corpus] it will execute after 1s");
+					TimeUnit.SECONDS.sleep(1);
 					logger.info("[corpus] start to execute");
 					backup = new Server();
 					backup.working();
@@ -289,8 +310,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			@Override
 			public void run() {
 				try {
-					logger.info("[corpus] it will execute after 2s");
-					Thread.sleep(2000);
+					logger.info("[corpus] it will execute after 1s");
+					TimeUnit.SECONDS.sleep(1);
 					logger.info("[corpus] start to execute");
 					aiiot = new AIIoT(that);
 					aiiot.working();
@@ -1109,7 +1130,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[WX] this stage finished: " + context.state());
 				}
 				String out = context.output();
-				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis())) {
+				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && input.equals("aiiot")) {
+					boolean open = switches("aiiot").get();
+					switches("aiiot").set(!open);
+					logger.info("switch aiiot from " + open);
+				}
+				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && switches("aiiot").get()) {
 					logger.info("管理员发话了： " + out);
 					aiiot.remoteCall(openid, "Robot_AIIoT_0001", "exam", out, context);
 				}
@@ -2321,6 +2347,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			return string + Const.delimiter + id.getAndIncrement();
+		}
+	}
+	
+	public List<Quiz> getQuiz(int n) {
+		List<Quiz> all = new ArrayList<>();
+		all.addAll(assimilatedQuiz);
+		Collections.shuffle(all);
+		if(all.size() <= n) return all;
+		else {
+			List<Quiz> little = new ArrayList<>();
+			for(int i=0;i<n;i++) {
+				little.add(all.get(i));
+			}
+			return little;
 		}
 	}
 }

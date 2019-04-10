@@ -19,7 +19,7 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
-import com.suppresswarnings.corpus.service.shop.game.ReplyAndBonus;
+import com.suppresswarnings.corpus.service.shop.game.SameReplyAndBonus;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ShopContext extends WXContext {
@@ -31,7 +31,7 @@ public class ShopContext extends WXContext {
 	AtomicBoolean noneed = new AtomicBoolean(false);
 	AtomicBoolean consumer = new AtomicBoolean(false);
 	AtomicBoolean first = new AtomicBoolean(true);
-	ReplyAndBonus game;
+	SameReplyAndBonus game;
 	State<Context<CorpusService>> shop = new State<Context<CorpusService>>() {
 		/**
 		 * 
@@ -248,8 +248,12 @@ public class ShopContext extends WXContext {
 				if(ownerid == null) {
 					u.output("该商铺二维码还未绑定！");
 				} else {
-					game = new ReplyAndBonus(consumer, ownerid, openid(), qrScene, init, u.content());
-					game.state().accept(t, u);
+					if(game == null) {
+						game = new SameReplyAndBonus(consumer, ownerid, openid(), qrScene, init, u);
+						game.state().accept(t, u);
+					} else {
+						logger.info("重复扫码，" + game);
+					}
 				}
 				return;
 			}
