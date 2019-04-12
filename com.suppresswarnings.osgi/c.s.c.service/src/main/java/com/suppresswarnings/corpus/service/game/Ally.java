@@ -71,19 +71,28 @@ public class Ally {
 			context.output(current.getQuiz().value());
 		} else {
 			state = 1;
-			context.output("你已完成答题，等待对方完成。");
+			context.output("你已完成答题，等待对方完成。你有一次机会可以和对手留言（双方都完成之后的3分钟之内）");
 		}
+	}
+	
+	public void chat(String t, Context<CorpusService> context) {
+		room.chat(openid, t);
+		context.output("你刚才的留言会在对方完成答题之后送达");
 	}
 	
 	public void complete(CorpusService service, List<KeyValue> qa) {
 		StringBuffer info = new StringBuffer();
 		for(int i=0;i<qa.size();i++) {
-			int index = i + 1;
-			KeyValue e1 = this.qa.get(i);
-			KeyValue e2 = qa.get(i);
-			info.append(index+ ". " + e1.key()).append("\n");
-			info.append("我. " + e1.value()).append("\n");
-			info.append("对方. " + e2.value()).append("\n");
+			try {
+				int index = i + 1;
+				KeyValue e1 = this.qa.get(i);
+				KeyValue e2 = qa.get(i);
+				info.append("问： " + index+ ". " + e1.key()).append("\n");
+				info.append("甲： " + e1.value()).append("\n");
+				info.append("乙： " + e2.value()).append("\n");
+			} catch (Exception e) {
+				info.append("异常：云端检测结果时异常").append("\n");
+			}
 		}
 		service.atUser(openid, info.toString());
 	}

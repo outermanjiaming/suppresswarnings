@@ -49,12 +49,19 @@ public class SameReplyAndBonus extends Context<CorpusService> {
 				u.output("接下来请耐心回答"+n+"个问题");
 				myself.start(u);
 			} else {
-				myself.reply(t, u);
+				if(myself.finish()) {
+					if(finish.compareAndSet(false, true)) {
+						myself.chat(t, u);
+					}
+				} else {
+					myself.reply(t, u);
+				}
 			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(finish.get()) return exit;
 			return game;
 		}
 
@@ -65,7 +72,7 @@ public class SameReplyAndBonus extends Context<CorpusService> {
 
 		@Override
 		public boolean finish() {
-			return false;
+			return finish.get();
 		}
 		
 	};

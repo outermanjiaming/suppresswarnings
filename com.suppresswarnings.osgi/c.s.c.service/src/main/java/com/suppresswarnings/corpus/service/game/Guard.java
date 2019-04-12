@@ -70,22 +70,30 @@ public class Guard implements Runnable {
 
 	@Override
 	public void run() {
-		try {
-			logger.info("guard schedule every 10s to check waiting room finished and remove completed ones");
-			List<String> remove = new ArrayList<>();
-			active.forEach((key, room) ->{
+		logger.info("guard schedule every 10s to check waiting room finished and remove completed ones");
+		List<String> remove = new ArrayList<>();
+		active.forEach((key, room) ->{
+			try {
 				if(room.finish(service)) {
-					remove.add(key);
-					logger.info("to remove room " + key);
+					if(room.finish()) {
+						remove.add(key);
+						logger.info("to remove room " + key);
+					} else {
+						logger.info("3min after finish will be cleared");
+					}
 				}
-			});
-			remove.forEach(key -> {
+			} catch (Exception e) {
+				logger.error("检查活跃房间时异常", e);
+			}
+		});
+		remove.forEach(key -> {
+			try {
 				WaitingRoom room = active.remove(key);
 				room.clear();
-			});
-		} catch (Exception e) {
-			logger.error("guard schedule error", e);
-		}
+			} catch (Exception e) {
+				logger.error("删除完成房间时异常", e);
+			}
+		});
 	}
 	
 }
