@@ -12,48 +12,45 @@
   <artifactId>com.suppresswarnings.osgi</artifactId>
   <packaging>pom</packaging>
   <modules>
-      <module>com.suppresswarnings.osgi.nn</module>
 	  <module>com.suppresswarnings.osgi.leveldb</module>
 	  <module>com.suppresswarnings.osgi.ner</module>
-	  <module>com.suppresswarnings.osgi.user</module>
-      <module>com.suppresswarnings.osgi.user.account</module>
-      <module>com.suppresswarnings.osgi.user.token</module>
-      <module>com.suppresswarnings.osgi.raspberrypi</module>
-      <module>com.suppresswarnings.osgi.alone</module>
-      <module>com.suppresswarnings.osgi.data</module>
-      <module>com.suppresswarnings.osgi.wx.data</module>
-      <module>com.suppresswarnings.osgi.corpus</module>
-      <module>com.suppresswarnings.osgi.corpus.register</module>
-      <module>com.suppresswarnings.osgi.corpus.data</module>
-      <module>com.suppresswarnings.osgi.corpus.quiz</module>
-      <module>com.suppresswarnings.osgi.corpus.pi</module>
+      
+      
+      
+      
+      
+      
+      
+      
+      
       <module>com.suppresswarnings.osgi.neuralnetwork</module>
-      <module>com.suppresswarnings.osgi.corpus.invite</module>
+      
       <module>com.suppresswarnings.osgi.crawler</module>
       <module>c.s.c.common</module>
       <module>c.s.c.service</module>
       <module>c.s.c.service.data</module>
-      <module>c.s.c.service.corpus.accost</module>
+      
       <module>c.s.c.service.account</module>
       <module>c.s.c.service.token</module>
       <module>c.s.c.service.report.raspberrypi</module>
-      <module>c.s.c.service.user.register</module>
-      <module>c.s.c.service.corpus.teach</module>
+      
+      
       <module>c.s.c.service.setting</module>
-      <module>c.s.c.service.warehouse</module>
+      
       <module>c.s.c.service.qrcode</module>
       <module>c.s.c.service.authorize</module>
       <module>c.s.c.service.shop</module>
       <module>c.s.c.service.customer</module>
-      <module>c.s.c.service.collect</module>
-      <module>c.s.c.service.produce</module>
+      
+      
       <module>c.s.c.service.reply</module>
       <module>c.s.c.service.menu</module>
       <module>c.s.c.service.similar</module>
       <module>c.s.c.service.manage</module>
-      <module>com.suppresswarnings.things</module>
+      
       <module>c.s.c.service.aiiot</module>
       <module>c.s.c.service.daigou</module>
+      <module>com.suppresswarnings.osgi.like</module>
   </modules>
   <dependencies>
   		<dependency>

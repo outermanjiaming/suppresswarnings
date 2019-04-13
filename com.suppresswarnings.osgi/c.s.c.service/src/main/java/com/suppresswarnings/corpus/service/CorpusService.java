@@ -52,11 +52,11 @@ import com.suppresswarnings.corpus.common.TTL;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
 import com.suppresswarnings.corpus.service.backup.Server;
-import com.suppresswarnings.corpus.service.daigou.Cart;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
-import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.daigou.Order;
 import com.suppresswarnings.corpus.service.game.Guard;
+import com.suppresswarnings.corpus.service.handlers.DaigouHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.PingHandlerFactory;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
@@ -1130,15 +1130,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[WX] this stage finished: " + context.state());
 				}
 				String out = context.output();
+				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && switches("aiiot").get()) {
+					logger.info("管理员发话了： " + out);
+					aiiot.remoteCall(openid, "Robot_AIIoT_0001", "exam", out, context);
+				}
 				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && input.equals("aiiot")) {
 					boolean open = switches("aiiot").get();
 					switches("aiiot").set(!open);
 					logger.info("switch aiiot from " + open);
 				}
-				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && switches("aiiot").get()) {
-					logger.info("管理员发话了： " + out);
-					aiiot.remoteCall(openid, "Robot_AIIoT_0001", "exam", out, context);
-				}
+				
 				return xml(openid, out, fromOpenId);
 			}
 		} else if("backup".equals(action)) {
@@ -1182,212 +1183,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[daigou] ticket == null");
 				return "fail";
 			}
-			
 			//lijiaming: it should be serious about openid
-			
-			if("manageorders".equals(todo)){
-				String state = parameter.getParameter("state");
-				if(state == null) {
-					logger.info("[daigou] state == null");
-					return "fail";
-				}
-				//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
-				JsAccessToken accessToken = jsAccessToken(CODE);
-				if(accessToken == null) {
-					logger.info("[daigou] accessToken == null");
-					return "fail";
-				}
-				String openId = accessToken.getOpenid();
-				if(openId == null) {
-					logger.info("[daigou] get openid failed");
-					return "fail";
-				}
-				logger.info("[daigou] orders");
-				if(!authrized(openId, "ManageOrders")) {
-					logger.info("[daigou] check auth failed");
-					return "fail";
-				}
-				return gson.toJson(daigouHandler.listOrders(openId));
-			}
-			
-			if("changeorderstate".equals(todo)) {
-				String userid = parameter.getParameter("userid");
-				String orderid = parameter.getParameter("orderid");
-				String newstate = parameter.getParameter("newstate");
-				daigouHandler.updateOrderState(orderid, userid, newstate);
-				return newstate;
-			}
-			
-			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
-			String openid = token().get(code2OpenIdKey);
-			if(openid == null) {
-				logger.info("[daigou] openid == null");
-				return "fail";
-			}
-			String agentid = parameter.getParameter("state");
-			if(agentid == null) {
-				logger.info("[daigou] state == null");
-				return "fail";
-			}
-			/**
-			 * TODO: Daigou
-			 */
-			if("index".equals(todo)) {
-				logger.info("[daigou] index");
-				List<Goods> list  = daigouHandler.listGoods();
-				if(daigouHandler.replacePricecentVIPPrice(list, openid)) {
-					logger.info("[daigou] use vip price");
-				} else if(daigouHandler.replacePricecentAgentPrice(list, agentid)){
-					logger.info("[daigou] use agent price");
-				}
-				return gson.toJson(list);
-			}
-
-			if("addgoodstocart".equals(todo)) {
-				logger.info("[daigou] addgoodstocart");
-				String goodsid = parameter.getParameter("goodsid");
-				if(goodsid == null) {
-					logger.info("[daigou] goodsid == null");
-					return "fail";
-				}
-				Cart cart = daigouHandler.addGoodsToCart(agentid, openid, goodsid);
-				if(cart == null) {
-					logger.info("[daigou] cart == null");
-					return "fail";
-				}
-				return SUCCESS;
-			}
-			if("mycarts".equals(todo)) {
-				logger.info("[daigou] mycarts");
-				List<Cart> carts = daigouHandler.myCarts(openid);
-				daigouHandler.fillGoodsToCart(carts);
-				return gson.toJson(carts);
-			}
-			if("makeanorder".equals(todo)) {
-				logger.info("[daigou] makeanorder");
-				String username = parameter.getParameter("username");
-				if(username == null || username.length() < 1) return "fail";
-				String idcard = parameter.getParameter("idcard");
-				if(idcard == null || idcard.length() < 15) return "fail";
-				String mobile = parameter.getParameter("mobile");
-				if(mobile == null || mobile.length() < 10) return "fail";
-				String address = parameter.getParameter("address");
-				if(address == null || address.length() < 3) return "fail";
-				String comment = parameter.getParameter("comment");
-				
-				List<Cart> carts = daigouHandler.myCarts(openid);
-				if(carts.isEmpty()) {
-					logger.info("[lijiaming] 订单为空");
-					return "fail";
-				}
-				daigouHandler.fillGoodsToCart(carts);
-				StringBuffer sb = new StringBuffer();
-				long totalcent = 0;
-				int totalcount = 0;
-				int totaltype = 0;
-				for(Cart cart : carts) {
-					int count = Integer.parseInt(cart.getCount());
-					int price = Integer.parseInt(cart.getActualpricecent());
-					long pricecent = price * count;
-					totaltype = totaltype + 1;
-					totalcent = totalcent + pricecent;
-					totalcount = totalcount + count;
-					sb.append("[").append(cart.getGoodsid()).append("*").append(cart.getCount()).append("] ");
-				}
-				double totalprice = totalcent * 0.01d;
-				
-				String openIdEnd = openid.substring(openid.length() - 7);
-				String randEnd = random.substring(random.length() - 4);
-				long current = System.currentTimeMillis();
-				String orderid = "DG"+ current + openIdEnd + randEnd;
-				sb.append(openid);
-				String detail = sb.toString();
-				String clientip = ip.split(",")[0];
-				String body = orderid +" 共¥" + totalprice;
-				String attach = openid;
-				String prepay = prepay(orderid, body, detail, attach, ""+ totalcount, ""+totalcent, clientip, openid, current, "DG");
-				if(prepay != null) {
-					Order order = new Order();
-					order.setAddress(address);
-					order.setCarts(carts);
-					order.setIdcard(idcard);
-					order.setComment(comment);
-					order.setGoodscount(""+totalcount);
-					order.setGoodstypes(""+totaltype);
-					order.setMobile(mobile);
-					order.setOpenid(openid);
-					order.setOrderid(orderid);
-					order.setState(Order.State.Create);
-					order.setTime(""+current);
-					order.setTotalcent(""+totalcent);
-					order.setUsername(username);
-					order.setDetail(detail);
-					daigouHandler.saveOrder(order);
-					return prepay;
-				} else {
-					return "fail";
-				}
-			}
-			if("goodsdetail".equals(todo)) {
-				String goodsid = parameter.getParameter("goodsid");
-				if(goodsid == null) {
-					logger.info("[daigou] goodsid == null");
-					return "fail";
-				}
-				Goods goods = daigouHandler.getByGoodsid(goodsid);
-				if(daigouHandler.replacePricecentVIPPrice(goods, openid)) {
-					logger.info("[daigou] use vip price");
-				} else if(daigouHandler.replacePricecentAgentPrice(goods, agentid)){
-					logger.info("[daigou] use agent price");
-				}
-				return gson.toJson(goods);
-			}
-			
-			if("myorders".equals(todo)) {
-				//TODO check openid
-				logger.info("[daigou] myorders");
-				List<Order> myOrders = daigouHandler.myOrders(openid);
-				//TODO clean input for xss
-				return gson.toJson(myOrders);
-			}
-			if("removecart".equals(todo)) {
-				logger.info("[daigou] remove cart");
-				String cartid = parameter.getParameter("cartid");
-				if(cartid == null) {
-					logger.info("[daigou] cartid == null");
-					return "fail";
-				}
-				String deleted = daigouHandler.deleteCart(openid, cartid);
-				if(!Cart.State.Delete.equals(deleted)) {
-					return "fail";
-				}
-				return SUCCESS;
-			}
-			if("updatecartnum".equals(todo)) {
-				logger.info("update cart num");
-				String cartid = parameter.getParameter("cartid");
-				if(cartid == null) {
-					logger.info("cartid == null");
-					return "fail";
-				}
-				String newnum = parameter.getParameter("newnum");
-				if(newnum == null) {
-					logger.info("newnum == null");
-					return "fail";
-				}
-				try {
-					Integer num = Integer.parseInt(newnum);
-					if(num <= 0 || num > 10000) {
-						return "fail";
-					}
-				} catch (Exception e) {
-					logger.info("wrong number for cart: " + newnum + ", openid: " + openid + ", cartid: " + cartid);
-					return "fail";
-				}
-				String result = daigouHandler.updateCartCount(openid, cartid, newnum);
-				return result;
-			}
-			return SUCCESS;
+			//TODO 
+			return DaigouHandlerFactory.handle(parameter, this);
 		} else if("access_token".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -1545,7 +1343,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			data().put(crewKey, time);
 			logger.info("[corpus reply similar] " + ret + " openid:" + exist);
 			return similarKey;
-		}else if("similarreplies".equals(action)) {
+		} else if("similarreplies".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {
 				logger.error("[corpus reply similar] no random number");
@@ -1919,75 +1717,79 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return null;
 	}
 	
-	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) throws Exception {
-		
+	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) {
 		long timeStamp = current / 1000;
-		WXPayConfig config = new WXPayConfigImpl();
-		WXPay wxPay = new WXPay(config);
-		logger.info("[corpus prepay] WXPay ready");
-		Map<String, String> reqData = new HashMap<>();
-		reqData.put("timeStamp", ""+timeStamp);
-		reqData.put("device_info", "WEB");
-		reqData.put("body", body);
-		reqData.put("detail", detail);
-		reqData.put("attach", goodsid);
-		reqData.put("out_trade_no", orderid);
-		reqData.put("fee_type", "CNY");
-		reqData.put("total_fee", totalcent);
-		reqData.put("spbill_create_ip", clientip);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		reqData.put("time_start", dateFormat.format(new Date(current)));
-		reqData.put("time_expire", dateFormat.format(new Date(current + TimeUnit.HOURS.toMillis(2))));
-		reqData.put("notify_url", "http://suppresswarnings.com/notify.http");
-		reqData.put("trade_type", "JSAPI");
-		reqData.put("product_id", orderid);
-		reqData.put("openid", openid);
-		logger.info("[corpus prepay] reqData: " + reqData.toString());
-		Map<String, String> resultData = wxPay.unifiedOrder(reqData);
-		logger.info("[corpus prepay] unifiedOrder result ready");
-		
-		Map<String, String> result = new HashMap<>();
-    	String appid = resultData.get("appid");
-    	String nonceStr = resultData.get("nonce_str");
-    	String prepay_id = resultData.get("prepay_id");
-    	
-    	result.put("appId", appid);
-    	result.put("timeStamp", ""+timeStamp);
-    	result.put("nonceStr", nonceStr);
-    	result.put("package", "prepay_id=" + prepay_id);
-    	result.put("signType", SignType.HMACSHA256.name());
-    	//sign
-    	String sign = wxPay.sign(result, SignType.HMACSHA256);
-		result.put("paySign", sign);
-		logger.info("[corpus prepay] paySign ready");
-		
-		String unifiedOrder = gson.toJson(result);
-		logger.info("[corpus prepay] unifiedOrder OK: " + unifiedOrder);
-		String reqjson = gson.toJson(reqData);
-		String resultjson = gson.toJson(resultData);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", "Orderid", orderid), orderid);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "UnifiedOrder"), unifiedOrder);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Reqjson"), reqjson);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Resultjson"), resultjson);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State"), "Wait");
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Openid"), openid);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Goodsid"), goodsid);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Amount"), amount);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Pricecent"), totalcent);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Type"), type);
-		
-		account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid), orderid);
-		account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid, "Body"), body);
-		
-		if(orderid.startsWith("Auth")) {
-			String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
-			String paidState = account().get(paidKey);
-			if(paidState == null) {
-				account().put(paidKey, orderid);
-				logger.info("[prepay] note orderid for auth pay: " + goodsid + ", " + openid + ", orderid" + orderid);
+		try {
+			WXPayConfig config = new WXPayConfigImpl();
+			WXPay wxPay = new WXPay(config);
+			logger.info("[corpus prepay] WXPay ready");
+			Map<String, String> reqData = new HashMap<>();
+			reqData.put("timeStamp", ""+timeStamp);
+			reqData.put("device_info", "WEB");
+			reqData.put("body", body);
+			reqData.put("detail", detail);
+			reqData.put("attach", goodsid);
+			reqData.put("out_trade_no", orderid);
+			reqData.put("fee_type", "CNY");
+			reqData.put("total_fee", totalcent);
+			reqData.put("spbill_create_ip", clientip);
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			reqData.put("time_start", dateFormat.format(new Date(current)));
+			reqData.put("time_expire", dateFormat.format(new Date(current + TimeUnit.HOURS.toMillis(2))));
+			reqData.put("notify_url", "http://suppresswarnings.com/notify.http");
+			reqData.put("trade_type", "JSAPI");
+			reqData.put("product_id", orderid);
+			reqData.put("openid", openid);
+			logger.info("[corpus prepay] reqData: " + reqData.toString());
+			logger.info("[corpus prepay] unifiedOrder result ready");
+			Map<String, String> resultData = wxPay.unifiedOrder(reqData);
+			Map<String, String> result = new HashMap<>();
+	    	String appid = resultData.get("appid");
+	    	String nonceStr = resultData.get("nonce_str");
+	    	String prepay_id = resultData.get("prepay_id");
+	    	
+	    	result.put("appId", appid);
+	    	result.put("timeStamp", ""+timeStamp);
+	    	result.put("nonceStr", nonceStr);
+	    	result.put("package", "prepay_id=" + prepay_id);
+	    	result.put("signType", SignType.HMACSHA256.name());
+	    	//sign
+	    	String sign = wxPay.sign(result, SignType.HMACSHA256);
+			result.put("paySign", sign);
+			logger.info("[corpus prepay] paySign ready");
+			
+			String unifiedOrder = gson.toJson(result);
+			logger.info("[corpus prepay] unifiedOrder OK: " + unifiedOrder);
+			String reqjson = gson.toJson(reqData);
+			String resultjson = gson.toJson(resultData);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", "Orderid", orderid), orderid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "UnifiedOrder"), unifiedOrder);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Reqjson"), reqjson);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Resultjson"), resultjson);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State"), "Wait");
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Openid"), openid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Goodsid"), goodsid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Amount"), amount);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Pricecent"), totalcent);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Type"), type);
+			
+			account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid), orderid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid, "Body"), body);
+			
+			if(orderid.startsWith("Auth")) {
+				String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
+				String paidState = account().get(paidKey);
+				if(paidState == null) {
+					account().put(paidKey, orderid);
+					logger.info("[prepay] note orderid for auth pay: " + goodsid + ", " + openid + ", orderid" + orderid);
+				}
 			}
+			return unifiedOrder;
+		} catch (Exception e) {
+			logger.error("获取预支付接口参数失败", e);
+			return null;
 		}
-		return unifiedOrder;
+		
 	}
 	
 	public String xml(String openid, String msg, String fromOpenId) {

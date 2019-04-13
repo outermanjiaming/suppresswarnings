@@ -1,15 +1,14 @@
-package com.suppresswarnings.corpus.service;
+package com.suppresswarnings.corpus.service.handlers;
 
 import org.slf4j.LoggerFactory;
 
+import com.suppresswarnings.corpus.service.CorpusService;
+import com.suppresswarnings.corpus.service.RequestHandler;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class PingHandlerFactory {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	static RequestHandler simple = (param, serivce) ->{
-		return "success";
-	};
-	static RequestHandler  aiit = (param, service) ->{
+	static RequestHandler aiit = (param, service) ->{
 		String key = param.getParameter("token");
 		return service.aiiot.ping(key);
 	};
@@ -18,7 +17,7 @@ public class PingHandlerFactory {
 		if("things".equals(type)) {
 			return aiit.handler(parameter, service);
 		} else {
-			return simple.handler(parameter, service);
+			return RequestHandler.simple.handler(parameter, service);
 		}
 	}
 }

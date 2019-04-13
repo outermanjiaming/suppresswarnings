@@ -31,14 +31,19 @@ public class BaiduTTS {
                     WatchKey watchKey = service.take();
                     List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
                     for(WatchEvent<?> event : watchEvents){
-                    	String filename = event.context().toString();
-                    	if(!filename.endsWith(".mp3")) continue;
-                        if(StandardWatchEventKinds.ENTRY_CREATE.equals(event.kind())) {
-                        	System.out.println("baidu tts " + event.context());
-                        	String words = filename.substring(0, filename.length() - 4);
-                        	String mp3 = baidu.speak(words);
-                        	Speaker.speakMp3(mp3);
-                        }
+                    	try {
+                    		String filename = event.context().toString();
+                        	if(!filename.endsWith(".mp3")) continue;
+                            if(StandardWatchEventKinds.ENTRY_CREATE.equals(event.kind())) {
+                            	System.out.println("baidu tts " + event.context());
+                            	String words = filename.substring(0, filename.length() - 4);
+                            	String mp3 = baidu.speak(words);
+                            	Speaker.speakMp3(mp3);
+                            }
+						} catch (Exception e) {
+							System.out.println("异常：" + e.getMessage());
+						}
+                    	
                     }
                     watchKey.reset();
                 }
