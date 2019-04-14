@@ -5,4 +5,5 @@
       <provide interface="com.suppresswarnings.osgi.network.http.HTTPService"/>
       <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
+   <reference bind="provide" cardinality="0..n" interface="com.suppresswarnings.corpus.common.Provider" name="com.suppresswarnings.corpus.provider" policy="dynamic" unbind="clearProvider"/>
 </scr:component>

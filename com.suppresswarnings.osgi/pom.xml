@@ -51,6 +51,7 @@
       <module>c.s.c.service.aiiot</module>
       <module>c.s.c.service.daigou</module>
       <module>com.suppresswarnings.osgi.like</module>
+      <module>c.s.c.service.like</module>
   </modules>
   <dependencies>
   		<dependency>

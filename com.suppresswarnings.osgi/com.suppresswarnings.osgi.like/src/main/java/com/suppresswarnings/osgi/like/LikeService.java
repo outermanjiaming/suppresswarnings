@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -16,12 +18,17 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.suppresswarnings.corpus.common.Provider;
+import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class LikeService implements HTTPService, CommandProvider {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	
+	public Map<String, Provider<?>> providers = new HashMap<>();
+	public Gson gson = new Gson();
+	public LevelDB account, data, token;
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		AtomicInteger integer = new AtomicInteger(1);
@@ -69,11 +76,16 @@ public class LikeService implements HTTPService, CommandProvider {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));  
 		try {  
 			String cmd = processBuilder.command().toString();
-		    String line;  
+		    String line;
 		    while ((line = reader.readLine()) != null) {  
-		           result.append(line);  
-		           logger.info(cmd + " --->: " + line);  
-		       }  
+		           result.append(line);
+		           if(line.contains("Already")) {
+		        	   logger.debug(cmd + " --->: " + line);
+		           } else {
+		        	   logger.info(cmd + " --->: " + line);
+		           }
+		    }
+		    
 		} catch (Exception e) {  
 			logger.warn("failed to read output from process", e);  
 		} finally {  
@@ -98,11 +110,61 @@ public class LikeService implements HTTPService, CommandProvider {
 				logger.error("Fail to git pull", e);
 			}
 		}, 3, 10, TimeUnit.SECONDS);
+		data().list("001.", 10, (k,v)->{
+			logger.info("test data: " + k + " = " + v);
+		});
 	}
 	public void deactivate() {
 		logger.info("[LikeService] deactivate.");
+		service.shutdown();
 	}
-		public void modified() {
-			logger.info("[LikeService] modified.");
+	public void modified() {
+		logger.info("[LikeService] modified.");
+	}
+	
+	public void provide(Provider<?> provider) {
+		logger.info("provider: " + provider.description());
+		String id = provider.identity();
+		Object instance = provider.instance();
+		Provider<?> old = providers.put(id, provider);
+		logger.info("put new provider: " + instance + " replace if exists: " + old);
+	}
+	public void clearProvider(Provider<?> provider) {
+		logger.info("clear provider: " + provider.description());
+		String id = provider.identity();
+		Object instance = provider.instance();
+		boolean b = providers.remove(id, provider);
+		logger.info("remove instance: " + instance + " if found: " + b);
+	}
+	public LevelDB account(){
+		if(account != null) {
+			return account;
 		}
+		account = getOrDefault("Account");
+		return account;
+	}
+	public LevelDB data(){
+		if(data != null) {
+			return data;
+		}
+		data = getOrDefault("Data");
+		return data;
+	}
+	public LevelDB token(){
+		if(token != null) {
+			return token;
+		}
+		token = getOrDefault("Token");
+		return token;
+	}
+	public LevelDB getOrDefault(String key) {
+		logger.info("[LikeService] get leveldb: " + key);
+		Provider<?> provider = providers.get(key);
+		if(provider == null) {
+			logger.error("[LikeService] get null from providers by key: " + key);
+			return null;
+		}
+		LevelDB instance = (LevelDB) provider.instance();
+		return instance;
+	}
 }

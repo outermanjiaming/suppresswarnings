@@ -32,6 +32,31 @@ public class WXContext extends Context<CorpusService> {
 	String openid;
 	String wxid;
 	WXuser user;
+	
+	State<Context<CorpusService>> template = new State<Context<CorpusService>>() {
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			if("hi".equals(t)) u.output("hello");
+			else u.output("how do you do?");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "示例状态";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
 
 	public final State<Context<CorpusService>> reject = new State<Context<CorpusService>>() {
 

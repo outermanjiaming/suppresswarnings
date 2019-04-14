@@ -123,7 +123,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public DaigouHandler daigouHandler;
 	public WorkHandler workHandler;
 	ScheduledExecutorService scheduler;
-	
+	public HashSet<String> uniqueMsgid = new HashSet<>();
 	public AtomicBoolean ready = new AtomicBoolean(false);
 	
 	public static final String[] formats = {
@@ -266,6 +266,22 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void log(String clazz, String info) {
 		logger.info("[" + clazz + "] " + info);
 	}
+	
+	public void clearUniqueMsgid() {
+		if(uniqueMsgid.size() > 1000) {
+			uniqueMsgid.clear();
+		}
+	}
+	
+	public boolean sameMsgid(String msgid) {
+		if(uniqueMsgid.contains(msgid)) {
+			clearUniqueMsgid();
+			return true;
+		}
+		clearUniqueMsgid();
+		return false;
+	}
+	
 	public Guard guard() {
 		return guard;
 	}
@@ -369,6 +385,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				long now = System.currentTimeMillis();
 				int currentTTL = ttl.size();
 				logger.info("[corpus run] start clean TTL("+currentTTL+")");
+				clearUniqueMsgid();
 				ttl.removeIf(out -> {
 					if(out.ttl() < now) {
 						if(out.marked()) {
@@ -968,6 +985,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
 				}
 				Map<String, String> wxmsg = WXPayUtil.xmlToMap(sms);
+				String msgid = wxmsg.get("MsgId");
+				if(sameMsgid(msgid)) {
+					logger.warn("duplicated msgid: " + msgid + ", openid: " + openid);
+					return SUCCESS;
+				}
 				String msgType = wxmsg.get("MsgType");
 				logger.info("[WX] check: " + msgType);
 				if(msgType == null) {
