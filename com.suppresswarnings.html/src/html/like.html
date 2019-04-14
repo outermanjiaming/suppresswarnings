@@ -2,7 +2,7 @@
 <html lang="zh-cn">
 <head>
     <meta name="viewport" content="initial-scale=1, user-scalable=0, minimal-ui" charset="UTF-8">
-    <title>点一亿个赞</title>
+    <title>先赞一个亿</title>
 	<link rel="stylesheet" href="asset/css/style.css">
     <link rel="stylesheet" href="asset/plug-ins/dist/dropload.css">
 	
@@ -98,19 +98,56 @@
 <script src="asset/plug-ins/dist/dropload.min.js"></script>
 
 <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
-<script>
-var name ="张";
-var state = "";
+
+<script type="text/javascript">
+
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+
+
 
 $(function(){
 
+	
+	var request = GetRequest();
+	var state = "";
+	var code = "";
+	var projectid = "";
+	var next = "";
 
-	 $.ajax({
+	if(request.state == undefined)
+	{
+	   if(request.projectid == undefined){
+		 projectid = "";
+	   } else {
+		 projectid = request.projectid
+	   }
+	   window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
+	} else {
+	 state = request.state
+	 code = request.code
+	}
+
+
+
+	$.ajax({
 		type: 'GET',
-		url: '/like.http?action=project&projectid='+state,
+		url: '/like.http?action=project&projectid='+state+'&code='+code,
+		//url: '/index/project.php',
 		dataType: 'json',
 		success: function(data){
-			var result = addItems(data.list);
+			next = data.data.next;
+			var result = addItems(data.data.entries);
 			// 为了测试，延迟1秒加载
 			setTimeout(function(){
 				$('#list').append(result);
@@ -142,12 +179,14 @@ $(function(){
             domNoData  : '<div class="dropload-noData">暂无数据</div>'
         },
         loadUpFn : function(me){
+			/*
             $.ajax({
                 type: 'GET',
-                url: '/index/asset/json/update.json',
+				//url: '/like.http?action=project&projectid='+state+'&code='+code,
+				url: '/index/project.php',
                 dataType: 'json',
                 success: function(data){
-                    var result = addItems(data.list);
+                    var result = addItems(data.data.entries);
                     // 为了测试，延迟1秒加载
                     setTimeout(function(){
                         $('#list').html(result);
@@ -161,14 +200,18 @@ $(function(){
                     dropload.resetload();
                 }
             });
+			*/
         },
         loadDownFn : function(me){
             $.ajax({
                 type: 'GET',
-                url: '/index/asset/json/more.json',
+				url: '/like.http?action=project&projectid='+next+'&code='+code,
+				//url: '/index/project.php?projectid='+next,
                 dataType: 'json',
                 success: function(data){
-                    var result = addItems(data.list);
+					next = data.data.next;
+					console.log(next);
+                    var result = addItems(data.data.entries);
                     // 为了测试，延迟1秒加载
                     setTimeout(function(){
                         $('#list').append(result);
@@ -209,8 +252,8 @@ function getItem(itemData)
 				+'<div class="po-hd">'
 					+'<p class="po-name"><span class="data-name">'+itemData.uname+'</span></p>'
 					+'<div class="post">'
-						+'<p>'+itemData.content+'</p>'
-						+'<p>'+getImgs(itemData.images)+'</p>'
+						+'<p>'+itemData.title+'</p>'
+						+'<p>'+getImgs(itemData.pictures)+'</p>'
 					+'</div>'
 					+'<p class="time"><img class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
 					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
@@ -219,7 +262,7 @@ function getItem(itemData)
 				+'</div>'
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
-					+'<div class="likes"><img src="asset/images/l.png">'+getLikes(itemData.likes)+'</div>'
+					+'<div class="likes"><img src="asset/images/l.png">'+getLikes(itemData.likes.entries)+'</div>'
 				+'</div>'
 			+'</div>'
 	   +'</li>'
@@ -251,7 +294,7 @@ function getLikes(likeArr)
 	var likes = "";
 	for(var i=0; i<likeArr.length; ++i)
 	{
-		likes += likeArr[i]+'，';
+		likes += likeArr[i].key+'，';
 	}
 	likes = likes.substr(0,likes.length-1);
 	likes += "...";
@@ -266,7 +309,7 @@ function ajaxAddLike(id)
 	var rowId = id.split("_")[1];
 	$.ajax({
 		type: 'POST',
-		url: '/index/add.php',
+		url: '/like.http?action=like',
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
@@ -291,7 +334,7 @@ function ajaxAddComment(id)
 {
 	$.ajax({
 		type: 'POST',
-		url: '/index/add.php',
+		url: '/like.http?action=comment',
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
@@ -317,7 +360,7 @@ function ajaxAddInvest(id)
 	  onOK: function(text) {
 		$.ajax({
 			type: 'POST',
-			url: '/index/add.php',
+			url: '/like.http?action=like',
 			dataType: 'json',
 			success: function(data){
 				$.toast("操作成功", "text");
