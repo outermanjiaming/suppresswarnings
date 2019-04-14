@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ public class Guard implements Runnable {
 		this.service = service;
 		this.start = System.currentTimeMillis();
 		logger.info("create Guard from " + start);
-		this.service.schedule.scheduleWithFixedDelay(this, 3, 10, TimeUnit.SECONDS);
 	}
 	
 	public String roomKey() {

@@ -305,6 +305,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(workHandler != null) workHandler.close();
 		if(guard == null) guard = new Guard(that);
 		//1
+		scheduler.scheduleWithFixedDelay(guard, 3, 10, TimeUnit.SECONDS);
 		scheduler.submit(new Runnable() {
 			
 			@Override
