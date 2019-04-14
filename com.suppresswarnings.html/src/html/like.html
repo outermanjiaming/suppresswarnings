@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta name="viewport" content="initial-scale=1, user-scalable=0, minimal-ui" charset="UTF-8">
+    <title>点一亿个赞</title>
+	<link rel="stylesheet" href="asset/css/style.css">
+    <link rel="stylesheet" href="asset/plug-ins/dist/dropload.css">
+	
+	<link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
+	<link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
+</head>
+
+
+<body>
+<div id="main" class="main">
+
+	<div id ="inner" class="inner">
+	
+	
+		<header>
+			<img id="bg" src="asset/images/bg.jpg">
+			<p id="user-name">万虎科技~贾素杰</p>
+			<a href="./user.html"><img id="avt" class="data-avt" src="asset/images/0.jpg"></a>
+		</header>
+	
+		
+
+		<div style="padding-top:30px;">
+			<!-- 左边主体 -->
+			<div class="po-left">
+				<!-- 头像 -->
+				<img src="asset/images/0.jpg">
+			</div>
+			<!--右边主体 -->
+			<div class="po-right">
+				<!--post主体-->
+				<div class="po-hd">
+					<!--昵称-->
+					<p class="po-name"><span class="data-name">万虎科技~贾素杰</span></p>
+					<div class="post">
+						<!--文本-->
+						<p>大家好，听说国内冻成狗🐶？我这边还挺热～大家好，听说国内冻成狗🐶？我这边还挺热～大家好，听说国内冻成狗🐶？我这边还挺热～</p>
+						<!--图片-->
+						<p>
+							<img class="list-img" src="asset/images/jt1.jpg" style="height: 80px;">
+							<img class="list-img" src="asset/images/yt3.jpg" style="height: 80px;">
+							<img class="list-img" src="asset/images/0.jpg" style="height: 80px;">
+						</p>
+					</div>
+					<!--发布时间-->
+					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
+					<!--点赞,评论,转发-->
+					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="comment_1" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+				</div>
+				<div class="triangle"></div>
+				<div class="cmt-wrap">
+					<!--点赞列表-->
+					<div class="likes"><img src="asset/images/l.png"><span id="likes_1">苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，马云...</span></div>
+					<!--评论和回复-->
+					<!--
+					<div class="cmt-list">
+						<p><span>wu世勋-EXO：</span>나는 서명～</p>
+						<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>
+						<p><span>权志龙：</span>나는 서명～</p>
+						<p><span>王思聪：</span>去哪玩啊？那么爽</p>
+						<p>
+							<span class="data-name">万虎科技~贾素杰</span>
+							回复
+									<span>
+										王思聪
+									</span>
+									<span>
+										：
+									</span>
+							澳洲大堡礁，这边刚好是夏季，挺适合避寒的。
+						</p>
+						<p><span>杨幂：</span>😘私人飞机出行，求带上我～</p>
+					</div>
+					-->
+				</div>
+			</div>
+		</div>
+		
+		
+
+		<ul id="list">
+			
+		</ul>
+
+		
+	</div>
+
+</div>
+<script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+
+<script src="asset/plug-ins/dist/dropload.min.js"></script>
+
+<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+<script>
+var name ="张";
+var state = "";
+
+$(function(){
+
+
+	 $.ajax({
+		type: 'GET',
+		url: '/like.http?action=project&projectid='+state,
+		dataType: 'json',
+		success: function(data){
+			var result = addItems(data.list);
+			// 为了测试，延迟1秒加载
+			setTimeout(function(){
+				$('#list').append(result);
+				// 每次数据加载完，必须重置
+				dropload.resetload();
+			},1000);
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+			// 即使加载出错，也得重置
+			dropload.resetload();
+		}
+	});
+
+
+
+    // dropload
+    var dropload = $('.inner').dropload({
+        domUp : {
+            domClass   : 'dropload-up',
+            domRefresh : '<div class="dropload-refresh">↓下拉刷新</div>',
+            domUpdate  : '<div class="dropload-update">↑释放更新</div>',
+            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>'
+        },
+        domDown : {
+            domClass   : 'dropload-down',
+            domRefresh : '<div class="dropload-refresh">↑上拉加载更多</div>',
+            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
+            domNoData  : '<div class="dropload-noData">暂无数据</div>'
+        },
+        loadUpFn : function(me){
+            $.ajax({
+                type: 'GET',
+                url: '/index/asset/json/update.json',
+                dataType: 'json',
+                success: function(data){
+                    var result = addItems(data.list);
+                    // 为了测试，延迟1秒加载
+                    setTimeout(function(){
+                        $('#list').html(result);
+                        // 每次数据加载完，必须重置
+                        dropload.resetload();
+                    },1000);
+                },
+                error: function(xhr, type){
+                    alert('Ajax error!');
+                    // 即使加载出错，也得重置
+                    dropload.resetload();
+                }
+            });
+        },
+        loadDownFn : function(me){
+            $.ajax({
+                type: 'GET',
+                url: '/index/asset/json/more.json',
+                dataType: 'json',
+                success: function(data){
+                    var result = addItems(data.list);
+                    // 为了测试，延迟1秒加载
+                    setTimeout(function(){
+                        $('#list').append(result);
+                        // 每次数据加载完，必须重置
+                        dropload.resetload();
+                    },1000);
+                },
+                error: function(xhr, type){
+                    alert('Ajax error!');
+                    // 即使加载出错，也得重置
+                    dropload.resetload();
+                }
+            });
+        }
+    });
+});
+
+
+function addItems(listData)
+{
+	var items = '';
+	for(var i = 0; i < listData.length; i++)
+	{
+		items += getItem(listData[i]);
+	}
+	return items;
+}
+
+
+function getItem(itemData)
+{
+	var item =
+		'<li class="item">'
+			+'<div class="po-left">'
+				+'<img src="'+itemData.face+'">'
+			+'</div>'
+			+'<div class="po-right">'
+				+'<div class="po-hd">'
+					+'<p class="po-name"><span class="data-name">'+itemData.uname+'</span></p>'
+					+'<div class="post">'
+						+'<p>'+itemData.content+'</p>'
+						+'<p>'+getImgs(itemData.images)+'</p>'
+					+'</div>'
+					+'<p class="time"><img class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
+					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+				+'</div>'
+				+'<div class="triangle"></div>'
+				+'<div class="cmt-wrap">'
+					+'<div class="likes"><img src="asset/images/l.png">'+getLikes(itemData.likes)+'</div>'
+				+'</div>'
+			+'</div>'
+	   +'</li>'
+	return item;
+}
+
+
+function getImgs(imgUrls)
+{	
+	var imgs = "";
+	var imgUrlArr = new Array();
+	imgUrlArr = imgUrls.split(",");
+	for(var i=0; i<imgUrlArr.length; ++i)
+	{
+		imgs += '<img class="list-img" src="'+imgUrlArr[i]+'" style="height: 80px;">';
+	}
+	return imgs;
+}
+
+
+function getTime(addtime)
+{
+	return "刚刚";
+}
+
+
+function getLikes(likeArr)
+{
+	var likes = "";
+	for(var i=0; i<likeArr.length; ++i)
+	{
+		likes += likeArr[i]+'，';
+	}
+	likes = likes.substr(0,likes.length-1);
+	likes += "...";
+	return likes;
+}
+
+
+
+
+function ajaxAddLike(id)
+{
+	var rowId = id.split("_")[1];
+	$.ajax({
+		type: 'POST',
+		url: '/index/add.php',
+		dataType: 'json',
+		success: function(data){
+			if(data.code == 0)
+			{
+				var likesHtml = $("#likes_"+rowId).html();
+				$("#likes_"+rowId).html(name+"，"+likesHtml);	
+				$.toast("操作成功", "text");
+			}
+			else
+			{
+				$.toast("操作失败", "text");
+			}
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+		}
+	});
+}
+
+
+function ajaxAddComment(id)
+{
+	$.ajax({
+		type: 'POST',
+		url: '/index/add.php',
+		dataType: 'json',
+		success: function(data){
+			console.log(data);
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+		}
+	});
+}
+
+
+function ajaxAddTransmit(id)
+{
+
+}
+
+
+function ajaxAddInvest(id)
+{
+	$.prompt({
+	  text: "名字不能超过6个字符，不得出现不和谐文字",
+	  title: "投资金额",
+	  onOK: function(text) {
+		$.ajax({
+			type: 'POST',
+			url: '/index/add.php',
+			dataType: 'json',
+			success: function(data){
+				$.toast("操作成功", "text");
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+			}
+		});
+	  },
+	  onCancel: function() {
+		console.log("取消了");
+	  },
+	  input: 'Mr Noone'
+	});
+}
+</script>
+</body>
+</html>
