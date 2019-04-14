@@ -48,11 +48,11 @@
 						</p>
 					</div>
 					<!--投资-->
-					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
+					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/ads.png" style="padding-left:10px"></p>
 					<!--转发,评论,点赞-->
-					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/link.png" style="padding-left:10px">
 					<img id="comment_1" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
-					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/l.png" style="padding-left:10px">
 				</div>
 				<div class="triangle"></div>
 				<div class="cmt-wrap">
@@ -122,7 +122,7 @@ $(function(){
 	var next = "";
 	var locationUrl = "";
 
-	
+	/*
 	if(request.state == undefined)
 	{
 	   if(request.projectid == undefined){
@@ -136,23 +136,31 @@ $(function(){
 	 state = request.state
 	 code = request.code
 	}
+	*/
+
 	
-
-
+	//请求第一页
 	$.ajax({
 		type: 'GET',
 		url: '/like.http?action=project&projectid='+state+'&code='+code,
 		//url: '/index/project.php',
 		dataType: 'json',
-		success: function(data){
+		success: function(data)
+		{
 			next = data.data.next;
-			var result = addItems(data.data.entries);
-			// 为了测试，延迟1秒加载
-			setTimeout(function(){
-				$('#list').append(result);
-				// 每次数据加载完，必须重置
+			if(data.data.entries.length == 0)
+			{
 				dropload.resetload();
-			},1000);
+				$.toast("没有更多了", "text");
+			}
+			else
+			{
+				var result = addItems(data.data.entries);
+				setTimeout(function(){
+					$('#list').append(result);
+					dropload.resetload();
+				},1000);					
+			}
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
@@ -171,19 +179,30 @@ $(function(){
             domUpdate  : '<div class="dropload-update">↑释放更新</div>',
             domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>'
         },
+		
         domDown : {
             domClass   : 'dropload-down',
             domRefresh : '<div class="dropload-refresh">↑上拉加载更多</div>',
             domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
             domNoData  : '<div class="dropload-noData">暂无数据</div>'
         },
+		
         loadUpFn : function(me){
 			setTimeout(function(){
 				dropload.resetload();
 				window.location.href = locationUrl;
 			},1000);
         },
+		
         loadDownFn : function(me){
+		
+			if(next == "null")
+			{
+				$.toast("没有更多了", "text");
+				dropload.resetload();
+				return;
+			}
+			
             $.ajax({
                 type: 'GET',
 				url: '/like.http?action=project&projectid='+next+'&code='+code,
@@ -191,14 +210,11 @@ $(function(){
                 dataType: 'json',
                 success: function(data){
 					next = data.data.next;
-					console.log(next);
-                    var result = addItems(data.data.entries);
-                    // 为了测试，延迟1秒加载
-                    setTimeout(function(){
-                        $('#list').append(result);
-                        // 每次数据加载完，必须重置
-                        dropload.resetload();
-                    },1000);
+					var result = addItems(data.data.entries);
+					setTimeout(function(){
+						$('#list').append(result);
+						dropload.resetload();
+					},1000);					
                 },
                 error: function(xhr, type){
                     alert('Ajax error!');
@@ -224,6 +240,7 @@ function addItems(listData)
 
 function getItem(itemData)
 {
+	console.log(itemData);
 	var item =
 		'<li class="item">'
 			+'<div class="po-left">'
