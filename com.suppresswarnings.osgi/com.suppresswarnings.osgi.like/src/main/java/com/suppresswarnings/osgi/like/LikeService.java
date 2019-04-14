@@ -21,6 +21,10 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
+import com.suppresswarnings.osgi.like.impl.LikeHandlerImpl;
+import com.suppresswarnings.osgi.like.model.Page;
+import com.suppresswarnings.osgi.like.model.Result;
+import com.suppresswarnings.osgi.like.model.Project;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
@@ -29,6 +33,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public Map<String, Provider<?>> providers = new HashMap<>();
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
+	public LikeHandler handler;
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		AtomicInteger integer = new AtomicInteger(1);
@@ -60,6 +65,18 @@ public class LikeService implements HTTPService, CommandProvider {
 	@Override
 	public String start(Parameter parameter) throws Exception {
 		logger.info("like request: " + parameter);
+		String action = parameter.getParameter("action");
+		if("project".equals(action)) {
+			String projectid = parameter.getParameter("projectid");
+			String openid = parameter.getParameter("openid");
+			Page<Project> page = handler.get(projectid, openid);
+			Result result = new Result(page);
+			Map<String, String> extra = new HashMap<>();
+			extra.put("uface", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvJdxWbKRtXG3RWZMaggh1BBYbNL6oZLKlKCZ1BOicq09TbCFg6Hqfia4MgYfiaEcHc67DlwZnibqVZIfEJOLJ6p6AHY/132");
+			extra.put("name", "香克斯");
+			result.setExtra(extra);
+			return gson.toJson(result);
+		}
 		return "like";
 	}
 	
@@ -102,6 +119,7 @@ public class LikeService implements HTTPService, CommandProvider {
 
 	public void activate() {
 		logger.info("LikeService activate");
+		handler = new LikeHandlerImpl(this);
 		service.scheduleWithFixedDelay(()->{
 			try {
 				logger.info("start to execute git pull");

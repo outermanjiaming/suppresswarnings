@@ -279,6 +279,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return true;
 		}
 		clearUniqueMsgid();
+		uniqueMsgid.add(msgid);
 		return false;
 	}
 	

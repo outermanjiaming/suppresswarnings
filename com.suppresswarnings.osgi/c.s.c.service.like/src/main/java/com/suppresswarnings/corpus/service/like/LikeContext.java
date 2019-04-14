@@ -26,7 +26,7 @@ public class LikeContext extends WXContext {
 			project.setProjectid(String.join(Const.delimiter, "Project", time(), openid()));
 			project.setBonusCent("1000");
 			project.setTime(time());
-			u.output("请输入点赞宣传语：");
+			u.output("你正在创建点赞，集赞达到目标即可获得现金奖励，所有参与点赞者均有分红。\n\n请输入邀请点赞的宣传语：");
 		}
 
 		@Override
@@ -100,7 +100,7 @@ public class LikeContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(count <= 0) {
+			if(count <= 1) {
 				return finish;
 			}
 			if("完成".equals(t)) {
@@ -130,11 +130,13 @@ public class LikeContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			logger.info(project.toString());
+			save();
 			u.content().atUser(openid(), "恭喜你完成了创建点赞，发起点赞之后，分享到朋友圈开始集赞，达到集赞目标之后，即可获得最高100元现金奖励，所有参与点赞者均有份！");
 			WXnews news = new WXnews();
 			news.setTitle("先赞一个亿，分享到朋友圈，开始集赞吧！");
 			news.setDescription("进去点赞哦！完成集赞目标，即可获得最高100元现金奖励，所有参与点赞者均有份！");
 			news.setUrl("http://SuppressWarnings.com/like.html?state="+project.getProjectid());
+			news.setPicUrl("http://SuppressWarnings.com/like.png");
 			String json = gson.toJson(news);
 			u.output("news://" + json);
 		}

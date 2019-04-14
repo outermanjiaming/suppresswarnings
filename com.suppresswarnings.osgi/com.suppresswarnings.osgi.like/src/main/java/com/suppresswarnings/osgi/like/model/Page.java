@@ -3,15 +3,16 @@ package com.suppresswarnings.osgi.like.model;
 import java.util.List;
 
 public class Page<T> {
-	List<T> data;
+	List<T> entries;
 	String start;
 	String next;
 	int size;
-	public List<T> getData() {
-		return data;
+	
+	public List<T> getEntries() {
+		return entries;
 	}
-	public void setData(List<T> data) {
-		this.data = data;
+	public void setEntries(List<T> entries) {
+		this.entries = entries;
 	}
 	public String getStart() {
 		return start;
@@ -31,4 +32,5 @@ public class Page<T> {
 	public void setSize(int size) {
 		this.size = size;
 	}
+	
 }
