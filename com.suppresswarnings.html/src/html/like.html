@@ -178,9 +178,10 @@ $(function(){
             domNoData  : '<div class="dropload-noData">暂无数据</div>'
         },
         loadUpFn : function(me){
-			// 每次数据加载完，必须重置
-			dropload.resetload();
-            window.location.href = locationUrl;
+			setTimeout(function(){
+				dropload.resetload();
+				window.location.href = locationUrl;
+			},1000);
         },
         loadDownFn : function(me){
             $.ajax({
