@@ -47,9 +47,9 @@
 							<img class="list-img" src="asset/images/0.jpg" style="height: 80px;">
 						</p>
 					</div>
-					<!--发布时间-->
+					<!--投资-->
 					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
-					<!--点赞,评论,转发-->
+					<!--转发,评论,点赞-->
 					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
 					<img id="comment_1" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
 					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
@@ -58,8 +58,7 @@
 				<div class="cmt-wrap">
 					<!--点赞列表-->
 					<div class="likes"><img src="asset/images/l.png"><span id="likes_1">苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，马云...</span></div>
-					<!--评论和回复-->
-					<!--
+
 					<div class="cmt-list">
 						<p><span>wu世勋-EXO：</span>나는 서명～</p>
 						<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>
@@ -78,17 +77,14 @@
 						</p>
 						<p><span>杨幂：</span>😘私人飞机出行，求带上我～</p>
 					</div>
-					-->
 				</div>
 			</div>
 		</div>
-		
 		
 
 		<ul id="list">
 			
 		</ul>
-
 		
 	</div>
 
@@ -124,7 +120,9 @@ $(function(){
 	var code = "";
 	var projectid = "";
 	var next = "";
+	var locationUrl = "";
 
+	
 	if(request.state == undefined)
 	{
 	   if(request.projectid == undefined){
@@ -132,12 +130,13 @@ $(function(){
 	   } else {
 		 projectid = request.projectid
 	   }
-	   window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
+	   window.location.href = locationUrl;
 	} else {
 	 state = request.state
 	 code = request.code
 	}
-
+	
 
 
 	$.ajax({
@@ -179,28 +178,9 @@ $(function(){
             domNoData  : '<div class="dropload-noData">暂无数据</div>'
         },
         loadUpFn : function(me){
-			/*
-            $.ajax({
-                type: 'GET',
-				//url: '/like.http?action=project&projectid='+state+'&code='+code,
-				url: '/index/project.php',
-                dataType: 'json',
-                success: function(data){
-                    var result = addItems(data.data.entries);
-                    // 为了测试，延迟1秒加载
-                    setTimeout(function(){
-                        $('#list').html(result);
-                        // 每次数据加载完，必须重置
-                        dropload.resetload();
-                    },1000);
-                },
-                error: function(xhr, type){
-                    alert('Ajax error!');
-                    // 即使加载出错，也得重置
-                    dropload.resetload();
-                }
-            });
-			*/
+			// 每次数据加载完，必须重置
+			dropload.resetload();
+            window.location.href = locationUrl;
         },
         loadDownFn : function(me){
             $.ajax({
@@ -255,10 +235,10 @@ function getItem(itemData)
 						+'<p>'+itemData.title+'</p>'
 						+'<p>'+getImgs(itemData.pictures)+'</p>'
 					+'</div>'
-					+'<p class="time"><img class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
-					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
-					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
-					+'<img class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
+					+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img id="comment_'+itemData.projectid+'" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
 				+'</div>'
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
