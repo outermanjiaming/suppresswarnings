@@ -159,8 +159,8 @@ $(function(){
 		dataType: 'json',
 		success: function(data)
 		{
-		    $("#user-name").text(data.data.uname);
-		    $("#avt").attr("src", data.data.face);
+		    $("#user-name").text(data.extra.uname);
+		    $("#avt").attr("src", data.extra.face);
 			next = data.data.next;
 			if(data.data.entries.length == 0)
 			{
