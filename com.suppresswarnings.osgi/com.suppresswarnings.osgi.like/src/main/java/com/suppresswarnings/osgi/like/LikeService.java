@@ -105,6 +105,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	
 	public String openid(String code) {
 		String exist = token().get(String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", code));
+		logger.info("code -> openid: " + code + " => " + exist);
 		return exist;
 	}
 	

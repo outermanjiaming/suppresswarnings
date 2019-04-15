@@ -131,11 +131,10 @@ public class LikeContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			logger.info(project.toString());
 			save();
-			u.content().atUser(openid(), "恭喜你完成了创建点赞，发起点赞之后，分享到朋友圈开始集赞，达到集赞目标之后，即可获得最高100元现金奖励，所有参与点赞者均有份！");
 			WXnews news = new WXnews();
-			news.setTitle("先赞一个亿，分享到朋友圈，开始集赞吧！");
-			news.setDescription("进去点赞哦！完成集赞目标，即可获得最高100元现金奖励，所有参与点赞者均有份！");
-			news.setUrl("http://SuppressWarnings.com/like.html?state="+project.getProjectid());
+			news.setTitle(project.getTitle());
+			news.setDescription("先赞一个亿！分享到朋友圈，开始集赞吧！进去点赞哦！完成集赞目标，即可获得最高100元现金奖励，所有参与点赞者均有份！");
+			news.setUrl("http://SuppressWarnings.com/like.html?projectid="+project.getProjectid());
 			news.setPicUrl("http://SuppressWarnings.com/like.png");
 			String json = gson.toJson(news);
 			u.output("news://" + json);
