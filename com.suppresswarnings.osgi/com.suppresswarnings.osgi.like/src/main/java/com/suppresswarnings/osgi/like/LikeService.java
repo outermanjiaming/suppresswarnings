@@ -80,6 +80,12 @@ public class LikeService implements HTTPService, CommandProvider {
 			extra.put("uname", kv.key());
 			result.setExtra(extra);
 			return gson.toJson(result);
+		} else if("next".equals(action)) {
+			String projectid = parameter.getParameter("projectid");
+			String code = parameter.getParameter("code");
+			Page<Project> page = handler.get(projectid, code);
+			Result result = new Result(page);
+			return gson.toJson(result);
 		}
 		return "like";
 	}

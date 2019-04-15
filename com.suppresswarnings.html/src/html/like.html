@@ -219,7 +219,7 @@ $(function(){
 			
             $.ajax({
                 type: 'GET',
-				url: '/like.http?action=project&projectid='+next+'&code='+code,
+				url: '/like.http?action=next&projectid='+next+'&code='+code,
 				//url: '/index/project.php?projectid='+next,
                 dataType: 'json',
                 success: function(data){
