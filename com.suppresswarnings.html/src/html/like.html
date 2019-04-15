@@ -147,43 +147,39 @@ $(function(){
 			dropload.resetload();
 		}
 	});
-	}
 	
-
-	
-	//请求第一页
-	$.ajax({
-		type: 'GET',
-		url: '/like.http?action=project&projectid='+state+'&code='+code,
-		//url: '/index/project.php',
-		dataType: 'json',
-		success: function(data)
-		{
-		    $("#user-name").text(data.extra.uname);
-		    $("#avt").attr("src", data.extra.face);
-			next = data.data.next;
-			if(data.data.entries.length == 0)
+		//请求第一页
+		$.ajax({
+			type: 'GET',
+			url: '/like.http?action=project&projectid='+state+'&code='+code,
+			//url: '/index/project.php',
+			dataType: 'json',
+			success: function(data)
 			{
-				dropload.resetload();
-				$.toast("没有更多了", "text");
-			}
-			else
-			{
-				var result = addItems(data.data.entries);
-				setTimeout(function(){
-					$('#list').append(result);
+			    $("#user-name").text(data.extra.uname);
+			    $("#avt").attr("src", data.extra.face);
+				next = data.data.next;
+				if(data.data.entries.length == 0)
+				{
 					dropload.resetload();
-				},1000);					
+					$.toast("没有更多了", "text");
+				}
+				else
+				{
+					var result = addItems(data.data.entries);
+					setTimeout(function(){
+						$('#list').append(result);
+						dropload.resetload();
+					},1000);					
+				}
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+				// 即使加载出错，也得重置
+				dropload.resetload();
 			}
-		},
-		error: function(xhr, type){
-			alert('Ajax error!');
-			// 即使加载出错，也得重置
-			dropload.resetload();
-		}
-	});
-
-
+		});
+	}
 
     // dropload
     var dropload = $('.inner').dropload({
