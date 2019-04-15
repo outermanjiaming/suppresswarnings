@@ -138,7 +138,7 @@ $(function(){
 	 $.ajax({
 		type: 'GET',
 		url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
-		dataType: 'json',
+		dataType: 'text',
 		success: function(data)
 		{
 			console.log(data);
