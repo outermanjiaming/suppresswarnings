@@ -6,6 +6,8 @@ public class Project {
 
 	String projectid;
 	String openid;
+	String face;
+	String uname;
 	String time;
 	String title;
 	String pictures;
@@ -13,6 +15,19 @@ public class Project {
 	Page<KeyValue> likes;
 	Page<KeyValue> forwards;
 	Page<KeyValue> invests;
+	
+	public String getFace() {
+		return face;
+	}
+	public void setFace(String face) {
+		this.face = face;
+	}
+	public String getUname() {
+		return uname;
+	}
+	public void setUname(String uname) {
+		this.uname = uname;
+	}
 	public String getProjectid() {
 		return projectid;
 	}

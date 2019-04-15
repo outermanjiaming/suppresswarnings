@@ -19,6 +19,8 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.suppresswarnings.corpus.common.Const;
+import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.like.impl.LikeHandlerImpl;
@@ -68,16 +70,36 @@ public class LikeService implements HTTPService, CommandProvider {
 		String action = parameter.getParameter("action");
 		if("project".equals(action)) {
 			String projectid = parameter.getParameter("projectid");
-			String openid = parameter.getParameter("openid");
+			String code = parameter.getParameter("code");
+			String openid = openid(code);
 			Page<Project> page = handler.get(projectid, openid);
 			Result result = new Result(page);
 			Map<String, String> extra = new HashMap<>();
-			extra.put("uface", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvJdxWbKRtXG3RWZMaggh1BBYbNL6oZLKlKCZ1BOicq09TbCFg6Hqfia4MgYfiaEcHc67DlwZnibqVZIfEJOLJ6p6AHY/132");
-			extra.put("name", "香克斯");
+			KeyValue kv = user(openid);
+			extra.put("face", kv.value());
+			extra.put("uname", kv.key());
 			result.setExtra(extra);
 			return gson.toJson(result);
 		}
 		return "like";
+	}
+	
+	public KeyValue user(String openid) {
+		if(openid == null) {
+			return new KeyValue("小目标", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvJdxWbKRtXG3RWZMaggh1BBYbNL6oZLKlKCZ1BOicq09TbCFg6Hqfia4MgYfiaEcHc67DlwZnibqVZIfEJOLJ6p6AHY/132");
+		}
+		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = gson.fromJson(json, Map.class);
+		String nickname = (String) map.get("nickname");
+		String headimgurl = (String) map.get("headimgurl");
+		KeyValue kv = new KeyValue(nickname, headimgurl);
+		return kv;
+	}
+	
+	public String openid(String code) {
+		String exist = token().get(String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", code));
+		return exist;
 	}
 	
 	String gitpull() throws Exception {

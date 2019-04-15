@@ -987,11 +987,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
 				}
 				Map<String, String> wxmsg = WXPayUtil.xmlToMap(sms);
-				String msgid = wxmsg.get("MsgId");
-				if(sameMsgid(msgid)) {
-					logger.warn("duplicated msgid: " + msgid + ", openid: " + openid);
-					return SUCCESS;
-				}
+				
 				String msgType = wxmsg.get("MsgType");
 				logger.info("[WX] check: " + msgType);
 				if(msgType == null) {
@@ -1000,15 +996,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
 				}
 				String input = "";
-				if("text".equals(msgType)) {
-					input = wxmsg.get("Content");
-					logger.info("[corpus] text: " + input);
-				} else if("voice".equals(msgType)) {
-					input = wxmsg.get("Recognition");
-					if(input == null) {
-						input = "听不清说了啥？";
-					}
-				} else if("event".equals(msgType)) {
+				if("event".equals(msgType)) {
 					String where = "素朴网联";
 					String event = wxmsg.get("Event");
 					String eventKey = wxmsg.get("EventKey");
@@ -1098,6 +1086,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 					} else {
 						logger.info("unhandled event: " + event + ", " + eventKey);
 						return SUCCESS;
+					}
+				} 
+				
+				String msgid = wxmsg.get("MsgId");
+				if(sameMsgid(msgid)) {
+					logger.warn("duplicated msgid: " + msgid + ", openid: " + openid);
+					return SUCCESS;
+				}
+				if("text".equals(msgType)) {
+					input = wxmsg.get("Content");
+					logger.info("[corpus] text: " + input);
+				} else if("voice".equals(msgType)) {
+					input = wxmsg.get("Recognition");
+					if(input == null) {
+						input = "听不清说了啥？";
 					}
 				} else if("image".equals(msgType)) {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Media", ""+System.currentTimeMillis(), openid);
