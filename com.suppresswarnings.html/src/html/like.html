@@ -140,15 +140,9 @@ $(function(){
 		success: function(data)
 		{
 			console.log(data);
-		},
-		error: function(xhr, type){
-			alert('Ajax error!');
-			// 即使加载出错，也得重置
-			dropload.resetload();
-		}
-	});
-	
-		//请求第一页
+			
+			
+			//请求第一页
 		$.ajax({
 			type: 'GET',
 			url: '/like.http?action=project&projectid='+state+'&code='+code,
@@ -179,6 +173,15 @@ $(function(){
 				dropload.resetload();
 			}
 		});
+		
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+			// 即使加载出错，也得重置
+			dropload.resetload();
+		}
+	});
+		
 	}
 
     // dropload
