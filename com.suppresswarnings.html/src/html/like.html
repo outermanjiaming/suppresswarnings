@@ -122,7 +122,7 @@ $(function(){
 	var next = "";
 	var locationUrl = "";
 
-	/*
+	
 	if(request.state == undefined)
 	{
 	   if(request.projectid == undefined){
@@ -135,8 +135,22 @@ $(function(){
 	} else {
 	 state = request.state
 	 code = request.code
+	 $.ajax({
+		type: 'GET',
+		url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
+		dataType: 'json',
+		success: function(data)
+		{
+			console.log(data);
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+			// 即使加载出错，也得重置
+			dropload.resetload();
+		}
+	});
 	}
-	*/
+	
 
 	
 	//请求第一页
@@ -253,10 +267,10 @@ function getItem(itemData)
 						+'<p>'+itemData.title+'</p>'
 						+'<p>'+getImgs(itemData.pictures)+'</p>'
 					+'</div>'
-					+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
-					+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/ads.png" style="padding-left:10px"></p>'
+					+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/link.png" style="padding-left:10px">'
 					+'<img id="comment_'+itemData.projectid+'" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
-					+'<img id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/l.png" style="padding-left:10px">'
 				+'</div>'
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
