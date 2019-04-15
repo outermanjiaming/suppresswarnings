@@ -22,8 +22,6 @@
 			<p id="user-name">万虎科技~贾素杰</p>
 			<a href="./user.html"><img id="avt" class="data-avt" src="asset/images/0.jpg"></a>
 		</header>
-	
-		
 
 		<div style="padding-top:30px;">
 			<!-- 左边主体 -->
@@ -161,6 +159,8 @@ $(function(){
 		dataType: 'json',
 		success: function(data)
 		{
+		    $("#user-name").text(data.data.uname);
+		    $("#avt").attr("src", data.data.face);
 			next = data.data.next;
 			if(data.data.entries.length == 0)
 			{
