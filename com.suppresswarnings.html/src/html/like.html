@@ -311,9 +311,9 @@ function ajaxAddLike(id)
 			{
 				$.toast("操作成功", "text");
 			    if(data.data == "1") {
-			        $("#likes_"+rowId).html(uname+"，"+uiHtml);	
+			        $(ui).html(uname+"，"+uiHtml);	
 			    } else {
-			        $("#likes_"+rowId).html(uiHtml.replace(uname+"，", ""));
+			        $(ui).html(uiHtml.replace(uname+"，", ""));
 			    }
 				
 			}
