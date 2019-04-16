@@ -302,9 +302,6 @@ function ajaxAddLike(id)
 	var rowId = id.replace("like_", "");
 	var ui = document.getElementById("likes_"+rowId);
 	var uiHtml = ui.innerHTML;
-	ui.innerHTML = "小明"+"，"+ui.innerHTML;	
-	$.toast("操作成功", "text");
-	/*
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
@@ -331,7 +328,6 @@ function ajaxAddLike(id)
 			alert('Ajax error!');
 		}
 	});
-	*/
 }
 
 
@@ -344,21 +340,18 @@ function ajaxAddComment(id)
 	
 	var ui = document.getElementById("comments_"+rowId);
 	var uiHtml = ui.innerHTML;
-	ui.innerHTML = "<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>"+ui.innerHTML;	
-	$.toast("操作成功", "text");
-	/*
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=comment&projectid='+projectid+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
+			$.toast("操作成功" + data.data, "text");
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
 		}
 	});
-	*/
 }
 
 
