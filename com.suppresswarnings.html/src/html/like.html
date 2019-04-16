@@ -309,13 +309,11 @@ function ajaxAddLike(id)
 		success: function(data){
 			if(data.code == 0)
 			{
-			    var likesHtml = $("#likes_"+rowId).html();
-				
 				$.toast("操作成功", "text");
 			    if(data.data == "1") {
-			        $("#likes_"+rowId).html(uname+"，"+likesHtml);	
+			        $("#likes_"+rowId).html(uname+"，"+uiHtml);	
 			    } else {
-			        $("#likes_"+rowId).html(likesHtml.replace(uname+"，", ""));
+			        $("#likes_"+rowId).html(uiHtml.replace(uname+"，", ""));
 			    }
 				
 			}
