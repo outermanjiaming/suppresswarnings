@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -36,6 +37,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public Gson gson = new Gson();
 	public LevelDB account, data, token;
 	public LikeHandler handler;
+	public Map<String, AtomicInteger> counters;
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		AtomicInteger integer = new AtomicInteger(1);
@@ -72,7 +74,7 @@ public class LikeService implements HTTPService, CommandProvider {
 			String projectid = parameter.getParameter("projectid");
 			String code = parameter.getParameter("code");
 			String openid = openid(code);
-			Page<Project> page = handler.get(projectid, openid);
+			Page<Project> page = handler.listProjects(true, 2, projectid, openid);
 			Result result = new Result(page);
 			Map<String, String> extra = new HashMap<>();
 			KeyValue kv = user(openid);
@@ -83,11 +85,16 @@ public class LikeService implements HTTPService, CommandProvider {
 		} else if("next".equals(action)) {
 			String projectid = parameter.getParameter("projectid");
 			String code = parameter.getParameter("code");
-			Page<Project> page = handler.get(projectid, code);
+			Page<Project> page = handler.listProjects(false, 5, projectid, code);
 			Result result = new Result(page);
 			return gson.toJson(result);
+		} else if("like".equals(action)) {
+			String projectid = parameter.getParameter("projectid");
+			String code = parameter.getParameter("code");
+			String openid = openid(code);
+			handler.likeProject(projectid, openid);
 		}
-		return "like";
+		return gson.toJson(new Result(400, "unknown action"));
 	}
 	
 	public KeyValue user(String openid) {
@@ -149,6 +156,8 @@ public class LikeService implements HTTPService, CommandProvider {
 	public void activate() {
 		logger.info("LikeService activate");
 		handler = new LikeHandlerImpl(this);
+		counters = new ConcurrentHashMap<>();
+		
 		service.scheduleWithFixedDelay(()->{
 			try {
 				logger.info("start to execute git pull");
@@ -157,9 +166,39 @@ public class LikeService implements HTTPService, CommandProvider {
 				logger.error("Fail to git pull", e);
 			}
 		}, 3, 10, TimeUnit.SECONDS);
-		data().list("001.", 10, (k,v)->{
-			logger.info("test data: " + k + " = " + v);
+		service.execute(() ->{
+			try {
+				String head = String.join(Const.delimiter, Const.Version.V1, "Projectid");
+				String start = String.join(Const.delimiter, Const.Version.V1, "Projectid", "Project");
+				List<String> projectids = new ArrayList<>();
+				logger.info("start = " + start);
+				account().page(head, start, null, Integer.MAX_VALUE, (k,v) ->{
+					projectids.add(v);
+				});
+				projectids.forEach(projectid ->{
+					String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
+					String count = data().get(countProjectLikeKey);
+					int initialValue = 0;
+					if(count == null) {
+						data().put(countProjectLikeKey, "0");
+						logger.info("first time initialValue = 0");
+					} else {
+						initialValue = Integer.valueOf(count);
+					}
+					counters.put(projectid, new AtomicInteger(initialValue));
+				});
+			} catch (Exception e) {
+				logger.error("fail to get counters from leveldb", e);
+			}
 		});
+	}
+	public void like(String project) {
+		AtomicInteger count = counters.get(project);
+		count.incrementAndGet();
+	}
+	public void dislike(String project) {
+		AtomicInteger count = counters.get(project);
+		count.decrementAndGet();
 	}
 	public void deactivate() {
 		logger.info("[LikeService] deactivate.");

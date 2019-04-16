@@ -20,15 +20,15 @@ public class LikeHandlerImpl implements LikeHandler {
 	}
 
 	@Override
-	public Page<Project> get(String projectid, String openid) {
-		if(projectid == null || projectid.length() < 1) {
+	public Page<Project> listProjects(boolean first, int n, String projectid, String openid) {
+		if(first || projectid == null || projectid.length() < 1) {
 			projectid = "Project";
 		}
 		String head = String.join(Const.delimiter, Const.Version.V1, "Projectid");
 		String start = String.join(Const.delimiter, Const.Version.V1, "Projectid", projectid);
 		List<String> projectids = new ArrayList<>();
 		logger.info("start = " + start);
-		service.account().page(head, start, null, 2, (k,v) ->{
+		service.account().page(head, start, null, n, (k,v) ->{
 			projectids.add(v);
 		});
 		logger.info("projectids = " + projectids);
@@ -55,7 +55,11 @@ public class LikeHandlerImpl implements LikeHandler {
 		
 		if(projectids.size() > 1) {
 			String s = projectids.get(i);
-			page.setNext(s);
+			if(first) {
+				page.setNext("Project");
+			} else {
+				page.setNext(s);
+			}
 		} else {
 			page.setNext("null");
 		}
@@ -91,6 +95,16 @@ public class LikeHandlerImpl implements LikeHandler {
 		data.add(kv2);
 		page.setEntries(data);
 		return page;
+	}
+
+	@Override
+	public String likeProject(String projectid, String openid) {
+		String projectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid, openid);
+		String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Count", projectid);
+		String userLikeKey = String.join(Const.delimiter, Const.Version.V1, openid, "Like", "Project", projectid);
+		String time = "" + System.currentTimeMillis();
+		
+		return null;
 	}
 
 }

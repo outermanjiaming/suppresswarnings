@@ -13,6 +13,7 @@ public class LikeContext extends WXContext {
 	public static final String CMD = "我要发起点赞";
 	Project project = new Project();
 	Gson gson = new Gson();
+	int count = 4;
 	State<Context<CorpusService>> like = new State<Context<CorpusService>>() {
 
 		/**
@@ -61,11 +62,12 @@ public class LikeContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			project.setTitle(t);
-			u.output("请上传图片（最多4张）：");
+			u.output("请上传图片（最多"+count+"张）：");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			count --;
 			return picture;
 		}
 
@@ -86,21 +88,23 @@ public class LikeContext extends WXContext {
 		 * 
 		 */
 		private static final long serialVersionUID = 7086519805654327293L;
-		int count = 4;
+		
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			count --;
+			
 			String image = t;
 			if(t.startsWith("IMAGE_")) {
 				image = t.substring("IMAGE_".length());
 			}
 			project.addPicture(image);
-			u.output("请继续上传图片（最多"+count+"张）(或输入“完成”即可结束上传)：");
+			if(count > 0) u.output("请输入“完成”或继续上传图片（最多"+count+"张）：");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(count <= 1) {
+			count --;
+			if(count < 1) {
+				this.accept(t, u);
 				return finish;
 			}
 			if("完成".equals(t)) {
