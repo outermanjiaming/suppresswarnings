@@ -128,14 +128,12 @@ var code = "";
 var projectid = "";
 var next = "";
 var locationUrl = "";
+var uname = "";
 
 $(function()
 {
 	var request = GetRequest();
-	
 	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
-
-	
 	
 	if(request.state == undefined)
 	{
@@ -174,6 +172,7 @@ $(function()
 					//url: '/index/project.php?projectid='+next,
 					dataType: 'json',
 					success: function(data){
+					    uname = data.extra.uname;
 						$("#user-name").text(data.extra.uname);
 						$("#avt").attr("src", data.extra.face);
 						next = data.data.next;
@@ -313,9 +312,15 @@ function ajaxAddLike(id)
 		success: function(data){
 			if(data.code == 0)
 			{
-				var likesHtml = $("#likes_"+rowId).html();
-				$("#likes_"+rowId).html("小明"+"，"+likesHtml);	
+			    var likesHtml = $("#likes_"+rowId).html();
+				
 				$.toast("操作成功", "text");
+			    if(data.data == "1") {
+			        $("#likes_"+rowId).html(uname+"，"+likesHtml);	
+			    } else {
+			        $("#likes_"+rowId).html(likesHtml.replace(uname+"，", ""));
+			    }
+				
 			}
 			else
 			{
