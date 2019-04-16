@@ -103,10 +103,11 @@ public class LikeService implements HTTPService, CommandProvider {
 	}
 	
 	public KeyValue user(String openid) {
-		if(openid == null) {
+		
+		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
+		if(openid == null || json == null) {
 			return new KeyValue("小目标", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvJdxWbKRtXG3RWZMaggh1BBYbNL6oZLKlKCZ1BOicq09TbCFg6Hqfia4MgYfiaEcHc67DlwZnibqVZIfEJOLJ6p6AHY/132");
 		}
-		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = gson.fromJson(json, Map.class);
 		String nickname = (String) map.get("nickname");

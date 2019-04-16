@@ -71,14 +71,20 @@ public class LikeHandlerImpl implements LikeHandler {
 	public Page<KeyValue> getLikes(String projectid) {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
-		String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
-		service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
-			String openid = k.substring(projectid.length());
-			KeyValue kv = service.user(openid);
-			data.add(kv);
-		});
+		try {
+			String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
+			int index = start.length() + Const.delimiter.length();
+			service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+				String openid = k.substring(index);
+				KeyValue kv = service.user(openid);
+				data.add(kv);
+			});
+			
+			page.setEntries(data);
+		} catch (Exception e) {
+			logger.error("fail to get likes", e);
+		}
 		
-		page.setEntries(data);
 		return page;
 	}
 
