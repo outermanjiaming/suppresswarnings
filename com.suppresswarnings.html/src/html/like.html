@@ -108,18 +108,15 @@ function GetRequest() {
     return theRequest;
 }
 
-
-
-$(function(){
-
-	
-	var request = GetRequest();
-	var state = "";
+var state = "";
 	var code = "";
 	var projectid = "";
 	var next = "";
 	var locationUrl = "";
 
+$(function(){
+
+	var request = GetRequest();
 	
 	if(request.state == undefined)
 	{
