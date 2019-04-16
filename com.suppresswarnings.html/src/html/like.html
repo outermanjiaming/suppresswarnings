@@ -123,14 +123,16 @@
 <script src="asset/plug-ins/popup_text/popup_text.js"></script>
 
 <script type="text/javascript">
+var state = "";
+var code = "";
+var projectid = "";
+var next = "";
+var locationUrl = "";
+
 $(function()
 {
 	var request = GetRequest();
-	var state = "";
-	var code = "";
-	var projectid = "";
-	var next = "";
-	var locationUrl = "";
+	
 	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
 
 	
@@ -237,7 +239,7 @@ $(function()
 			{
 				$.ajax({
 					type: 'GET',
-					url: '/like.http?action=project&projectid='+next+'&code='+code,
+					url: '/like.http?action=next&projectid='+next+'&code='+code,
 					//url: '/index/project.php?projectid='+next,
 					dataType: 'json',
 					success: function(data){
@@ -306,7 +308,7 @@ function ajaxAddLike(id)
 	/*
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=like',
+		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
@@ -342,7 +344,7 @@ function ajaxAddComment(id)
 	/*
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=comment',
+		url: '/like.http?action=comment&projectid='+projectid+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
@@ -366,12 +368,12 @@ function ajaxAddTransmit(id)
 function ajaxAddInvest(id)
 {
 	$.prompt({
-	  text: "名字不能超过6个字符，不得出现不和谐文字",
+	  text: "投资的金额用于鼓励更多用户点赞，完成之后可以得到广告收益分红",
 	  title: "投资金额",
 	  onOK: function(text) {
 		$.ajax({
 			type: 'POST',
-			url: '/like.http?action=like',
+			url: '/like.http?action=invest&projectid='+projectid+'&code='+code,
 			dataType: 'json',
 			success: function(data){
 				$.toast("操作成功", "text");
