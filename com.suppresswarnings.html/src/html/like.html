@@ -4,35 +4,14 @@
     <meta name="viewport" content="initial-scale=1, user-scalable=0, minimal-ui" charset="UTF-8">
     <title>先赞一个亿</title>
 	<link rel="stylesheet" href="asset/css/style.css">
-	
     <link rel="stylesheet" href="asset/plug-ins/dist/dropload.css">
 	
 	<link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
 	<link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
-	
-	<link rel="stylesheet" href="asset/plug-ins/popup_text/popup_text.css">
 </head>
 
 
 <body>
-
-<!-- 弹出层输入框 -->
-<div id="actionSheet_wrap">
-    <div class="weui_mask_transition" id="actionSheet_mask" style="display: none;"></div>
-    <div class="weui_actionsheet" id="weui_actionsheet">
-		<div class="weui-cell" style="overflow: auto;">
-			<div class="weui-cell__bd">
-			  <textarea class="weui-textarea" placeholder="请输入文本" rows="3"></textarea>
-			  <!--<div class="weui-textarea-counter"><span>0</span>/200</div>-->
-			</div>		
-		</div>
-		<div class="button_sp_area" style="float:right; margin-right:15px;">
-        <button id="actionSheet_send" onclick="ajaxAddComment(this.attributes['val'].nodeValue);" class="weui-btn weui-btn_mini weui-btn_primary" style="margin-bottom:5px;">发送</button>
-        </div>			
-    </div>
-</div>
-
-
 <div id="main" class="main">
 
 	<div id ="inner" class="inner">
@@ -44,7 +23,6 @@
 			<a href="./user.html"><img id="avt" class="data-avt" src="asset/images/0.jpg"></a>
 		</header>
 
-		
 		<div style="padding-top:30px;">
 			<!-- 左边主体 -->
 			<div class="po-left">
@@ -68,18 +46,18 @@
 						</p>
 					</div>
 					<!--投资-->
-					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
+					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/ads.png" style="padding-left:10px"></p>
 					<!--转发,评论,点赞-->
-					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
-					<img id="comment_1" onclick="showActionSheet(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
-					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/link.png" style="padding-left:10px">
+					<img id="comment_1" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/l.png" style="padding-left:10px">
 				</div>
 				<div class="triangle"></div>
 				<div class="cmt-wrap">
 					<!--点赞列表-->
 					<div class="likes"><img src="asset/images/l.png"><span id="likes_1">苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，苍井空，陈冠希，杨幂，王思聪，陈赫，刘德华，马云...</span></div>
 
-					<div id="comments_1" class="cmt-list">
+					<div class="cmt-list">
 						<p><span>wu世勋-EXO：</span>나는 서명～</p>
 						<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>
 						<p><span>权志龙：</span>나는 서명～</p>
@@ -111,43 +89,48 @@
 </div>
 <script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
 
-<script src="asset/js/likeUiHelper.js"></script>
-
 <script src="asset/plug-ins/dist/dropload.min.js"></script>
 
 <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
 
-<script src="asset/plug-ins/popup_text/popup_text.js"></script>
-
-
 <script type="text/javascript">
-$(function()
-{
-	var request = GetRequest();
-	var state = "";
+
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+}
+
+var state = "";
 	var code = "";
 	var projectid = "";
 	var next = "";
 	var locationUrl = "";
-	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
 
+$(function(){
+
+	var request = GetRequest();
 	
 	if(request.state == undefined)
 	{
-		if(request.projectid == undefined)
-		{
+	   if(request.projectid == undefined){
 		 projectid = "";
-		} else {
+	   } else {
 		 projectid = request.projectid
-		}
-		locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
-		window.location.href = locationUrl;
-	} 
-	else 
-	{
-		state = request.state
-		code = request.code
-		$.ajax({
+	   }
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
+	   window.location.href = locationUrl;
+	} else {
+	 state = request.state
+	 code = request.code
+	 $.ajax({
 		type: 'GET',
 		url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
 		dataType: 'text',
@@ -155,48 +138,49 @@ $(function()
 		{
 			console.log(data);
 			
+			
 			//请求第一页
-			$.ajax({
-				type: 'GET',
-				//url: '/like.http?action=project&projectid='+state+'&code='+code,
-				url: '/index/project.php',
-				dataType: 'json',
-				success: function(data)
+		$.ajax({
+			type: 'GET',
+			url: '/like.http?action=project&projectid='+state+'&code='+code,
+			//url: '/index/project.php',
+			dataType: 'json',
+			success: function(data)
+			{
+			    $("#user-name").text(data.extra.uname);
+			    $("#avt").attr("src", data.extra.face);
+				next = data.data.next;
+				if(data.data.entries.length == 0)
 				{
-					$("#user-name").text(data.extra.uname);
-					$("#avt").attr("src", data.extra.face);
-					next = data.data.next;
-					if(data.data.entries.length == 0)
-					{
-						dropload.resetload();
-						$.toast("没有更多了", "text");
-					}
-					else
-					{
-						var result = addItems(data.data.entries);
-						setTimeout(function(){
-							$('#list').append(result);
-							dropload.resetload();
-						}, getDelayTime());					
-					}
-				},
-				error: function(xhr, type){
-					alert('Ajax error!');
-					// 即使加载出错，也得重置
 					dropload.resetload();
+					$.toast("没有更多了", "text");
 				}
-			});
-
+				else
+				{
+					var result = addItems(data.data.entries);
+					setTimeout(function(){
+						$('#list').append(result);
+						dropload.resetload();
+					},1000);					
+				}
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+				// 即使加载出错，也得重置
+				dropload.resetload();
+			}
+		});
+		
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
 			// 即使加载出错，也得重置
 			dropload.resetload();
 		}
-		});
+	});
+		
 	}
 
-	
     // dropload
     var dropload = $('.inner').dropload({
         domUp : {
@@ -210,76 +194,47 @@ $(function()
             domClass   : 'dropload-down',
             domRefresh : '<div class="dropload-refresh">↑上拉加载更多</div>',
             domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
-            domNoData  : '<div class="dropload-noData">没有更多了</div>'
+            domNoData  : '<div class="dropload-noData">暂无数据</div>'
         },
 		
-        loadUpFn : function(me)
-		{
-			setTimeout(function()
-			{
+        loadUpFn : function(me){
+			setTimeout(function(){
 				dropload.resetload();
 				window.location.href = locationUrl;
-			}, 1000 );
+			},1000);
         },
 		
-        loadDownFn : function(me)
-		{
+        loadDownFn : function(me){
+		
 			if(next == "null")
 			{
-			    dropload.noData();
+				$.toast("没有更多了", "text");
 				dropload.resetload();
 				return;
 			}
-			else
-			{
-				$.ajax({
-					type: 'GET',
-					//url: '/like.http?action=project&projectid='+next+'&code='+code,
-					url: '/index/project.php?projectid='+next,
-					dataType: 'json',
-					success: function(data){
-						next = data.data.next;
-						var result = addItems(data.data.entries);
-						setTimeout(function(){
-							$('#list').append(result);
-							dropload.resetload();
-						}, getDelayTime() );					
-					},
-					error: function(xhr, type){
-						alert('Ajax error!');
-						// 即使加载出错，也得重置
+			
+            $.ajax({
+                type: 'GET',
+				url: '/like.http?action=next&projectid='+next+'&code='+code,
+				//url: '/index/project.php?projectid='+next,
+                dataType: 'json',
+                success: function(data){
+					next = data.data.next;
+					var result = addItems(data.data.entries);
+					setTimeout(function(){
+						$('#list').append(result);
 						dropload.resetload();
-					}
-				});			
-			}
+					},1000);					
+                },
+                error: function(xhr, type){
+                    alert('Ajax error!');
+                    // 即使加载出错，也得重置
+                    dropload.resetload();
+                }
+            });
         }
     });
 });
-
-
-
-
-function getDelayTime()
-{
-	return Math.floor(Math.random()*3+1)*50;
-}
-
-
-
-function GetRequest()
-{
-    var url = location.search; //获取url中"?"符后的字串
-    var theRequest = new Object();
-    if (url.indexOf("?") != -1) {
-        var str = url.substr(1);
-        strs = str.split("&");
-        for(var i = 0; i < strs.length; i ++) {
-            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-        }
-    }
-    return theRequest;
-}
-
 
 
 function addItems(listData)
@@ -293,23 +248,82 @@ function addItems(listData)
 }
 
 
+function getItem(itemData)
+{
+	console.log(itemData);
+	var item =
+		'<li class="item">'
+			+'<div class="po-left">'
+				+'<img src="'+itemData.face+'">'
+			+'</div>'
+			+'<div class="po-right">'
+				+'<div class="po-hd">'
+					+'<p class="po-name"><span class="data-name">'+itemData.uname+'</span></p>'
+					+'<div class="post">'
+						+'<p>'+itemData.title+'</p>'
+						+'<p>'+getImgs(itemData.pictures)+'</p>'
+					+'</div>'
+					+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/ads.png" style="padding-left:10px"></p>'
+					+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/link.png" style="padding-left:10px">'
+					+'<img id="comment_'+itemData.projectid+'" onclick="ajaxAddComment(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+					+'<img id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/l.png" style="padding-left:10px">'
+				+'</div>'
+				+'<div class="triangle"></div>'
+				+'<div class="cmt-wrap">'
+					+'<div class="likes"><img src="asset/images/l.png">'+getLikes(itemData.likes.entries)+'</div>'
+				+'</div>'
+			+'</div>'
+	   +'</li>'
+	return item;
+}
+
+
+function getImgs(imgUrls)
+{	
+	var imgs = "";
+	var imgUrlArr = new Array();
+	imgUrlArr = imgUrls.split(",");
+	for(var i=0; i<imgUrlArr.length; ++i)
+	{
+		imgs += '<img class="list-img" src="'+imgUrlArr[i]+'" style="height: 80px;">';
+	}
+	return imgs;
+}
+
+
+function getTime(addtime)
+{
+	return "刚刚";
+}
+
+
+function getLikes(likeArr)
+{
+	var likes = "";
+	for(var i=0; i<likeArr.length; ++i)
+	{
+		likes += likeArr[i].key+'，';
+	}
+	likes = likes.substr(0,likes.length-1);
+	likes += "...";
+	return likes;
+}
+
+
+
+
 function ajaxAddLike(id)
 {
-	var rowId = id.replace("like_", "");
-	var ui = document.getElementById("likes_"+rowId);
-	var uiHtml = ui.innerHTML;
-	ui.innerHTML = "小明"+"，"+ui.innerHTML;	
-	$.toast("操作成功", "text");
-	/*
+	var rowId = id.split("_")[1];
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=like',
+		url: '/like.http?action=like&projectid='+rowId+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
 			{
 				var likesHtml = $("#likes_"+rowId).html();
-				$("#likes_"+rowId).html("小明"+"，"+likesHtml);	
+				$("#likes_"+rowId).html(name+"，"+likesHtml);	
 				$.toast("操作成功", "text");
 			}
 			else
@@ -321,24 +335,15 @@ function ajaxAddLike(id)
 			alert('Ajax error!');
 		}
 	});
-	*/
 }
 
 
 function ajaxAddComment(id)
 {
-	var rowId = id.replace("comment_", "");
-	var text = $('#weui_actionsheet textarea')[0].value;
-	hideActionSheet();
-	
-	var ui = document.getElementById("comments_"+rowId);
-	var uiHtml = ui.innerHTML;
-	ui.innerHTML = "<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>"+ui.innerHTML;	
-	$.toast("操作成功", "text");
-	/*
+    var rowId = id.split("_")[1];
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=comment',
+		url: '/like.http?action=comment&projectid='+rawId+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
@@ -347,7 +352,6 @@ function ajaxAddComment(id)
 			alert('Ajax error!');
 		}
 	});
-	*/
 }
 
 
