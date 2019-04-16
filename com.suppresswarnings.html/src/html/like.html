@@ -157,8 +157,6 @@ $(function()
 		success: function(data)
 		{
 			console.log(data);
-			$("#user-name").text(data.extra.uname);
-			$("#avt").attr("src", data.extra.face);		
 			
 			if(next == "null")
 			{
