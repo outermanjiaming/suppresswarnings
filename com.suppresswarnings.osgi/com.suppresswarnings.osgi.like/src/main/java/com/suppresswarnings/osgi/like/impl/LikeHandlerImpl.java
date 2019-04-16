@@ -71,40 +71,46 @@ public class LikeHandlerImpl implements LikeHandler {
 	public Page<KeyValue> getLikes(String projectid) {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
-		KeyValue kv = new KeyValue("风一样", "http://thirdwx.qlogo.cn/mmopen/iclj2ZoicVicfThpda5COqWAw57KVzOZDeVtgvWGLKib8xIc9hicZOQo5Hxn9LkG3elRDiaaCt8LqXZHWWytNMl5QTOue9omeUGucr/132");
-		KeyValue kv2 = new KeyValue("玻利维亚", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvLVv0OfyfwsmEn7JOibSBkh9K5crTJk0bwVhuKQiclMx7TqvI8MuQZ6xFC8gZiavjWp1fsrM70P3NagbeBACb4sYNe/132");
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
-		data.add(kv);
-		data.add(kv2);
+		String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
+		service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+			String openid = k.substring(projectid.length());
+			KeyValue kv = service.user(openid);
+			data.add(kv);
+		});
+		
 		page.setEntries(data);
 		return page;
 	}
 
 	@Override
 	public String likeProject(String projectid, String openid) {
-		String projectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid, openid);
-		String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Count", projectid);
-		String userLikeKey = String.join(Const.delimiter, Const.Version.V1, openid, "Like", "Project", projectid);
 		String time = "" + System.currentTimeMillis();
+		String projectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid, openid);
+		String userLikeKey = String.join(Const.delimiter, Const.Version.V1, openid, "Like", "Project", projectid);
 		
-		return null;
+		String like = service.data().get(projectLikeKey);
+		if(like == null) {
+			//like
+			int count = service.like(projectid);
+			service.data().put(projectLikeKey, time);
+			service.data().put(userLikeKey, time);
+			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time);
+			service.data().put(userLikedKey, projectid);
+			return "" + count;
+		} else {
+			//dislike
+			int count = service.dislike(projectid);
+			service.data().del(projectLikeKey);
+			service.data().del(userLikeKey);
+			String userDislikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Dislike", "Project", time);
+			service.data().put(userDislikedKey, projectid);
+			return "" + count;
+		}
+	}
+
+	@Override
+	public void commentProject(String projectid, String openid, String commentid) {
+		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " at " + commentid);
 	}
 
 }

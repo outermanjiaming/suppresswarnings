@@ -35,7 +35,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Map<String, Provider<?>> providers = new HashMap<>();
 	public Gson gson = new Gson();
-	public LevelDB account, data, token;
+	private LevelDB account, data, token;
 	public LikeHandler handler;
 	public Map<String, AtomicInteger> counters;
 	long start = System.currentTimeMillis();
@@ -91,8 +91,13 @@ public class LikeService implements HTTPService, CommandProvider {
 		} else if("like".equals(action)) {
 			String projectid = parameter.getParameter("projectid");
 			String code = parameter.getParameter("code");
+			if(projectid == null || code == null) {
+				return gson.toJson(new Result(500, "projectid == null || code == null"));
+			}
 			String openid = openid(code);
-			handler.likeProject(projectid, openid);
+			String count = handler.likeProject(projectid, openid);
+			Result result = new Result(count);
+			return gson.toJson(result);
 		}
 		return gson.toJson(new Result(400, "unknown action"));
 	}
@@ -176,29 +181,36 @@ public class LikeService implements HTTPService, CommandProvider {
 					projectids.add(v);
 				});
 				projectids.forEach(projectid ->{
-					String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
-					String count = data().get(countProjectLikeKey);
-					int initialValue = 0;
-					if(count == null) {
-						data().put(countProjectLikeKey, "0");
-						logger.info("first time initialValue = 0");
-					} else {
-						initialValue = Integer.valueOf(count);
-					}
-					counters.put(projectid, new AtomicInteger(initialValue));
+					initLike(projectid);
 				});
 			} catch (Exception e) {
 				logger.error("fail to get counters from leveldb", e);
 			}
 		});
 	}
-	public void like(String project) {
-		AtomicInteger count = counters.get(project);
-		count.incrementAndGet();
+	public void initLike(String projectid) {
+		if(!counters.containsKey(projectid)) {
+			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
+			String count = data().get(countProjectLikeKey);
+			int initialValue = 0;
+			if(count == null) {
+				data().put(countProjectLikeKey, "0");
+				logger.info("first time initialValue = 0");
+			} else {
+				initialValue = Integer.valueOf(count);
+			}
+			counters.put(projectid, new AtomicInteger(initialValue));
+		}
 	}
-	public void dislike(String project) {
+	public int like(String project) {
+		initLike(project);
 		AtomicInteger count = counters.get(project);
-		count.decrementAndGet();
+		return count.incrementAndGet();
+	}
+	public int dislike(String project) {
+		initLike(project);
+		AtomicInteger count = counters.get(project);
+		return count.decrementAndGet();
 	}
 	public void deactivate() {
 		logger.info("[LikeService] deactivate.");

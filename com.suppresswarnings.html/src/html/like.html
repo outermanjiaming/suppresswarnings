@@ -320,7 +320,7 @@ function ajaxAddLike(id)
 	var rowId = id.split("_")[1];
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=like',
+		url: '/like.http?action=like&projectid='+rowId+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
@@ -343,9 +343,10 @@ function ajaxAddLike(id)
 
 function ajaxAddComment(id)
 {
+    var rowId = id.split("_")[1];
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=comment',
+		url: '/like.http?action=comment&projectid='+rawId+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
