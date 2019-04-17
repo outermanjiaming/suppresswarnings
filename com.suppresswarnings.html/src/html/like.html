@@ -429,13 +429,14 @@ function ajaxAddInvest(id)
 	$.prompt({
 	  text: "投资的金额用于鼓励更多用户点赞，完成之后可以得到广告收益分红",
 	  title: "投资金额",
-	  onOK: function(text) {
-		pay("Invest001", 1);
-	  },
+	  buttons: [
+	    { text: "1分钱", onClick: function(){ pay("Invest001", 1);} },
+	    { text: "1元钱", onClick: function(){ pay("Invest001", 100);} },
+	    { text: "取消", className: "default", onClick: function(){ console.log(3)} },
+	  ],
 	  onCancel: function() {
 		console.log("取消了");
-	  },
-	  input: 'Mr Noone'
+	  }
 	});
 }
 </script>
