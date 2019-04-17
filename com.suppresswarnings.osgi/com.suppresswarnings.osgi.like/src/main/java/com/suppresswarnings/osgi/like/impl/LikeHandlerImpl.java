@@ -98,19 +98,21 @@ public class LikeHandlerImpl implements LikeHandler {
 		if(like == null) {
 			//like
 			int count = service.like(projectid);
+			logger.info("likes = " + count + " for " + projectid);
 			service.data().put(projectLikeKey, time);
 			service.data().put(userLikeKey, time);
 			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time);
 			service.data().put(userLikedKey, projectid);
-			return "" + count;
+			return "1";
 		} else {
 			//dislike
 			int count = service.dislike(projectid);
+			logger.info("likes = " + count + " for " + projectid);
 			service.data().del(projectLikeKey);
 			service.data().del(userLikeKey);
 			String userDislikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Dislike", "Project", time);
 			service.data().put(userDislikedKey, projectid);
-			return "" + count;
+			return "0";
 		}
 	}
 

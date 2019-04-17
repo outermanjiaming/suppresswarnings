@@ -194,13 +194,20 @@ public class LikeService implements HTTPService, CommandProvider {
 			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
 			String count = data().get(countProjectLikeKey);
 			int initialValue = 0;
+			AtomicInteger value = new AtomicInteger(initialValue);
+			String head = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
+			data().page(head, head, null, Integer.MAX_VALUE, (k,v)->{
+				value.getAndIncrement();
+			});
 			if(count == null) {
-				data().put(countProjectLikeKey, "0");
-				logger.info("first time initialValue = 0");
+				data().put(countProjectLikeKey, "" + value.get());
+				logger.info("first time initialValue = " + value.get());
+				counters.put(projectid, value);
 			} else {
 				initialValue = Integer.valueOf(count);
+				counters.put(projectid, new AtomicInteger(Math.max(initialValue, value.get())));
 			}
-			counters.put(projectid, new AtomicInteger(initialValue));
+			
 		}
 	}
 	public int like(String project) {
