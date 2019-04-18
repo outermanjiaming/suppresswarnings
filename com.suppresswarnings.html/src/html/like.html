@@ -288,10 +288,10 @@ function ajaxAddLike(id)
 		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
 		dataType: 'json',
 		success: function(data){
+		    var ui = document.getElementById("likes_"+projectid);
+			var uiHtml = ui.innerHTML;
 			if(data.code == 0)
 			{
-				var ui = document.getElementById("likes_"+projectid);
-				var uiHtml = ui.innerHTML;
 				$(ui).html(uname+"，"+uiHtml);
 				$.toast("点赞成功", "text");
 			}
