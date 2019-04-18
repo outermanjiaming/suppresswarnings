@@ -29,7 +29,7 @@ var ItemUiHelper =
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
 					+'<div class="likes"><img src="asset/images/l.png"><span id="likes_'+itemData.projectid+'">'+this.getLikes(itemData.likes.entries)+'</span></div>'
-					+'<div id="comments_'+itemData.projectid+'" class="cmt-list">'+this.getComments(itemData.comments)+'</div>'
+					+'<div id="comments_'+itemData.projectid+'" class="cmt-list">'+this.getComments(itemData.comments.entries)+'</div>'
 				+'</div>'
 			  +'</div>';	
 	},
