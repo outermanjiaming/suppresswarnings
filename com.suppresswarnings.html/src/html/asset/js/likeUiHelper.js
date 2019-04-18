@@ -44,8 +44,8 @@ var ItemUiHelper =
 					+'<p>'+itemData.title+'</p>'
 					+'<p>'+this.getImgs(itemData.pictures)+'</p>'
 				+'</div>'
-				+'<span id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="glyphicon glyphicon-usd" style="padding-left:15px">投资</span>'
-				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" class="glyphicon glyphicon-share" style="padding-left:12px">分享</span>'
+				+'<span id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="glyphicon glyphicon-usd">投资</span>'
+				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" class="glyphicon glyphicon-share" style="padding-left:15px">分享</span>'
 				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" class="glyphicon glyphicon-comment" style="padding-left:12px">留言</span>'
 				+'<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="glyphicon glyphicon-heart-empty" style="padding-left:12px">点赞</span>'
 			+'</div>';	
