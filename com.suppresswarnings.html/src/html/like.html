@@ -108,10 +108,11 @@
 var state = "";
 var code = "";
 var projectid = "";
-var next = "null";
+var next = "";
 var locationUrl = "";
 var uname = "";
-var bridgeReady = 0
+var bridgeReady = 0;
+var dropload;
 
 $(function()
 {
@@ -139,7 +140,6 @@ $(function()
 		dataType: 'text',
 		success: function(data)
 		{
-		    next = "null"
 			console.log(data);
 			$.ajax({
 					type: 'GET',
@@ -151,7 +151,66 @@ $(function()
 						$("#avt").attr("src", data.extra.face);
 						next = data.data.next;
 						var result = addItems(data.data.entries);
-						$('#list').append(result);			
+						$('#list').append(result);
+						
+						dropload = $('.inner').dropload({
+					        domUp : {
+					            domClass   : 'dropload-up',
+					            domRefresh : '<div class="dropload-refresh">↓下拉刷新</div>',
+					            domUpdate  : '<div class="dropload-update">↑释放更新</div>',
+					            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>'
+					        },
+							
+					        domDown : {
+					            domClass   : 'dropload-down',
+					            domRefresh : '<div class="dropload-refresh">↑上拉加载更多</div>',
+					            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
+					            domNoData  : '<div class="dropload-noData">没有更多了</div>'
+					        },
+							
+					        loadUpFn : function(me)
+							{
+								setTimeout(function()
+								{
+									dropload.resetload();
+									window.location.href = locationUrl;
+								}, 1000 );
+					        },
+							
+					        loadDownFn : function(me)
+							{
+								if(next == "null")
+								{
+								    dropload.noData();
+									dropload.resetload();
+									return;
+								}
+								else
+								{
+									$.ajax({
+										type: 'GET',
+										url: '/like.http?action=next&projectid='+next+'&code='+code,
+										//url: '/index/project.php?projectid='+next,
+										dataType: 'json',
+										success: function(data){
+											next = data.data.next;
+											var result = addItems(data.data.entries);
+											setTimeout(function(){
+												$('#list').append(result);
+												dropload.resetload();
+											}, getDelayTime() );					
+										},
+										error: function(xhr, type){
+											alert('Ajax error!');
+											// 即使加载出错，也得重置
+											dropload.resetload();
+										}
+									});			
+								}
+					        }
+					    });
+						
+								
 					},
 					error: function(xhr, type){
 						alert('Ajax error!');
@@ -166,65 +225,6 @@ $(function()
 			dropload.resetload();
 		}
 		});
-		
-		
-		// dropload
-    var dropload = $('.inner').dropload({
-        domUp : {
-            domClass   : 'dropload-up',
-            domRefresh : '<div class="dropload-refresh">↓下拉刷新</div>',
-            domUpdate  : '<div class="dropload-update">↑释放更新</div>',
-            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>'
-        },
-		
-        domDown : {
-            domClass   : 'dropload-down',
-            domRefresh : '<div class="dropload-refresh">↑上拉加载更多</div>',
-            domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
-            domNoData  : '<div class="dropload-noData">没有更多了</div>'
-        },
-		
-        loadUpFn : function(me)
-		{
-			setTimeout(function()
-			{
-				dropload.resetload();
-				window.location.href = locationUrl;
-			}, 1000 );
-        },
-		
-        loadDownFn : function(me)
-		{
-			if(next == "null")
-			{
-			    dropload.noData();
-				dropload.resetload();
-				return;
-			}
-			else
-			{
-				$.ajax({
-					type: 'GET',
-					url: '/like.http?action=next&projectid='+next+'&code='+code,
-					//url: '/index/project.php?projectid='+next,
-					dataType: 'json',
-					success: function(data){
-						next = data.data.next;
-						var result = addItems(data.data.entries);
-						setTimeout(function(){
-							$('#list').append(result);
-							dropload.resetload();
-						}, getDelayTime() );					
-					},
-					error: function(xhr, type){
-						alert('Ajax error!');
-						// 即使加载出错，也得重置
-						dropload.resetload();
-					}
-				});			
-			}
-        }
-    });
 	}
 });
 
