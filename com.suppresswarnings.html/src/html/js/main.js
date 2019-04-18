@@ -61,31 +61,11 @@ function _animate(){
 			pathMove("xiaoshu","shugan",1000);
 			setTimeout(function(){
 				_mianMove("xiaoshu","yezi",500);
-				setTimeout(function(){_dashuAnimate()},1000);
 			},1000)
 		},800);
 	});
 }
-function _dashuAnimate(){
-	$("#xiaoshuSvg").fadeOut("slow");
-	setTimeout(function(){
-		  _mianMove("dashu","tudi",1400);
-		  setTimeout(function(){
-			  pathMove("dashu","shugan",2000);
-			  setTimeout(function(){
-				 _mianMove("dashu","yezi",100,30); 
-				 setTimeout(function(){
-					 pathMove("dashu","yun",2000);
-				 },2000);
-			  },2000);
-		  },500);
-	},100);
-}
-function _textMove(){
-	var svg = Snap("#dashu");
-    var snpg = svg.select("#font");
-	snpg.animate({"transform":"sclae(1) translate(241.7539,84.4229)"},1000,mina.backout);//圆圈圈动画
-}
+
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
 	var svg = Snap("#"+dom);
