@@ -394,7 +394,7 @@ function ajaxAddComment(id)
 	var rowId = id.replace("comment_", "");
 	var text = $('#weui_actionsheet textarea')[0].value;
 	hideActionSheet();
-	
+	$('#weui_actionsheet textarea')[0].value = "";
 	var ui = document.getElementById("comments_"+rowId);
 	var uiHtml = ui.innerHTML;
 	

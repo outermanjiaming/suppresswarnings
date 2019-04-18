@@ -120,7 +120,9 @@ public class LikeHandlerImpl implements LikeHandler {
 	@Override
 	public String commentProject(String comment, String projectid, String openid, String commentid) {
 		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " at " + commentid);
-		return "Project.Comment." + projectid + "." + openid + "." + System.currentTimeMillis();
+		String id = String.join(Const.delimiter, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
+		service.data().put(id, comment);
+		return id;
 	}
 
 }
