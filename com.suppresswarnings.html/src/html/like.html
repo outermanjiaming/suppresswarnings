@@ -150,10 +150,7 @@ $(function()
 						$("#avt").attr("src", data.extra.face);
 						next = data.data.next;
 						var result = addItems(data.data.entries);
-						setTimeout(function(){
-							$('#list').append(result);
-							dropload.resetload();
-						}, getDelayTime() );					
+						$('#list').append(result);			
 					},
 					error: function(xhr, type){
 						alert('Ajax error!');
