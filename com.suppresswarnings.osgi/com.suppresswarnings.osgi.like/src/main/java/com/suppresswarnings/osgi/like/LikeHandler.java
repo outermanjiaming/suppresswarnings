@@ -9,5 +9,5 @@ public interface LikeHandler {
 
 	public String likeProject(String projectid, String openid);
 	
-	public void commentProject(String projectid, String openid, String commentid);
+	public String commentProject(String comment, String projectid, String openid, String commentid);
 }

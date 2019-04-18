@@ -98,6 +98,18 @@ public class LikeService implements HTTPService, CommandProvider {
 			String count = handler.likeProject(projectid, openid);
 			Result result = new Result(count);
 			return gson.toJson(result);
+		} else if("comment".equals(action)) {
+			String projectid = parameter.getParameter("projectid");
+			String code = parameter.getParameter("code");
+			String comment = parameter.getParameter("comment");
+			if(projectid == null || code == null || comment == null) {
+				return gson.toJson(new Result(500, "projectid is null || code is null || comment is null"));
+			}
+			String openid = openid(code);
+			String commentid = parameter.getParameter("commentid");
+			String id = handler.commentProject(comment, projectid, openid, commentid);
+			Result result = new Result(id);
+			return gson.toJson(result);
 		}
 		return gson.toJson(new Result(400, "unknown action"));
 	}

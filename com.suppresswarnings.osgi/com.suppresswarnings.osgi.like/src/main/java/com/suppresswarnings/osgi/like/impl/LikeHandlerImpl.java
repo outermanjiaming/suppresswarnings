@@ -118,8 +118,9 @@ public class LikeHandlerImpl implements LikeHandler {
 	}
 
 	@Override
-	public void commentProject(String projectid, String openid, String commentid) {
+	public String commentProject(String comment, String projectid, String openid, String commentid) {
 		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " at " + commentid);
+		return "Project.Comment." + projectid + "." + openid + "." + System.currentTimeMillis();
 	}
 
 }
