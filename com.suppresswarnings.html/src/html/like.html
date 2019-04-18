@@ -293,8 +293,8 @@ $(function()
 			{
 				$.ajax({
 					type: 'GET',
-					//url: '/like.http?action=project&projectid='+next+'&code='+code,
-					url: '/index/project.php?projectid='+next,
+					url: '/like.http?action=next&projectid='+next+'&code='+code,
+					//url: '/index/project.php?projectid='+next,
 					dataType: 'json',
 					success: function(data){
 						next = data.data.next;
@@ -359,14 +359,14 @@ function addItems(listData)
 //添加点赞
 function ajaxAddLike(id)
 {
+    var projectid = id.replace("like_", "");
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=like',
+		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
 			{
-				var projectid = id.replace("like_", "");
 				var ui = document.getElementById("likes_"+projectid);
 				var uiHtml = ui.innerHTML;
 				ui.innerHTML = uname+"，"+ui.innerHTML;	
@@ -399,6 +399,11 @@ function ajaxAddComment(id)
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=comment',
+		data: {
+			projectid: rowId,
+			code: code,
+			comment: text
+		},
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
