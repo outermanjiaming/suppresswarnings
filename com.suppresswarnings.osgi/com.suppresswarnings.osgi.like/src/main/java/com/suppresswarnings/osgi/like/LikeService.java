@@ -96,6 +96,9 @@ public class LikeService implements HTTPService, CommandProvider {
 			}
 			String openid = openid(code);
 			String count = handler.likeProject(projectid, openid);
+			if(count == null) {
+				return gson.toJson(new Result(401, "like again"));
+			}
 			Result result = new Result(count);
 			return gson.toJson(result);
 		} else if("comment".equals(action)) {
@@ -106,8 +109,8 @@ public class LikeService implements HTTPService, CommandProvider {
 				return gson.toJson(new Result(500, "projectid is null || code is null || comment is null"));
 			}
 			String openid = openid(code);
-			String commentid = parameter.getParameter("commentid");
-			String id = handler.commentProject(comment, projectid, openid, commentid);
+			String name = parameter.getParameter("name");
+			String id = handler.commentProject(comment, projectid, openid, name);
 			Result result = new Result(id);
 			return gson.toJson(result);
 		}
@@ -234,6 +237,8 @@ public class LikeService implements HTTPService, CommandProvider {
 		AtomicInteger count = counters.get(project);
 		return count.incrementAndGet();
 	}
+	
+	@Deprecated
 	public int dislike(String project) {
 		initLike(project);
 		AtomicInteger count = counters.get(project);

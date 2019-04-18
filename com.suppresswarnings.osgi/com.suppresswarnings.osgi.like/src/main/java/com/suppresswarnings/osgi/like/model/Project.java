@@ -13,9 +13,16 @@ public class Project {
 	String pictures;
 	String bonusCent;
 	Page<KeyValue> likes;
+	Page<KeyValue> comments;
 	Page<KeyValue> forwards;
 	Page<KeyValue> invests;
 	
+	public Page<KeyValue> getComments() {
+		return comments;
+	}
+	public void setComments(Page<KeyValue> comments) {
+		this.comments = comments;
+	}
 	public String getFace() {
 		return face;
 	}

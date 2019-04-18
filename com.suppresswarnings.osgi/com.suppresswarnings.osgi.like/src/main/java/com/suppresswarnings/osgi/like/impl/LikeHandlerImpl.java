@@ -49,6 +49,7 @@ public class LikeHandlerImpl implements LikeHandler {
 			project.setPictures(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Pictures", project.getProjectid())));
 			project.setTime(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Time", project.getProjectid())));
 			project.setLikes(getLikes(s));
+			project.setComments(getComments(s));
 			data.add(project);
 			i++;
 		} while(i<projectids.size() - 1);
@@ -68,6 +69,29 @@ public class LikeHandlerImpl implements LikeHandler {
 		return page;
 	}
 	
+	public Page<KeyValue> getComments(String projectid) {
+		Page<KeyValue> page = new Page<KeyValue>();
+		List<KeyValue> data = new ArrayList<>();
+		try {
+			String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Comment", projectid);
+			int index = start.length() + Const.delimiter.length();
+			logger.info("comments: " + start);
+			service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+				String openid_Time = k.substring(index);
+				String openid = openid_Time.split("\\.")[0];
+				KeyValue kv = service.user(openid);
+				kv.value(v);
+				data.add(kv);
+			});
+			
+			page.setEntries(data);
+		} catch (Exception e) {
+			logger.error("fail to get comments", e);
+		}
+		
+		return page;
+	}
+
 	public Page<KeyValue> getLikes(String projectid) {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
@@ -96,31 +120,25 @@ public class LikeHandlerImpl implements LikeHandler {
 		
 		String like = service.data().get(userLikeKey);
 		logger.info("like project: " + userLikeKey + " => " + like);
-		if(like == null || "None".equals(like)) {
+		if(like == null) {
 			//like
 			int count = service.like(projectid);
 			logger.info("likes = " + count + " for " + projectid);
 			service.data().put(projectLikeKey, time);
 			service.data().put(userLikeKey, time);
-			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time);
-			service.data().put(userLikedKey, projectid);
 			return "1";
 		} else {
-			//dislike
-			int count = service.dislike(projectid);
-			logger.info("likes = " + count + " for " + projectid);
-			service.data().put(projectLikeKey, "None");
-			service.data().put(userLikeKey, "None");
-			String userDislikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Dislike", "Project", time);
-			service.data().put(userDislikedKey, projectid);
-			return "0";
+			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time, projectid);
+			service.data().put(userLikedKey, projectid);
+			return null;
 		}
 	}
 
 	@Override
-	public String commentProject(String comment, String projectid, String openid, String commentid) {
-		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " at " + commentid);
-		String id = String.join(Const.delimiter, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
+	public String commentProject(String comment, String projectid, String openid, String name) {
+		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " named " + name);
+		String id = String.join(Const.delimiter, Const.Version.V1, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
+		
 		service.data().put(id, comment);
 		return id;
 	}
