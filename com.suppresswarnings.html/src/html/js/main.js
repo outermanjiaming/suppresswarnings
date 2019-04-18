@@ -1,4 +1,5 @@
 var tWidth = tHeight = 0;
+var stopTime = 100;
 $(function() {
 	tWidth = $(window).width();
 	tHeight = $(window).height(); - 52;
