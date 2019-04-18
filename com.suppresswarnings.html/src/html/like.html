@@ -301,7 +301,7 @@ function addItems(listData)
 //添加点赞
 function ajaxAddLike(id)
 {
-    var projectid = id.replace("likes_", "");
+    var projectid = id.replace("like_", "");
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
