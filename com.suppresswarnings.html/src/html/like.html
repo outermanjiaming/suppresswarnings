@@ -438,7 +438,7 @@ function ajaxGetQrcode(id)
 			projectid:id,
 			ticket:code,
 			what:'likeshare'
-		}
+		},
 		dataType: 'json',
 		success: function(data){
 			var qrcode = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+data.ticket;
