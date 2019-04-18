@@ -44,9 +44,9 @@ var ItemUiHelper =
 					+'<p>'+itemData.title+'</p>'
 					+'<p>'+this.getImgs(itemData.pictures)+'</p>'
 				+'</div>'
-				+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
-				+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
-				+'<img id="comment_'+itemData.projectid+'" onclick="showActionSheet(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+				+'<p class="time"><img id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>'
+				+'<img id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
+				+'<img id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
 				+'<img id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">'
 			+'</div>';	
 	},

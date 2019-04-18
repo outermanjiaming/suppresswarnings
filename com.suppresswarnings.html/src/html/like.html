@@ -10,33 +10,71 @@
 	<link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
 	<link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
 	
-	<link rel="stylesheet" href="asset/plug-ins/popup_text/popup_text.css">
+	<link rel="stylesheet" href="asset/plug-ins/mask-widget/mask-widget.css">
+	
+	<style>
+	</style>
 </head>
 
 
 <body>
-
-<!-- 弹出层输入框 -->
-<div id="actionSheet_wrap">
-    <div class="weui_mask_transition" id="actionSheet_mask" style="display: none;"></div>
-    <div class="weui_actionsheet" id="weui_actionsheet">
-		<div class="weui-cell" style="overflow: auto;">
-			<div class="weui-cell__bd">
-			  <textarea class="weui-textarea" placeholder="请输入文本" rows="3"></textarea>
-			  <!--<div class="weui-textarea-counter"><span>0</span>/200</div>-->
-			</div>		
+<!-- 全屏消息层，显示转发的二维码 -->
+<div id="qrcode-mask" style="display: none;">
+	<div id="qrcode-mask-content">
+		<div id="black-action" style="top: 0px;">
+			<div id="hide-qrcode-mask" onclick="hideQrcodeMask()"></div>
 		</div>
-		<div class="button_sp_area" style="float:right; margin-right:15px;">
-        <button id="actionSheet_send" onclick="ajaxAddComment(this.attributes['val'].nodeValue);" class="weui-btn weui-btn_mini weui-btn_primary" style="margin-bottom:5px;">发送</button>
-        </div>			
-    </div>
+		<div style="text-align:center;"><img id="qrcode-img" src="https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=7bcb659c9745d688a302b5a29cf91a23/2934349b033b5bb571dc8c5133d3d539b600bc12.jpg" width="230"></div>
+		<div style="text-align:center; color:#FFFFFF; line-height:60px;">
+			<p>长按二维码转发</p>
+		</div>
+	</div>
 </div>
+
+
+ 
+<!-- 全屏消息层，显示投资页面 -->
+<div id="invest-mask" style="display: none;">
+	<div id="invest-mask-content">
+		<input type="hidden" id="invest-projectid" value="">
+		<div width="100%" style="height:40px;">
+			<div id="invest-mask-title" style="float:left; line-height:40px; margin-left:10px;">投资金额</div>
+			<div id="hide-invest-mask" onclick="hideinvestMask()"></div>
+		</div>
+		<div id="invest-mask-details" style="text-align:center; color:#FFFFFF; line-height:60px;">
+			<p style="font-size:15px;color:#999;">投资的金额用于鼓励更多用户点赞，完成之后得到广告收益分红</p>
+		</div>
+		<ul id="ul-invest" style="text-align:center;">
+			<li onclick="ajaxAddInvest(0.01)"><p>0.01元</p></li>
+			<li onclick="ajaxAddInvest(0.1)"><p>0.1元</p></li>
+			<li onclick="ajaxAddInvest(10)"><p>10元</p></li>
+			<li onclick="ajaxAddInvest(20)"><p>20元</p></li>
+		</ul>
+	</div>
+</div>
+ 
+ 
+
+<!-- 弹出层输入框，评论用 -->
+<div  id="text-input-mask" class="weui_mask_transition" style="display: none;"></div>
+<div id="text-input-content" class="weui_actionsheet" >
+	<div class="weui-cell" style="overflow: auto;">
+		<div class="weui-cell__bd">
+		  <textarea class="weui-textarea" placeholder="请输入文本" rows="3"></textarea>
+		  <!--<div class="weui-textarea-counter"><span>0</span>/200</div>-->
+		</div>		
+	</div>
+	<div class="button_sp_area" style="float:right; margin-right:15px;">
+	<button id="actionSheet_send" onclick="ajaxAddComment(this.attributes['val'].nodeValue);" class="weui-btn weui-btn_mini weui-btn_primary" style="margin-bottom:5px;">发送</button>
+	</div>			
+</div>
+
+
 
 
 <div id="main" class="main">
 
 	<div id ="inner" class="inner">
-	
 	
 		<header>
 			<img id="bg" src="asset/images/bg.jpg">
@@ -69,10 +107,10 @@
 						</p>
 					</div>
 					<!--投资-->
-					<p class="time"><img id="invest_1" onclick="ajaxAddInvest(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
+					<p class="time"><img id="invest_1" onclick="showinvestMask(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px"></p>
 					<!--转发,评论,点赞-->
-					<img id="transmit_1" onclick="ajaxAddTransmit(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
-					<img id="comment_1" onclick="showActionSheet(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="transmit_1" onclick="ajaxGetQrcode(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
+					<img id="comment_1" onclick="showTextInput(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
 					<img id="like_1" onclick="ajaxAddLike(this.id)" class="c-icon" src="asset/images/c.png" style="padding-left:10px">
 				</div>
 				<div class="triangle"></div>
@@ -120,22 +158,22 @@
 
 <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
 
-<script src="asset/plug-ins/popup_text/popup_text.js"></script>
+<script src="asset/plug-ins/mask-widget/mask-widget.js"></script>
 
 <script type="text/javascript">
-var state = "";
-var code = "";
-var projectid = "";
-var next = "";
-var locationUrl = "";
-var uname = "";
-var bridgeReady = 0
-
 $(function()
 {
 	var request = GetRequest();
+	var state = "";
+	var code = "";
+	var projectid = "";
+	var next = "";
+	var locationUrl = "";
+	var uname = "小明"
 	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
+
 	
+	/*
 	if(request.state == undefined)
 	{
 	   if(request.projectid == undefined)
@@ -152,61 +190,53 @@ $(function()
 		state = request.state
 		code = request.code
 		$.ajax({
-		type: 'GET',
-		url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
-		dataType: 'text',
-		success: function(data)
-		{
-			console.log(data);
-			
-			if(next == "null")
+			type: 'GET',
+			url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
+			dataType: 'text',
+			success: function(data)
 			{
-			    dropload.noData();
-				dropload.resetload();
-				return;
-			}
-			else
-			{
-				$.ajax({
-					type: 'GET',
-					url: '/like.http?action=project&projectid='+next+'&code='+code,
-					//url: '/index/project.php?projectid='+next,
-					dataType: 'json',
-					success: function(data){
-					    uname = data.extra.uname;
-						$("#user-name").text(data.extra.uname);
-						$("#avt").attr("src", data.extra.face);
-						next = data.data.next;
-						var result = addItems(data.data.entries);
-						setTimeout(function(){
-							$('#list').append(result);
+				console.log(data);
+				$("#user-name").text(data.extra.uname);
+				$("#avt").attr("src", data.extra.face);		
+				if(next == "null")
+				{
+					dropload.noData();
+					dropload.resetload();
+					return;
+				}
+				else
+				{
+					$.ajax({
+						type: 'GET',
+						//url: '/like.http?action=project&projectid='+next+'&code='+code,
+						url: '/index/project.php?projectid='+next,
+						dataType: 'json',
+						success: function(data){
+							$("#user-name").text(data.extra.uname);
+							$("#avt").attr("src", data.extra.face);
+							next = data.data.next;
+							var result = addItems(data.data.entries);
+							setTimeout(function(){
+								$('#list').append(result);
+								dropload.resetload();
+							}, getDelayTime() );					
+						},
+						error: function(xhr, type){
+							alert('Ajax error!');
+							// 即使加载出错，也得重置
 							dropload.resetload();
-						}, getDelayTime() );					
-					},
-					error: function(xhr, type){
-						alert('Ajax error!');
-						// 即使加载出错，也得重置
-						dropload.resetload();
-					}
-				});			
+						}
+					});			
+				}
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+				// 即使加载出错，也得重置
+				dropload.resetload();
 			}
-		},
-		error: function(xhr, type){
-			alert('Ajax error!');
-			// 即使加载出错，也得重置
-			dropload.resetload();
-		}
 		});
 	}
-	
-if (typeof WeixinJSBridge == "undefined"){
-	if( document.addEventListener ){
-	    document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
-	} else if (document.attachEvent){
-	    document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
-	    document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
-	}
-}
+	*/
 
 
 
@@ -247,8 +277,8 @@ if (typeof WeixinJSBridge == "undefined"){
 			{
 				$.ajax({
 					type: 'GET',
-					url: '/like.http?action=next&projectid='+next+'&code='+code,
-					//url: '/index/project.php?projectid='+next,
+					//url: '/like.http?action=project&projectid='+next+'&code='+code,
+					url: '/index/project.php?projectid='+next,
 					dataType: 'json',
 					success: function(data){
 						next = data.data.next;
@@ -299,32 +329,32 @@ function addItems(listData)
 	var items = '';
 	for(var i = 0; i < listData.length; i++)
 	{
-		items += ItemUiHelper.getItem(listData[i]);
+		
+		var exist = document.getElementById("likes_"+itemData.projectid);
+		if(exist == undefined)
+		{
+			items += ItemUiHelper.getItem(listData[i]);
+		}
 	}
 	return items;
 }
 
 
-
+//添加点赞
 function ajaxAddLike(id)
 {
-	var rowId = id.replace("like_", "");
-	var ui = document.getElementById("likes_"+rowId);
-	var uiHtml = ui.innerHTML;
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=like&projectid='+rowId+'&code='+code,
+		url: '/like.http?action=like',
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
 			{
+				var projectid = id.replace("like_", "");
+				var ui = document.getElementById("likes_"+projectid);
+				var uiHtml = ui.innerHTML;
+				ui.innerHTML = uname+"，"+ui.innerHTML;	
 				$.toast("操作成功", "text");
-			    if(data.data == "1") {
-			        $(ui).html(uname+"，"+uiHtml);	
-			    } else {
-			        $(ui).html(uiHtml.replace(uname+"，", ""));
-			    }
-				
 			}
 			else
 			{
@@ -332,115 +362,85 @@ function ajaxAddLike(id)
 			}
 		},
 		error: function(xhr, type){
-			alert('Ajax error!');
+			$.toast("Ajax error!", "text");
 		}
 	});
 }
 
-function pay(gid, amt) {
-  if(bridgeReady == 1) {
-	  console.log("lijiaming: bridgeReady = 1")
-    $.ajax({
-    url: "/wx.http?r=" + Math.random(),
-    data: {
-	    action : "prepay",
-	    random : code,
-	    ticket : code,
-	    goodsid: gid,
-	    amount : amt
-    },
-    success: function( result ) {
-      console.log('pay ok' + result)
-      
-      var prepay = JSON.parse(result)
-      
-      console.log('prepay.package = ' + prepay.package)
-      WeixinJSBridge.invoke(
-            'getBrandWCPayRequest', {
-               "appId": prepay.appId,
-               "timeStamp":prepay.timeStamp,
-               "nonceStr":prepay.nonceStr,
-               "package":prepay.package,
-               "signType":prepay.signType,
-               "paySign":prepay.paySign
-            },
-            function(res){
-              console.log('res.err_msg'+res.err_msg)
-              if(res.err_msg == "get_brand_wcpay_request:ok" ){
-                  console.log('finish success')
-				  $("#sampleData").html("恭喜，您已经支付成功！")
-				  location.href = "/user.html"
-            }
-      });
 
-    },
-    error: function( xhr, result, obj ) {
-      console.log("prepay err: " + obj )
-    }
-  })
-  } else {
-    $("#btnbuy").text("暂时无法支付")
-  }
-}
-
-function onBridgeOK(){
-  bridgeReady = 1
-}
-
-
-
+//添加评论
 function ajaxAddComment(id)
 {
-	var rowId = id.replace("comment_", "");
-	var text = $('#weui_actionsheet textarea')[0].value;
-	hideActionSheet();
-	$('#weui_actionsheet textarea')[0].value = "";
-	var ui = document.getElementById("comments_"+rowId);
-	var uiHtml = ui.innerHTML;
+	var textComment = $('#text-input-content textarea')[0];
+	if(textComment.value == "")
+	{
+		$.toast("输入不能为空", "text");
+		return;
+	}
+	hideTextInput();
 	
-	$.toast("操作成功", "text");
+
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=comment',
-		data: {
-			projectid: rowId,
-			code: code,
-			comment: text
-		},
 		dataType: 'json',
 		success: function(data){
-			console.log(data);
-			ui.innerHTML = "<p id=''><span>"+uname+"：</span>"+text+"</p>"+ui.innerHTML;	
-			$.toast("操作成功" + data.data, "text");
+			if(data.code == 0)
+			{
+				var projectid = id.replace("comment_", "");	
+				var ui = document.getElementById("comments_"+projectid);	
+				ui.innerHTML = "<p><span>"+uname+"：</span>"+textComment.value+"</p>"+ui.innerHTML;	
+				textComment.value = "";
+				$.toast("操作成功", "text");
+			}
+			else
+			{
+				$.toast("操作失败", "text");
+			}
 		},
 		error: function(xhr, type){
-			alert('Ajax error!');
+			$.toast("Ajax error!", "text");
 		}
 	});
 }
 
-var urlStart = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=";
 
-function ajaxAddTransmit(id)
+
+//获取转发二维码
+function ajaxGetQrcode(id)
 {
-
+	$.ajax({
+		type: 'POST',
+		url: '/like.http?action=getQrcode',
+		dataType: 'json',
+		success: function(data){
+			document.getElementById("qrcode-img").src="https://www.baidu.com/img/bd_logo1.png";
+			showQrcodeMask();
+		},
+		error: function(xhr, type){
+			$.toast("Ajax error!", "text");
+		}
+	});
+	showQrcodeMask();
 }
 
 
-
-function ajaxAddInvest(id)
+//添加投资
+function ajaxAddInvest(price)
 {
-	$.modal({
-	  text: "投资的金额会鼓励更多用户点赞，完成之后可以得到广告收益分红",
-	  title: "投资金额",
-	  buttons: [
-	    { text: "1分钱", onClick: function(){ pay("Invest001", 1);} },
-	    { text: "1元钱", onClick: function(){ pay("Invest100", 1);} },
-	    { text: "取消", className: "default", onClick: function(){ console.log(3)} },
-	  ],
-	  onCancel: function() {
-		console.log("取消了");
-	  }
+	var projectid = document.getElementById("invest-projectid").value;
+	
+	$.ajax({
+		type: 'POST',
+		url: '/like.http?action=invest',
+		dataType: 'json',
+		success: function(data){
+			$.toast("操作成功", "text");
+			hideinvestMask();
+		},
+		error: function(xhr, type){
+			$.toast("Ajax error!", "text");
+		}
 	});
 }
 </script>
