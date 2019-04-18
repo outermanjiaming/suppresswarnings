@@ -117,7 +117,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		String projectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid, openid);
 		String userLikeKey = String.join(Const.delimiter, Const.Version.V1, openid, "Like", "Project", projectid);
 		
-		String like = service.data().get(userLikeKey);
+		String like = service.data().get(projectLikeKey);
 		logger.info("like project: " + userLikeKey + " => " + like);
 		if(like == null) {
 			//like
@@ -125,7 +125,7 @@ public class LikeHandlerImpl implements LikeHandler {
 			logger.info("likes = " + count + " for " + projectid);
 			service.data().put(projectLikeKey, time);
 			service.data().put(userLikeKey, time);
-			return "1";
+			return "" + count;
 		} else {
 			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time, projectid);
 			service.data().put(userLikedKey, projectid);
