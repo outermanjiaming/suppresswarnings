@@ -164,7 +164,7 @@ header {
 
 #list li {
     line-height: 1.5;
-    border-top: 1px solid #e2e2e2;
+    border-bottom: 1px solid #e2e2e2;
     margin-top: 15px;
 	padding-top: 10px;
     padding-bottom: 15px
