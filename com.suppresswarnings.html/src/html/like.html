@@ -150,8 +150,7 @@ $(function()
 			{
 				$.ajax({
 					type: 'GET',
-					url: '/like.http?action=project&projectid='+next+'&code='+code,
-					//url: '/index/project.php?projectid='+next,
+					url: '/like.http?action=project&projectid='+state+'&code='+code,
 					dataType: 'json',
 					success: function(data){
 					    uname = data.extra.uname;
