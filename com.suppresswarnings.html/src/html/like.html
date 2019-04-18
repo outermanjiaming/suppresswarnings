@@ -298,6 +298,7 @@ function ajaxAddLike(id)
 			else
 			{
 				$(ui).html(uiHtml.replace(uname+"，", ""));
+				uiHtml = ui.innerHTML;
 				$(ui).html(uname+"，"+uiHtml);
 			}
 		},
