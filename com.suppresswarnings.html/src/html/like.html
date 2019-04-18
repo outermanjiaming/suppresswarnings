@@ -45,10 +45,10 @@
 			<p style="font-size:15px;color:#999;">投资的金额用于鼓励更多用户点赞，完成之后得到广告收益分红</p>
 		</div>
 		<ul id="ul-invest" style="text-align:center;">
-			<li onclick="ajaxAddInvest(0.01)"><p>0.01元</p></li>
-			<li onclick="ajaxAddInvest(0.1)"><p>0.1元</p></li>
-			<li onclick="ajaxAddInvest(10)"><p>10元</p></li>
-			<li onclick="ajaxAddInvest(20)"><p>20元</p></li>
+			<li onclick="ajaxAddInvest('Invest001')"><p>0.01元</p></li>
+			<li onclick="ajaxAddInvest('Invest010')"><p>0.1元</p></li>
+			<li onclick="ajaxAddInvest('Invest100')"><p>1元</p></li>
+			<li onclick="ajaxAddInvest('Invest10000')"><p>100元</p></li>
 		</ul>
 	</div>
 </div>
@@ -346,7 +346,7 @@ function addItems(listData)
 	for(var i = 0; i < listData.length; i++)
 	{
 		
-		var exist = document.getElementById("likes_"+itemData.projectid);
+		var exist = document.getElementById("likes_"+listData[i].projectid);
 		if(exist == undefined)
 		{
 			items += ItemUiHelper.getItem(listData[i]);
