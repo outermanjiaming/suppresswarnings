@@ -76,10 +76,6 @@ function _dashuAnimate(){
 				 _mianMove("dashu","yezi",100,30); 
 				 setTimeout(function(){
 					 pathMove("dashu","yun",2000);
-					 setTimeout(function(){
-						 
-						 setTimeout(function(){top._listMove();},stopTime/2);
-					 },2200);
 				 },2000);
 			  },2000);
 		  },500);
