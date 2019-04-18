@@ -139,16 +139,7 @@ $(function()
 		success: function(data)
 		{
 			console.log(data);
-			
-			if(next == "null")
-			{
-			    dropload.noData();
-				dropload.resetload();
-				return;
-			}
-			else
-			{
-				$.ajax({
+			$.ajax({
 					type: 'GET',
 					url: '/like.http?action=project&projectid='+state+'&code='+code,
 					dataType: 'json',
@@ -168,8 +159,7 @@ $(function()
 						// 即使加载出错，也得重置
 						dropload.resetload();
 					}
-				});			
-			}
+				});	
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
