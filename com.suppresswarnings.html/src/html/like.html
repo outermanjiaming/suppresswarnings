@@ -380,7 +380,7 @@ function ajaxGetQrcode(id)
 		url: '/wx.http?action=qrcode',
 		data: {
 		    random:Math.random(),
-			projectid:id,
+			projectid:projectid,
 			ticket:code,
 			what:'likeshare'
 		},

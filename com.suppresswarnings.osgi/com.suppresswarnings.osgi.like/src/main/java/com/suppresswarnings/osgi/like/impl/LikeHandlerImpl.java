@@ -75,7 +75,6 @@ public class LikeHandlerImpl implements LikeHandler {
 		try {
 			String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Comment", projectid);
 			int index = start.length() + Const.delimiter.length();
-			logger.info("comments: " + start);
 			service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
 				String openid_Time = k.substring(index);
 				String openid = openid_Time.split("\\.")[0];
