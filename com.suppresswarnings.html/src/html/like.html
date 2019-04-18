@@ -312,11 +312,11 @@ function ajaxAddLike(id)
 				var ui = document.getElementById("likes_"+projectid);
 				var uiHtml = ui.innerHTML;
 				ui.innerHTML = uname+"，"+ui.innerHTML;	
-				$.toast("操作成功", "text");
+				$.toast("点赞成功", "text");
 			}
 			else
 			{
-				$.toast("操作失败", "text");
+				$.toast("点赞失败", "text");
 			}
 		},
 		error: function(xhr, type){
