@@ -2,8 +2,7 @@ var tWidth = tHeight = 0;
 var stopTime = 100;
 $(function() {
 	tWidth = $(window).width();
-	tHeight = 321px;
-	var bi = 667 / (tWidth);
+	tHeight = 321;
 });
 $(document).ready(function(e) {
 	_initLogoSvg();
