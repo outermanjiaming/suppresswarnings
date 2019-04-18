@@ -431,6 +431,7 @@ function ajaxAddComment(id)
 //获取转发二维码
 function ajaxGetQrcode(id)
 {
+	var projectid = id.replace("transmit_", "");	
 	$.ajax({
 		type: 'POST',
 		url: '/wx.http?action=qrcode',
