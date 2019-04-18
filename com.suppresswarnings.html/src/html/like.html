@@ -432,10 +432,17 @@ function ajaxGetQrcode(id)
 {
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=getQrcode',
+		url: '/wx.http?action=qrcode',
+		data: {
+		    random:Math.random(),
+			projectid:id,
+			ticket:code,
+			what:'likeshare'
+		}
 		dataType: 'json',
 		success: function(data){
-			document.getElementById("qrcode-img").src="https://www.baidu.com/img/bd_logo1.png";
+			var qrcode = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+data.ticket;
+			document.getElementById("qrcode-img").src=qrcode;
 			showQrcodeMask();
 		},
 		error: function(xhr, type){
@@ -450,10 +457,8 @@ function ajaxGetQrcode(id)
 function ajaxAddInvest(price)
 {
 	var projectid = document.getElementById("invest-projectid").value;
-	$.toast("操作成功", "text");
-	hideinvestMask();
-	
-	pay("Invest001", projectid);
+	pay(price, projectid);
+	hideinvestMask();	
 }
 
 
