@@ -166,27 +166,9 @@ $(function()
 			dropload.resetload();
 		}
 		});
-	}
-	
-
-
-	
-	if (typeof WeixinJSBridge == "undefined"){
-		if( document.addEventListener ){
-			document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
-		} else if (document.attachEvent){
-			document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
-			document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
-		}
-	}
-
-
-
-
-
-
-
-    // dropload
+		
+		
+		// dropload
     var dropload = $('.inner').dropload({
         domUp : {
             domClass   : 'dropload-up',
@@ -215,6 +197,7 @@ $(function()
 		{
 			if(next == "null")
 			{
+			    dropload.noData();
 				dropload.resetload();
 				return;
 			}
@@ -242,7 +225,18 @@ $(function()
 			}
         }
     });
+	}
 });
+
+	
+	if (typeof WeixinJSBridge == "undefined"){
+		if( document.addEventListener ){
+			document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
+		} else if (document.attachEvent){
+			document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
+			document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
+		}
+	}
 
 
 
