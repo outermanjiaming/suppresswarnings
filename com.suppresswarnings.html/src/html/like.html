@@ -160,20 +160,21 @@
 
 <script src="asset/plug-ins/mask-widget/mask-widget.js"></script>
 
+	
 <script type="text/javascript">
+var state = "";
+var code = "";
+var projectid = "";
+var next = "";
+var locationUrl = "";
+var uname = "";
+var bridgeReady = 0
+
 $(function()
 {
 	var request = GetRequest();
-	var state = "";
-	var code = "";
-	var projectid = "";
-	var next = "";
-	var locationUrl = "";
-	var uname = "小明"
 	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
-
 	
-	/*
 	if(request.state == undefined)
 	{
 	   if(request.projectid == undefined)
@@ -190,53 +191,65 @@ $(function()
 		state = request.state
 		code = request.code
 		$.ajax({
-			type: 'GET',
-			url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
-			dataType: 'text',
-			success: function(data)
+		type: 'GET',
+		url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
+		dataType: 'text',
+		success: function(data)
+		{
+			console.log(data);
+			
+			if(next == "null")
 			{
-				console.log(data);
-				$("#user-name").text(data.extra.uname);
-				$("#avt").attr("src", data.extra.face);		
-				if(next == "null")
-				{
-					dropload.noData();
-					dropload.resetload();
-					return;
-				}
-				else
-				{
-					$.ajax({
-						type: 'GET',
-						//url: '/like.http?action=project&projectid='+next+'&code='+code,
-						url: '/index/project.php?projectid='+next,
-						dataType: 'json',
-						success: function(data){
-							$("#user-name").text(data.extra.uname);
-							$("#avt").attr("src", data.extra.face);
-							next = data.data.next;
-							var result = addItems(data.data.entries);
-							setTimeout(function(){
-								$('#list').append(result);
-								dropload.resetload();
-							}, getDelayTime() );					
-						},
-						error: function(xhr, type){
-							alert('Ajax error!');
-							// 即使加载出错，也得重置
-							dropload.resetload();
-						}
-					});			
-				}
-			},
-			error: function(xhr, type){
-				alert('Ajax error!');
-				// 即使加载出错，也得重置
+			    dropload.noData();
 				dropload.resetload();
+				return;
 			}
+			else
+			{
+				$.ajax({
+					type: 'GET',
+					url: '/like.http?action=project&projectid='+next+'&code='+code,
+					//url: '/index/project.php?projectid='+next,
+					dataType: 'json',
+					success: function(data){
+					    uname = data.extra.uname;
+						$("#user-name").text(data.extra.uname);
+						$("#avt").attr("src", data.extra.face);
+						next = data.data.next;
+						var result = addItems(data.data.entries);
+						setTimeout(function(){
+							$('#list').append(result);
+							dropload.resetload();
+						}, getDelayTime() );					
+					},
+					error: function(xhr, type){
+						alert('Ajax error!');
+						// 即使加载出错，也得重置
+						dropload.resetload();
+					}
+				});			
+			}
+		},
+		error: function(xhr, type){
+			alert('Ajax error!');
+			// 即使加载出错，也得重置
+			dropload.resetload();
+		}
 		});
 	}
-	*/
+	
+if (typeof WeixinJSBridge == "undefined"){
+	if( document.addEventListener ){
+	    document.addEventListener('WeixinJSBridgeReady', onBridgeOK, false);
+	} else if (document.attachEvent){
+	    document.attachEvent('WeixinJSBridgeReady', onBridgeOK); 
+	    document.attachEvent('onWeixinJSBridgeReady', onBridgeOK);
+	}
+}
+
+
+
+
 
 
 
