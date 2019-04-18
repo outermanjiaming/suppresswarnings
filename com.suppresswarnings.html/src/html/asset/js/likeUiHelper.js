@@ -29,7 +29,7 @@ var ItemUiHelper =
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
 					+'<div class="likes"><img src="asset/images/l.png"><span id="likes_'+itemData.projectid+'">'+this.getLikes(itemData.likes.entries)+'</span></div>'
-					+'<div id="comments_'+itemData.projectid+'" class="cmt-list">'+this.getComments()+'</div>'
+					+'<div id="comments_'+itemData.projectid+'" class="cmt-list">'+this.getComments(itemData.conments)+'</div>'
 				+'</div>'
 			  +'</div>';	
 	},
@@ -77,6 +77,7 @@ var ItemUiHelper =
 	getLikes: function(likeArr)
 	{
 		var likes = "";
+		if(likeArr == undefined) return likes;
 		for(var i=0; i<likeArr.length; ++i)
 		{
 			likes += likeArr[i].key+'，';
@@ -88,9 +89,14 @@ var ItemUiHelper =
 	
 	
 	
-	getComments: function()
+	getComments: function(conmentsArr)
 	{
-		var comments = '<p><span class="data-name">万虎科技~贾素杰</span>：</span>澳洲大堡礁，这边刚好是夏季，挺适合避寒的。</p><p><span class="data-name">万虎科技~贾素杰</span>：</span>澳洲大堡礁，这边刚好是夏季，挺适合避寒的。</p>';
+		var comments = "";
+		if(conmentsArr == undefined) return comments;
+		for(var i=0; i<conmentsArr.length; ++i)
+		{
+			comments += '<p><span>'+conmentsArr[i].key+'</span>：'+conmentsArr[i].value+'</p>';
+		}
 		return comments;
 	}
 };
