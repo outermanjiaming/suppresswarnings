@@ -1,7 +1,7 @@
 var tWidth = tHeight = 0;
 var stopTime = 100;
 $(function() {
-	tWidth = $(window).width();
+	tWidth = 543;
 	tHeight = 321;
 });
 $(document).ready(function(e) {
@@ -17,7 +17,7 @@ function _initLogoSvg() {
         Svg.attr({
             width: tWidth,
 			height:tHeight,
-			viewBox:"0,0,667,323"
+			viewBox:"0,0,543,321"
         });
 		Svg.selectAll("#tudi path,#shugan path").forEach(function(e, index) {
 			e.attr({"opacity":0});
@@ -27,31 +27,6 @@ function _initLogoSvg() {
 		});
     },
     document.getElementById("xiaoshuSvg"));
-	
-	//初始化大树
-    Snap.load("img/dashu.svg",
-    function(svg) {
-        this.appendChild(svg.node);
-        var Svg = Snap("#dashu");
-        Svg.attr({
-            width: tWidth,
-			height:tHeight,
-			viewBox:"0,0,667,323"
-        });
-		Svg.selectAll("#yezi path").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate(0,0)"});
-		});
-		Svg.selectAll("#font").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate("+tWidth/2+" "+tHeight/2+")"});
-		});
-		Svg.selectAll("#tudi path").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate(0,100)"});
-		});
-		Svg.selectAll("#yun path,#shugan path").forEach(function(e, index) {
-			e.attr({"opacity":0});
-		});
-    },
-    document.getElementById("dashuSvg"));
 }
 function _animate(){
 	Snap.load("img/xiaoshu.svg",
