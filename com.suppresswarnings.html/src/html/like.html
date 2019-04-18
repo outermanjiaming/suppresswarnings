@@ -387,6 +387,8 @@ function ajaxAddLike(id)
 //添加评论
 function ajaxAddComment(id)
 {
+	var projectid = id.replace("comment_", "");	
+	
 	var textComment = $('#text-input-content textarea')[0];
 	if(textComment.value == "")
 	{
@@ -400,7 +402,7 @@ function ajaxAddComment(id)
 		type: 'POST',
 		url: '/like.http?action=comment',
 		data: {
-			projectid: rowId,
+			projectid: projectid,
 			code: code,
 			comment: text
 		},
@@ -408,7 +410,6 @@ function ajaxAddComment(id)
 		success: function(data){
 			if(data.code == 0)
 			{
-				var projectid = id.replace("comment_", "");	
 				var ui = document.getElementById("comments_"+projectid);	
 				ui.innerHTML = "<p><span>"+uname+"：</span>"+textComment.value+"</p>"+ui.innerHTML;	
 				textComment.value = "";
