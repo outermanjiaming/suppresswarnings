@@ -77,7 +77,7 @@ function _dashuAnimate(){
 				 setTimeout(function(){
 					 pathMove("dashu","yun",2000);
 					 setTimeout(function(){
-						 _textMove();
+						 
 						 setTimeout(function(){top._listMove();},stopTime/2);
 					 },2200);
 				 },2000);
