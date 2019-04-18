@@ -397,22 +397,26 @@ function ajaxAddComment(id)
 	
 	var ui = document.getElementById("comments_"+rowId);
 	var uiHtml = ui.innerHTML;
-	ui.innerHTML = "<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>"+ui.innerHTML;	
+	
 	$.toast("操作成功", "text");
-	/*
 	$.ajax({
 		type: 'POST',
-		url: '/like.http?action=comment&projectid='+rowId+'&code='+code,
+		url: '/like.http?action=comment',
+		data: {
+			projectid: rowId,
+			code: code,
+			comment: text
+		},
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
+			ui.innerHTML = "<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>"+ui.innerHTML;	
 			$.toast("操作成功" + data.data, "text");
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
 		}
 	});
-	*/
 }
 
 

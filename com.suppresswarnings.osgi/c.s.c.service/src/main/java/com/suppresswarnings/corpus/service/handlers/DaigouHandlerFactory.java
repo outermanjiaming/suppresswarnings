@@ -17,7 +17,7 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 public class DaigouHandlerFactory {
 	static org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	
-	static RequestHandler manageOrders = (parameter, service) ->{
+	static RequestHandler manageOrders = (parameter, service, args) ->{
 		Gson gson = new Gson();
 		String state = parameter.getParameter("state");
 		if(state == null) {
@@ -44,7 +44,7 @@ public class DaigouHandlerFactory {
 		return gson.toJson(service.daigouHandler.listOrders(openId));
 	};
 	
-	static RequestHandler changeoOrderState = (parameter, service) ->{
+	static RequestHandler changeoOrderState = (parameter, service, args) ->{
 		String userid = parameter.getParameter("userid");
 		String orderid = parameter.getParameter("orderid");
 		String newstate = parameter.getParameter("newstate");
@@ -52,7 +52,7 @@ public class DaigouHandlerFactory {
 		return newstate;
 	};
 	
-	static RequestHandler index = (parameter, service) ->{
+	static RequestHandler index = (parameter, service, args) ->{
 		Gson gson = new Gson();
 		logger.info("[daigou] index");
 		String CODE = parameter.getParameter("ticket");

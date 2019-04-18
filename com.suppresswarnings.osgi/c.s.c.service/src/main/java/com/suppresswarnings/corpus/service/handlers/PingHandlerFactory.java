@@ -8,7 +8,7 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class PingHandlerFactory {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
-	static RequestHandler aiit = (param, service) ->{
+	static RequestHandler aiit = (param, service, args) ->{
 		String key = param.getParameter("token");
 		return service.aiiot.ping(key);
 	};

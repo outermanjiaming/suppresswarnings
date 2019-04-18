@@ -57,6 +57,7 @@ import com.suppresswarnings.corpus.service.daigou.Order;
 import com.suppresswarnings.corpus.service.game.Guard;
 import com.suppresswarnings.corpus.service.handlers.DaigouHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.PingHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.QRCodeHandlerFactory;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
@@ -894,6 +895,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String ip = parameter.getParameter(Parameter.COMMON_KEY_CLIENT_IP);
 		if("ping".equals(action)) {
 			return PingHandlerFactory.handle(parameter, this);
+		} else if("qrcode".equals(action)) {
+			return QRCodeHandlerFactory.handle(parameter, this);
 		} else if("managereports".equals(action)){
 			logger.info("[managereports] lijiaming");
 			String random = parameter.getParameter("random");

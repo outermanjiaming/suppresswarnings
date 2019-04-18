@@ -158,7 +158,12 @@ public class LikeService implements HTTPService, CommandProvider {
 		
 		return result.toString();  
 	}
-
+	public void writeLikes() {
+		counters.forEach((projectid,value) -> {
+			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
+			data().put(countProjectLikeKey, "" + value.get());
+		});
+	}
 	public void activate() {
 		logger.info("LikeService activate");
 		handler = new LikeHandlerImpl(this);
@@ -168,6 +173,8 @@ public class LikeService implements HTTPService, CommandProvider {
 			try {
 				logger.info("start to execute git pull");
 				gitpull();
+				logger.info("start to write likes");
+				writeLikes();
 			} catch (Exception e) {
 				logger.error("Fail to git pull", e);
 			}
@@ -193,7 +200,7 @@ public class LikeService implements HTTPService, CommandProvider {
 		if(!counters.containsKey(projectid)) {
 			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
 			String count = data().get(countProjectLikeKey);
-			int initialValue = 0;
+			int initialValue = 1;
 			AtomicInteger value = new AtomicInteger(initialValue);
 			String head = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
 			data().page(head, head, null, Integer.MAX_VALUE, (k,v)->{

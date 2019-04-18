@@ -27,7 +27,7 @@ public class LikeContext extends WXContext {
 			project.setProjectid(String.join(Const.delimiter, "Project", time(), openid()));
 			project.setBonusCent("1000");
 			project.setTime(time());
-			u.output("你正在创建点赞，集赞达到目标即可获得现金奖励，所有参与点赞者均有分红。\n\n请输入邀请点赞的宣传语：");
+			u.output("你正在创建点赞，集赞达到目标即可获得现金奖励，所有参与点赞者均有分红。\n\n请输入这一刻你的想法：");
 		}
 
 		@Override
