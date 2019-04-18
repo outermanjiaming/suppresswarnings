@@ -44,10 +44,10 @@ var ItemUiHelper =
 					+'<p>'+itemData.title+'</p>'
 					+'<p>'+this.getImgs(itemData.pictures)+'</p>'
 				+'</div>'
-				+'<p class="time"><span id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="c-icon glyphicon glyphicon-heart-empty" src="asset/images/c.png" style="padding-left:10px">投资</span></p>'
-				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" class="c-icon glyphicon glyphicon-heart-empty" src="asset/images/c.png" style="padding-left:10px">分享</span>'
-				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" class="c-icon glyphicon glyphicon-heart-empty" src="asset/images/c.png" style="padding-left:10px">留言</span>'
-				+'<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon glyphicon glyphicon-heart-empty" src="asset/images/c.png" style="padding-left:10px">点赞</span>'
+				+'<p class="time"><span id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="c-icon glyphicon glyphicon-usd">投资</span></p>'
+				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" class="c-icon glyphicon glyphicon-share">分享</span>'
+				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" class="c-icon glyphicon glyphicon-comment">留言</span>'
+				+'<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" class="c-icon glyphicon glyphicon-heart-empty">点赞</span>'
 			+'</div>';	
 	},
 	
