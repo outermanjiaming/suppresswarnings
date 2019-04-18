@@ -410,7 +410,7 @@ function ajaxAddComment(id)
 		dataType: 'json',
 		success: function(data){
 			console.log(data);
-			ui.innerHTML = "<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>"+ui.innerHTML;	
+			ui.innerHTML = "<p><span>"+uanem+"：</span>"+text+"</p>"+ui.innerHTML;	
 			$.toast("操作成功" + data.data, "text");
 		},
 		error: function(xhr, type){
