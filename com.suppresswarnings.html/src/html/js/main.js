@@ -1,8 +1,8 @@
 var tWidth = tHeight = 0;
 var stopTime = 100;
 $(function() {
-	tWidth = 543;
-	tHeight = 321;
+	tWidth = 100%;
+	tHeight = 50%;
 });
 $(document).ready(function(e) {
 	_initLogoSvg();
