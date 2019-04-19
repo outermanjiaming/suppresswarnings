@@ -1631,6 +1631,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return gson.toJson(goods);
 		} else if("notify".equals(action)) {
 			String postbody = parameter.getParameter(Parameter.POST_BODY);
+			logger.info("postbody = " + postbody);
 			Map<String, String> map = WXPayUtil.xmlToMap(postbody);
 			logger.info("notify map: " + map.toString());
 			WXPayConfig config = new WXPayConfigImpl();
@@ -1646,6 +1647,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String cashfee = map.get("cash_fee");
 			if("SUCCESS".equals(result)) {
 				if(goodid != null) {
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Paid", goodid, openid, orderid), "" + System.currentTimeMillis());
+					account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Paid", goodid, orderid), "" + System.currentTimeMillis());
 					String keyBossid = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodid, "Bossid");
 					String bossid = account().get(keyBossid);
 					double fee = Double.valueOf(cashfee) / 100;

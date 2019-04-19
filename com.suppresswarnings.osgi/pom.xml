@@ -52,6 +52,7 @@
       <module>c.s.c.service.daigou</module>
       <module>com.suppresswarnings.osgi.like</module>
       <module>c.s.c.service.like</module>
+      <module>com.suppresswarnings.osgi.notify</module>
   </modules>
   <dependencies>
   		<dependency>
