@@ -28,10 +28,17 @@ function _initLogoSvg() {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
 		Svg.selectAll("#githubtext").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate(0,0)"});
+			e.attr({"transform":"sclae(0) translate(200,0)"});
 		});
     },
     document.getElementById("xiaoshuSvg"));
+    
+    
+    Snap.load("img/logo.svg",
+    function(svg) {
+        this.appendChild(svg.node);
+    },
+    document.getElementById("logo"));
 }
 function _animate(){
 	Snap.load("img/xiaoshu.svg",
