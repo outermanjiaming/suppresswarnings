@@ -979,7 +979,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String msgSignature = parameter.getParameter("signature");
 			String timestamp = parameter.getParameter("timestamp");
 			String nonce = parameter.getParameter("nonce");
-			String sha1 = getSHA1(Const.WXmsg.secret[0], timestamp, nonce, "");
+			String sha1 = getSHA1(Const.WXmsg.secret[0], timestamp, nonce, "", "");
 			String openid =  parameter.getParameter("openid");
 			String echoStr = parameter.getParameter("echostr");
 			String token = parameter.getParameter("token");
@@ -1726,7 +1726,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String url = parameter.getParameter("url");
 			String de = URLDecoder.decode(url, "UTF-8");
 			logger.info("request = " + String.join(" - ", noncestr, jsapiTicket, timestamp, url, de));
-			String sha1 = getSHA1("noncestr=" + noncestr, "timestamp="+timestamp, "jsapi_ticket="+jsapiTicket, "url"+de);
+			String sha1 = getSHA1("jsapi_ticket="+jsapiTicket, "noncestr=" + noncestr, "timestamp="+timestamp, "url="+de, "&");
 			Map<String, Object> map = new HashMap<>();
 			map.put("nonceStr", noncestr);
 			map.put("timestamp", current);
@@ -2120,18 +2120,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return null;
 		}
 	}
-	public String getSHA1(String token, String timestamp, String nonce, String encrypt) {
+	public String getSHA1(String token, String timestamp, String nonce, String encrypt, String join) {
 		if(CheckUtil.anyNull(token, timestamp, nonce, encrypt)) {
 			return null;
 		}
 		try {
 			String[] array = new String[] { token, timestamp, nonce, encrypt };
-			StringBuffer sb = new StringBuffer();
 			Arrays.sort(array);
-			for (int i = 0; i < 4; i++) {
-				sb.append(array[i]);
-			}
-			String str = sb.toString();
+			String str = String.join(join, array);
+			logger.info("sha1 to be encrypt: " + str);
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
 			md.update(str.getBytes());
 			byte[] digest = md.digest();

@@ -201,25 +201,30 @@
 			    jsApiList: ['updateTimelineShareData']
 			});
 		
+			wx.ready(function () {
+			
+				wx.checkJsApi({
+				    jsApiList: ['updateTimelineShareData'],
+				    success: function(res) {
+				        console.log("check js api ok: " + res)
+				    }
+				});
+			
+			    wx.updateTimelineShareData({ 
+			        title: '进来点赞，先赞一个亿，一起分红',
+			        link: 'http://suppresswarnings.com/like.html',
+			        imgUrl: 'http://suppresswarnings.com/like.png',
+			        success: function () {
+			           console.log("===== lijiaming ====");
+			        }
+			    })
+			});
 		},
 		error: function(xhr, type){
 			alert('Ajax error!');
 			dropload.resetload();
 		}
 		});
-		
-		
-		wx.ready(function () {
-		    wx.updateTimelineShareData({ 
-		        title: '进来点赞，先赞一个亿，一起分红',
-		        link: 'http://suppresswarnings.com/like.html',
-		        imgUrl: 'http://suppresswarnings.com/like.png',
-		        success: function () {
-		           console.log("===== lijiaming ====");
-		        }
-		    })
-		});
-
 	</script>	
 </body>
 
