@@ -460,13 +460,13 @@ function onBridgeOK(){
 		    timestamp: data.timestamp,
 		    nonceStr: data.nonceStr,
 		    signature: data.signature,
-		    jsApiList: ['onMenuShareTimeline']
+		    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
 		});
 	
 		wx.ready(function () {
 		
 			wx.checkJsApi({
-			    jsApiList: ['onMenuShareTimeline'],
+			    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
 			    success: function(res) {
 			        console.log("check js api ok: " + res)
 			    }
