@@ -16,7 +16,7 @@ function _initLogoSvg() {
         Svg.attr({
             width: "100%",
 			height: "300",
-			viewBox:"0,0,650,300"
+			viewBox:"0,0,650,400"
         });
 		Svg.selectAll("#tudi path,#shugan path").forEach(function(e, index) {
 			e.attr({"opacity":0});
