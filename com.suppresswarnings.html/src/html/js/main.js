@@ -2,6 +2,10 @@ var stopTime = 100;
 $(document).ready(function(e) {
 	_initLogoSvg();
 	_animate();
+	
+	$("#like").click(function(){
+	    console.log(12345);
+	});
 });
 function _initLogoSvg() {
 	//初始化小树
