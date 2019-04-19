@@ -136,9 +136,9 @@ public class LikeContext extends WXContext {
 			logger.info(project.toString());
 			save();
 			WXnews news = new WXnews();
-			news.setTitle(project.getTitle());
-			news.setDescription("先赞一个亿！分享到朋友圈，开始集赞吧！进去点赞哦！完成集赞目标，即可获得最高100元现金奖励，所有参与点赞者均有份！");
-			news.setUrl("http://SuppressWarnings.com/like.html?projectid="+project.getProjectid());
+			news.setTitle("进来点赞，先赞一个亿，一起分红！");
+			news.setDescription("「"+project.getTitle()+"」进来点赞，先赞一个亿！所有参与点赞者均有分红！");
+			news.setUrl("http://SuppressWarnings.com/like.html#projectid="+project.getProjectid());
 			news.setPicUrl("http://SuppressWarnings.com/like.png");
 			String json = gson.toJson(news);
 			u.output("news://" + json);

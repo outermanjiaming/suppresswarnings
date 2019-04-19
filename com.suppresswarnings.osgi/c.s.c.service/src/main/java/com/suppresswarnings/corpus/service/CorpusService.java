@@ -9,6 +9,7 @@
  */
 package com.suppresswarnings.corpus.service;
 
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -428,10 +429,22 @@ public class CorpusService implements HTTPService, CommandProvider {
 					last = now;
 					String json = get.call();
 					AccessToken at = gson.fromJson(json, AccessToken.class);
+					String access = at.getAccess_token();
 					long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(7200);
-					int result = token().put(key, at.getAccess_token());
+					int result = token().put(key, access);
 					token().put(expireKey, "" + expireAt);
 					logger.info("[access token] refresh " + result + ", expires at " + at.getExpires_in());
+					
+					CallableGet jsget = new CallableGet("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi", access);
+					String jsjson = jsget.call();
+					@SuppressWarnings("unchecked")
+					Map<String, Object> map = gson.fromJson(jsjson, Map.class);
+					String jskey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Token", "973rozg");
+					String jsexpireKey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Expire", "973rozg");
+					String ticket = (String) map.get("ticket");
+					token().put(jskey, ticket);
+					token().put(jsexpireKey, "" + expireAt);
+					logger.info("[js access token] refresh " + jsjson);
 				} catch (Exception e) {
 					logger.error("[access token] Exception when refresh", e);
 				}
@@ -1704,6 +1717,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 			int random = new Random().nextInt(100000);
 			account().put(String.join(Const.delimiter, Const.Version.V1, "Notify", ""+current, ""+random, ip), postbody);
 			return SUCCESS;
+		} else if("jsapi_ticket".equals(action)) {
+			long current = System.currentTimeMillis()/1000;
+			int random = new Random().nextInt(100000);
+			String noncestr = current + "" +  random;
+			String jsapiTicket = jsAccessToken();
+			String timestamp = "" + current;
+			String url = parameter.getParameter("url");
+			String de = URLDecoder.decode(url, "UTF-8");
+			logger.info("request = " + String.join(" - ", noncestr, jsapiTicket, timestamp, url, de));
+			String sha1 = getSHA1("noncestr=" + noncestr, "timestamp="+timestamp, "jsapi_ticket="+jsapiTicket, "url"+de);
+			Map<String, Object> map = new HashMap<>();
+			map.put("nonceStr", noncestr);
+			map.put("timestamp", current);
+			map.put("signature", sha1);
+			return gson.toJson(map);
 		}
 		logger.info(parameter.toString());
 		logger.info("[Corpus] return success for any unknown action " + action + " from " + ip);
@@ -1726,6 +1754,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String mykey = String.join(Const.delimiter, Const.Version.V1, openid, "Code", "Activate", "Software");
 		account().put(mykey, code);
 		return code;
+	}
+	public String jsAccessToken() {
+		String key = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Token", "973rozg");
+		String ticket = token().get(key);
+		return ticket;
 	}
 	public JsAccessToken jsAccessToken(String code) {
 		String APPID = System.getProperty("wx.appid");
