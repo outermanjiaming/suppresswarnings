@@ -24,6 +24,9 @@ function _initLogoSvg() {
 		Svg.selectAll("#yezi path").forEach(function(e, index) {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
+		Svg.selectAll("#likeshare").forEach(function(e, index) {
+			e.attr({"transform":"sclae(0) translate(0,0)"});
+		});
     },
     document.getElementById("xiaoshuSvg"));
 }
@@ -35,11 +38,18 @@ function _animate(){
 			pathMove("xiaoshu","shugan",1000);
 			setTimeout(function(){
 				_mianMove("xiaoshu","yezi",500);
+				setTimeout(function(){
+				  _textMove();
+				},800);
 			},1000)
 		},800);
 	});
 }
-
+function _textMove(){
+	var svg = Snap("#xiaoshu");
+    var snpg = svg.select("#liketext");
+	snpg.animate({"transform":"sclae(1) translate(200.7539,184.4229)"},1000,mina.backout);
+}
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
 	var svg = Snap("#"+dom);
