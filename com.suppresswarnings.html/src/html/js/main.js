@@ -11,8 +11,8 @@ function _initLogoSvg() {
         var Svg = Snap("#xiaoshu");
         Svg.attr({
             width: "100%",
-			height: "50%",
-			viewBox:"0,0,500,321"
+			height: "300",
+			viewBox:"0,0,650,300"
         });
 		Svg.selectAll("#tudi path,#shugan path").forEach(function(e, index) {
 			e.attr({"opacity":0});
