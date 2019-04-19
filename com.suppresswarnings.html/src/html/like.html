@@ -293,12 +293,14 @@ function ajaxAddLike(id)
 			{
 				$(ui).html(uname+"，"+uiHtml);
 				$.toast("点赞成功", "text");
-				$("#"+id).removeClass("glyphicon-heart-empty");
-				$("#"+id).addClass("glyphicon-heart");
+				var heart = document.getElementById(id);
+				$(heart).removeClass("glyphicon-heart-empty");
+				$(heart).addClass("glyphicon-heart");
 			}
 			else
 			{
 				$(ui).html(uiHtml.replace(uname+"，", ""));
+				$.toast("点出去的赞，泼出去的水", "text");
 				uiHtml = ui.innerHTML;
 				$(ui).html('<font class="myself" style="color:black">' + uname + '，</font>' + uiHtml);
 			}
