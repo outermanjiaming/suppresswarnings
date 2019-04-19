@@ -103,7 +103,6 @@
 
 <script src="asset/plug-ins/mask-widget/mask-widget.js"></script>
 
-	
 <script type="text/javascript">
 var state = "";
 var code = "";
@@ -378,6 +377,8 @@ function ajaxGetQrcode(id)
 		}
 	});
 	showQrcodeMask();
+	
+	share(projectid);
 }
 
 
@@ -443,6 +444,61 @@ function onBridgeOK(){
   bridgeReady = 1
 }
 
+function share(project) {
+
+	wx.onMenuShareTimeline({ 
+        title: '进来点赞，先赞一个亿，一起分红',
+        link: 'http://suppresswarnings.com/like.html',
+        imgUrl: 'http://suppresswarnings.com/like.png',
+        success: function () {
+           console.log("===== lijiaming ====");
+        }
+    });
+
+}
+</script>
+
+<script src="js/jweixin-1.2.0.js"></script>
+<script>
+	var url = window.location.href;
+	
+	$.ajax({
+	type: 'GET',
+	url: '/wx.http?action=jsapi_ticket&url='+encodeURI(url),
+	dataType: 'json',
+	success: function(data) {
+		wx.config({
+		    debug: true,
+		    appId: 'wx41b262e9b9d8885e',
+		    timestamp: data.timestamp,
+		    nonceStr: data.nonceStr,
+		    signature: data.signature,
+		    jsApiList: ['onMenuShareTimeline']
+		});
+	
+		wx.ready(function () {
+		
+			wx.checkJsApi({
+			    jsApiList: ['onMenuShareTimeline'],
+			    success: function(res) {
+			        console.log("check js api ok: " + res)
+			    }
+			});
+		    wx.onMenuShareTimeline({ 
+		        title: '进来点赞，先赞一个亿，一起分红',
+		        link: 'http://suppresswarnings.com/like.html',
+		        imgUrl: 'http://suppresswarnings.com/like.png',
+		        success: function () {
+		           console.log("===== lijiaming ====");
+		        }
+		    });
+		});
+	},
+	error: function(xhr, type){
+		alert('Ajax error!');
+		dropload.resetload();
+	}
+	});
 </script>
 </body>
 </html>
