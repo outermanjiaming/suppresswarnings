@@ -470,7 +470,7 @@ function share(project) {
 	dataType: 'json',
 	success: function(data) {
 		wx.config({
-		    debug: true,
+		    debug: false,
 		    appId: 'wx41b262e9b9d8885e',
 		    timestamp: data.timestamp,
 		    nonceStr: data.nonceStr,

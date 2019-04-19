@@ -183,6 +183,49 @@
 	</div>
 	<script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
 	<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+	<script src="js/base64.js"></script>
+<script>
+	var url = window.location.href;
+	var en = base64encode(url);
+	console.log("====== ======= " + en);
+	$.ajax({
+		type: 'GET',
+		url: '/wx.http?action=jsapi_ticket&url='+en,
+		dataType: 'json',
+		success: function(data) {
+		wx.config({
+		    debug: false,
+		    appId: 'wx41b262e9b9d8885e',
+		    timestamp: data.timestamp,
+		    nonceStr: data.nonceStr,
+		    signature: data.signature,
+		    jsApiList: ['onMenuShareTimeline']
+		});
+	
+		wx.ready(function () {
+		
+			wx.checkJsApi({
+			    jsApiList: ['onMenuShareTimeline'],
+			    success: function(res) {
+			        console.log("check js api ok: " + res)
+			    }
+			});
+		    wx.onMenuShareTimeline({ 
+		        title: '进来点赞，先赞一个亿，一起分红',
+		        link: 'http://suppresswarnings.com/like.html',
+		        imgUrl: 'http://suppresswarnings.com/like.png',
+		        success: function () {
+		           console.log("===== lijiaming ====");
+		        }
+		    });
+		});
+	},
+	error: function(xhr, type){
+		alert('Ajax error!');
+		dropload.resetload();
+	}
+	});
+</script>
 </body>
 
 </html>
