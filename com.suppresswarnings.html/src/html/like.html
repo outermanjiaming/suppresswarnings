@@ -300,7 +300,7 @@ function ajaxAddLike(id)
 			else
 			{
 				$(ui).html(uiHtml.replace(uname+"，", ""));
-				$.toast("点出去的赞\n泼出去的水", "text");
+				$.toast("点出去的赞<br/>泼出去的水", "text");
 				uiHtml = ui.innerHTML;
 				$(ui).html('<font class="myself" style="color:black">' + uname + '，</font>' + uiHtml);
 			}
