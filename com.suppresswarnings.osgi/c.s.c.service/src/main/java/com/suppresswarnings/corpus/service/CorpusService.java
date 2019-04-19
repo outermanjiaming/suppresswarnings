@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -1724,7 +1725,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String jsapiTicket = jsAccessToken();
 			String timestamp = "" + current;
 			String url = parameter.getParameter("url");
-			String de = URLDecoder.decode(url, "UTF-8");
+			Base64.Decoder decoder = Base64.getDecoder();
+			String de = new String(decoder.decode(url.getBytes("UTF-8")), "UTF-8");
 			logger.info("request = " + String.join(" - ", noncestr, jsapiTicket, timestamp, url, de));
 			String sha1 = getSHA1("jsapi_ticket="+jsapiTicket, "noncestr=" + noncestr, "timestamp="+timestamp, "url="+de, "&");
 			Map<String, Object> map = new HashMap<>();
