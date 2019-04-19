@@ -298,7 +298,7 @@ function ajaxAddLike(id)
 			{
 				$(ui).html(uiHtml.replace(uname+"，", ""));
 				uiHtml = ui.innerHTML;
-				$(ui).html(uname+"，"+uiHtml);
+				$(ui).html('<font class="myself" style="color:black">' + uname + '，</font>' + uiHtml);
 			}
 		},
 		error: function(xhr, type){
