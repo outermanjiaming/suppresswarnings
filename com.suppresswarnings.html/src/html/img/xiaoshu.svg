@@ -7,6 +7,10 @@
     <a xlink:href="http://suppresswarnings.com/like.html" target="_blank">
      <text x="200" y="180" id="liketext" fill="orange" transform="matrix(1 0 0 1 200 180)" font-size="24">先赞一个亿</text>
     </a>
+    
+    <a xlink:href="http://github.com/outermanjiaming/suppresswarnings" target="_blank">
+     <text x="100" y="180" id="githubtext" fill="orange" transform="matrix(1 0 0 1 100 180)" font-size="24">开源项目</text>
+    </a>
    </g>
   <g id="tudi">
     <path fill="none" stroke="#2377C8" stroke-miterlimit="10" d="M49.44,324c40.421-31.391,118.683-36.551,170.284-25.37

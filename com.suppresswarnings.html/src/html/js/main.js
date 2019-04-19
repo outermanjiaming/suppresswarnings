@@ -27,6 +27,9 @@ function _initLogoSvg() {
 		Svg.selectAll("#liketext").forEach(function(e, index) {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
+		Svg.selectAll("#githubtext").forEach(function(e, index) {
+			e.attr({"transform":"sclae(0) translate(0,0)"});
+		});
     },
     document.getElementById("xiaoshuSvg"));
 }
@@ -47,8 +50,11 @@ function _animate(){
 }
 function _textMove(){
 	var svg = Snap("#xiaoshu");
-    var snpg = svg.select("#liketext");
-	snpg.animate({"transform":"sclae(1) translate(200,180)"},1000,mina.backout);
+    var like = svg.select("#liketext");
+	like.animate({"transform":"sclae(1) translate(200,180)"},1000,mina.backout);
+	
+	var github = svg.select("#githubtext");
+	github.animate({"transform":"sclae(1) translate(100,180)"},1000,mina.backout);
 }
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
