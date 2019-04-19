@@ -2,10 +2,6 @@ var stopTime = 100;
 $(document).ready(function(e) {
 	_initLogoSvg();
 	_animate();
-	
-	$("#like").click(function(){
-	    console.log(12345);
-	});
 });
 function _initLogoSvg() {
 	//初始化小树
@@ -15,7 +11,7 @@ function _initLogoSvg() {
         var Svg = Snap("#xiaoshu");
         Svg.attr({
             width: "100%",
-			height: "300",
+			height: "400",
 			viewBox:"0,0,650,400"
         });
 		Svg.selectAll("#tudi path,#shugan path").forEach(function(e, index) {
@@ -45,12 +41,12 @@ function _animate(){
     function(svg) {
 		pathMove("xiaoshu","tudi",800);
 		setTimeout(function(){
+				  _textMove();
+				},800);
+		setTimeout(function(){
 			pathMove("xiaoshu","shugan",1000);
 			setTimeout(function(){
 				_mianMove("xiaoshu","yezi",500);
-				setTimeout(function(){
-				  _textMove();
-				},800);
 			},1000)
 		},800);
 	});
