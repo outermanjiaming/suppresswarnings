@@ -479,6 +479,18 @@ function onBridgeOK(){
 		           console.log("===== lijiaming ====");
 		        }
 		    });
+		    
+		    wx.onMenuShareAppMessage({
+				title: '进来点赞，先赞一个亿，一起分红',
+				desc: '进来点赞，简单赚金币，100%可以提现。',
+				link: 'http://suppresswarnings.com/like.html',
+				imgUrl: 'http://suppresswarnings.com/like.png',
+				type: 'link',
+				dataUrl: '',
+				success: function () {
+					console.log("===== lijiaming ====");
+				}
+			});
 		});
 	},
 	error: function(xhr, type){
