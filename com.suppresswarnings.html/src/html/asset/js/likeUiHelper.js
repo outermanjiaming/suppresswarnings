@@ -26,7 +26,7 @@ var ItemUiHelper =
 	{
 	    var likes = this.getLikes(itemData.likes.entries, uname);
 	    var liked = 0;
-	    if(str.indexOf("color:pink") != -1) {
+	    if(likes.indexOf("color:pink") != -1) {
 	        liked = 1;
 	    }
 		return '<div class="po-right">'
