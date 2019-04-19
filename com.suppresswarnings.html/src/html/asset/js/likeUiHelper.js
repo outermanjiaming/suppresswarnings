@@ -1,11 +1,11 @@
 var ItemUiHelper = 
 {
-	getItem:function(itemData)
+	getItem:function(itemData, uname)
 	{
 		var item =
 			'<li class="item">'
 				+this.getPoLeft(itemData)
-				+this.getPoRight(itemData)
+				+this.getPoRight(itemData, uname)
 		   +'</li>'
 		return item;		
 	},
@@ -22,13 +22,18 @@ var ItemUiHelper =
 	
 	
 	
-	getPoRight: function(itemData)
+	getPoRight: function(itemData, uname)
 	{
+	    var likes = this.getLikes(itemData.likes.entries, uname);
+	    var liked = 0;
+	    if(str.indexOf("color:pink") != -1) {
+	        liked = 1;
+	    }
 		return '<div class="po-right">'
-				+this.getPoHd(itemData)
+				+this.getPoHd(itemData, liked)
 				+'<div class="triangle"></div>'
 				+'<div class="cmt-wrap">'
-					+'<div class="likes"><img src="asset/images/l.png"><span id="likes_'+itemData.projectid+'">'+this.getLikes(itemData.likes.entries)+'</span></div>'
+					+'<div class="likes"><img src="asset/images/l.png"><span id="likes_'+itemData.projectid+'">'+likes+'</span></div>'
 					+'<div id="comments_'+itemData.projectid+'" class="cmt-list">'+this.getComments(itemData.comments.entries)+'</div>'
 				+'</div>'
 			  +'</div>';	
@@ -36,8 +41,14 @@ var ItemUiHelper =
 	
 	
 	
-	getPoHd: function(itemData)
+	getPoHd: function(itemData, liked)
 	{
+	    var like = "";
+	    if(liked == 0){
+	        like = '<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-heart-empty">点赞</span>';
+	    } else {
+	        like = '<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-heart">点赞</span>'
+	    }
 		return '<div class="po-hd">'
 				+'<p class="po-name"><span class="data-name">'+itemData.uname+'</span></p>'
 				+'<div class="post">'
@@ -47,7 +58,7 @@ var ItemUiHelper =
 				+'<span id="invest_'+itemData.projectid+'" onclick="showinvestMask(this.id)" class="glyphicon glyphicon-usd">投资</span>'
 				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" style="padding-left:30px;" class="glyphicon glyphicon-share">分享</span>'
 				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-comment">留言</span>'
-				+'<span id="like_'+itemData.projectid+'" onclick="ajaxAddLike(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-heart-empty">点赞</span>'
+				+like
 			+'</div>';	
 	},
 	
@@ -74,15 +85,19 @@ var ItemUiHelper =
 
 
 	
-	getLikes: function(likeArr)
+	getLikes: function(likeArr, uname)
 	{
 		var likes = "";
 		if(likeArr == undefined) return likes;
 		for(var i=0; i<likeArr.length; ++i)
 		{
-			likes += likeArr[i].key+'，';
+		    if(uname == likeArr[i].key) {
+		        likes += '<font class="myself" style="color:pink">' + likeArr[i].key+'</font>，';
+		    } else {
+		        likes += likeArr[i].key+'，';
+		    }
+			
 		}
-		likes = likes.substr(0,likes.length-1);
 		likes += "...";
 		return likes;
 	},

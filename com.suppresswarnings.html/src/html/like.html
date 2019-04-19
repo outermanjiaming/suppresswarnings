@@ -271,7 +271,7 @@ function addItems(listData)
 		var exist = document.getElementById("likes_"+listData[i].projectid);
 		if(exist == undefined)
 		{
-			items += ItemUiHelper.getItem(listData[i]);
+			items += ItemUiHelper.getItem(listData[i], uname);
 		}
 	}
 	return items;
