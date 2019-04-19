@@ -461,10 +461,11 @@ function share(project) {
 <script src="js/jweixin-1.2.0.js"></script>
 <script>
 	var url = window.location.href;
-	
+	var en = encodeURI(url);
+	console.log("====== ======= " + en);
 	$.ajax({
 	type: 'GET',
-	url: '/wx.http?action=jsapi_ticket&url='+encodeURI(url),
+	url: '/wx.http?action=jsapi_ticket&url='+en,
 	dataType: 'json',
 	success: function(data) {
 		wx.config({
