@@ -24,7 +24,7 @@ function _initLogoSvg() {
 		Svg.selectAll("#yezi path").forEach(function(e, index) {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
-		Svg.selectAll("#likeshare").forEach(function(e, index) {
+		Svg.selectAll("#liketext").forEach(function(e, index) {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
     },
@@ -48,7 +48,7 @@ function _animate(){
 function _textMove(){
 	var svg = Snap("#xiaoshu");
     var snpg = svg.select("#liketext");
-	snpg.animate({"transform":"sclae(1) translate(200.7539,184.4229)"},1000,mina.backout);
+	snpg.animate({"transform":"sclae(1) translate(200,180)"},1000,mina.backout);
 }
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
