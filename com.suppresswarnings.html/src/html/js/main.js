@@ -1,9 +1,4 @@
-var tWidth = tHeight = 0;
 var stopTime = 100;
-$(function() {
-	tWidth = 100%;
-	tHeight = 50%;
-});
 $(document).ready(function(e) {
 	_initLogoSvg();
 	_animate();
@@ -15,9 +10,9 @@ function _initLogoSvg() {
         this.appendChild(svg.node);
         var Svg = Snap("#xiaoshu");
         Svg.attr({
-            width: tWidth,
-			height:tHeight,
-			viewBox:"0,0,543,321"
+            width: "100%",
+			height: "50%",
+			viewBox:"0,0,500,321"
         });
 		Svg.selectAll("#tudi path,#shugan path").forEach(function(e, index) {
 			e.attr({"opacity":0});
