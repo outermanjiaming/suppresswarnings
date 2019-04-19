@@ -293,6 +293,8 @@ function ajaxAddLike(id)
 			{
 				$(ui).html(uname+"，"+uiHtml);
 				$.toast("点赞成功", "text");
+				$("#"+id).removeClass("glyphicon-heart-empty");
+				$("#"+id).addClass("glyphicon-heart");
 			}
 			else
 			{
