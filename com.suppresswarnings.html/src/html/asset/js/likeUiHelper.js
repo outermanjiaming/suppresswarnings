@@ -26,7 +26,7 @@ var ItemUiHelper =
 	{
 	    var likes = this.getLikes(itemData.likes.entries, uname);
 	    var liked = 0;
-	    if(likes.indexOf("color:pink") != -1) {
+	    if(likes.indexOf("color:black") != -1) {
 	        liked = 1;
 	    }
 		return '<div class="po-right">'
@@ -92,7 +92,7 @@ var ItemUiHelper =
 		for(var i=0; i<likeArr.length; ++i)
 		{
 		    if(uname == likeArr[i].key) {
-		        likes += '<font class="myself" style="color:pink">' + likeArr[i].key+'</font>，';
+		        likes += '<font class="myself" style="color:black">' + likeArr[i].key+'，</font>';
 		    } else {
 		        likes += likeArr[i].key+'，';
 		    }
