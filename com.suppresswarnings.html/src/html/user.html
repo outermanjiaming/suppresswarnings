@@ -16,6 +16,9 @@
 		background: #f4f5f7;
 		color: #666;
 	}
+	a{
+	    text-decoration:none;
+	}
 	
 	.home-avatar {
 		/*text-align:center;
@@ -53,6 +56,12 @@
 		position: relative;
 		display: none;
 		overflow: auto;
+	}
+	
+	.divInfo p {
+		margin-left: 12px;
+	    margin-bottom: 2px;
+	    border-left: 4px solid #ccc;
 	}
 	
 	.aui-mine-box {
@@ -153,10 +162,12 @@
 					<p>我要提现</p>
 				</div>
 				<div class="aui-arrow">
-					<span>103分</span>
+					<span id="mycash">103分</span>
 				</div>
 			</a>
-			<div id="cashout" class="divInfo"></div>
+			<div id="cashout" class="divInfo">
+			
+			</div>
 			<div class="divHeight"></div>
 			
 			<a href="javascript:toggle('#mylike');" class="aui-flex b-line">
@@ -167,7 +178,23 @@
 					<span></span>
 				</div>
 			</a>
-			<div id="mylike" class="divInfo"></div>
+			<div id="mylike" class="divInfo">
+			    <p>晚上心血来潮发起点赞</p>
+			    <p>有朋友来点赞吗？</p>
+			    <p>这里有人在干啥，不会是开玩笑吗</p>
+			</div>
+			<a href="javascript:toggle('#myproject');" class="aui-flex b-line">
+				<div class="aui-flex-box">
+					<p>我的发布</p>
+				</div>
+				<div class="aui-arrow">
+					<span></span>
+				</div>
+			</a>
+			<div id="myproject" class="divInfo">
+			
+			
+			</div>
 			
 			<a href="javascript:toggle('#likeshare');" class="aui-flex b-line">
 				<div class="aui-flex-box">
@@ -177,7 +204,11 @@
 					<span></span>
 				</div>
 			</a>
-			<div id="likeshare" class="divInfo"></div>
+			<div id="likeshare" class="divInfo">
+			<p>1.进入点赞首页<a href="http://suppresswarnings.com/like.html">点击此处</a></p>
+			<p>2.看到喜欢的发布就点击分享按钮，或者直接点击右上角的...</p>
+			<p>3.选择分享给朋友，或者分享到朋友圈</p>
+			</div>
 			
 			<a href="javascript:toggle('#wantlike');" class="aui-flex b-line">
 				<div class="aui-flex-box">
@@ -187,7 +218,12 @@
 					<span>素朴网联</span>
 				</div>
 			</a>
-			<div id="wantlike" class="divInfo"></div>
+			<div id="wantlike" class="divInfo">
+			<p>1.进入微信公众号「素朴网联」，输入"我要发起点赞"></p>
+			<p>2.输入你想要发布的内容和想法</p>
+			<p>3.上传配图，输入"完成"即可获得分享链接</p>
+			<p>4.分享到朋友圈，或者发送给朋友们</p>
+			</div>
 		</div>
 	</div>
 	<script src="js/jquery.min.js"></script>
@@ -252,7 +288,7 @@
 </script>
 
 
-<footer class="footer navbar-fixed-bottom" style="z-index:-1;background:#5cb85c;">
+<footer class="footer navbar-fixed-bottom" style="z-index:-1;background:#f4f5f7;">
      <div class="copyright" style="text-align:center;width:100%;margin:0 auto; padding:5px 0;">
      <div><font size=1>
          © 2019 <a href="http://SuppressWarnings.com/" target="_blank"> 素朴网联 </a> All Rights Reserved
