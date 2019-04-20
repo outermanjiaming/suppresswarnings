@@ -53,6 +53,8 @@
       <module>com.suppresswarnings.osgi.like</module>
       <module>c.s.c.service.like</module>
       <module>com.suppresswarnings.osgi.notify</module>
+      <module>c.s.c.service.cashout</module>
+      <module>c.s.c.service.likeshare</module>
   </modules>
   <dependencies>
   		<dependency>

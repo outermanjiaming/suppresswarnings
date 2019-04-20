@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Likeshare
+Bundle-SymbolicName: c.s.c.service.likeshare
+Bundle-Version: 1.0.0.osgi
+Export-Package: com.suppresswarnings.corpus.service.likeshare
+Import-Package: com.google.gson;version="2.6.2",
+ com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service,
+ com.suppresswarnings.corpus.service.wx,
+ com.suppresswarnings.osgi.leveldb,
+ org.slf4j;version="1.7.2"
+Service-Component: OSGI-INF/component.xml

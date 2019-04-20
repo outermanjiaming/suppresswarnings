@@ -15,6 +15,7 @@ public class QRCodeHandlerFactory {
 		String accessToken = service.accessToken("like share");
 		String qrScene = "T_Like_Share$" + projectid + "$" + openid;
 		service.account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", qrScene), qrScene);
+		service.setGlobalCommand(qrScene, "我要分享点赞", openid, "" + System.currentTimeMillis());
 		return service.qrCode(accessToken, 120, "QR_STR_SCENE", qrScene);
 	};
 	public static String handle(Parameter parameter, CorpusService service) {

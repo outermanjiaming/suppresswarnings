@@ -9,7 +9,6 @@
  */
 package com.suppresswarnings.corpus.service;
 
-import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,9 +54,9 @@ import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
 import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
-import com.suppresswarnings.corpus.service.daigou.Order;
 import com.suppresswarnings.corpus.service.game.Guard;
 import com.suppresswarnings.corpus.service.handlers.DaigouHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.NotifyHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.PingHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.QRCodeHandlerFactory;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
@@ -1588,6 +1587,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String randEnd = random.substring(random.length() - 4);
 			long current = System.currentTimeMillis(); 
 			String orderid = type + current + openIdEnd + randEnd;
+			
+			String projectid = parameter.getParameter("projectid");
+			if(projectid != null && projectid.length() > 5) {
+				account().put(String.join(Const.delimiter, Const.Version.V1, "Orderid", "Projectid", orderid), projectid);
+			}
+			
 			String clientip = ip.split(",")[0];
 			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", amount:" + amount);
 			try {
@@ -1644,80 +1649,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			goods.put("username", user.getNickname());
 			return gson.toJson(goods);
 		} else if("notify".equals(action)) {
-			String postbody = parameter.getParameter(Parameter.POST_BODY);
-			logger.info("postbody = " + postbody);
-			Map<String, String> map = WXPayUtil.xmlToMap(postbody);
-			logger.info("notify map: " + map.toString());
-			WXPayConfig config = new WXPayConfigImpl();
-			WXPay wxPay = new WXPay(config);
-			String check = wxPay.sign(map, SignType.HMACSHA256);
-			String sign = map.get("sign");
-			boolean equal = check.equals(sign);
-			logger.info("[corpus] lijiaming: equal = " + equal + "\ncheck = " + check + "\nsign=" + sign);
-			String goodid = map.get("attach");
-			String orderid = map.get("out_trade_no");
-			String openid = map.get("openid");
-			String result = map.get("result_code");
-			String cashfee = map.get("cash_fee");
-			if("SUCCESS".equals(result)) {
-				if(goodid != null) {
-					account().put(String.join(Const.delimiter, Const.Version.V1, "Paid", goodid, openid, orderid), "" + System.currentTimeMillis());
-					account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Paid", goodid, orderid), "" + System.currentTimeMillis());
-					String keyBossid = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodid, "Bossid");
-					String bossid = account().get(keyBossid);
-					double fee = Double.valueOf(cashfee) / 100;
-					if(bossid != null) {
-						atUser(bossid, "收款成功：" + fee + "元");
-					} else {
-						logger.info("[notify] bossid is null, orderid: " + orderid);
-					}
-				}
-				atUser(openid, "您已支付成功。\n谢谢您的信任！");
-			} else {
-				atUser(openid, "支付失败。\n稍后再试！");
-			}
-			String transactionid = map.get("transaction_id");
-			String goodsid = map.get("attach");
-			
-			if(orderid.startsWith("DG")) {
-				if("SUCCESS".equals(result)) {
-					daigouHandler.updateOrderState(orderid, openid, Order.State.Paid);
-					daigouHandler.afterPaidAtAgentAndUser(orderid, openid);
-				} else {
-					daigouHandler.updateOrderState(orderid, openid, Order.State.Failed);
-				}
-			} else {
-				String keyState = String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State");
-				String oldState = account().get(keyState);
-				String newState = "Fail";
-				if("SUCCESS".equals(result)) {
-					newState = "Paid";
-					if(orderid.startsWith("Auth")) {
-						String paidKey = String.join(Const.delimiter, Const.Version.V1, "Paid", goodsid, openid);
-						account().put(paidKey, newState);
-						//authorize 
-						if(goodsid != null) {
-							String authKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Auth", goodsid, openid);
-							String value = System.currentTimeMillis() + "." + orderid;
-							account().put(authKey, value);
-							logger.info("[notify] lijiaming: authorize " + openid + " with " + goodsid + ", orderid: " + orderid);
-						}					
-					} else if(orderid.startsWith("Software")) {
-						String code = generateActivateCode(openid);
-						atUser(openid, code);
-					}
-				} else {
-					logger.error("[notify] 支付失败！" + map);
-				}
-				logger.info("[notify] new state: " + newState + ", old state: " + oldState + ", openid: " + openid + ", orderid: " + orderid + ", transactionid: " + transactionid);
-				account().put(keyState, newState);
-				account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Transactionid"), transactionid);
-				account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Notify"), postbody);
-			}
-			long current = System.currentTimeMillis();
-			int random = new Random().nextInt(100000);
-			account().put(String.join(Const.delimiter, Const.Version.V1, "Notify", ""+current, ""+random, ip), postbody);
-			return SUCCESS;
+			NotifyHandlerFactory.handle(parameter, this);
 		} else if("jsapi_ticket".equals(action)) {
 			long current = System.currentTimeMillis()/1000;
 			int random = new Random().nextInt(100000);
