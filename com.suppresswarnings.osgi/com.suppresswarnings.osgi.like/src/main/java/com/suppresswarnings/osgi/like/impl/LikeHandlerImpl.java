@@ -191,7 +191,7 @@ public class LikeHandlerImpl implements LikeHandler {
 			likeids.add(v);
 		});
 		likeids.forEach(project -> {
-			String title = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Title", project));
+			String title = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project));
 			KeyValue p = new KeyValue(project, title);
 			likes.add(p);
 		});
