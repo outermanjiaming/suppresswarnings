@@ -1,6 +1,8 @@
 package com.suppresswarnings.osgi.like.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import com.suppresswarnings.osgi.like.LikeHandler;
 import com.suppresswarnings.osgi.like.LikeService;
 import com.suppresswarnings.osgi.like.model.Page;
 import com.suppresswarnings.osgi.like.model.Project;
+import com.suppresswarnings.osgi.like.model.User;
 
 public class LikeHandlerImpl implements LikeHandler {
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
@@ -115,8 +118,8 @@ public class LikeHandlerImpl implements LikeHandler {
 	public String likeProject(String projectid, String openid) {
 		String time = "" + System.currentTimeMillis();
 		String projectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "Like", projectid, openid);
-		String userLikeKey = String.join(Const.delimiter, Const.Version.V2, openid, "Like", "Project", projectid);
-		
+		String userLikeKey = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Like", projectid);
+		service.account().put(userLikeKey, projectid);
 		String like = service.data().get(projectLikeKey);
 		logger.info("like project: " + userLikeKey + " => " + like);
 		if(like == null) {
@@ -127,7 +130,7 @@ public class LikeHandlerImpl implements LikeHandler {
 			service.data().put(userLikeKey, time);
 			return "" + count;
 		} else {
-			String userLikedKey = String.join(Const.delimiter, Const.Version.V2, openid, "Love", "Project", time, projectid);
+			String userLikedKey = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Love", time, projectid);
 			service.data().put(userLikedKey, projectid);
 			return null;
 		}
@@ -136,10 +139,85 @@ public class LikeHandlerImpl implements LikeHandler {
 	@Override
 	public String commentProject(String comment, String projectid, String openid, String name) {
 		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " named " + name);
+		String commented = String.join(Const.delimiter, Const.Version.V2, openid, "Projectid", "Comment", projectid);
 		String id = String.join(Const.delimiter, Const.Version.V2, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
-		
+		String my = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Comment", projectid, "" + System.currentTimeMillis());
 		service.data().put(id, comment);
+		service.data().put(my, comment);
+		service.account().put(commented, projectid);
 		return id;
+	}
+
+	@Override
+	public User myself(String openid) {
+		User user = new User();
+		user.setOpenid(openid);
+		KeyValue kv = service.user(openid);
+		user.setUname(kv.key());
+		user.setFace(kv.value());
+		List<KeyValue> projects = new ArrayList<>();
+		List<String> projectids = new ArrayList<>();
+		String start = String.join(Const.delimiter, Const.Version.V2, openid, "Projectid");
+		service.account().page(start, start, null, 1000, (k,v) ->{
+			projectids.add(v);
+		});
+		projectids.forEach(project -> {
+			String title = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project));
+			KeyValue p = new KeyValue(project, title);
+			projects.add(p);
+		});
+		user.setProjects(projects);
+		
+		List<KeyValue> comments = new ArrayList<>();
+		List<String> commentids = new ArrayList<>();
+		start = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Comment");
+		service.account().page(start, start, null, 1000, (k,v) ->{
+			commentids.add(v);
+		});
+		commentids.forEach(project -> {
+			String head = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Comment", project);
+			service.data().page(head, head, null, 100, (k,v) ->{
+				KeyValue p = new KeyValue(project, v);
+				comments.add(p);
+			});
+			
+		});
+		user.setComments(comments);
+		
+		List<KeyValue> likes = new ArrayList<>();
+		List<String> likeids = new ArrayList<>();
+		start = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Like");
+		service.account().page(start, start, null, 1000, (k,v) ->{
+			likeids.add(v);
+		});
+		likeids.forEach(project -> {
+			String title = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Title", project));
+			KeyValue p = new KeyValue(project, title);
+			likes.add(p);
+		});
+		user.setLikes(likes);
+		
+		List<KeyValue> cashouts = new ArrayList<>();
+		String requesting = service.account().get(String.join(Const.delimiter, Const.Version.V2, openid, "Cashout", "Requesting"));
+		start = String.join(Const.delimiter, Const.Version.V2, openid, "Cashout", "Request");
+		service.account().page(start, start, null, 1000, (k,v) ->{
+			try {
+				Long time = Long.valueOf(v);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss发起申请提现");
+				String date = sdf.format(new Date(time));
+				if(v.equals(requesting)) {
+					KeyValue cashout = new KeyValue(date, "正在审核...");
+					cashouts.add(cashout);
+				} else {
+					KeyValue cashout = new KeyValue(date, "提现完成");
+					cashouts.add(cashout);
+				}
+			} catch (Exception e) {
+				logger.error("Cashout Request log error");
+			}
+		});
+		user.setCashouts(cashouts);
+		return user;
 	}
 
 }

@@ -27,6 +27,7 @@ import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.like.impl.LikeHandlerImpl;
 import com.suppresswarnings.osgi.like.model.Page;
 import com.suppresswarnings.osgi.like.model.Result;
+import com.suppresswarnings.osgi.like.model.User;
 import com.suppresswarnings.osgi.like.model.Project;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
@@ -112,6 +113,12 @@ public class LikeService implements HTTPService, CommandProvider {
 			String name = parameter.getParameter("name");
 			String id = handler.commentProject(comment, projectid, openid, name);
 			Result result = new Result(id);
+			return gson.toJson(result);
+		} else if("user".equals(action)) {
+			String code = parameter.getParameter("code");
+			String openid = openid(code);
+			User user = handler.myself(openid);
+			Result result = new Result(user);
 			return gson.toJson(result);
 		}
 		return gson.toJson(new Result(400, "unknown action"));
