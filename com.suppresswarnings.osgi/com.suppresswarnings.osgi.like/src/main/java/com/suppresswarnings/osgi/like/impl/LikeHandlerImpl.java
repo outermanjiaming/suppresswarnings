@@ -24,8 +24,8 @@ public class LikeHandlerImpl implements LikeHandler {
 		if(first || projectid == null || projectid.length() < 1) {
 			projectid = "Project";
 		}
-		String head = String.join(Const.delimiter, Const.Version.V1, "Projectid");
-		String start = String.join(Const.delimiter, Const.Version.V1, "Projectid", projectid);
+		String head = String.join(Const.delimiter, Const.Version.V2, "Projectid");
+		String start = String.join(Const.delimiter, Const.Version.V2, "Projectid", projectid);
 		List<String> projectids = new ArrayList<>();
 		logger.info("start = " + start);
 		service.account().page(head, start, null, n, (k,v) ->{
@@ -39,15 +39,15 @@ public class LikeHandlerImpl implements LikeHandler {
 			String s = projectids.get(i);
 			Project project = new Project();
 			project.setProjectid(s);
-			String userid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Openid", project.getProjectid()));
-			project.setTitle(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Title", project.getProjectid())));
-			project.setBonusCent(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "BonusCent", project.getProjectid())));
+			String userid = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Openid", project.getProjectid()));
+			project.setTitle(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project.getProjectid())));
+			project.setBonusCent(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "BonusCent", project.getProjectid())));
 			project.setOpenid(userid);
 			KeyValue kv = service.user(userid);
 			project.setUname(kv.key());
 			project.setFace(kv.value());
-			project.setPictures(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Pictures", project.getProjectid())));
-			project.setTime(service.account().get(String.join(Const.delimiter, Const.Version.V1, "Project", "Time", project.getProjectid())));
+			project.setPictures(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Pictures", project.getProjectid())));
+			project.setTime(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Time", project.getProjectid())));
 			project.setLikes(getLikes(s));
 			project.setComments(getComments(s));
 			data.add(project);
@@ -73,7 +73,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
 		try {
-			String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Comment", projectid);
+			String start = String.join(Const.delimiter, Const.Version.V2, "Project", "Comment", projectid);
 			int index = start.length() + Const.delimiter.length();
 			service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
 				String openid_Time = k.substring(index);
@@ -95,7 +95,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
 		try {
-			String start = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
+			String start = String.join(Const.delimiter, Const.Version.V2, "Project", "Like", projectid);
 			int index = start.length() + Const.delimiter.length();
 			service.data().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
 				String openid = k.substring(index);
@@ -114,8 +114,8 @@ public class LikeHandlerImpl implements LikeHandler {
 	@Override
 	public String likeProject(String projectid, String openid) {
 		String time = "" + System.currentTimeMillis();
-		String projectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid, openid);
-		String userLikeKey = String.join(Const.delimiter, Const.Version.V1, openid, "Like", "Project", projectid);
+		String projectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "Like", projectid, openid);
+		String userLikeKey = String.join(Const.delimiter, Const.Version.V2, openid, "Like", "Project", projectid);
 		
 		String like = service.data().get(projectLikeKey);
 		logger.info("like project: " + userLikeKey + " => " + like);
@@ -127,7 +127,7 @@ public class LikeHandlerImpl implements LikeHandler {
 			service.data().put(userLikeKey, time);
 			return "" + count;
 		} else {
-			String userLikedKey = String.join(Const.delimiter, Const.Version.V1, openid, "Liked", "Project", time, projectid);
+			String userLikedKey = String.join(Const.delimiter, Const.Version.V2, openid, "Love", "Project", time, projectid);
 			service.data().put(userLikedKey, projectid);
 			return null;
 		}
@@ -136,7 +136,7 @@ public class LikeHandlerImpl implements LikeHandler {
 	@Override
 	public String commentProject(String comment, String projectid, String openid, String name) {
 		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " named " + name);
-		String id = String.join(Const.delimiter, Const.Version.V1, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
+		String id = String.join(Const.delimiter, Const.Version.V2, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
 		
 		service.data().put(id, comment);
 		return id;

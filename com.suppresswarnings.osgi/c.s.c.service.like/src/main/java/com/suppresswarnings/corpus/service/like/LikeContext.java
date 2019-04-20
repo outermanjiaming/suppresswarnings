@@ -163,13 +163,13 @@ public class LikeContext extends WXContext {
 	
 	
 	public void save() {
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, "Projectid", project.getProjectid()), project.getProjectid());
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, "Project", "Openid", project.getProjectid()), project.getOpenid());
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, "Project", "Title", project.getProjectid()), project.getTitle());
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, "Project", "Pictures", project.getProjectid()), project.getPictures());
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, "Project", "BonusCent", project.getProjectid()), project.getBonusCent());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Projectid", project.getProjectid()), project.getProjectid());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Openid", project.getProjectid()), project.getOpenid());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project.getProjectid()), project.getTitle());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Pictures", project.getProjectid()), project.getPictures());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "BonusCent", project.getProjectid()), project.getBonusCent());
 		
-		content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Projectid", project.getProjectid()), project.getProjectid());
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Projectid", project.getProjectid()), project.getProjectid());
 	}
 	
 	public LikeContext(String wxid, String openid, CorpusService ctx) {

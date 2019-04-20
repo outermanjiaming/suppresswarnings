@@ -175,7 +175,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	}
 	public void writeLikes() {
 		counters.forEach((projectid,value) -> {
-			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
+			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "LikeCount", projectid);
 			data().put(countProjectLikeKey, "" + value.get());
 		});
 	}
@@ -196,8 +196,8 @@ public class LikeService implements HTTPService, CommandProvider {
 		}, 3, 10, TimeUnit.SECONDS);
 		service.execute(() ->{
 			try {
-				String head = String.join(Const.delimiter, Const.Version.V1, "Projectid");
-				String start = String.join(Const.delimiter, Const.Version.V1, "Projectid", "Project");
+				String head = String.join(Const.delimiter, Const.Version.V2, "Projectid");
+				String start = String.join(Const.delimiter, Const.Version.V2, "Projectid", "Project");
 				List<String> projectids = new ArrayList<>();
 				logger.info("start = " + start);
 				account().page(head, start, null, Integer.MAX_VALUE, (k,v) ->{
@@ -213,11 +213,11 @@ public class LikeService implements HTTPService, CommandProvider {
 	}
 	public void initLike(String projectid) {
 		if(!counters.containsKey(projectid)) {
-			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V1, "Project", "LikeCount", projectid);
+			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "LikeCount", projectid);
 			String count = data().get(countProjectLikeKey);
 			int initialValue = 1;
 			AtomicInteger value = new AtomicInteger(initialValue);
-			String head = String.join(Const.delimiter, Const.Version.V1, "Project", "Like", projectid);
+			String head = String.join(Const.delimiter, Const.Version.V2, "Project", "Like", projectid);
 			data().page(head, head, null, Integer.MAX_VALUE, (k,v)->{
 				value.getAndIncrement();
 			});

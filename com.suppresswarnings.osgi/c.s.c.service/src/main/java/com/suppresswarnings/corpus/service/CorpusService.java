@@ -1909,10 +1909,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(users.containsKey(openid)) {
 			WXuser user = getWXuserByOpenId(openid);
 			logger.info("[user online] already online: " + user.toString());
+		} else {
+			WXuser user = getWXuserByOpenId(openid);
+			users.put(openid, user);
+			logger.info("[user online] new online: " + user.toString());
 		}
-		WXuser user = getWXuserByOpenId(openid);
-		users.put(openid, user);
-		logger.info("[user online] new online: " + user.toString());
 	}
 	public String globalCommand(String sceneOrCommand) {
 		String nowCommandKey = String.join(Const.delimiter, "Setting", "Global", "Command", sceneOrCommand.toLowerCase());
@@ -1950,26 +1951,26 @@ public class CorpusService implements HTTPService, CommandProvider {
 				user = gson.fromJson(json, WXuser.class);
 				account().put(userKey, json);
 			} catch (Exception e) {
-				logger.error("[WXContext] fail to get user info: " + openId, e);
+				logger.error("[corpus] fail to get user info: " + openId, e);
 			}
 		} else {
 			logger.info("[corpus] getWXuserByOpenId using exist json: " + json);
 			user = gson.fromJson(json, WXuser.class);
 			if(user.getSubscribe() == 0) {
-				logger.info("[Corpus] get WXuser info: " + openId);
+				logger.info("[corpus] get WXuser info: " + openId);
 				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
 				try {
 					json = get.call();
 					user = gson.fromJson(json, WXuser.class);
 				} catch (Exception e) {
-					logger.error("[WXContext] fail to get user info: " + openId, e);
+					logger.error("[corpus] fail to get user info: " + openId, e);
 				}
 			}
 			account().put(userKey, json);
 		}
 		
 		if(user == null) {
-			logger.info("[WXContext] fail to get user info: use default");
+			logger.info("[corpus] fail to get user info: use default");
 			user = new WXuser();
 			user.setSubscribe(0);
 			user.setOpenid(openId);
