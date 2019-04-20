@@ -22,7 +22,12 @@ public class LikeShareContext extends WXContext {
 			WXnews news = new WXnews();
 			news.setTitle("进来点赞，先赞一个亿，一起分红！");
 			news.setDescription("「分享点赞可以分红」进来点赞，先赞一个亿！所有参与点赞者均有分红！");
-			news.setUrl("http://SuppressWarnings.com/like.html");
+			if(t.startsWith("SCAN_")) {
+				String qrScene = t.substring("SCAN_".length());
+				news.setUrl("http://SuppressWarnings.com/like.html?state="+qrScene);
+			} else {
+				news.setUrl("http://SuppressWarnings.com/like.html");
+			}
 			news.setPicUrl("http://SuppressWarnings.com/like.png");
 			String json = gson.toJson(news);
 			u.output("news://" + json);

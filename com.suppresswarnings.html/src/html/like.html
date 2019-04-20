@@ -118,13 +118,13 @@ $(function()
 	var request = GetRequest();
 	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
 	
-	if(request.state == undefined)
+	if(request.code == undefined)
 	{
-	   if(request.projectid == undefined)
+	   if(request.state == undefined)
 	   {
 		 projectid = "";
 	   } else {
-		 projectid = request.projectid
+		 projectid = request.state
 	   }
 	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
 	   window.location.href = locationUrl;
@@ -476,7 +476,7 @@ function onBridgeOK(){
 			    }
 			});
 		    wx.onMenuShareTimeline({ 
-		        title: '进来点赞，先赞一个亿，一起分红',
+		        title: '进来帮我点赞，先赞一个亿，一起分红',
 		        link: 'http://suppresswarnings.com/like.html',
 		        imgUrl: 'http://suppresswarnings.com/like.png',
 		        success: function () {
@@ -485,8 +485,8 @@ function onBridgeOK(){
 		    });
 		    
 		    wx.onMenuShareAppMessage({
-				title: '进来点赞，先赞一个亿，一起分红',
-				desc: '进来点赞就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
+				title: '进来帮我点赞，先赞一个亿，一起分红',
+				desc: '进来帮我点赞就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
 				link: 'http://suppresswarnings.com/like.html',
 				imgUrl: 'http://suppresswarnings.com/like.png',
 				success: function () {

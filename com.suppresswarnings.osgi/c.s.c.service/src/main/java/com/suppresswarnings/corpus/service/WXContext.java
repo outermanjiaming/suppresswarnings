@@ -140,7 +140,7 @@ public class WXContext extends Context<CorpusService> {
 				u.output("稍等，我现在还没有准备好！");
 			}
 			if(exit(t, "exit()")) {
-				u.output("上一阶段对话已经结束。");
+				u.output("不聊算了～");
 				u.content().forgetIt(openid());
 				//TODO bugfixed
 				return;
@@ -324,7 +324,7 @@ public class WXContext extends Context<CorpusService> {
 	
 	@Override
 	public State<Context<CorpusService>> exit() {
-		content().sendTxtTo("close " + getClass().getSimpleName(), "感谢您使用本次服务，下次再聊！", openid());
+		content().sendTxtTo("close " + getClass().getSimpleName(), "先这样吧，我们下次再聊！", openid());
 		return init;
 	}
 	public void state(State<Context<CorpusService>> state) {
