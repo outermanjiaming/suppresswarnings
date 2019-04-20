@@ -5,11 +5,11 @@
 	 width="100%" height="400px" viewBox="0 0 650 400" enable-background="new 0 0 650 400" xml:space="preserve">
    <g id="like">
     <a xlink:href="http://suppresswarnings.com/like.html" target="_blank">
-     <text x="200" y="180" id="liketext" fill="orange" transform="matrix(1 0 0 1 200 180)" font-size="24">先赞一个亿</text>
+     <text x="200" y="180" id="liketext" fill="red" transform="matrix(1 0 0 1 200 180)" font-size="24">先赞一个亿</text>
     </a>
     
     <a xlink:href="http://github.com/outermanjiaming/suppresswarnings" target="_blank">
-     <text x="100" y="180" id="githubtext" fill="orange" transform="matrix(1 0 0 1 100 180)" font-size="24">开源项目</text>
+     <text x="50" y="180" id="githubtext" fill="pink" transform="matrix(1 0 0 1 50 180)" font-size="24">开源项目</text>
     </a>
    </g>
   <g id="tudi">

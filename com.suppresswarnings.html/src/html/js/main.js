@@ -57,7 +57,7 @@ function _textMove(){
 	like.animate({"transform":"sclae(1) translate(200,180)"},1000,mina.backout);
 	
 	var github = svg.select("#githubtext");
-	github.animate({"transform":"sclae(1) translate(100,180)"},1000,mina.backout);
+	github.animate({"transform":"sclae(1) translate(50,180)"},1000,mina.backout);
 }
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
