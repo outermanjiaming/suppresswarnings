@@ -155,8 +155,8 @@
 </head>
 <body>
 	<div class="home-avatar">
-			<img src="http://suppresswarnings.com/suppresswarnings.jpg" alt="">
-			<span>素朴网联</span>
+			<img id="face" src="http://suppresswarnings.com/suppresswarnings.jpg" alt="">
+			<span id="uname">素朴网联</span>
 	</div>
 </div>
 	<div class="aui-mine-box">
@@ -170,7 +170,7 @@
 					<p>我要提现</p>
 				</div>
 				<div class="aui-arrow">
-					<span id="mycash">103分</span>
+					<span id="mycash"></span>
 				</div>
 			</a>
 			<div id="cashout" class="divInfo">
@@ -178,7 +178,6 @@
 				<p> <img style="width:120px;height:120px;" src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=gQGs8DwAAAAAAAAAAS5odHRwOi8vd2VpeGluLnFxLmNvbS9xLzAyRDdIdHdhZUZkY2wxMDAwMGcwN20AAgQqI7tcAwQAAAAA"/></p>
 				<p>1.在公众号「素朴网联」输入"我要提现"</p>
 				<p> 以下是你的提现记录： </p>
-			
 			
 			
 			</div>
@@ -197,6 +196,21 @@
 			    
 			    
 			</div>
+			
+			<a href="javascript:toggle('#mycomment');" class="aui-flex b-line">
+				<div class="aui-flex-box">
+					<p>我的评论</p>
+				</div>
+				<div class="aui-arrow">
+					<span></span>
+				</div>
+			</a>
+			<div id="mycomment" class="divInfo">
+			    
+			    
+			    
+			</div>
+			
 			<a href="javascript:toggle('#myproject');" class="aui-flex b-line">
 				<div class="aui-flex-box">
 					<p>我的发布</p>
@@ -348,6 +362,12 @@ $(function()
 					    
 						if(data.code == 0) {
 							console.log(data.data);
+							
+							$("#face").attr("src", data.data.face);
+							$("#uname").html(data.data.uname);
+							
+							var mycash = 0;
+							
 							var divProj = $("#myproject");
 							var projects = data.data.projects;
 							for(var i=0;i<projects.length;i++){
@@ -362,12 +382,26 @@ $(function()
 							var divLike = $("#mylike");
 							var likes = data.data.likes;
 							for(var i=0;i<likes.length;i++){
+							    mycash ++;
 							    var like = likes[i];
 							    var idx = i + 1;
 							    divLike.append("<p><a href='http://suppresswarnings.com/like.html?state=" + like.key + "'>" + idx + ". " + like.value + "</a></p>");
 							}
 							if(likes.length == 0) {
 							    divLike.append("<p>1.你点赞的内容显示在这里(目前你还没有点赞)</p>");
+							}
+							
+							
+							var divComnt = $("#mycomment");
+							var comments = data.data.comments;
+							for(var i=0;i<comments.length;i++){
+							    mycash ++;
+							    var comment = comments[i];
+							    var idx = i + 1;
+							    divComnt.append("<p><a href='http://suppresswarnings.com/like.html?state=" + comment.key + "'>" + idx + ". " + comment.value + "</a></p>");
+							}
+							if(comments.length == 0) {
+							    divComnt.append("<p>1.你评论的内容显示在这里(目前你还没有评论)</p>");
 							}
 							
 							var divCash = $("#cashout");
@@ -380,6 +414,7 @@ $(function()
 							if(cashs.length == 0) {
 							    divCash.append("<p>（目前你还没有提现）</p>");
 							}
+							$("#mycash").html(mycash + "分");
 							
 						}
 					},

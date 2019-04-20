@@ -139,7 +139,7 @@ public class LikeHandlerImpl implements LikeHandler {
 	@Override
 	public String commentProject(String comment, String projectid, String openid, String name) {
 		logger.info("( Just ) comment on project: " + projectid + " by openid: " + openid + " named " + name);
-		String commented = String.join(Const.delimiter, Const.Version.V2, openid, "Projectid", "Comment", projectid);
+		String commented = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Comment", projectid);
 		String id = String.join(Const.delimiter, Const.Version.V2, "Project", "Comment", projectid, openid, "" + System.currentTimeMillis());
 		String my = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Comment", projectid, "" + System.currentTimeMillis());
 		service.data().put(id, comment);
@@ -198,7 +198,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		user.setLikes(likes);
 		
 		List<KeyValue> cashouts = new ArrayList<>();
-		String requesting = service.account().get(String.join(Const.delimiter, Const.Version.V2, openid, "Cashout", "Requesting"));
+		String requesting = service.account().get(String.join(Const.delimiter, Const.Version.V2, openid, "Requesting", "Cashout"));
 		start = String.join(Const.delimiter, Const.Version.V2, openid, "Cashout", "Request");
 		service.account().page(start, start, null, 1000, (k,v) ->{
 			try {

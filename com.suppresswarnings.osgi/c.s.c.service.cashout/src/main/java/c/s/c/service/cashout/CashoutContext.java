@@ -21,15 +21,15 @@ public class CashoutContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			String key = String.join(Const.delimiter, Const.Version.V1, openid(), "Cashout", "Requesting");
+			String key = String.join(Const.delimiter, Const.Version.V2, openid(), "Requesting", "Cashout");
 			String requesting = u.content().account().get(key);
 			if(requesting == null || "Done".equals(requesting)) {
 				//ok
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
 				String hourly = sdf.format(new Date());
 				u.content().account().put(key, time());
-				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Cashout", "Request", hourly, time(), openid()), openid());
-				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Cashout", "Request", hourly), time());
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V2, "Cashout", "Request", hourly, time(), openid()), openid());
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Cashout", "Request", hourly), time());
 				u.output("恭喜你，提现请求已经发出，财务部门正在审核，预计24小时内审核到账");
 			} else {
 				//is doing
