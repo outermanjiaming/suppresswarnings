@@ -182,9 +182,9 @@
 				</div>
 			</a>
 			<div id="mylike" class="divInfo">
-			    <p>1.晚上心血来潮发起点赞</p>
-			    <p>2.有朋友来点赞吗？</p>
-			    <p>3.这里有人在干啥，不会是开玩笑吗</p>
+			    
+			    
+			    
 			</div>
 			<a href="javascript:toggle('#myproject');" class="aui-flex b-line">
 				<div class="aui-flex-box">
@@ -195,8 +195,7 @@
 				</div>
 			</a>
 			<div id="myproject" class="divInfo">
-			<p>1.你发布到内容显示在这里</p>
-			<p>2.目前你还没有发布过点赞</p>
+			
 			
 			</div>
 			
@@ -342,8 +341,24 @@ $(function()
 							var projects = data.data.projects;
 							for(var i=0;i<projects.length;i++){
 							    var proj = projects[i];
-							    divProj.append("<p><a href='http://suppresswarnings.com/like.html?state=" + proj.key + "'>" + proj.value + "</a></p>");
+							    var idx = i + 1;
+							    divProj.append("<p><a href='http://suppresswarnings.com/like.html?state=" + proj.key + "'>" + idx + ". " + proj.value + "</a></p>");
 							}
+							if(projects.length == 0) {
+							    divProj.append("<p>1.你发布的内容显示在这里(目前你还没有发布过点赞)</p>");
+							}
+							
+							var divLike = $("#mylike");
+							var likes = data.data.likes;
+							for(var i=0;i<likes.length;i++){
+							    var like = likes[i];
+							    var idx = i + 1;
+							    divLike.append("<p><a href='http://suppresswarnings.com/like.html?state=" + like.key + "'>" + idx + ". " + like.value + "</a></p>");
+							}
+							if(likes.length == 0) {
+							    divLike.append("<p>1.你点赞的内容显示在这里(目前你还没有点赞)</p>");
+							}
+							
 						}
 					},
 					error: function(xhr, type){
