@@ -338,6 +338,12 @@ $(function()
 					    
 						if(data.code == 0) {
 							console.log(data.data);
+							var divProj = $("#myproject");
+							var projects = data.data.projects;
+							for(var i=0;i<projects.length;i++){
+							    var proj = projects[i];
+							    divProj.append("<p><a href='http://suppresswarnings.com/like.html?state=" + proj.key + "'>" + proj.value + "</a></p>");
+							}
 						}
 					},
 					error: function(xhr, type){
