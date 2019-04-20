@@ -21,7 +21,7 @@ public class LikeHandlerImpl implements LikeHandler {
 
 	@Override
 	public Page<Project> listProjects(boolean first, int n, String projectid, String openid) {
-		if(first || projectid == null || projectid.length() < 1) {
+		if(projectid == null || projectid.length() < 1) {
 			projectid = "Project";
 		}
 		String head = String.join(Const.delimiter, Const.Version.V2, "Projectid");
@@ -56,13 +56,13 @@ public class LikeHandlerImpl implements LikeHandler {
 		
 		if(projectids.size() > 1) {
 			String s = projectids.get(i);
-			if(first) {
-				page.setNext("Project");
-			} else {
-				page.setNext(s);
-			}
+			page.setNext(s);
 		} else {
 			page.setNext("null");
+		}
+		
+		if(first) {
+			page.setNext("Project");
 		}
 		page.setEntries(data);
 		page.setStart(start);

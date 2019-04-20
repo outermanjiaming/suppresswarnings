@@ -292,6 +292,49 @@
 		dropload.resetload();
 	}
 	});
+	
+	
+	
+	$(function()
+{
+	var request = GetRequest();
+	$.toast.prototype.defaults.duration = 700;	//设置toast显示时间
+	
+	if(request.code == undefined)
+	{
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/user.html&response_type=code&scope=snsapi_base&state=like.user#wechat_redirect"
+	   window.location.href = locationUrl;
+	} 
+	else 
+	{
+		state = request.state
+		code = request.code
+		$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=access_token&random=random-'+state+'&ticket='+code,
+			dataType: 'text',
+			success: function(data) {
+				console.log("like user");
+				
+				$.ajax({
+					type: 'POST',
+					url: '/like.http?action=user&code='+code,
+					dataType: 'json',
+					success: function(data){
+					    
+						if(data.code == 0) {
+							console.log(data.data);
+						}
+					},
+					error: function(xhr, type){
+						console.log('Ajax error!');
+					}
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+			}
+		});
+	}
 </script>
 
 
