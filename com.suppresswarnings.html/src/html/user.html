@@ -18,9 +18,9 @@
 	}
 	
 	.home-avatar {
-		text-align:center;
+		/*text-align:center;
 		background: url(./asset/images/home_bg.png) no-repeat;
-		background-size:100% 100%;
+		background-size:100% 100%; */
 		background-color: white;
 	}
 	
@@ -51,7 +51,7 @@
 		height: 130px;
 		background: #f5f5f5;
 		position: relative;
-		display:block;
+		display: none;
 		overflow: auto;
 	}
 	
@@ -148,18 +148,18 @@
 		
 		<div class="">
 		
-			<a id="btn-01" href="javascript:;" class="aui-flex">
+			<a id="btn-01" href="javascript:toggle('#cashout');" class="aui-flex">
 				<div class="aui-flex-box">
 					<p>我要提现</p>
 				</div>
 				<div class="aui-arrow">
-					<span></span>
+					<span>103分</span>
 				</div>
 			</a>
-			<div class="divInfo"></div>
+			<div id="cashout" class="divInfo"></div>
 			<div class="divHeight"></div>
 			
-			<a href="javascript:;" class="aui-flex b-line">
+			<a href="javascript:toggle('#mylike');" class="aui-flex b-line">
 				<div class="aui-flex-box">
 					<p>我的点赞</p>
 				</div>
@@ -167,33 +167,38 @@
 					<span></span>
 				</div>
 			</a>
-			<div class="divInfo"></div>
+			<div id="mylike" class="divInfo"></div>
 			
-			<a href="javascript:;" class="aui-flex b-line">
+			<a href="javascript:toggle('#likeshare');" class="aui-flex b-line">
 				<div class="aui-flex-box">
-					<p>我要发广告</p>
+					<p>我要分享点赞</p>
 				</div>
 				<div class="aui-arrow">
 					<span></span>
 				</div>
 			</a>
-			<div class="divInfo"></div>
+			<div id="likeshare" class="divInfo"></div>
 			
-			<a href="javascript:;" class="aui-flex b-line">
+			<a href="javascript:toggle('#wantlike');" class="aui-flex b-line">
 				<div class="aui-flex-box">
 					<p>我要发起点赞</p>
 				</div>
 				<div class="aui-arrow">
-					<span>需要关注公众号：素朴网联</span>
+					<span>素朴网联</span>
 				</div>
 			</a>
+			<div id="wantlike" class="divInfo"></div>
 		</div>
 	</div>
-	<script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+	<script src="js/jquery.min.js"></script>
 	<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
 	<script src="js/jweixin-1.2.0.js"></script>
 	<script src="js/base64.js"></script>
 <script>
+    function toggle(id){
+        $(id).toggle();
+    }
+
 	var url = window.location.href;
 	var en = base64encode(url);
 	console.log("====== ======= " + en);
