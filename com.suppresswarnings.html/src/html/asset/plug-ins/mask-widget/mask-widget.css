@@ -106,6 +106,73 @@
 
 
 
+#game-mask {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    position: fixed;
+    z-index: 990;
+    left: 0;
+    top: 0;
+}
+
+#game-mask-content {
+	width:80%;
+	padding:10px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -moz-transform: translate(50%, 50%);
+    -o-transform: translate(50%, 50%);
+    z-index: 991;
+	background-color: #FFFFFF;
+	border-radius: 3px;
+}
+
+#hide-game-mask {
+    width: 5%;
+	margin-right:10px;
+	float:right;
+    color: #000000;
+    height: 40px;
+    line-height: 35px;
+    text-align: center;
+}
+
+#hide-game-mask::before {
+    content: "\d7";
+    font-size: 30px;
+}
+
+#ul-game > li {
+	display: inline-block;
+	width: 45%;
+	margin: 3px;
+	border-radius: 15px;
+	height: 50px;
+	text-align: center;
+	line-height: 50px;
+	border:1px solid #179b16;
+}
+
+#game-mask-title {
+	float:left; 
+	line-height:40px; 
+	margin-left:10px;
+}		
+
+#game-mask-details > p {
+	color: #000000;
+	font-size: 100%;
+	line-height:25px;
+}
+
+
+
+
+
 #invest-mask {
     width: 100%;
     height: 100%;
