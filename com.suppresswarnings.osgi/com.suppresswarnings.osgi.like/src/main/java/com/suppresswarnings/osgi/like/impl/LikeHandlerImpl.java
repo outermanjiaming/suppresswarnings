@@ -203,7 +203,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		service.account().page(start, start, null, 1000, (k,v) ->{
 			try {
 				Long time = Long.valueOf(v);
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss发起申请提现");
+				SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH:mm:ss发起申请提现");
 				String date = sdf.format(new Date(time));
 				if(v.equals(requesting)) {
 					KeyValue cashout = new KeyValue(date, "正在审核...");
@@ -217,6 +217,25 @@ public class LikeHandlerImpl implements LikeHandler {
 			}
 		});
 		user.setCashouts(cashouts);
+		
+		
+		List<KeyValue> moneys = new ArrayList<>();
+		start = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Like", "Money");
+		int len = start.length();
+		service.account().page(start, start, null, 100, (k,v) ->{
+			try {
+				String t = k.substring(len + Const.delimiter.length());
+				Long time = Long.valueOf(t);
+				SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH:mm:ss参与抽奖获得");
+				String date = sdf.format(new Date(time));
+				Integer val = Integer.valueOf(v);
+				moneys.add(new KeyValue(date, ""+val));
+			} catch (Exception e) {
+				logger.error("计算金额出错了", e);
+			}
+		});
+		user.setMoneys(moneys);
+		
 		return user;
 	}
 

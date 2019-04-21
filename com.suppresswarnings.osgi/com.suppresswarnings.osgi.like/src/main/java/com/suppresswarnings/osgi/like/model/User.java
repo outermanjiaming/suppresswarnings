@@ -12,7 +12,15 @@ public class User {
 	List<KeyValue> comments;
 	List<KeyValue> projects;
 	List<KeyValue> cashouts;
+	List<KeyValue> moneys;
 	
+	
+	public List<KeyValue> getMoneys() {
+		return moneys;
+	}
+	public void setMoneys(List<KeyValue> moneys) {
+		this.moneys = moneys;
+	}
 	public List<KeyValue> getComments() {
 		return comments;
 	}

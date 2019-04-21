@@ -416,6 +416,19 @@ $(function()
 							if(cashs.length == 0) {
 							    divCash.append("<p>（目前你还没有提现）</p>");
 							}
+							
+							var moneys = data.data.moneys;
+							if(cashs.length > 0) {
+								 divCash.append("<p>（以下是你抽奖获得的金额）</p>");
+							}
+							for(var i=0;i<moneys.length;i++){
+							    var m = moneys[i];
+							    mycash = mycash + parseInt(m.value);
+							    
+							    var idx = i + 1;
+							    divCash.append("<p>" +cash.key + "("+cash.value+")" + "</p>");
+							}
+							
 							$("#mycash").html(mycash + "分");
 							
 						}

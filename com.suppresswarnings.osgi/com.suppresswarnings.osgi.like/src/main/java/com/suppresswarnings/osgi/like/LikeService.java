@@ -80,6 +80,9 @@ public class LikeService implements HTTPService, CommandProvider {
 			Result result = new Result(page);
 			Map<String, String> extra = new HashMap<>();
 			KeyValue kv = user(openid);
+			if(kv.key().equals(fake(openid)) || join(openid)) {
+				extra.put("game", "show");
+			}
 			extra.put("face", kv.value());
 			extra.put("uname", kv.key());
 			result.setExtra(extra);
@@ -142,12 +145,20 @@ public class LikeService implements HTTPService, CommandProvider {
 		}
 		return projectid;
 	}
+	
+	public boolean join(String openid) {
+		return openid.equals(account().get(String.join(Const.delimiter, Const.Version.V2, "Join", "Game", "Like", openid)));
+	}
+	
+	public String fake(String openid) {
+		int len = openid.length();
+		return "未关注" + openid.substring(len - 4, len);
+	}
+	
 	public KeyValue user(String openid) {
-		
 		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
 		if(openid == null || json == null) {
-			int len = openid.length();
-			return new KeyValue("未关注" + openid.substring(len - 4, len), "http://suppresswarnings.com/suppresswarnings.jpg");
+			return new KeyValue(fake(openid), "http://suppresswarnings.com/suppresswarnings.jpg");
 		}
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = gson.fromJson(json, Map.class);
