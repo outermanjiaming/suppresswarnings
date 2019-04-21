@@ -27,12 +27,17 @@ public class NotifyHandlerFactory {
 		if("SUCCESS".equals(result)) {
 			logger.info("invest success: " + projectid);
 			if(projectid != null) {
+				String user = service.getWXuserByOpenId(openid).toString();
+				service.atUser("oDqlM1TyKpSulfMC2OsZPwhi-9Wk", "投资金额："+cashfee+"分\n投资用户："+user);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Invest", projectid, orderid, openid), cashfee);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Invest", "Openid", orderid), openid);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Invest", "Projectid", orderid), projectid);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Invest", "User", orderid), user);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Invest", projectid, orderid), cashfee);
 			} else {
 				logger.error("projectid is null");
 			}
-			service.atUser(openid, "恭喜你投资点赞项目成功！");
+			service.atUser(openid, "恭喜你投资点赞项目成功！当项目点赞达到目标之后，会将投资回报通过企业付款发送到你的微信零钱。");
 		} else {
 			logger.error("invest fail");
 		}

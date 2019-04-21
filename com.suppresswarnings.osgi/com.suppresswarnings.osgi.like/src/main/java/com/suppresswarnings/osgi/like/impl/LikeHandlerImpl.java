@@ -220,7 +220,7 @@ public class LikeHandlerImpl implements LikeHandler {
 		
 		
 		List<KeyValue> moneys = new ArrayList<>();
-		start = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Like", "Money");
+		start = String.join(Const.delimiter, Const.Version.V2, openid, "Project", "Money", "Like");
 		int len = start.length();
 		service.account().page(start, start, null, 100, (k,v) ->{
 			try {

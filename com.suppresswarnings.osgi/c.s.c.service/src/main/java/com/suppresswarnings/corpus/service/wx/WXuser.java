@@ -119,6 +119,9 @@ public class WXuser {
 	@Override
 	public String toString() {
 		return "WXuser [subscribe=" + subscribe + ", openid=" + openid + ", nickname=" + nickname + ", sex=" + sex
-				+ "]";
+				+ ", city=" + city + ", country=" + country + ", province=" + province + ", language=" + language
+				+ ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unionid=" + unionid
+				+ ", remark=" + remark + ", groupid=" + groupid + ", subscribe_scene=" + subscribe_scene + ", qr_scene="
+				+ qr_scene + ", qr_scene_str=" + qr_scene_str + "]";
 	}
 }

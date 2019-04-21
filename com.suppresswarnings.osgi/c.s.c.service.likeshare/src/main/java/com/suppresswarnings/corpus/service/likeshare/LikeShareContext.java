@@ -72,26 +72,26 @@ public class LikeShareContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			synchronized (likegame) {
-				String done = String.join(Const.delimiter, Const.Version.V2, "Like", "Game", openid());
+				String done = String.join(Const.delimiter, Const.Version.V2, "Game", "Like", openid());
 				String exist = u.content().account().get(done);
 				if(exist == null) {
 					u.content().account().put(done, time());
-					u.content().data().put(String.join(Const.delimiter, Const.Version.V2, "Like", "Game", openid(), time()), openid());
-					u.content().data().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Like", "Game", time()), openid());
+					u.content().data().put(String.join(Const.delimiter, Const.Version.V2, "Game", "Like", openid(), time()), openid());
+					u.content().data().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Game", "Like", time()), openid());
 					
 					double score = new Random().nextDouble();
 					if(score < 0.6) {
-						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Like", "Money", time()), "3");
+						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "3");
 						u.output("恭喜你，抽中三等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					} else if(score > 0.9) {
-						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Like", "Money", time()), "100");
+						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "100");
 						u.output("恭喜你，抽中一等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					} else {
-						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Like", "Money", time()), "10");
+						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "10");
 						u.output("恭喜你，抽中二等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					}
 				} else {
-					u.content().account().put(String.join(Const.delimiter, Const.Version.V2, "Inform", "Like", "Game", time(), random()), openid());
+					u.content().account().put(String.join(Const.delimiter, Const.Version.V2, "Inform", "Game", "Like", time(), random()), openid());
 					u.output("你已经参与抽奖活动了，奖金已经在你的账户，你可以输入「我要提现」申请提现哦，秒到账！");
 				}
 			}
