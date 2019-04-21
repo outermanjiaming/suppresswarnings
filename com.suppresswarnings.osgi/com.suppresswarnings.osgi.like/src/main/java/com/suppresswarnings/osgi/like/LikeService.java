@@ -75,6 +75,7 @@ public class LikeService implements HTTPService, CommandProvider {
 			String projectid = parameter.getParameter("projectid");
 			String code = parameter.getParameter("code");
 			String openid = openid(code);
+			projectid = sharedProjectid(projectid, openid);
 			Page<Project> page = handler.listProjects(true, 2, projectid, openid);
 			Result result = new Result(page);
 			Map<String, String> extra = new HashMap<>();
@@ -124,11 +125,29 @@ public class LikeService implements HTTPService, CommandProvider {
 		return gson.toJson(new Result(400, "unknown action"));
 	}
 	
+	public String sharedProjectid(String projectid, String openid) {
+		logger.info("sharedProjectid: " + projectid + ", " + openid);
+		if(projectid != null && projectid.startsWith("T_Like_Share")) {
+			String[] share = projectid.split("\\$");
+			logger.info("shared project: " + share[1]);
+			if(share.length > 2) {
+				String origin = share[1];
+				String sharer = share[2];
+				String time = "" + System.currentTimeMillis();
+				data().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Share", projectid, sharer, openid), time);
+				data().put(String.join(Const.delimiter, Const.Version.V2, sharer, "Project", "Share", projectid, openid, time), openid);
+				account().put(String.join(Const.delimiter, Const.Version.V2, sharer, "Project", "Share", projectid, openid), time);
+				return origin;
+			}
+		}
+		return projectid;
+	}
 	public KeyValue user(String openid) {
 		
 		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
 		if(openid == null || json == null) {
-			return new KeyValue("小目标", "http://thirdwx.qlogo.cn/mmopen/6XNMsXhEtvJdxWbKRtXG3RWZMaggh1BBYbNL6oZLKlKCZ1BOicq09TbCFg6Hqfia4MgYfiaEcHc67DlwZnibqVZIfEJOLJ6p6AHY/132");
+			int len = openid.length();
+			return new KeyValue("未关注" + openid.substring(len - 4, len), "http://suppresswarnings.com/suppresswarnings.jpg");
 		}
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = gson.fromJson(json, Map.class);

@@ -65,3 +65,19 @@ function hideinvestMask()
 	var mask = document.getElementById("invest-mask");
 	mask.style.display="none"; 
 } 
+
+
+
+function showGameMask(id)
+{
+	var mask = document.getElementById("game-mask");
+	mask.style.display="block"; 
+	document.getElementById("game-projectid").value=id;
+}
+
+
+function hideGameMask()
+{ 
+	var mask = document.getElementById("game-mask");
+	mask.style.display="none"; 
+} 
