@@ -70,6 +70,7 @@
 		</div>
 		<ul id="ul-game" style="text-align:center;">
 			<img style="width:120px" src="http://suppresswarnings.com/game.jpg"/>
+			<img style="width:120px" src="http://suppresswarnings.com/game.gif"/>
 		</ul>
 	</div>
 </div>
@@ -171,7 +172,9 @@ $(function()
 						var result = addItems(data.data.entries);
 						$('#list').append(result);
 						
-						showGameMask(state);
+						if(data.extra.game == "show") {
+							showGameMask(state);
+						}
 						
 						dropload = $('.inner').dropload({
 					        domUp : {
