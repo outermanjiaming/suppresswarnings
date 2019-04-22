@@ -156,7 +156,7 @@
 </head>
 <body>
 	<div class="home-avatar">
-			<img id="face" src="https://suppresswarnings.com/suppresswarnings.jpg" alt="">
+			<img id="face" src="http://suppresswarnings.com/suppresswarnings.jpg" alt="">
 			<span id="uname">素朴网联</span>
 	</div>
 </div>
@@ -234,7 +234,7 @@
 				</div>
 			</a>
 			<div id="likeshare" class="divInfo">
-			<p>1.进入点赞首页<a href="https://suppresswarnings.com/like.html">点击此处</a></p>
+			<p>1.进入点赞首页<a href="http://suppresswarnings.com/like.html">点击此处</a></p>
 			<p>2.看到喜欢的发布就点击分享按钮</p>
 			<p>3.或者直接点击右上角的...进行分享</p>
 			<p>4.选择分享给朋友，或者分享到朋友圈</p>
@@ -308,8 +308,8 @@
 			});
 		    wx.onMenuShareTimeline({ 
 		        title: '进来帮我点赞，先赞一个亿，一起分红',
-		        link: 'https://suppresswarnings.com/like.html',
-		        imgUrl: 'https://suppresswarnings.com/like.png',
+		        link: 'http://suppresswarnings.com/like.html',
+		        imgUrl: 'http://suppresswarnings.com/like.png',
 		        success: function () {
 		           console.log("===== lijiaming ====");
 		        }
@@ -318,8 +318,8 @@
 		    wx.onMenuShareAppMessage({
 				title: '进来帮我点赞，先赞一个亿，一起分红',
 				desc: '进来帮我点赞就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
-				link: 'https://suppresswarnings.com/like.html',
-				imgUrl: 'https://suppresswarnings.com/like.png',
+				link: 'http://suppresswarnings.com/like.html',
+				imgUrl: 'http://suppresswarnings.com/like.png',
 				success: function () {
 					console.log("===== lijiaming ====");
 				}
@@ -341,7 +341,7 @@ $(function()
 	
 	if(request.code == undefined)
 	{
-	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=https://suppresswarnings.com/user.html&response_type=code&scope=snsapi_base&state=like.user#wechat_redirect"
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/user.html&response_type=code&scope=snsapi_base&state=like.user#wechat_redirect"
 	   window.location.href = locationUrl;
 	} 
 	else 
@@ -374,7 +374,7 @@ $(function()
 							for(var i=0;i<projects.length;i++){
 							    var proj = projects[i];
 							    var idx = i + 1;
-							    divProj.append("<p><a href='https://suppresswarnings.com/like.html?state=" + proj.key + "'>" + idx + ". " + proj.value + "</a></p>");
+							    divProj.append("<p><a href='http://suppresswarnings.com/like.html?state=" + proj.key + "'>" + idx + ". " + proj.value + "</a></p>");
 							}
 							if(projects.length == 0) {
 							    divProj.append("<p>1.你发布的内容显示在这里(目前你还没有发布过点赞)</p>");
@@ -386,7 +386,7 @@ $(function()
 							    mycash ++;
 							    var like = likes[i];
 							    var idx = i + 1;
-							    divLike.append("<p><a href='https://suppresswarnings.com/like.html?state=" + like.key + "'>" + idx + ". " + like.value + "</a></p>");
+							    divLike.append("<p><a href='http://suppresswarnings.com/like.html?state=" + like.key + "'>" + idx + ". " + like.value + "</a></p>");
 							}
 							if(likes.length == 0) {
 							    divLike.append("<p>1.你点赞的内容显示在这里(目前你还没有点赞)</p>");
@@ -399,7 +399,7 @@ $(function()
 							    mycash ++;
 							    var comment = comments[i];
 							    var idx = i + 1;
-							    divComnt.append("<p><a href='https://suppresswarnings.com/like.html?state=" + comment.key + "'>" + idx + ". " + comment.value + "</a></p>");
+							    divComnt.append("<p><a href='http://suppresswarnings.com/like.html?state=" + comment.key + "'>" + idx + ". " + comment.value + "</a></p>");
 							}
 							if(comments.length == 0) {
 							    divComnt.append("<p>1.你评论的内容显示在这里(目前你还没有评论)</p>");
@@ -450,7 +450,7 @@ $(function()
 <footer class="footer navbar-fixed-bottom" style="z-index:-1;background:#f4f5f7;">
      <div class="copyright" style="text-align:center;width:100%;margin:0 auto; padding:5px 0;">
      <div><font size=1>
-         © 2019 <a href="https://suppresswarnings.com/" target="_blank"> 素朴网联 </a> All Rights Reserved
+         © 2019 <a href="http://SuppressWarnings.com/" target="_blank"> 素朴网联 </a> All Rights Reserved
        </font>
      </div>
      <a href='mailto:email@suppresswarnings.com'><font size=1>email@suppresswarnings.com</font></a>
