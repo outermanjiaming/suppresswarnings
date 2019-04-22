@@ -114,13 +114,11 @@
 
 
 <script src="js/jquery.min.js"></script>
-
-<script src="asset/js/likeUiHelper.js"></script>
-
-<script src="asset/plug-ins/dist/dropload.min.js"></script>
-
+<script src="js/jweixin-1.2.0.js"></script>
 <script src="js/jquery-weui.min.js"></script>
-
+<script src="js/base64.js"></script>
+<script src="asset/js/likeUiHelper.js"></script>
+<script src="asset/plug-ins/dist/dropload.min.js"></script>
 <script src="asset/plug-ins/mask-widget/mask-widget.js"></script>
 
 <script type="text/javascript">
@@ -161,6 +159,61 @@ $(function()
 		success: function(data)
 		{
 			console.log(data);
+			
+			
+			var url = window.location.href;
+			var en = base64encode(url);
+			console.log("====== ======= " + en);
+			$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=jsapi_ticket&url='+en,
+			dataType: 'json',
+			success: function(data) {
+				wx.config({
+				    debug: false,
+				    appId: 'wx41b262e9b9d8885e',
+				    timestamp: data.timestamp,
+				    nonceStr: data.nonceStr,
+				    signature: data.signature,
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+				});
+			
+				wx.ready(function () {
+				    console.log(window.__wxjs_environment === 'miniprogram');
+					wx.checkJsApi({
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+					    success: function(res) {
+					        console.log("check js api ok: " + res)
+					    }
+					});
+				    wx.onMenuShareTimeline({ 
+				        title: '进来帮我点赞，先赞一个亿，一起分红',
+				        link: 'http://suppresswarnings.com/like.html',
+				        imgUrl: 'http://suppresswarnings.com/like.png',
+				        success: function () {
+				           console.log("===== lijiaming ====");
+				        }
+				    });
+				    
+				    wx.onMenuShareAppMessage({
+						title: '进来帮我点赞，先赞一个亿，一起分红',
+						desc: '进来帮我点赞就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
+						link: 'http://suppresswarnings.com/like.html',
+						imgUrl: 'http://suppresswarnings.com/like.png',
+						success: function () {
+							console.log("===== lijiaming ====");
+						}
+					});
+				});
+			},
+			error: function(xhr, type){
+				alert('js api ticket error!');
+				dropload.resetload();
+			}
+			});
+			
+			
+			
 			$.ajax({
 					type: 'GET',
 					url: '/like.http?action=project&projectid='+state+'&code='+code,
@@ -225,7 +278,7 @@ $(function()
 											}, getDelayTime() );					
 										},
 										error: function(xhr, type){
-											alert('Ajax error!');
+											alert('next project error!');
 											// 即使加载出错，也得重置
 											dropload.resetload();
 										}
@@ -237,18 +290,18 @@ $(function()
 								
 					},
 					error: function(xhr, type){
-						alert('Ajax error!');
+						alert('first project error!');
 						// 即使加载出错，也得重置
 						dropload.resetload();
 					}
 				});	
 		},
 		error: function(xhr, type){
-			alert('Ajax error!');
+			alert('access token error!');
 			// 即使加载出错，也得重置
 			dropload.resetload();
 		}
-		});
+	});
 	}
 });
 
@@ -331,7 +384,7 @@ function ajaxAddLike(id)
 			}
 		},
 		error: function(xhr, type){
-			$.toast("Ajax error!", "text");
+			$.toast("like error!", "text");
 		}
 	});
 }
@@ -375,7 +428,7 @@ function ajaxAddComment(id)
 			}
 		},
 		error: function(xhr, type){
-			$.toast("Ajax error!", "text");
+			$.toast("comment error!", "text");
 		}
 	});
 }
@@ -402,7 +455,7 @@ function ajaxGetQrcode(id)
 			showQrcodeMask();
 		},
 		error: function(xhr, type){
-			$.toast("Ajax error!", "text");
+			$.toast("forward error!", "text");
 		}
 	});
 	showQrcodeMask();
@@ -470,61 +523,6 @@ function pay(gid, projectid) {
 function onBridgeOK(){
   bridgeReady = 1
 }
-</script>
-
-<script src="js/jweixin-1.2.0.js"></script>
-<script src="js/base64.js"></script>
-<script>
-	var url = window.location.href;
-	var en = base64encode(url);
-	console.log("====== ======= " + en);
-	$.ajax({
-	type: 'GET',
-	url: '/wx.http?action=jsapi_ticket&url='+en,
-	dataType: 'json',
-	success: function(data) {
-		wx.config({
-		    debug: false,
-		    appId: 'wx41b262e9b9d8885e',
-		    timestamp: data.timestamp,
-		    nonceStr: data.nonceStr,
-		    signature: data.signature,
-		    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
-		});
-	
-		wx.ready(function () {
-		    console.log(window.__wxjs_environment === 'miniprogram');
-			wx.checkJsApi({
-			    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
-			    success: function(res) {
-			        console.log("check js api ok: " + res)
-			    }
-			});
-		    wx.onMenuShareTimeline({ 
-		        title: '进来帮我点赞，先赞一个亿，一起分红',
-		        link: 'http://suppresswarnings.com/like.html',
-		        imgUrl: 'http://suppresswarnings.com/like.png',
-		        success: function () {
-		           console.log("===== lijiaming ====");
-		        }
-		    });
-		    
-		    wx.onMenuShareAppMessage({
-				title: '进来帮我点赞，先赞一个亿，一起分红',
-				desc: '进来帮我点赞就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
-				link: 'http://suppresswarnings.com/like.html',
-				imgUrl: 'http://suppresswarnings.com/like.png',
-				success: function () {
-					console.log("===== lijiaming ====");
-				}
-			});
-		});
-	},
-	error: function(xhr, type){
-		alert('Ajax error!');
-		dropload.resetload();
-	}
-	});
 </script>
 </body>
 </html>
