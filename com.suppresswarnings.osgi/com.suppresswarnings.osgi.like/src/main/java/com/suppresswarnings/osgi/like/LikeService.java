@@ -158,7 +158,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public KeyValue user(String openid) {
 		String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
 		if(openid == null || json == null) {
-			return new KeyValue(fake(openid), "http://suppresswarnings.com/suppresswarnings.jpg");
+			return new KeyValue(fake(openid), "https://suppresswarnings.com/suppresswarnings.jpg");
 		}
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = gson.fromJson(json, Map.class);
