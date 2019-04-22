@@ -1,17 +1,6 @@
 <!--index.wxml-->
 <view class="container">
-  <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 加入组织「素朴网联」 </button>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-    </block>
-  </view>
-  <view class='thelogo'>
-    <image src="http://suppresswarnings.com/index.png" style='width:60px;height:60px;'></image>
-  </view>
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
-  </view>
+
+  <web-view src="https://suppresswarnings.com/like.html" bindmessage="素朴网联"></web-view>
   
 </view>

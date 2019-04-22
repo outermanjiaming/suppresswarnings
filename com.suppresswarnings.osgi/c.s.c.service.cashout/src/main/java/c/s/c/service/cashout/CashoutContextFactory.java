@@ -3,10 +3,10 @@ package c.s.c.service.cashout;
 import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
+import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class CashoutContextFactory extends AbstractAuthContextFactory {
+public class CashoutContextFactory implements ContextFactory<CorpusService> {
 
 	@Override
 	public String command() {
@@ -24,12 +24,7 @@ public class CashoutContextFactory extends AbstractAuthContextFactory {
 	}
 
 	@Override
-	public String[] requiredAuth() {
-		return CashoutContext.AUTH;
-	}
-
-	@Override
-	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
+	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
 		return new CashoutContext(wxid, openid, content);
 	}
 
