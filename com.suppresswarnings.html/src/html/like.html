@@ -146,7 +146,8 @@ $(function()
 	   } else {
 		 projectid = request.state
 	   }
-	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/like.html&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
+	   var url = window.location.href;
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri="+url+"&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
 	   window.location.href = locationUrl;
 	} 
 	else 
