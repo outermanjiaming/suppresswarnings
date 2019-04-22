@@ -150,7 +150,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	
 	public boolean join(String openid) {
 		String join = account().get(String.join(Const.delimiter, Const.Version.V2, "Join", "Game", "Like", openid));
-		return null == join || Long.valueOf(join) - System.currentTimeMillis() > TimeUnit.DAYS.toMillis(2);
+		return join == null || openid.equals(join) || Long.valueOf(join) - System.currentTimeMillis() > TimeUnit.DAYS.toMillis(2);
 	}
 	
 	public String fake(String openid) {
