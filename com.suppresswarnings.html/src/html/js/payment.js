@@ -18,7 +18,7 @@ $.ajax({
 			$("#reason").text(goods.reason)
 			$("#what").text(goods.what)
 			$("#userimg").attr("src", goods.userimg)
-			if(goods.type == "Auth") {
+			if(goods.type == "Auth" || goods.type == "Software") {
 				input.hide()
 				rate = 1
 				var total = parseFloat(goods.pricecent);

@@ -26,7 +26,7 @@ jQuery.ajax({
         var datas = user.datas
         var size = datas.length
         var mydatas = $("#mydatas")
-        mydatas.append("<div class='mydata'>"+size+"</div>")
+        mydatas.append("<div class='mydata'>您还没有购买数据</div>")
       }
     },error: function( xhr, result, obj ) {
       console.log("[lijiaming] user err: " + result)
