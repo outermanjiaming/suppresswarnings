@@ -90,7 +90,9 @@ public class LikeService implements HTTPService, CommandProvider {
 		} else if("next".equals(action)) {
 			String projectid = parameter.getParameter("projectid");
 			String code = parameter.getParameter("code");
-			Page<Project> page = handler.listProjects(false, 5, projectid, code);
+			String openid = openid(code);
+			account().put(String.join(Const.delimiter, Const.Version.V2, "Join", "Game", "Like", openid), ""+System.currentTimeMillis());
+			Page<Project> page = handler.listProjects(false, 5, projectid, openid);
 			Result result = new Result(page);
 			return gson.toJson(result);
 		} else if("like".equals(action)) {
@@ -147,7 +149,8 @@ public class LikeService implements HTTPService, CommandProvider {
 	}
 	
 	public boolean join(String openid) {
-		return openid.equals(account().get(String.join(Const.delimiter, Const.Version.V2, "Join", "Game", "Like", openid)));
+		String join = account().get(String.join(Const.delimiter, Const.Version.V2, "Join", "Game", "Like", openid));
+		return null == join || Long.valueOf(join) - System.currentTimeMillis() > TimeUnit.DAYS.toMillis(2);
 	}
 	
 	public String fake(String openid) {
