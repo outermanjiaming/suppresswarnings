@@ -189,7 +189,7 @@
 					<p>我的点赞</p>
 				</div>
 				<div class="aui-arrow">
-					<span></span>
+					<span>+1分</span>
 				</div>
 			</a>
 			<div id="mylike" class="divInfo">
@@ -203,7 +203,7 @@
 					<p>我的评论</p>
 				</div>
 				<div class="aui-arrow">
-					<span></span>
+					<span>+1分</span>
 				</div>
 			</a>
 			<div id="mycomment" class="divInfo">
@@ -217,7 +217,7 @@
 					<p>我的发布</p>
 				</div>
 				<div class="aui-arrow">
-					<span></span>
+					<span>+10分</span>
 				</div>
 			</a>
 			<div id="myproject" class="divInfo">
@@ -230,7 +230,7 @@
 					<p>我要分享点赞</p>
 				</div>
 				<div class="aui-arrow">
-					<span></span>
+					<span>+5分</span>
 				</div>
 			</a>
 			<div id="likeshare" class="divInfo">
@@ -372,6 +372,7 @@ $(function()
 							var divProj = $("#myproject");
 							var projects = data.data.projects;
 							for(var i=0;i<projects.length;i++){
+							    mycash = mycash + 10;
 							    var proj = projects[i];
 							    var idx = i + 1;
 							    divProj.append("<p><a href='http://suppresswarnings.com/like.html?state=" + proj.key + "'>" + idx + ". " + proj.value + "</a></p>");
