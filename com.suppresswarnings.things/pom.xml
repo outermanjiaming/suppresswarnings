@@ -1,12 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.suppresswarnings</groupId>
-    <artifactId>suppresswarnings-parent</artifactId>
-    <version>1.0.0</version>
-  </parent>
+
   <name>SuppressWarnings Things</name>
   <description>subscribe 素朴网联 first, using SuppressWarnings things component to control things by wechat command</description>
+  
+  <groupId>com.suppresswarnings</groupId>
   <artifactId>com.suppresswarnings.things</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.3</version>
+  <url>http://suppresswarnings.com</url>
+  <properties> 
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+  </properties>
+  <distributionManagement>
+	    <repository>
+	        <id>release</id>
+	        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+	    </repository>
+	    <snapshotRepository>
+	        <id>release</id>
+	        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+	    </snapshotRepository>
+  </distributionManagement>
 </project>

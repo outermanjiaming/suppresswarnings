@@ -4,5 +4,4 @@ Bundle-Name: Things
 Bundle-SymbolicName: com.suppresswarnings.things
 Bundle-Version: 1.0.0.qualifier
 Export-Package: com.suppresswarnings.things,
- com.suppresswarnings.things.demo,
- com.suppresswarnings.things.security
+ com.suppresswarnings.things.demo

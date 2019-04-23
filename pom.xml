@@ -5,9 +5,7 @@
 	<artifactId>suppresswarnings-parent</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
-	<properties>
-		<suppresswarnings.version>1.0.0</suppresswarnings.version>
-	</properties>
+	
 	<modules>
 		<module>com.suppresswarnings.osgi</module>
 		<module>com.suppresswarnings.html</module>

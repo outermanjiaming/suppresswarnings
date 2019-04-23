@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>com.suppresswarnings.osgi</artifactId>
-    <version>${suppresswarnings.version}</version>
+    <version>1.0.0</version>
   </parent>
   <artifactId>com.suppresswarnings.osgi.ner</artifactId>
   <name>com.suppresswarnings.osgi.ner</name>

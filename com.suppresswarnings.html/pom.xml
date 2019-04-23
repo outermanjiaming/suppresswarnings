@@ -5,11 +5,9 @@
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>suppresswarnings-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
-  <groupId>com.suppresswarnings</groupId>
   <artifactId>com.suppresswarnings.html</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>com.suppresswarnings.html</name>
   <url>http://maven.apache.org</url>
   <properties>
