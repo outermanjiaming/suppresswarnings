@@ -30,14 +30,17 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.backup.Config;
+import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
 
 public class AIIoT implements Closeable {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Map<String, Things> things = new ConcurrentHashMap<String, Things>();
+	Gson gson = new Gson();
 	CorpusService service;
 	int sslPort;
 	AtomicBoolean on = new AtomicBoolean(true);
@@ -124,6 +127,12 @@ public class AIIoT implements Closeable {
 				String[] args = knock.split(",");
 				String description = args[0];
 				String code = args[1];
+				String qrScene = code;
+				String accessToken = service.accessToken("things qrcode");
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", qrScene), qrScene);
+				service.setGlobalCommand(qrScene, "智能家居设备", code, "" + System.currentTimeMillis());
+				String json = service.qrCode(accessToken, 10000, "QR_STR_SCENE", qrScene);
+				QRCodeTicket qrTicket = gson.fromJson(json, QRCodeTicket.class);
 				String commands = args[2];
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code), description);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
@@ -138,6 +147,7 @@ public class AIIoT implements Closeable {
 				if(thing != null) {
 					things.put(code, thing);
 					logger.info("[AIIoT] new things register: " + thing.toString());
+					thing.execute("suppresswarnings.showqrcode", "http://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
 				} else {
 					logger.info("[AIIoT] unknown things: " + knock);
 				}

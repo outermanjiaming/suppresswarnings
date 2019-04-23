@@ -31,6 +31,8 @@ public interface Things {
 		String UTF8 = "UTF-8";
 		String CODE_FILE = "suppresswarnings.code";
 		String PING_FORAMT = "http://suppresswarnings.com/wx.http?action=ping&type=things&token=%s";
+		String SHOW_QRCODE = "suppresswarnings.showqrcode";
+		String QRCODE_FILE = "suppresswarnings.qrcode.jpg";
 	}
 	/**
 	 * description of this thing

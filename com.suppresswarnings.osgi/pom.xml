@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <properties>
-    <suppresswarnings.version>0.0.1-SNAPSHOT</suppresswarnings.version>
-  </properties>
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>suppresswarnings-parent</artifactId>
@@ -14,45 +11,27 @@
   <modules>
 	  <module>com.suppresswarnings.osgi.leveldb</module>
 	  <module>com.suppresswarnings.osgi.ner</module>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <module>com.suppresswarnings.osgi.neuralnetwork</module>
-      
       <module>com.suppresswarnings.osgi.crawler</module>
+      <module>com.suppresswarnings.osgi.like</module>
+      <module>com.suppresswarnings.osgi.notify</module>
       <module>c.s.c.common</module>
       <module>c.s.c.service</module>
       <module>c.s.c.service.data</module>
-      
       <module>c.s.c.service.account</module>
       <module>c.s.c.service.token</module>
       <module>c.s.c.service.report.raspberrypi</module>
-      
-      
       <module>c.s.c.service.setting</module>
-      
       <module>c.s.c.service.qrcode</module>
       <module>c.s.c.service.authorize</module>
       <module>c.s.c.service.shop</module>
       <module>c.s.c.service.customer</module>
-      
-      
       <module>c.s.c.service.reply</module>
       <module>c.s.c.service.menu</module>
       <module>c.s.c.service.similar</module>
       <module>c.s.c.service.manage</module>
-      
       <module>c.s.c.service.aiiot</module>
       <module>c.s.c.service.daigou</module>
-      <module>com.suppresswarnings.osgi.like</module>
       <module>c.s.c.service.like</module>
-      <module>com.suppresswarnings.osgi.notify</module>
       <module>c.s.c.service.cashout</module>
       <module>c.s.c.service.likeshare</module>
   </modules>

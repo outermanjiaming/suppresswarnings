@@ -3,20 +3,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.suppresswarnings</groupId>
 	<artifactId>suppresswarnings-parent</artifactId>
-	<version>${suppresswarnings.version}</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<properties>
-		<suppresswarnings.version>0.0.1-osgi</suppresswarnings.version>
+		<suppresswarnings.version>1.0.0</suppresswarnings.version>
 	</properties>
 	<modules>
 		<module>com.suppresswarnings.osgi</module>
-		<module>com.suppresswarnings.util</module>
 		<module>com.suppresswarnings.html</module>
 		<module>com.suppresswarnings.spring</module>
-		<module>com.suppresswarnings.agent</module>
+		
 		<module>com.suppresswarnings.things</module>
 		<module>com.suppresswarnings.robot</module>
-		<module>com.suppresswarnings.third</module>
+		
+		<module>com.suppresswarnings.ai</module>
 	</modules>
 	
 	<!-- force it to use jdk1.8 -->

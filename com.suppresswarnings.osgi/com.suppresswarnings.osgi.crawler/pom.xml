@@ -5,9 +5,8 @@
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>com.suppresswarnings.osgi</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${suppresswarnings.version}</version>
   </parent>
-  <groupId>com.suppresswarnings.osgi.crawler</groupId>
   <artifactId>com.suppresswarnings.osgi.crawler</artifactId>
   <name>com.suppresswarnings.osgi.crawler</name>
   <url>http://maven.apache.org</url>

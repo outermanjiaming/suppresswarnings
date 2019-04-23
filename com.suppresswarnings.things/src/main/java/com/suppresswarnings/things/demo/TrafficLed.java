@@ -114,12 +114,7 @@ public class TrafficLed implements Things {
 	public String description() {
 		return "树莓派红绿灯";
 	}
-	
-	@Override
-	public String code() {
-		return "T_AIIoT_1542963026305_945";
-	}
-	
+
 	public static void main(String[] args) throws Exception {
 		ThingsManager.connect(new TrafficLed());
 	}

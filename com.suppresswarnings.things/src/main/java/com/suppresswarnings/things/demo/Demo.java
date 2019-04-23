@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
@@ -27,9 +26,8 @@ public class Demo extends JFrame implements Things {
 	private static final long serialVersionUID = -3570646113762994098L;
 	private static final int width = 300, height = 500; 
 	private boolean status = false;
-	private ImageIcon imageOff,imageOn,imageCode;
+	private ImageIcon imageOff,imageOn;
 	private JButton bulb;
-	private JLabel 	qrCode;
 	
 	public Demo(){
 		init();
@@ -41,10 +39,7 @@ public class Demo extends JFrame implements Things {
 		setLocation(700, 200);
 		imageOff = new ImageIcon("off.png");
 		imageOn = new ImageIcon("on.png");
-		imageCode = new ImageIcon("demo.jpg");
 		bulb = new JButton(imageOff);
-		qrCode = new JLabel(imageCode);
-		qrCode.setSize(width, width);
 		bulb.addActionListener(new ActionListener() {
 			
 			@Override
@@ -54,10 +49,8 @@ public class Demo extends JFrame implements Things {
 			}
 		});
 		add(bulb, BorderLayout.NORTH);
-		add(qrCode, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.pack();
-		setIconImage(new ImageIcon("icon.gif").getImage());
 		setVisible(true);
 		repaint();
 	}
@@ -106,7 +99,7 @@ public class Demo extends JFrame implements Things {
 	
 	@Override
 	public String code() {
-		return "T_AIIoT_1542963026305_945";
+		return "LiJiaming_Test_Things";
 	}
 	
 	public static void main(String[] args) throws Exception {

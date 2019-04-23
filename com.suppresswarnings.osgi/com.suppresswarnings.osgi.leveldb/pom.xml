@@ -3,8 +3,7 @@
   <parent>
     <groupId>com.suppresswarnings</groupId>
     <artifactId>com.suppresswarnings.osgi</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${suppresswarnings.version}</version>
   </parent>
   <artifactId>com.suppresswarnings.osgi.leveldb</artifactId>
-  <groupId>com.suppresswarnings.osgi</groupId>
 </project>

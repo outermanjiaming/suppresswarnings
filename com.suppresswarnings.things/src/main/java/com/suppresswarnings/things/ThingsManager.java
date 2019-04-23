@@ -10,9 +10,12 @@
  */
 package com.suppresswarnings.things;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,6 +28,9 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +39,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import com.suppresswarnings.things.security.UnsafeClassLoader;
 
 @SuppressWarnings("物联网的总入口，通过ThingsManager.connect(Things)进行连接。")
@@ -53,8 +64,8 @@ public class ThingsManager {
 	            URL url = new URL(httpurl);
 	            connection = (HttpURLConnection) url.openConnection();
 	            connection.setRequestMethod("GET");
-	            connection.setConnectTimeout(1500);
-	            connection.setReadTimeout(3000);
+	            connection.setConnectTimeout(30000);
+	            connection.setReadTimeout(30000);
 	            connection.connect();
 	            if (connection.getResponseCode() == 200) {
 	                is = connection.getInputStream();
@@ -170,6 +181,9 @@ public class ThingsManager {
 					if(callInput.length == 2) {
 						String call = callInput[0];
 						String input = callInput[1];
+						if(Things.Const.SHOW_QRCODE.equals(call)) {
+							qrcode(input, 50000);
+						}
 						String ret = execute(call, input);
 						System.out.println("ret ========= " + ret);
 						out.write(ret + "\n");
@@ -227,5 +241,31 @@ public class ThingsManager {
 			e.printStackTrace();
 		}
 		things.exception("Exit, " + error);
+	}
+	
+	public static void qrcode(String url, long size) {
+		try {
+			JFrame frame = new JFrame("微信扫一扫控制该程序");
+			int width = 430, height = 430; 
+			frame.setBackground(Color.PINK);
+			frame.setSize(width, height);
+			frame.setLocation(30, 30);
+			InputStream in = new URL(url).openStream();
+			File file = new File(Things.Const.QRCODE_FILE);
+			file.createNewFile();
+			ReadableByteChannel ch = Channels.newChannel(in);
+			FileOutputStream fos = new FileOutputStream(file);
+			FileChannel fch = fos.getChannel();
+			fch.transferFrom(ch, 0, size);
+			fos.close();
+			ImageIcon imageCode = new ImageIcon(file.getAbsolutePath());
+			JLabel qrCode = new JLabel(imageCode);
+			qrCode.setSize(width, height);
+			frame.add(qrCode);
+			frame.setVisible(true);
+		} catch (Exception e) {
+			System.out.println("fail to show qrcode: " + e.getMessage());
+		}
+		
 	}
 }
