@@ -50,14 +50,14 @@ public interface Things {
 	}
 	/**
 	 * description of this thing
-	 * @return
+	 * @return String 描述
 	 */
 	String description();
 	/**
 	 * the unique code of this thing
 	 * get it from 公众号: 素朴网联
 	 * 在公众号输入"我要物联网",即可返回code
-	 * @return
+	 * @return String 操作物联网的唯一code
 	 */
 	default String code() {
 		try {

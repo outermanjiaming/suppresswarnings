@@ -40,7 +40,7 @@ public @interface SuppressWarnings {
 
 	/**
 	 * the command for this method
-	 * @return
+	 * @return String命令
 	 */
 	String value();
 }

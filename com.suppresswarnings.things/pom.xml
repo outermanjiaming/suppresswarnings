@@ -8,16 +8,16 @@
 
 	<groupId>com.suppresswarnings</groupId>
 	<artifactId>com.suppresswarnings.things</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.5</version>
 	<url>http://suppresswarnings.com</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<licenses>
 		<license>
-			<name>Apache-2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-			<distribution>repo</distribution>
+			<name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
 		</license>
 	</licenses>
 
@@ -35,6 +35,13 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<developers>
+		<developer>
+            <name>lijiaming</name>
+            <email>outermanjiaming@163.com</email>
+            <organization>SuppressWarnings.com</organization>
+        </developer>
+	</developers>
 	<build>
 		<plugins>
 			<plugin>
@@ -74,6 +81,20 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-gpg-plugin</artifactId>
+               <version>1.1</version>
+               <executions>
+                   <execution>
+                       <id>sign-artifacts</id>
+                       <phase>verify</phase>
+                       <goals>
+                           <goal>sign</goal>
+                       </goals>
+                   </execution>
+               </executions>
+           </plugin>
 		</plugins>
 	</build>
 </project>
