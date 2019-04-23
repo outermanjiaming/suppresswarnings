@@ -12,12 +12,20 @@
 		<module>com.suppresswarnings.osgi</module>
 		<module>com.suppresswarnings.html</module>
 		<module>com.suppresswarnings.spring</module>
-		
 		<module>com.suppresswarnings.things</module>
 		<module>com.suppresswarnings.robot</module>
-		
 		<module>com.suppresswarnings.ai</module>
 	</modules>
+	<distributionManagement>
+	    <repository>
+	        <id>release</id>
+	        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+	    </repository>
+	    <snapshotRepository>
+	        <id>release</id>
+	        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+	    </snapshotRepository>
+	</distributionManagement>
 	
 	<!-- force it to use jdk1.8 -->
 	<build>
