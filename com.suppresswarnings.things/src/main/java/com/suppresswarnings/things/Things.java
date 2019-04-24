@@ -88,5 +88,13 @@ public interface Things {
 		}
 	}
 	
+	default void showQRCode(String qrCodeImageAbsolutePath) {
+		try {
+			System.out.println("Please open QR Code Image at " + qrCodeImageAbsolutePath);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	String exception(String error);
 }

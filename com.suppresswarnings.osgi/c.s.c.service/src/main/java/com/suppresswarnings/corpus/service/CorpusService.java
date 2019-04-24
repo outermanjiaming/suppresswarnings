@@ -2006,7 +2006,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		String accessToken = accessToken(business);
 		String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" + accessToken;
-		String json = "{\"touser\":\"" + openid + "\",\"msgtype\":\"text\",\"text\":{\"content\":\"" + message + "\"}}";
+		String json = "{\"touser\":\"" + openid + "\",\"msgtype\":\"text\",\"text\":{\"content\":\"" + message.replace("\\", "\\\\") + "\"}}";
 		CallablePost post = new CallablePost(url, json);
 		try {
 			String result = post.call();

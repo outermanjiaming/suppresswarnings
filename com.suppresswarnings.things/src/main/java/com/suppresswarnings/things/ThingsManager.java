@@ -25,7 +25,7 @@
  */
 package com.suppresswarnings.things;
 
-import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,10 +54,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import com.suppresswarnings.things.security.UnsafeClassLoader;
 
@@ -169,7 +165,7 @@ public class ThingsManager {
 			service.scheduleWithFixedDelay(() -> {
 				try {
 					String ret = doGet(String.format(Things.Const.PING_FORAMT, code));
-					System.out.println(start + " ping = " + ret);
+					System.out.println(start + " -> " + System.currentTimeMillis() + " ping = " + ret);
 					if(ret == null || "closed".equals(ret.trim())) {
 						System.out.println("restart");
 						things.exception("restart");
@@ -197,7 +193,7 @@ public class ThingsManager {
 						String call = callInput[0];
 						String input = callInput[1];
 						if(Things.Const.SHOW_QRCODE.equals(call)) {
-							qrcode(input, 50000);
+							qrcode(things, input, 50000);
 						}
 						String ret = execute(call, input);
 						System.out.println("ret ========= " + ret);
@@ -258,13 +254,8 @@ public class ThingsManager {
 		things.exception("Exit, " + error);
 	}
 	
-	public static void qrcode(String url, long size) {
+	public static void qrcode(Things things, String url, long size) {
 		try {
-			JFrame frame = new JFrame("微信扫一扫控制该程序");
-			int width = 430, height = 430; 
-			frame.setBackground(Color.PINK);
-			frame.setSize(width, height);
-			frame.setLocation(30, 30);
 			InputStream in = new URL(url).openStream();
 			File file = new File(Things.Const.QRCODE_FILE);
 			file.createNewFile();
@@ -273,14 +264,25 @@ public class ThingsManager {
 			FileChannel fch = fos.getChannel();
 			fch.transferFrom(ch, 0, size);
 			fos.close();
-			ImageIcon imageCode = new ImageIcon(file.getAbsolutePath());
-			JLabel qrCode = new JLabel(imageCode);
-			qrCode.setSize(width, height);
-			frame.add(qrCode);
-			frame.setVisible(true);
+			System.out.println("微信扫一扫二维码控制该程序");
 		} catch (Exception e) {
 			System.out.println("fail to show qrcode: " + e.getMessage());
 		}
 		
 	}
+	
+	public static String toAscii(BufferedImage bi) {
+        StringBuilder builder = new StringBuilder();
+        for (int r = 0; r < bi.getWidth(); r++) {
+            for (int c = 0; c < bi.getHeight(); c++) {
+                if (bi.getRGB(r, c) > 100) {
+                	builder.append("\033[47m   \033[0m");
+                } else {
+                	builder.append("\033[40m   \033[0m");
+                }
+            }
+            System.out.printf("\n");
+        }
+        return builder.toString();
+    }
 }

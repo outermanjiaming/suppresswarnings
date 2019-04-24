@@ -26,7 +26,10 @@ package com.suppresswarnings.things.demo;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+
+import javax.imageio.ImageIO;
 
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
@@ -127,6 +130,15 @@ public class TrafficLed implements Things {
 	@Override
 	public String description() {
 		return "树莓派红绿灯";
+	}
+	
+	@Override
+	public void showQRCode(String qrCodeImageAbsolutePath) {
+		try {
+			ThingsManager.toAscii(ImageIO.read(new File(qrCodeImageAbsolutePath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

@@ -2,15 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.suppresswarnings</groupId>
-    <artifactId>suppresswarnings-parent</artifactId>
+    <artifactId>com.suppresswarnings.osgi</artifactId>
     <version>1.0.0</version>
   </parent>
-  <artifactId>com.suppresswarnings.third</artifactId>
-  <dependencies>
-  <dependency>
-  <groupId>com.suppresswarnings</groupId>
-  <artifactId>c.s.c.common</artifactId>
-  <version>1.0.0</version>
-  </dependency>
-  </dependencies>
+  <artifactId>c.s.c.service.iot</artifactId>
 </project>
