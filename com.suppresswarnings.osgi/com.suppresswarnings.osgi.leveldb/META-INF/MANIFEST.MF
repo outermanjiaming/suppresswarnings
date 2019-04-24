@@ -2,9 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LevelDB
 Bundle-SymbolicName: com.suppresswarnings.osgi.leveldb
-Bundle-Version: 2018.5.5.osgi
+Bundle-Version: 2019.4.24.osgi
 Bundle-Vendor: LIJIAMING
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.commons.io,
   org.apache.commons.logging,
   org.slf4j
+Export-Package: com.suppresswarnings.osgi.leveldb

@@ -74,11 +74,11 @@ public class AIIoTContext extends WXContext {
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
-				if(mine == null) {
+				if(mine == null || "None".equals(mine)) {
 					//new things register
 					mine = time();
 					//3.check owner
-					if(ownerid != null) {
+					if(ownerid != null && !"None".equals(ownerid)) {
 						if(ownerid.equals(openid())) {
 							//save owner
 							u.content().account().put(keyMine, mine);
@@ -89,8 +89,8 @@ public class AIIoTContext extends WXContext {
 							//2.ask owner first
 							
 							//1.send text to owner
-							u.content().sendTxtTo("ask auth aiiot", user().getNickname() + "请求控制设备:" + info, ownerid);
-							u.output("已经通知主人你想绑定该设备");
+							u.content().sendTxtTo("ask auth aiiot", user().getNickname() + "请求控制设备:" + info+",如果你同意，请扫码并输入「解除绑定」", ownerid);
+							u.output("已经通知主人你想绑定该设备，让主人扫码并输入「解除绑定」");
 							return;
 						}
 					} else {
@@ -114,6 +114,8 @@ public class AIIoTContext extends WXContext {
 						}
 						u.output("你绑定了该设备，你可以通过命令进行控制: " + cmds);
 					}
+				} else {
+					u.output("该设备好像不属于任何人：" + info);
 				}
 			}
 
@@ -145,27 +147,32 @@ public class AIIoTContext extends WXContext {
 				if(info == null) {
 					u.output("未知设备");
 				}
-				u.output("设备信息："  + info);
+				
 				if(mine != null) {
-					u.content().account().del(keyMine);
+					u.content().account().put(keyMine, "None");
 					//TODO usage inform
-					u.output("你解除了该设备");
+					u.output("你解除了该设备：" + info);
+				} else {
+					u.output("设备信息："  + info);
 				}
+				
 				if(ownerid != null) {
 					if(ownerid.equals(openid())) {
 						//delete owner
-						u.content().account().del(keyOwner);
+						u.content().account().put(keyOwner, "None");
 						u.output("你是设备的主人，你解除绑定之后，别人可以绑定该设备");
 					} else {
+						u.content().atUser(ownerid, "用户正在解除绑定设备：" + info);
 						u.output("已经通知设备的主人");
 						return;
 					}
 				}
 				String left = u.content().account().get(keyMine);
-				if(left!= null) {
-					u.content().account().put(keyMine, "");
+				if(left == null || "None".equals(left)) {
+					u.output("已经解除绑定：" + info);
+				} else {
+					u.content().account().put(keyMine, "None");
 				}
-				u.output("已经解除绑定" + left);
 			}
 
 			@Override
@@ -200,7 +207,6 @@ public class AIIoTContext extends WXContext {
 			keyInfo = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code);
 			info = u.content().account().get(keyInfo);
 			u.output("设备信息：" + info);
-			u.output("你可以输入：");
 			
 			keyMine = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", code);
 			mine = u.content().account().get(keyMine);
@@ -213,10 +219,11 @@ public class AIIoTContext extends WXContext {
 			keyCmds = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code);
 			cmds = u.content().account().get(keyCmds);
 			logger.info("[AIIoTContext] owner : " + keyOwner + " => " + ownerid);
-			if(mine == null) {
-				u.output("    绑定设备");
+			if(mine == null || "None".equals(mine)) {
+				bind.accept(t, u);
+				state(init);
 			} else {
-				u.output("    解除绑定");
+				u.output("你已经绑定该设备，无须重复扫码，直接输入命令["+cmds+"]即可。如果你需要解绑可以输入：解除绑定。");
 			}
 		}
 
@@ -228,7 +235,7 @@ public class AIIoTContext extends WXContext {
 			if("绑定设备".equals(t)){
 				return bind;
 			}
-			return things;
+			return init;
 		}
 
 		@Override

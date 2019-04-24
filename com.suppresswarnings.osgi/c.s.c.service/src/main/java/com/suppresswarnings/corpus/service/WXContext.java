@@ -35,6 +35,11 @@ public class WXContext extends Context<CorpusService> {
 	
 	State<Context<CorpusService>> template = new State<Context<CorpusService>>() {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1154267650726164000L;
+
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			if("hi".equals(t)) u.output("hello");
@@ -185,6 +190,10 @@ public class WXContext extends Context<CorpusService> {
 						String remote = u.content().aiiot(openid(), code, reply, t, u);
 						logger.info("[WXContext] remote: " + remote);
 						u.output("远程状态："+ remote);
+						if(remote != null) {
+							logger.info("remove call aiiot success, just return");
+							return;
+						}
 					}
 					
 					HashSet<String> answers = u.content().aidToAnswers.get(aid);
@@ -207,9 +216,6 @@ public class WXContext extends Context<CorpusService> {
 					u.content().data().put(answerKey, t);
 					//counter for quiz
 					counter(u.content()).quiz(System.currentTimeMillis(), t);
-					
-					String crewKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Crew", openid());
-					u.content().data().put(crewKey, time());
 					aid = answerKey;
 				}
 				//save

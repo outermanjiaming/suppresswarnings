@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,8 +42,10 @@ public class AIIoT implements Closeable {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Map<String, Things> things = new ConcurrentHashMap<String, Things>();
 	Gson gson = new Gson();
+	Random random = new Random();
 	CorpusService service;
 	int sslPort;
+	String quizId;
 	AtomicBoolean on = new AtomicBoolean(true);
 	SSLServerSocket serverSocket;
 	ScheduledExecutorService scheduledExecutorService;
@@ -77,6 +80,7 @@ public class AIIoT implements Closeable {
 	}
 	
 	public void working() throws Exception {
+		this.quizId = service.getTodoQuizid();
 		Properties config = new Properties();
 		config.load(new FileInputStream(Config.serverConfigFilePath));
 		logger.info("[AIIoT] load config: " + config.size());
@@ -160,7 +164,19 @@ public class AIIoT implements Closeable {
 	public void checkCMD(String code, String[] commands){
 		String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Creator", code);
 		String openid = service.account().get(keyType);
+		if(openid == null) {
+			openid = "T_CODE_"+code;
+		}
+		
+		//counter for quiz
 		for(String cmd : commands) {
+			String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid, ""+System.currentTimeMillis(), ""+random.nextInt(9999));
+			String aid = service.data().get(answerKey);
+			if(aid == null) {
+				service.data().put(answerKey, cmd);
+				logger.info("[AIIoT] new words command: " + cmd + ", aid: " + aid);
+				service.questionToAid.put(cmd, answerKey);
+			}
 			String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid, "AIIoT", cmd);
 			String codes = service.account().get(keyCMD);
 			if(codes != null) {

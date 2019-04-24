@@ -248,7 +248,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			for(String thing : codes) {
 				String ret = aiiot.remoteCall(openid, thing, input, origin, context);
 				if(ret == null) {
-					
+					logger.error("[corpus aiiot] return null: "+ thing);
 				} else {
 					now.append(thing).append(";");
 					sb.append(thing).append("=").append(ret).append(";");
