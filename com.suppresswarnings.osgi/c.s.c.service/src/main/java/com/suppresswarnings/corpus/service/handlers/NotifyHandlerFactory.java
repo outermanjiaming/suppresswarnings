@@ -55,7 +55,7 @@ public class NotifyHandlerFactory {
 				projectid = state.split("_Template_")[1];
 			}
 			service.account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Sponsor", projectid), cashfee);
-			service.atUser(openid, "(通知)你成功赞助了"+cashfee+"分，请继续");
+			service.atUser(openid, "谢谢，你成功赞助了"+cashfee+"分，赞助金额将鼓励用户关注点赞！");
 			return "success";
 		} else {
 			service.atUser(openid, "你赞助支付失败");
