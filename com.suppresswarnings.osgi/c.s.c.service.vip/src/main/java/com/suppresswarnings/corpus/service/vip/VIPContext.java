@@ -116,7 +116,7 @@ public class VIPContext extends WXContext {
 						u.content().account().put(bossKey, inviter);
 						String crewKey = String.join(Const.delimiter, Const.Version.V1, inviter, "Crew", openid());
 						u.content().account().put(crewKey, openid());
-						String idx = u.content().increment(counterBoss);
+						String idx = u.content().increment(counterBoss, String.join(Const.delimiter, Const.Version.V1, inviter, "Crew"));
 						u.output("恭喜你是第"+idx+"位被"+bossName+"邀请加入素朴网联");
 						u.content().atUser(inviter, "第"+idx+"位朋友被你邀请加入素朴网联，邀请的用户成为你的资产，未来广告收益会给你分成，可以提现！");
 					} else {

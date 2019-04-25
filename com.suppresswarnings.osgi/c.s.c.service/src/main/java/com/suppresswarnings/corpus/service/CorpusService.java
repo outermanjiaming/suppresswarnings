@@ -2154,13 +2154,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 	}
 	
-	public String increment(String key) {
+	public String increment(String key, String start) {
 		synchronized (incrementers) {
 			AtomicInteger idx = incrementers.get(key);
 			if(idx == null) {
 				String value = account().get(key);
 				if(value == null) {
-					value = "1";
+					AtomicInteger val = new AtomicInteger(1);
+					account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+						val.incrementAndGet();
+					});
+					value = "" + val.get();
 					account().put(key, value);
 				}
 				int v = Integer.valueOf(value);
