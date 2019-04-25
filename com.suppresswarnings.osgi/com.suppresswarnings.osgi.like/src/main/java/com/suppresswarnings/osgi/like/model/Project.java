@@ -12,11 +12,26 @@ public class Project {
 	String title;
 	String pictures;
 	String bonusCent;
+	String target;
+	String sponsor;
 	Page<KeyValue> likes;
 	Page<KeyValue> comments;
 	Page<KeyValue> forwards;
 	Page<KeyValue> invests;
 	
+	
+	public String getSponsor() {
+		return sponsor;
+	}
+	public void setSponsor(String sponsor) {
+		this.sponsor = sponsor;
+	}
+	public String getTarget() {
+		return target;
+	}
+	public void setTarget(String target) {
+		this.target = target;
+	}
 	public Page<KeyValue> getComments() {
 		return comments;
 	}
@@ -101,5 +116,4 @@ public class Project {
 		return "Project [projectid=" + projectid + ", openid=" + openid + ", time=" + time + ", title=" + title
 				+ ", pictures=" + pictures + ", bonusCent=" + bonusCent + "]";
 	}
-	
 }

@@ -171,7 +171,12 @@ function pay() {
               if(res.err_msg == "get_brand_wcpay_request:ok" ){
                   console.log('finish success')
 				  $("#sampleData").html("恭喜，您已经支付成功！")
-				  location.href = "/user.html"
+				  if(state.indexOf("Like_Template_") != -1) {
+				    window.close();
+				  } else { 
+				    location.href = "/user.html"
+				  }
+				  
             }
       });
 

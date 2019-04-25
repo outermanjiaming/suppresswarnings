@@ -1549,10 +1549,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.error("[prepay] openid null");
 				return "fail";
 			}
-			String goodsid= parameter.getParameter("goodsid");
+			String state = parameter.getParameter("goodsid");
 			String amount  = parameter.getParameter("amount");
 			
-			String detail = "[" + goodsid + ", " + amount + "]";
+			String detail = "[" + state + ", " + amount + "]";
+			String goodsid = state;
+			if(state.contains("_Template_")) {
+				goodsid = state.split("_Template_")[0];
+			}
 			String reason =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Reason"));
 			String what =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "What"));
 			String body = "素朴网联-" + reason + "-" +amount + "-" + what;
@@ -1578,6 +1582,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String randEnd = random.substring(random.length() - 4);
 			long current = System.currentTimeMillis(); 
 			String orderid = type + current + openIdEnd + randEnd;
+			//TODO 临时加的赞助金额的goodid特殊表示
+			if(state.contains("_Template_")) {
+				goodsid = state.split("_Template_")[0];
+				orderid = goodsid + current + openIdEnd + randEnd;
+			}
 			
 			String projectid = parameter.getParameter("projectid");
 			if(projectid != null && projectid.length() > 5) {
@@ -1585,9 +1594,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			String clientip = ip.split(",")[0];
-			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + goodsid + ", amount:" + amount);
+			logger.info("[corpus prepay] openid:" + openid + ", goodsid:" + state + ", amount:" + amount);
 			try {
-				return prepay(orderid, body, detail, goodsid, amount, totalcent, clientip, openid, current, type);
+				return prepay(orderid, body, detail, state, amount, totalcent, clientip, openid, current, type);
 			} catch (Exception e) {
 				return "fail";
 			}
@@ -1625,6 +1634,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 			token().put(code2OpenIdKey, accessToken.getOpenid());
 			
 			String goodsid = state;
+			if(state.contains("_Template_")) {
+				goodsid = state.split("_Template_")[0];
+			}
 			String reason =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Reason"));
 			String what =  account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "What"));
 			String goodsTypeKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Type");

@@ -43,7 +43,25 @@ public class NotifyHandlerFactory {
 		}
 		return "success";
 	};
-	
+	static RequestHandler sponsor = (parameter, service, args) ->{
+		String result = args[0];
+		String orderid = args[1];
+		String openid = args[2];
+		String state = args[3];
+		String cashfee = args[4];
+		if("SUCCESS".equals(result)) {
+			String projectid = orderid;
+			if(state.contains("_Template_")) {
+				projectid = state.split("_Template_")[1];
+			}
+			service.account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Sponsor", projectid), cashfee);
+			service.atUser(openid, "(通知)你成功赞助了"+cashfee+"分，请继续");
+			return "success";
+		} else {
+			service.atUser(openid, "你赞助支付失败");
+			return "fail";
+		}
+	};
 	static RequestHandler daigou = (parameter, service, args) ->{
 		String result = args[0];
 		String orderid = args[1];
@@ -94,7 +112,7 @@ public class NotifyHandlerFactory {
 			if(!equal) {
 				return "fail";
 			}
-			String goodid = map.get("attach");
+			String attach = map.get("attach");
 			String orderid = map.get("out_trade_no");
 			String openid = map.get("openid");
 			String result = map.get("result_code");
@@ -102,8 +120,11 @@ public class NotifyHandlerFactory {
 			String transactionid = map.get("transaction_id");
 			double fee = Double.valueOf(cashfee) / 100;
 			String money = fee + "元";
-			
-			if(goodid != null) {
+			String goodid = attach;
+			if(attach != null) {
+				if(attach.contains("_Template_")) {
+					goodid = attach.split("_Template_")[0];
+				}
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Paid", goodid, openid, orderid), "" + System.currentTimeMillis());
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Paid", goodid, orderid), "" + System.currentTimeMillis());
 				String keyBossid = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodid, "Bossid");
@@ -142,7 +163,10 @@ public class NotifyHandlerFactory {
 				String code = service.generateActivateCode(openid);
 				service.atUser(openid, code);
 				return "success";
-			}else {
+			} else if(orderid.startsWith("Like")) {
+				logger.info("赞助金额：" + cashfee + " for " + goodid);
+				return sponsor.handler(parameter, service, result, orderid, openid, attach, cashfee);
+			} else {
 				return RequestHandler.simple.handler(parameter, service);
 			}
 		} catch (Exception e) {

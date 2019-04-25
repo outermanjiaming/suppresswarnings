@@ -27,7 +27,16 @@ public class LikeContext extends WXContext {
 			project.setProjectid(String.join(Const.delimiter, "Project", time(), openid()));
 			project.setBonusCent("1000");
 			project.setTime(time());
-			u.output("你正在创建点赞，集赞达到目标即可获得现金奖励，所有参与点赞者均有分红。\n\n请输入这一刻你的想法：");
+			
+			WXnews news = new WXnews();
+			news.setTitle("点击进行支付赞助金额");
+			news.setDescription("你可以选择支付赞助金额，赞助金额越大传播越广越快");
+			news.setUrl("http://SuppressWarnings.com/payment.html?state=Like_Template_" + project.getProjectid());
+			news.setPicUrl("http://SuppressWarnings.com/like.png");
+			String json = gson.toJson(news);
+			u.output("news://" + json);
+			
+			u.content().atUser(openid(), "请输入你要大家点赞的内容：");
 		}
 
 		@Override
@@ -133,15 +142,23 @@ public class LikeContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			project.setTarget("1000");
 			logger.info(project.toString());
 			save();
 			WXnews news = new WXnews();
-			news.setTitle("进来帮我点赞，先赞一个亿，一起分红！");
-			news.setDescription("「"+project.getTitle()+"」进来帮我点赞，先赞一个亿！所有参与点赞者均有分红！");
+			news.setTitle("进来点赞就可以赚钱！");
+			news.setDescription("「"+project.getTitle()+"」进来点赞评论就可以赚钱，随时可以提现！");
 			news.setUrl("http://SuppressWarnings.com/like.html?state="+project.getProjectid());
 			news.setPicUrl("http://SuppressWarnings.com/like.png");
 			String json = gson.toJson(news);
 			u.output("news://" + json);
+			String sponsor = u.content().account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Sponsor", project.getProjectid()));
+			if(sponsor == null) {
+				sponsor = "你还没有赞助，如果你支付赞助将会鼓励大家一起分享哦";
+			} else {
+				sponsor = "赞，你已经支付了" + sponsor + "分赞助本次点赞传播！";
+			}
+			u.content().atUser(openid(), "点击链接，分享给朋友们一起点赞，祝你早日完成点赞目标！\n当前点赞目标："+ project.getTarget() + "\n" + sponsor);
 		}
 
 		@Override
@@ -168,7 +185,7 @@ public class LikeContext extends WXContext {
 		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project.getProjectid()), project.getTitle());
 		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Pictures", project.getProjectid()), project.getPictures());
 		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "BonusCent", project.getProjectid()), project.getBonusCent());
-		
+		content().account().put(String.join(Const.delimiter, Const.Version.V2, "Project", "Target", project.getProjectid()), project.getTarget());
 		content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Projectid", project.getProjectid()), project.getProjectid());
 	}
 	
