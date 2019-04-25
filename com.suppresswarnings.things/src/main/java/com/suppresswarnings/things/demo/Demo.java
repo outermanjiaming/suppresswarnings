@@ -87,6 +87,15 @@ public class Demo extends JFrame implements Things {
 		return "OFF";
 	}
 	
+	@SuppressWarnings("测试交互")
+	public String inter(String input){
+		status=!status;
+		bulb.setIcon(status?imageOff:imageOn);
+		return INTERACTIVE;
+	}
+	
+	
+	
 	@Override
 	public String exception(String error) {
 		for(int i=0;i<30;i++) {
@@ -111,6 +120,8 @@ public class Demo extends JFrame implements Things {
 		return "模拟灯具";
 	}
 	
+	
+	
 	@Override
 	public String code() {
 		return "LiJiaming_Test_Things";
@@ -118,7 +129,6 @@ public class Demo extends JFrame implements Things {
 	
 	@Override
 	public void showQRCode(String remoteQRCodeURL, String text) {
-		System.out.println(remoteQRCodeURL);
 		JFrameQR.show(remoteQRCodeURL, text);
 	}
 	
