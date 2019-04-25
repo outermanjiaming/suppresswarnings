@@ -36,6 +36,7 @@ public interface Things {
 	String SUCCESS = "success";
 	String FAIL = "fail";
 	String ERROR = "error";
+	String INTERACTIVE = "interactive";
 	interface Config {
 		String CODE = "things.code";
 	}
@@ -89,7 +90,7 @@ public interface Things {
 		}
 	}
 	
-	default void showQRCode(String remoteQRCodeURL) {
+	default void showQRCode(String remoteQRCodeURL, String text) {
 		try {
 			System.out.println("Please open QR Code Image at " + remoteQRCodeURL);
 		} catch (Exception e) {

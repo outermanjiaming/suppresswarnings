@@ -81,3 +81,4 @@ public class Example implements Things {
 * 1. 其中value是String类型，
 * 1. 如果注解在方法上就是命令（方法是固定格式：`public String test(String input)）
 * 1. 如果注解在其他地方就是普通说明（后期可能会对类上面的注解进行解析）
+* 1. 返回值包括Things.INTERACTIVE，Things.SUCCESS，Things.FAIL，Things.ERROR，其中Things.INTERACTIVE表示接下来的输入会直接进入该方法内。

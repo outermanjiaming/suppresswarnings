@@ -28,10 +28,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
-import com.suppresswarnings.things.QRCodeUtil;
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
+import com.suppresswarnings.things.qr.ScreenQR;
 
 public class TrafficLed implements Things {
 
@@ -131,8 +131,8 @@ public class TrafficLed implements Things {
 	}
 	
 	@Override
-	public void showQRCode(String remoteQRCodeURL) {
-		QRCodeUtil.showQRCodeOnScreen(remoteQRCodeURL);
+	public void showQRCode(String remoteQRCodeURL, String text) {
+		ScreenQR.show(remoteQRCodeURL, text);
 	}
 
 	public static void main(String[] args) throws Exception {

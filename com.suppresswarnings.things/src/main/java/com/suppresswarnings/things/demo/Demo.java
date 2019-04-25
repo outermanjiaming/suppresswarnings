@@ -31,10 +31,10 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import com.suppresswarnings.things.QRCodeUtil;
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
+import com.suppresswarnings.things.qr.JFrameQR;
 
 public class Demo extends JFrame implements Things {
 	private static final long serialVersionUID = -3570646113762994098L;
@@ -117,8 +117,9 @@ public class Demo extends JFrame implements Things {
 	}
 	
 	@Override
-	public void showQRCode(String remoteQRCodeURL) {
-		QRCodeUtil.showQRCodeAsJFrame(remoteQRCodeURL);
+	public void showQRCode(String remoteQRCodeURL, String text) {
+		System.out.println(remoteQRCodeURL);
+		JFrameQR.show(remoteQRCodeURL, text);
 	}
 	
 	public static void main(String[] args) throws Exception {

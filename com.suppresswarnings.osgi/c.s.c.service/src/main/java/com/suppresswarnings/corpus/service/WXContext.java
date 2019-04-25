@@ -187,7 +187,7 @@ public class WXContext extends Context<CorpusService> {
 					//get my things code, which is unique for each things
 					logger.info("Key: " + keyCMD + " => " + code);
 					if(code != null) {
-						String remote = u.content().aiiot(openid(), code, reply, t, u);
+						String remote = u.content().aiiot(wxid(), openid(), code, reply, t, u);
 						logger.info("[WXContext] remote: " + remote);
 						u.output("远程状态："+ remote);
 						if(remote != null) {

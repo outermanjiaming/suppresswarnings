@@ -62,7 +62,7 @@ public class AIIoT implements Closeable {
 		logger.info(code + " has diff " + diff);
 		return "success";
 	}
-	public String remoteCall(String openid, String code, String cmd, String input, Context<?> context) {
+	public String remoteCall(String wxid, String openid, String code, String cmd, String input, Context<?> context) {
 		Things thing = service.aiiot.things.get(code);
 		logger.info("[AIIoT] remoteCall "+ thing);
 		if(thing == null) {
@@ -76,7 +76,17 @@ public class AIIoT implements Closeable {
 			return null;
 		}
 		logger.info("[AIIoT] remoteCall("+openid+", "+thing+", " +input+ ", " +context+ ")");
-		return thing.execute(cmd, input);
+		String ret = thing.execute(cmd, input);
+		if(context instanceof InteractiveContext) {
+			logger.info("[AIIoT] InteractiveContext working");
+		} else {
+			if("interactive".equals(ret)) {
+				Context<?> ctx = new InteractiveContext(wxid, openid, service, cmd, code, thing.desc);
+				service.contextx(openid, ctx, TimeUnit.MINUTES.toMillis(10));
+				logger.info("[AIIoT] first time into InteractiveContext");
+			}
+		}
+		return ret;
 	}
 	
 	public void working() throws Exception {
@@ -135,7 +145,7 @@ public class AIIoT implements Closeable {
 				String accessToken = service.accessToken("things qrcode");
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", qrScene), qrScene);
 				service.setGlobalCommand(qrScene, "智能家居设备", code, "" + System.currentTimeMillis());
-				String json = service.qrCode(accessToken, 10000, "QR_STR_SCENE", qrScene);
+				String json = service.qrCode(accessToken, 1200, "QR_STR_SCENE", qrScene);
 				QRCodeTicket qrTicket = gson.fromJson(json, QRCodeTicket.class);
 				String commands = args[2];
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", code), description);
@@ -151,7 +161,7 @@ public class AIIoT implements Closeable {
 				if(thing != null) {
 					things.put(code, thing);
 					logger.info("[AIIoT] new things register: " + thing.toString());
-					thing.execute("suppresswarnings.showqrcode", "http://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
+					thing.execute("suppresswarnings.showqrcode", "http://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket() + "#" + qrTicket.getUrl());
 				} else {
 					logger.info("[AIIoT] unknown things: " + knock);
 				}

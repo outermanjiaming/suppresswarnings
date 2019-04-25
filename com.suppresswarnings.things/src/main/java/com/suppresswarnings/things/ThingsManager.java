@@ -188,7 +188,9 @@ public class ThingsManager {
 						String input = callInput[1];
 						if(Things.Const.SHOW_QRCODE.equals(call)) {
 							System.out.println("微信扫一扫二维码控制该程序");
-							things.showQRCode(input);
+							String[] url_text = input.split("#");
+							if(url_text.length < 2) url_text = new String[] {input, input};
+							things.showQRCode(url_text[0], url_text[1]);
 						}
 						String ret = execute(call, input);
 						if("true".equals(debug)) System.out.println("return " + ret);

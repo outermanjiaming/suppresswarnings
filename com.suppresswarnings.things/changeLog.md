@@ -11,3 +11,6 @@
 ```
 * 增加QRCodeUtil
 用法：在Things中增加showQRCode方法，根据情况使用相应的Util静态方法
+
+* 1.0.8
+* 为了适配树莓派（不支持javax.io）将QRCodeUtil拆分为3个，位于com.suppresswarnings.things.util

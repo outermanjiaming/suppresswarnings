@@ -76,7 +76,7 @@ public class Remote implements Things {
 			return ERROR;
 		}
 		
-		return SUCCESS;
+		return INTERACTIVE;
 	}
 	
 	@Override

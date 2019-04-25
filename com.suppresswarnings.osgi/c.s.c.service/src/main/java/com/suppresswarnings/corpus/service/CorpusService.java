@@ -240,13 +240,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return this.workHandler.clockOut(openid);
 	}
 
-	public String aiiot(String openid, String code, String input, String origin, Context<CorpusService> context) {
+	public String aiiot(String wxid, String openid, String code, String input, String origin, Context<CorpusService> context) {
 		if(code.contains(";")) {
 			StringBuffer sb = new StringBuffer();
 			String[] codes = code.split(";");
 			StringBuffer now = new StringBuffer();
 			for(String thing : codes) {
-				String ret = aiiot.remoteCall(openid, thing, input, origin, context);
+				String ret = aiiot.remoteCall(wxid, openid, thing, input, origin, context);
 				if(ret == null) {
 					logger.error("[corpus aiiot] return null: "+ thing);
 				} else {
@@ -259,7 +259,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			context.content().account().put(keyCMD, now.toString());
 			return sb.toString();
 		} else {
-			return aiiot.remoteCall(openid, code, input, origin, context);
+			return aiiot.remoteCall(wxid, openid, code, input, origin, context);
 		}
 	}
 	public String toJson(Object obj) {
@@ -605,7 +605,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if("exam".equals(cmd)) {
 			for(int i=0;i<size && start.get() < assimilatedQuiz.size();i++) {
 				String input = assimilatedQuiz.get(start.getAndIncrement()).getQuiz().value();
-				String ret = aiiot.remoteCall("myself", code, cmd, input, context);
+				String ret = aiiot.remoteCall("appid", "myself", code, cmd, input, context);
 				logger.info("generate mp3 remote: " + ret);
 			}
 		}
@@ -1173,15 +1173,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[WX] this stage finished: " + context.state());
 				}
 				String out = context.output();
-				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && switches("aiiot").get()) {
-					logger.info("管理员发话了： " + out);
-					aiiot.remoteCall(openid, "Robot_AIIoT_0001", "exam", out, context);
-				}
-				if(isAdmin(openid, "aiiot", ""+System.currentTimeMillis()) && input.equals("aiiot")) {
-					boolean open = switches("aiiot").get();
-					switches("aiiot").set(!open);
-					logger.info("switch aiiot from " + open);
-				}
 				
 				return xml(openid, out, fromOpenId);
 			}
