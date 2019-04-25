@@ -24,17 +24,14 @@
 package com.suppresswarnings.things.demo;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-
+import com.suppresswarnings.things.QRCodeUtil;
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
@@ -120,22 +117,8 @@ public class Demo extends JFrame implements Things {
 	}
 	
 	@Override
-	public void showQRCode(String qrCodeImageAbsolutePath) {
-		try {
-			JFrame frame = new JFrame("微信扫一扫控制该程序");
-			int width = 430, height = 430; 
-			frame.setBackground(Color.PINK);
-			frame.setSize(width, height);
-			frame.setLocation(30, 30);
-			File file = new File(qrCodeImageAbsolutePath);
-			ImageIcon imageCode = new ImageIcon(file.getAbsolutePath());
-			JLabel qrCode = new JLabel(imageCode);
-			qrCode.setSize(width, height);
-			frame.add(qrCode);
-			frame.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void showQRCode(String remoteQRCodeURL) {
+		QRCodeUtil.showQRCodeAsJFrame(remoteQRCodeURL);
 	}
 	
 	public static void main(String[] args) throws Exception {

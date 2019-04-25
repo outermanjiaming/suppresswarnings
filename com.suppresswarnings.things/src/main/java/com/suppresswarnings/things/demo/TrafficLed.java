@@ -26,11 +26,9 @@ package com.suppresswarnings.things.demo;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import javax.imageio.ImageIO;
-
+import com.suppresswarnings.things.QRCodeUtil;
 import com.suppresswarnings.things.SuppressWarnings;
 import com.suppresswarnings.things.Things;
 import com.suppresswarnings.things.ThingsManager;
@@ -133,12 +131,8 @@ public class TrafficLed implements Things {
 	}
 	
 	@Override
-	public void showQRCode(String qrCodeImageAbsolutePath) {
-		try {
-			ThingsManager.toAscii(ImageIO.read(new File(qrCodeImageAbsolutePath)));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void showQRCode(String remoteQRCodeURL) {
+		QRCodeUtil.showQRCodeOnScreen(remoteQRCodeURL);
 	}
 
 	public static void main(String[] args) throws Exception {

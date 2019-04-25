@@ -25,12 +25,9 @@
  */
 package com.suppresswarnings.things;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,9 +40,6 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,12 +144,12 @@ public class ThingsManager {
 			}
 			
 			String code = System.getProperty(Things.Config.CODE, things.code()); 
-			String debug = System.getProperty("debug");
+			String debug = System.getProperty(Things.Const.DEBUG_SWITCH);
 			if("true".equals(debug)) System.setProperty("javax.net.debug", "ssl,handshake");
 			Config prepare = new UnsafeClassLoader(Thread.currentThread().getContextClassLoader()).load(Config.code(), "prepare");
 			this.sslsocket = prepare.factory().createSocket(Things.Const.HOST, Things.Const.PORT);
 			String knock = String.join(",", things.description(), code, String.join(";", commands)) + "\n";
-			System.out.println("knock ======== " + knock);
+			if("true".equals(debug)) System.out.println("knock at " + knock);
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(sslsocket.getOutputStream(), Things.Const.UTF8));    
 			out.write(knock);
 			out.flush();
@@ -165,7 +159,7 @@ public class ThingsManager {
 			service.scheduleWithFixedDelay(() -> {
 				try {
 					String ret = doGet(String.format(Things.Const.PING_FORAMT, code));
-					System.out.println(start + " -> " + System.currentTimeMillis() + " ping = " + ret);
+					if("true".equals(debug)) System.out.println(start + " -> " + System.currentTimeMillis() + " ping = " + ret);
 					if(ret == null || "closed".equals(ret.trim())) {
 						System.out.println("restart");
 						things.exception("restart");
@@ -182,7 +176,7 @@ public class ThingsManager {
 		    	while(run.get() && sslsocket.isConnected() && !sslsocket.isClosed()) {
 					BufferedReader in = new BufferedReader(new InputStreamReader(is, Things.Const.UTF8));
 					String msg = in.readLine();
-					System.out.println("msg ========= " + msg);
+					if("true".equals(debug)) System.out.println("msg read " + msg);
 					if(msg == null) {
 						run.set(false);
 						continue;
@@ -193,10 +187,11 @@ public class ThingsManager {
 						String call = callInput[0];
 						String input = callInput[1];
 						if(Things.Const.SHOW_QRCODE.equals(call)) {
-							qrcode(things, input, 50000);
+							System.out.println("微信扫一扫二维码控制该程序");
+							things.showQRCode(input);
 						}
 						String ret = execute(call, input);
-						System.out.println("ret ========= " + ret);
+						if("true".equals(debug)) System.out.println("return " + ret);
 						out.write(ret + "\n");
 						out.flush();
 					} else {
@@ -214,7 +209,7 @@ public class ThingsManager {
 				things.exception("网络异常，请重启！" + e.getMessage());
 				System.out.println(e.getMessage() + "网络异常，请重启！");
 			}
-			
+			service.shutdown();
 			System.out.println("Executor stops");
 		}
 	}
@@ -253,36 +248,4 @@ public class ThingsManager {
 		}
 		things.exception("Exit, " + error);
 	}
-	
-	public static void qrcode(Things things, String url, long size) {
-		try {
-			InputStream in = new URL(url).openStream();
-			File file = new File(Things.Const.QRCODE_FILE);
-			file.createNewFile();
-			ReadableByteChannel ch = Channels.newChannel(in);
-			FileOutputStream fos = new FileOutputStream(file);
-			FileChannel fch = fos.getChannel();
-			fch.transferFrom(ch, 0, size);
-			fos.close();
-			System.out.println("微信扫一扫二维码控制该程序");
-		} catch (Exception e) {
-			System.out.println("fail to show qrcode: " + e.getMessage());
-		}
-		
-	}
-	
-	public static String toAscii(BufferedImage bi) {
-        StringBuilder builder = new StringBuilder();
-        for (int r = 0; r < bi.getWidth(); r++) {
-            for (int c = 0; c < bi.getHeight(); c++) {
-                if (bi.getRGB(r, c) > 100) {
-                	builder.append("\033[47m   \033[0m");
-                } else {
-                	builder.append("\033[40m   \033[0m");
-                }
-            }
-            System.out.printf("\n");
-        }
-        return builder.toString();
-    }
 }

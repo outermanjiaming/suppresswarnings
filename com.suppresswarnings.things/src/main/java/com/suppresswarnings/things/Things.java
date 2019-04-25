@@ -44,6 +44,7 @@ public interface Things {
 		Integer PORT = 6617;
 		String UTF8 = "UTF-8";
 		String CODE_FILE = "suppresswarnings.code";
+		String DEBUG_SWITCH = "suppresswarnings.debug";
 		String PING_FORAMT = "http://suppresswarnings.com/wx.http?action=ping&type=things&token=%s";
 		String SHOW_QRCODE = "suppresswarnings.showqrcode";
 		String QRCODE_FILE = "suppresswarnings.qrcode.jpg";
@@ -88,9 +89,9 @@ public interface Things {
 		}
 	}
 	
-	default void showQRCode(String qrCodeImageAbsolutePath) {
+	default void showQRCode(String remoteQRCodeURL) {
 		try {
-			System.out.println("Please open QR Code Image at " + qrCodeImageAbsolutePath);
+			System.out.println("Please open QR Code Image at " + remoteQRCodeURL);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
