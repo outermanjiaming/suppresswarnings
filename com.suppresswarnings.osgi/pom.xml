@@ -35,6 +35,7 @@
       <module>c.s.c.service.cashout</module>
       <module>c.s.c.service.likeshare</module>
       <module>c.s.c.service.iot</module>
+      <module>c.s.c.service.vip</module>
   </modules>
   <dependencies>
   		<dependency>

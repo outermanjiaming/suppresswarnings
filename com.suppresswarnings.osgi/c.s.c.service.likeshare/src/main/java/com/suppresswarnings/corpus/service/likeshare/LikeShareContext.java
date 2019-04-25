@@ -82,18 +82,27 @@ public class LikeShareContext extends WXContext {
 					double score = new Random().nextDouble();
 					if(score < 0.6) {
 						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "3");
-						u.output("恭喜你，抽中三等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
+						u.content().atUser(openid(), "恭喜你，抽中三等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					} else if(score > 0.9) {
 						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "100");
-						u.output("恭喜你，抽中一等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
+						u.content().atUser(openid(), "恭喜你，抽中一等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					} else {
 						u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Project", "Money", "Like", time()), "10");
-						u.output("恭喜你，抽中二等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
+						u.content().atUser(openid(), "恭喜你，抽中二等奖，可以直接输入「我要提现」申请提现哦，秒到账！");
 					}
 				} else {
 					u.content().account().put(String.join(Const.delimiter, Const.Version.V2, "Inform", "Game", "Like", time(), random()), openid());
-					u.output("你已经参与抽奖活动了，奖金已经在你的账户，你可以输入「我要提现」申请提现哦，秒到账！");
+					u.content().atUser(openid(), "你已经参与抽奖活动了，奖金已经在你的账户，你可以输入「我要提现」申请提现哦，秒到账！");
 				}
+				
+				Gson gson = new Gson();
+				WXnews news = new WXnews();
+				news.setTitle("进来点赞就可以赚钱！");
+				news.setDescription("「分享点赞可以分红」进来点赞评论就可以赚钱，可以提现！");
+				news.setUrl("http://SuppressWarnings.com/like.html");
+				news.setPicUrl("http://SuppressWarnings.com/like.png");
+				String json = gson.toJson(news);
+				u.output("news://" + json);
 			}
 		}
 

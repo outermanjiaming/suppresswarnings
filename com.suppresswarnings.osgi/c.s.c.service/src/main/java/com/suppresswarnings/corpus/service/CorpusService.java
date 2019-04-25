@@ -135,6 +135,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public static final Format quizAnswerReplyOrSimilar = new Format(formats);
 	public Map<String, Counter> counters = new ConcurrentHashMap<>();
 	public Map<String, AtomicInteger> atomicIds = new ConcurrentHashMap<>();
+	public Map<String, AtomicInteger> incrementers = new ConcurrentHashMap<>();
 	public Map<String, AtomicBoolean> atomicSwitches = new ConcurrentHashMap<>();
 	public Map<String, String> questionToAid = new ConcurrentHashMap<>();
 	public Map<String, HashSet<String>> aidToAnswers = new ConcurrentHashMap<>();
@@ -2150,6 +2151,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			return string + Const.delimiter + id.getAndIncrement();
+		}
+	}
+	
+	public String increment(String key) {
+		synchronized (incrementers) {
+			AtomicInteger idx = incrementers.get(key);
+			if(idx == null) {
+				String value = account().get(key);
+				if(value == null) {
+					value = "1";
+					account().put(key, value);
+				}
+				int v = Integer.valueOf(value);
+				idx = new AtomicInteger(v);
+				atomicIds.put(key, idx);
+			}
+			
+			return ""+idx.incrementAndGet();
 		}
 	}
 	
