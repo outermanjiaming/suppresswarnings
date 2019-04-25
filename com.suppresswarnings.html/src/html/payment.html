@@ -171,12 +171,7 @@ function pay() {
               if(res.err_msg == "get_brand_wcpay_request:ok" ){
                   console.log('finish success')
 				  $("#sampleData").html("恭喜，您已经支付成功！")
-				  if(state.indexOf("Like_Template_") != -1) {
-				    window.close();
-				  } else { 
-				    location.href = "/user.html"
-				  }
-				  
+				  wx.closeWindow();
             }
       });
 
@@ -380,6 +375,57 @@ if(Request.code === undefined) {
 	state  = Request.state
 	showDiv()
 	console.log("code: " + ticket + ", state: " + state)
+	var url = window.location.href;
+		var en = base64encode(url);
+		console.log("====== ======= " + en);
+		$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=jsapi_ticket&url='+en,
+			dataType: 'json',
+			success: function(data) {
+				wx.config({
+				    debug: false,
+				    appId: 'wx41b262e9b9d8885e',
+				    timestamp: data.timestamp,
+				    nonceStr: data.nonceStr,
+				    signature: data.signature,
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'closeWindow']
+				});
+			
+				wx.ready(function () {
+				    console.log(window.__wxjs_environment === 'miniprogram');
+					wx.checkJsApi({
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'closeWindow'],
+					    success: function(res) {
+					        console.log("check js api ok: " + res)
+					    }
+					});
+				    wx.onMenuShareTimeline({ 
+				        title: '进来点赞就可以赚钱',
+				        link: 'http://suppresswarnings.com/like.html',
+				        imgUrl: 'http://suppresswarnings.com/like.png',
+				        success: function () {
+				           console.log("===== lijiaming ====");
+				        }
+				    });
+				    
+				    wx.onMenuShareAppMessage({
+						title: '进来点赞就可以赚钱',
+						desc: '进来点赞评论就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
+						link: 'http://suppresswarnings.com/like.html',
+						imgUrl: 'http://suppresswarnings.com/like.png',
+						success: function () {
+							console.log("===== lijiaming ====");
+						}
+					});
+				});
+			},
+			error: function(xhr, type){
+				alert('js api ticket error!');
+				dropload.resetload();
+			}
+		});
+		
 	jQuery.getScript("js/payment.js?r=" + Math.random());
 }
 

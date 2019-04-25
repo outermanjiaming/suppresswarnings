@@ -161,10 +161,10 @@ $(function()
 			console.log(data);
 			
 			
-			var url = window.location.href;
-			var en = base64encode(url);
-			console.log("====== ======= " + en);
-			$.ajax({
+		var url = window.location.href;
+		var en = base64encode(url);
+		console.log("====== ======= " + en);
+		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=jsapi_ticket&url='+en,
 			dataType: 'json',
@@ -210,7 +210,7 @@ $(function()
 				alert('js api ticket error!');
 				dropload.resetload();
 			}
-			});
+		});
 			
 			
 			
