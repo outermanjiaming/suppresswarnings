@@ -60,7 +60,7 @@ var ItemUiHelper =
 				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-comment">留言</span>'
 				+like
 			+'</div>'
-			+'<p class="sponsor" style="font-size: 12px;color: #576b95;border: 1px solid #ddd;border-radius: 3px;padding:2px 3px; background:#eee;"><span>目标:10000赞</span><span>赞助:30分</span><span>投资:180分</span><span>点赞:180个</span></p>';	
+			+'<p class="sponsor" style="font-size: 12px;color: #576b95;border: 1px solid #ddd;border-radius: 3px;padding:2px 3px; background:#eee;"><span>赞助：'+itemData.sponsor+'分</span><span>目标：'+itemData.target+'赞</span><span>投资：'+itemData.invest+'分</span><span>点赞：'+itemData.liked+'个</span></p>';	
 	},
 	
 

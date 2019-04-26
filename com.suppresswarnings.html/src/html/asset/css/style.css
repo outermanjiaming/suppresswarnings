@@ -178,7 +178,10 @@ header {
     display: inline-block
 }
 
-
+.sponsor span {
+    display:block;
+    margin: 4px 2px;
+}
 
 
 .triangle {
