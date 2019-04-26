@@ -45,6 +45,8 @@ public class LikeHandlerImpl implements LikeHandler {
 			String userid = service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Openid", project.getProjectid()));
 			project.setTitle(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Title", project.getProjectid())));
 			project.setBonusCent(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "BonusCent", project.getProjectid())));
+			project.setTarget(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Target", project.getProjectid())));
+			project.setSponsor(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Sponsor", project.getProjectid())));
 			project.setOpenid(userid);
 			KeyValue kv = service.user(userid);
 			project.setUname(kv.key());

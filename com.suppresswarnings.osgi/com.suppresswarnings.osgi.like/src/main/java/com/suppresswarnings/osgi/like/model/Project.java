@@ -14,23 +14,30 @@ public class Project {
 	String bonusCent;
 	String target;
 	String sponsor;
+	String liked;
 	Page<KeyValue> likes;
 	Page<KeyValue> comments;
 	Page<KeyValue> forwards;
 	Page<KeyValue> invests;
 	
 	
+	public String getLiked() {
+		return liked;
+	}
+	public void setLiked(String liked) {
+		this.liked = liked == null ? "" : liked;
+	}
 	public String getSponsor() {
 		return sponsor;
 	}
 	public void setSponsor(String sponsor) {
-		this.sponsor = sponsor;
+		this.sponsor = sponsor == null ? "" : sponsor;
 	}
 	public String getTarget() {
 		return target;
 	}
 	public void setTarget(String target) {
-		this.target = target;
+		this.target = target == null ? "" : target;
 	}
 	public Page<KeyValue> getComments() {
 		return comments;
@@ -91,6 +98,7 @@ public class Project {
 	}
 	public void setLikes(Page<KeyValue> likes) {
 		this.likes = likes;
+		setLiked("" + likes.getEntries().size());
 	}
 	public Page<KeyValue> getForwards() {
 		return forwards;
