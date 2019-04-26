@@ -12,7 +12,7 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class VIPContext extends WXContext {
 
-	public static final String CMD = "我是VIP";
+	public static final String CMD = "我是vip";
 	State<Context<CorpusService>> vip = new State<Context<CorpusService>>() {
 
 		/**
@@ -40,17 +40,17 @@ public class VIPContext extends WXContext {
 					String qrMyKey = String.join(Const.delimiter, Const.Version.V1, openid(), "VIP");
 					u.content().account().put(qrMyKey, json);
 					qrTicket = gson.fromJson(json, QRCodeTicket.class);
-					logger.info("Create permanent qrcode: " + qrTicket.getUrl());
+					logger.info("Create permanent qrcode: " + exist);
 				} else {
 					qrTicket = gson.fromJson(exist, QRCodeTicket.class);
-					logger.info("Use exist permanent qrcode: " + qrTicket.getUrl());
+					logger.info("Use exist permanent qrcode: " + exist);
 				}
 				
 				String myvip = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()));
 				if(myvip == null || "None".equals(myvip)) {
 					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()), openid());
 				}
-				
+				u.content().setGlobalCommand(P_Func_Target, CMD, openid(), time());
 				WXnews news = new WXnews();
 				news.setTitle("尊敬的素朴网联VIP");
 				news.setDescription("点击进入VIP页面，通过你的二维码关注素朴网联公众号的用户，就是你的财富！");
@@ -63,7 +63,7 @@ public class VIPContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(CMD.equals(t)) {
+			if(CMD.equals(t.toLowerCase())) {
 				return vip;
 			}
 			if(t.startsWith("SCAN_")) {
@@ -93,7 +93,7 @@ public class VIPContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			String myvip = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()));
-			
+			logger.info("[VIP] myvip: " + myvip);
 			if(myvip == null || "None".equals(myvip)) {
 				//can be invited 
 				String qrScene = t.substring("SCAN_".length());
@@ -117,14 +117,17 @@ public class VIPContext extends WXContext {
 						String crewKey = String.join(Const.delimiter, Const.Version.V1, inviter, "Crew", openid());
 						u.content().account().put(crewKey, openid());
 						String idx = u.content().increment(counterBoss, String.join(Const.delimiter, Const.Version.V1, inviter, "Crew"));
-						u.output("恭喜你是第"+idx+"位被"+bossName+"邀请加入素朴网联");
+						u.content().atUser(openid(), bossName+"说：很荣幸，你被我邀请加入素朴网联");
 						u.content().atUser(inviter, "第"+idx+"位朋友被你邀请加入素朴网联，邀请的用户成为你的资产，未来广告收益会给你分成，可以提现！");
 					} else {
-						u.output("你已经被"+bossName+"邀请过了");
+						u.content().atUser(openid(), "你已经被"+bossName+"邀请成为素朴网联VIP了");
 					}
-					u.output("现在你可以输入：我是VIP");
+					u.content().atUser(openid(), "你随时可以输入以下命令查看自己的邀请二维码："+CMD);
 				}
 			}
+			
+			logger.info("[VIP] you are VIP already: " + openid());
+			vip.accept(t, u);
 		}
 
 		@Override

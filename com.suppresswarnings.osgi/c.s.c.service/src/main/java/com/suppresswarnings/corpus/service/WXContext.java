@@ -156,7 +156,14 @@ public class WXContext extends Context<CorpusService> {
 				String exchange = u.content().globalCommand(command);
 				if(exchange != null) {
 					cf = u.content().factories.get(exchange);
+					if(cf == null) {
+						cf = u.content().factories.get(command.toLowerCase());
+					}
 				}
+			}
+			
+			if(cf == null) {
+				cf = u.content().factories.get(command.toLowerCase());
 			}
 			
 			if(cf != null) {

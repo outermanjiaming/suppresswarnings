@@ -476,10 +476,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[corpus] scheduler: the admins not set");
 					return;
 				}
+				AtomicInteger cnt = new AtomicInteger(0);
+				incrementers.forEach((k, a) -> {
+					logger.info("[VIP] " + k + " invited " + a.get());
+					cnt.getAndAdd(a.get());
+				});
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
 				info.append("周期汇报：第").append(times).append("次").append("\n");
+				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
 				info.append("当前对话: " + contexts.size()).append("\n");
 				info.append("providers：" + providers.size()).append("\n");
 				info.append("factories: " + factories.size()).append("\n");
@@ -2169,7 +2175,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				}
 				int v = Integer.valueOf(value);
 				idx = new AtomicInteger(v);
-				atomicIds.put(key, idx);
+				incrementers.put(key, idx);
 			}
 			
 			return ""+idx.incrementAndGet();
