@@ -56,7 +56,10 @@ public class AIIoT implements Closeable {
 	}
 	public String ping(String code) {
 		Things things = service.aiiot.things.get(code);
-		if(things == null) return "null";
+		if(things == null) {
+			logger.error("[AIIoT] code -> things is null: " + code);
+			return "closed";
+		}
 		if(things.isClosed()) return "closed";
 		long diff = things.ping();
 		logger.info(code + " has diff " + diff);

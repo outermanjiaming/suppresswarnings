@@ -25,6 +25,7 @@ public class CashoutContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			String key = String.join(Const.delimiter, Const.Version.V2, openid(), "Requesting", "Cashout");
 			String requesting = u.content().account().get(key);
+			realValue = u.content().account().get(String.join(Const.delimiter, Const.Version.V2, openid(), "RealValue"));
 			if(requesting == null || "Done".equals(requesting)) {
 				//ok
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
@@ -38,7 +39,7 @@ public class CashoutContext extends WXContext {
 				//is doing
 				u.output("你的提现请求正在审核，预计24小时内审核到账");
 			}
-			u.output("如果要补充实名信息请输入：" + real.name());
+			u.output("如果要更改或补充实名信息请输入：" + real.name());
 			
 		}
 
@@ -75,7 +76,12 @@ public class CashoutContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("你还没有实名认证，提现需要实名信息（微信要求），请输入该微信号对应的真实姓名和身份证，比如：张三,430481199801107112");
+			realValue = u.content().account().get(String.join(Const.delimiter, Const.Version.V2, openid(), "RealValue"));
+			if(realValue == null || "None".equals(realValue)) {
+				u.output("你还没有实名认证，提现需要实名信息（微信要求），请输入该微信号对应的真实姓名和身份证，比如：张三,430481199801107112");
+			} else {
+				u.output("你已经提交了实名认证，如果需要修改，请输入该微信号对应的真实姓名和身份证，比如：张三,430481199801107112");
+			}
 		}
 
 		@Override
@@ -101,7 +107,6 @@ public class CashoutContext extends WXContext {
 	public CashoutContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.state = cashout;
-		this.realValue = ctx.account().get(String.join(Const.delimiter, Const.Version.V2, openid(), "RealValue"));
 	}
 
 }

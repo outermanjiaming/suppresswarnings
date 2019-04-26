@@ -480,12 +480,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 				incrementers.forEach((k, a) -> {
 					logger.info("[VIP] " + k + " invited " + a.get());
 					cnt.getAndAdd(a.get());
+					account().put(k, "" + a.get());
 				});
+				
+				updateWXuser();
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
 				info.append("周期汇报：第").append(times).append("次").append("\n");
 				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
+				info.append("当前用户：" + users.size() + "人").append("\n");
 				info.append("当前对话: " + contexts.size()).append("\n");
 				info.append("providers：" + providers.size()).append("\n");
 				info.append("factories: " + factories.size()).append("\n");
@@ -575,6 +579,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
 		buffer.append("\t findn - findn <startkey> <what> <limit> - find them and delete some key-values by what value.\n");
 		buffer.append("\t aiiot - aiiot <exam> <word> - speak words on things\n");
+		buffer.append("\t cashout - cashout <limit> - list all cashout request\n");
 		
 		return buffer.toString();
 	}
@@ -857,6 +862,29 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		fillWork();
 	}
+	
+	public void _cashout(CommandInterpreter ci) {
+		String count = ci.nextArgument();
+		Integer val = Integer.valueOf(count);
+		AtomicInteger integer = new AtomicInteger(0);
+		String start = String.join(Const.delimiter, Const.Version.V2, "Cashout", "Request");
+		account().page(start, start, null, val, (k, v) ->{
+			WXuser user = getWXuserByOpenId(v);
+			String realName = account().get(String.join(Const.delimiter, Const.Version.V2, v, "RealValue"));
+			ci.println(integer.incrementAndGet() + ". " + k + " = " + v + " real: " + realName + " user: " + user.toString());
+			String informKey = String.join(Const.delimiter, Const.Version.V2, "@User", "Cashout", "Inform", v);
+			String informCashoutRequest = account().get(informKey);
+			if(informCashoutRequest == null || "None".equals(informCashoutRequest)) {
+				account().put(informKey, k);
+				atUser(v, "素朴网联正在审核提现请求，请稍等，（微信公众平台规定）提现金额少于30分无法通过企业付款，请谅解！");
+			} else {
+				ci.println(integer.get() + ". 已经通知用户。" + k);
+			}
+			
+		});
+		ci.println(integer.incrementAndGet() + ". 完成");
+	}
+	
 	public void _interception(CommandInterpreter ci) {
 		String quizId = ci.nextArgument();
 		ci.println("[_interception] quizId: " + quizId);
@@ -1937,6 +1965,32 @@ public class CorpusService implements HTTPService, CommandProvider {
 		account().put(nowCommandKey, command);
 		account().put(infoKey, info);
 	}
+	
+	public void updateWXuser() {
+		String head = String.join(Const.delimiter, Const.Version.V1, "User");
+		account().page(head, head, null, 10000, (k, t) ->{
+			String openid = k.substring(head.length() + Const.delimiter.length());
+			getWXuserByOpenId(openid);
+			logger.info("check user " + openid + " from " + t);
+		});
+		
+		logger.info("update user info: " + users.size());
+		users.forEach((k, v) -> {
+			String accessToken = accessToken("Update User");
+			String userKey = String.join(Const.delimiter, Const.Version.V1, k, "User");
+			String json = account().get(userKey);
+			logger.info("[corpus] update WXuser info: " + k);
+			CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, k);
+			try {
+				json = get.call();
+				WXuser user = gson.fromJson(json, WXuser.class);
+				account().put(userKey, json);
+				users.put(k, user);
+			} catch (Exception e) {
+				logger.error("[corpus] fail to update user info: " + k, e);
+			}
+		});
+	}
 	/**
 	 * 001.openidvalue.User = {user info json}
 	 * @param openId
@@ -2164,17 +2218,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		synchronized (incrementers) {
 			AtomicInteger idx = incrementers.get(key);
 			if(idx == null) {
-				String value = account().get(key);
-				if(value == null) {
-					AtomicInteger val = new AtomicInteger(1);
-					account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
-						val.incrementAndGet();
-					});
-					value = "" + val.get();
-					account().put(key, value);
-				}
-				int v = Integer.valueOf(value);
-				idx = new AtomicInteger(v);
+				AtomicInteger val = new AtomicInteger(1);
+				account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					val.incrementAndGet();
+				});
+				idx = val;
 				incrementers.put(key, idx);
 			}
 			

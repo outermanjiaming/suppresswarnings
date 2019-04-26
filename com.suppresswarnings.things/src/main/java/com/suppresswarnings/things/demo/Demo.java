@@ -94,8 +94,6 @@ public class Demo extends JFrame implements Things {
 		return INTERACTIVE;
 	}
 	
-	
-	
 	@Override
 	public String exception(String error) {
 		for(int i=0;i<30;i++) {
@@ -124,7 +122,7 @@ public class Demo extends JFrame implements Things {
 	
 	@Override
 	public String code() {
-		return "LiJiaming_Test_Things";
+		return "Tao";
 	}
 	
 	@Override
