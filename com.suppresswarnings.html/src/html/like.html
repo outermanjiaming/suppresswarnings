@@ -129,6 +129,7 @@ var locationUrl = "";
 var uname = "";
 var bridgeReady = 0;
 var dropload;
+var openid = "";
 
 $(function()
 {
@@ -158,7 +159,7 @@ $(function()
 		success: function(data)
 		{
 			console.log(data);
-			
+			openid = data;
 			
 		var url = window.location.href;
 		var en = base64encode(url);
@@ -187,7 +188,7 @@ $(function()
 					});
 				    wx.onMenuShareTimeline({ 
 				        title: '进来点赞就可以赚钱',
-				        link: 'http://suppresswarnings.com/like.html',
+				        link: 'http://suppresswarnings.com/like.html?state=T_Like_Share$' + projectid + '$' + openid,
 				        imgUrl: 'http://suppresswarnings.com/like.png',
 				        success: function () {
 				           console.log("===== lijiaming ====");
@@ -197,7 +198,7 @@ $(function()
 				    wx.onMenuShareAppMessage({
 						title: '进来点赞就可以赚钱',
 						desc: '进来点赞评论就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
-						link: 'http://suppresswarnings.com/like.html',
+						link: 'http://suppresswarnings.com/like.html?state=T_Like_Share$' + projectid + '$' + openid,
 						imgUrl: 'http://suppresswarnings.com/like.png',
 						success: function () {
 							console.log("===== lijiaming ====");
@@ -358,7 +359,7 @@ function addItems(listData)
 //添加点赞
 function ajaxAddLike(id)
 {
-    var projectid = id.replace("like_", "");
+    projectid = id.replace("like_", "");
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=like&projectid='+projectid+'&code='+code,
@@ -392,8 +393,7 @@ function ajaxAddLike(id)
 //添加评论
 function ajaxAddComment(id)
 {
-	var projectid = id.replace("comment_", "");	
-	
+	projectid = id.replace("comment_", "");	
 	var textComment = $('#text-input-content textarea')[0];
 	if(textComment.value == "")
 	{
@@ -402,7 +402,6 @@ function ajaxAddComment(id)
 	}
 	hideTextInput();
 	
-
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=comment',
@@ -437,7 +436,7 @@ function ajaxAddComment(id)
 //获取转发二维码
 function ajaxGetQrcode(id)
 {
-	var projectid = id.replace("transmit_", "");	
+	projectid = id.replace("transmit_", "");	
 	$.ajax({
 		type: 'POST',
 		url: '/wx.http?action=qrcode',
@@ -451,6 +450,33 @@ function ajaxGetQrcode(id)
 		success: function(data){
 			var qrcode = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+data.ticket;
 			document.getElementById("qrcode-img").src=qrcode;
+			
+			console.log(window.__wxjs_environment === 'miniprogram');
+					wx.checkJsApi({
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+					    success: function(res) {
+					        console.log("check js api ok: " + res)
+					    }
+					});
+				    wx.onMenuShareTimeline({ 
+				        title: '进来点赞就可以赚钱',
+				        link: 'http://suppresswarnings.com/like.html?state=T_Like_Share$' + projectid + '$' + openid,
+				        imgUrl: 'http://suppresswarnings.com/like.png',
+				        success: function () {
+				           console.log("===== lijiaming ====");
+				        }
+				    });
+				    
+				    wx.onMenuShareAppMessage({
+						title: '进来点赞就可以赚钱',
+						desc: '进来点赞评论就可以赚钱，分享给朋友圈，还可以额外获得分红提成，分红100%可以提现。',
+						link: 'http://suppresswarnings.com/like.html?state=T_Like_Share$' + projectid + '$' + openid,
+						imgUrl: 'http://suppresswarnings.com/like.png',
+						success: function () {
+							console.log("===== lijiaming ====");
+						}
+					});
+					
 			showQrcodeMask();
 		},
 		error: function(xhr, type){
@@ -464,7 +490,7 @@ function ajaxGetQrcode(id)
 //添加投资
 function ajaxAddInvest(price)
 {
-	var projectid = document.getElementById("invest-projectid").value;
+	projectid = document.getElementById("invest-projectid").value;
 	pay(price, projectid);
 	hideinvestMask();	
 }

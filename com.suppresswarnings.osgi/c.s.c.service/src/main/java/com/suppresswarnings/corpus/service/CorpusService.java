@@ -487,7 +487,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
-				info.append("周期汇报：第").append(times).append("次").append("\n");
+				info.append("（仅通知管理员）\n周期汇报：第").append(times).append("次").append("\n");
 				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
 				info.append("当前用户：" + users.size() + "人").append("\n");
 				info.append("当前对话: " + contexts.size()).append("\n");
@@ -1267,7 +1267,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
 			String exist = token().get(code2OpenIdKey);
 			if(exist != null) {
-				return SUCCESS;
+				return exist;
 			}
 			//https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
 			JsAccessToken accessToken = jsAccessToken(CODE);
@@ -1282,7 +1282,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			token().put(code2OpenIdKey, accessToken.getOpenid());
-			return SUCCESS;
+			return accessToken.getOpenid();
 		} else if("collect".equals(action)) {
 			String random = parameter.getParameter("random");
 			if(random == null) {

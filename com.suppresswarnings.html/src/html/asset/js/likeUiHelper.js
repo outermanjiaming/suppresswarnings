@@ -59,7 +59,8 @@ var ItemUiHelper =
 				+'<span id="transmit_'+itemData.projectid+'" onclick="ajaxGetQrcode(this.id)" style="padding-left:30px;" class="glyphicon glyphicon-share">分享</span>'
 				+'<span id="comment_'+itemData.projectid+'" onclick="showTextInput(this.id)" style="padding-left:20px;" class="glyphicon glyphicon-comment">留言</span>'
 				+like
-			+'</div>';	
+			+'</div>'
+			+'<p class="sponsor" style="font-size: 12px;color: #576b95;border: 1px solid #ddd;border-radius: 3px;padding:2px 3px; background:#eee;"><span>目标:10000赞</span><span>赞助:30分</span><span>投资:180分</span><span>点赞:180个</span></p>';	
 	},
 	
 
