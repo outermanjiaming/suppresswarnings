@@ -12,6 +12,7 @@ package com.suppresswarnings.corpus.service;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
+import com.suppresswarnings.corpus.common.State;
 
 public abstract class AbstractAuthContextFactory implements ContextFactory<CorpusService> {
 	
@@ -27,7 +28,35 @@ public abstract class AbstractAuthContextFactory implements ContextFactory<Corpu
 				String authrized = content.account().get(authKey);
 				if(authrized == null || "None".equals(authrized)) {
 					WXContext context = new WXContext(wxid, openid, content);
-					context.state(context.reject);
+					context.state(new State<Context<CorpusService>>() {
+						
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 6280729600212212503L;
+						boolean first = true;
+
+						@Override
+						public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+							if(first) return this;
+							return context.init;
+						}
+						
+						@Override
+						public void accept(String t, Context<CorpusService> u) {
+							u.output("因权限控制，暂时无法使用该服务：" + description());
+						}
+						
+						@Override
+						public String name() {
+							return "权限控制";
+						}
+						
+						@Override
+						public boolean finish() {
+							return true;
+						}
+					});
 					return context;
 				}
 			}

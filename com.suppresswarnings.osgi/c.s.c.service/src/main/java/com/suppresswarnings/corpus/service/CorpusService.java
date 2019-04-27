@@ -1113,6 +1113,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 							//lijiaming leave from worker user
 							forgetIt(openid);
 							ContextFactory<CorpusService> cf = factories.get(exchange);
+							if(cf == null) {
+								cf = factories.get(exchange.toLowerCase());
+							}
 							Context<CorpusService> contxt = cf.getInstance(fromOpenId, openid, this);
 							contxt.test("SCAN_" + where);
 							contextx(openid, contxt, cf.ttl());

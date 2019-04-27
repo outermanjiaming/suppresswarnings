@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +54,14 @@ public class LikeHandlerImpl implements LikeHandler {
 			project.setFace(kv.value());
 			project.setPictures(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Pictures", project.getProjectid())));
 			project.setTime(service.account().get(String.join(Const.delimiter, Const.Version.V2, "Project", "Time", project.getProjectid())));
-			project.setLikes(getLikes(s));
-			project.setComments(getComments(s));
+			Page<KeyValue> like = getLikes(s);
+			Page<KeyValue> invest = getInvests(s);
+			Page<KeyValue> comment = getComments(s);
+			project.setLikes(like);
+			project.setComments(comment);
+			project.setLiked("" + like.getSize());
+			project.setInvest("" + invest.getSize());
+			project.setComment("" + comment.getSize());
 			data.add(project);
 			i++;
 		} while(i<projectids.size() - 1);
@@ -74,6 +81,34 @@ public class LikeHandlerImpl implements LikeHandler {
 		return page;
 	}
 	
+	public Page<KeyValue> getInvests(String projectid) {
+		
+		Page<KeyValue> page = new Page<KeyValue>();
+		List<KeyValue> data = new ArrayList<>();
+		try {
+			String start = String.join(Const.delimiter, Const.Version.V1, "Invest", projectid);
+			int index = start.length() + Const.delimiter.length();
+			AtomicInteger integer = new AtomicInteger(0);
+			service.account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+				String orderid_openid = k.substring(index);
+				String openid = orderid_openid.split("\\.")[1];
+				KeyValue kv = service.user(openid);
+				kv.value(v);
+				Integer val = Integer.valueOf(v);
+				integer.getAndAdd(val);
+				data.add(kv);
+			});
+			page.setSize(integer.get());
+			page.setEntries(data);
+		} catch (Exception e) {
+			logger.error("fail to get comments", e);
+		}
+		
+		return page;
+		
+		
+	}
+	
 	public Page<KeyValue> getComments(String projectid) {
 		Page<KeyValue> page = new Page<KeyValue>();
 		List<KeyValue> data = new ArrayList<>();
@@ -87,7 +122,7 @@ public class LikeHandlerImpl implements LikeHandler {
 				kv.value(v);
 				data.add(kv);
 			});
-			
+			page.setSize(data.size());
 			page.setEntries(data);
 		} catch (Exception e) {
 			logger.error("fail to get comments", e);
@@ -107,7 +142,7 @@ public class LikeHandlerImpl implements LikeHandler {
 				KeyValue kv = service.user(openid);
 				data.add(kv);
 			});
-			
+			page.setSize(data.size());
 			page.setEntries(data);
 		} catch (Exception e) {
 			logger.error("fail to get likes", e);

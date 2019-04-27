@@ -165,7 +165,7 @@ public class WXContext extends Context<CorpusService> {
 			if(cf == null) {
 				cf = u.content().factories.get(command.toLowerCase());
 			}
-			
+			logger.info("ContextFactory: " + cf);
 			if(cf != null) {
 				//leave from worker user
 				u.content().forgetIt(openid());

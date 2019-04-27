@@ -13,6 +13,8 @@ import com.suppresswarnings.corpus.service.wx.WXuser;
 public class VIPContext extends WXContext {
 
 	public static final String CMD = "我是vip";
+	public static final String[] AUTH = {"VIP"};
+	
 	State<Context<CorpusService>> vip = new State<Context<CorpusService>>() {
 
 		/**
@@ -63,6 +65,7 @@ public class VIPContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			logger.info("[VIP] input: " + t);
 			if(CMD.equals(t.toLowerCase())) {
 				return vip;
 			}
