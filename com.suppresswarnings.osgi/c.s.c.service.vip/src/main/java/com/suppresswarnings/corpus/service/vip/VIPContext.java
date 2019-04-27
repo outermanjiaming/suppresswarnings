@@ -52,7 +52,7 @@ public class VIPContext extends WXContext {
 				if(myvip == null || "None".equals(myvip)) {
 					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()), openid());
 				}
-				u.content().setGlobalCommand(P_Func_Target, CMD, openid(), time());
+				u.content().setGlobalCommand(P_Func_Target, "加入素朴网联", openid(), time());
 				WXnews news = new WXnews();
 				news.setTitle("尊敬的素朴网联VIP");
 				news.setDescription("点击进入VIP页面，通过你的二维码关注素朴网联公众号的用户，就是你的财富！");

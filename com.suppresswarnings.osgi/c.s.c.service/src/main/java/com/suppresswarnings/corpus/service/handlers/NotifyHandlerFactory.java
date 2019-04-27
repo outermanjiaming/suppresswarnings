@@ -90,6 +90,8 @@ public class NotifyHandlerFactory {
 				String value = System.currentTimeMillis() + "." + orderid;
 				service.account().put(authKey, value);
 				logger.info("[notify] lijiaming: authorize " + openid + " with " + goodid + ", orderid: " + orderid + ", newState: Paid");
+				String info = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodid, "What"));
+				service.atUser(openid, "恭喜你，你已经开通权限：" + info);
 			}
 		} else {
 			logger.error("fail to pay auth: " + openid + ", orderid: " + orderid);
