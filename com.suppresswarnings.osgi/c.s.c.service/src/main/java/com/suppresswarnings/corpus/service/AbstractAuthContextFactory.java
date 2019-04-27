@@ -38,7 +38,10 @@ public abstract class AbstractAuthContextFactory implements ContextFactory<Corpu
 
 						@Override
 						public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-							if(first) return this;
+							if(first) {
+								first = false;
+								return this;
+							}
 							return context.init;
 						}
 						

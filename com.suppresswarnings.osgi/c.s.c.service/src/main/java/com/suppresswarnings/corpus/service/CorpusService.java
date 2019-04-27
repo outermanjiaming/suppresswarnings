@@ -664,6 +664,22 @@ public class CorpusService implements HTTPService, CommandProvider {
 		});
 	}
 	
+	public void _updaten(CommandInterpreter ci) {
+		logger.info("[_updaten] " + leveldb);
+		if(leveldb == null) return;
+		String target = ci.nextArgument();
+		String real = ci.nextArgument();
+		String n = ci.nextArgument();
+		int idx = Integer.valueOf(n);
+		ci.println("[_updaten] start: " + target + ", value: " + real);
+		AtomicInteger i = new AtomicInteger(0);
+		leveldb.page(target, target, null, idx, (k, v) -> {
+			leveldb.put(k, real);
+			int index = i.incrementAndGet();
+			ci.println("[_updaten] " + index + ". update key:\n" + k + "value:"+v+"\n -> \n" + real);
+		});
+	}
+	
 	public void _findn(CommandInterpreter ci) {
 		logger.info("[_findn] " + leveldb);
 		ci.println("[_findn] startKey what n");
