@@ -86,58 +86,6 @@
 	    }
 	    return theRequest;
 	}
-
-	var url = window.location.href;
-	var en = base64encode(url);
-	console.log("====== ======= " + en);
-$.ajax({
-	type: 'GET',
-	url: '/wx.http?action=jsapi_ticket&url='+en,
-	dataType: 'json',
-	success: function(data) {
-		wx.config({
-		    debug: false,
-		    appId: 'wx41b262e9b9d8885e',
-		    timestamp: data.timestamp,
-		    nonceStr: data.nonceStr,
-		    signature: data.signature,
-		    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
-		});
-	
-		wx.ready(function () {
-		
-			wx.checkJsApi({
-			    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
-			    success: function(res) {
-			        console.log("check js api ok: " + res)
-			    }
-			});
-		    wx.onMenuShareTimeline({ 
-		        title: '邀请你加入素朴网联',
-		        link: 'http://suppresswarnings.com/vip.html?state' + request.state,
-		        imgUrl: 'http://suppresswarnings.com/like.png',
-		        success: function () {
-		           console.log("===== lijiaming ====");
-		        }
-		    });
-		    
-		    wx.onMenuShareAppMessage({
-				title: '邀请你加入素朴网联',
-				desc: '素朴网联-立志于创建开放的盈利平台，泽润天下。',
-				link: 'http://suppresswarnings.com/vip.html?state=' + request.state,
-				imgUrl: 'http://suppresswarnings.com/like.png',
-				success: function () {
-					console.log("===== lijiaming ====");
-				}
-			});
-		});
-	},
-	error: function(xhr, type){
-		alert('Ajax error!');
-		dropload.resetload();
-	}
-});
-	
 	
 	
 $(function()
@@ -153,6 +101,7 @@ $(function()
 	{
 		state = request.state
 		code = request.code
+		
 		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=vip&state='+state + '&ticket=' + code + '&random=' + Math.random(),
@@ -175,6 +124,58 @@ $(function()
 			                $("#invited").append('<img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" alt="'+user.value+'" src="'+user.key+'"/>');
 			            }
 			        }
+			        
+			        
+			        var url = window.location.href;
+					var en = base64encode(url);
+					console.log("====== ======= " + en);
+					$.ajax({
+						type: 'GET',
+						url: '/wx.http?action=jsapi_ticket&url='+en,
+						dataType: 'json',
+						success: function(data) {
+							wx.config({
+							    debug: false,
+							    appId: 'wx41b262e9b9d8885e',
+							    timestamp: data.timestamp,
+							    nonceStr: data.nonceStr,
+							    signature: data.signature,
+							    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+							});
+						
+							wx.ready(function () {
+							
+								wx.checkJsApi({
+								    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+								    success: function(res) {
+								        console.log("check js api ok: " + res)
+								    }
+								});
+							    wx.onMenuShareTimeline({ 
+							        title: '邀请你加入素朴网联',
+							        link: 'http://suppresswarnings.com/vip.html?state' + request.state,
+							        imgUrl: data.face,
+							        success: function () {
+							           console.log("===== lijiaming ====");
+							        }
+							    });
+							    
+							    wx.onMenuShareAppMessage({
+									title: '邀请你加入素朴网联',
+									desc: '邀请你加入素朴网联，守护素朴网联',
+									link: 'http://suppresswarnings.com/vip.html?state=' + request.state,
+									imgUrl: data.face,
+									success: function () {
+										console.log("===== lijiaming ====");
+									}
+								});
+							});
+						},
+						error: function(xhr, type){
+							alert('Ajax error!');
+						}
+					});
+					
 			        
 			    }
 			},
