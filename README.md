@@ -1,7 +1,6 @@
 # [素朴网联|SuppressWarnings](http://suppresswarnings.com)
 > SuppressWarnings 是Java SE 定义的一个元注解，具体内容请查看jdk源码@SuppressWarnings，素朴网联来自于SuppressWarnings的音译，同时包含公司的发展思路：希望参与素朴网联项目的所有人都是以朴素、淳朴的心态通过网络联系起来，比如我们所有参与素朴网联的开发设计人员，都是在背后默默的贡献，有了利益公司主动发分红给参与者。不仅如此，只要是对素朴网联有贡献的人，包括用户，都会得到相应的报酬。
 
-====
 
 ## 模块介绍
 > SuppressWarnings开源项目包括多个模块，它能做到不限开发语言、不限技术架构、不限运行平台，可以运行或展示在各个平台，比如linux、windows、mac、arm嵌入式开发版。
