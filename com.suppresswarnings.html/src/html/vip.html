@@ -163,7 +163,7 @@ $(function()
 			    } else {
 			        
 			        $("#vipcard").attr("src", "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+data.ticket);
-			        $("#count").html(data.uname + "已经邀请了" + data.count + "位朋友加入了素朴网联")
+			        $("#count").html("我已经邀请了" + data.count + "位朋友加入了素朴网联")
 			        $("#user").append('<img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+data.face+'"/><span>' + data.uname + '</span>');
 			        
 			        var list = data.entries;
