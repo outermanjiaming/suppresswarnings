@@ -983,6 +983,78 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return PingHandlerFactory.handle(parameter, this);
 		} else if("qrcode".equals(action)) {
 			return QRCodeHandlerFactory.handle(parameter, this);
+		} else if("vip".equals(action)) {
+			logger.info("[vip] lijiaming");
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.info("[vip] random == null");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.info("[vip] ticket == null");
+				return "fail";
+			}
+			String state = parameter.getParameter("state");
+			if(state == null) {
+				logger.info("[vip] state == null");
+				return "fail";
+			}
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[vip access_token] accessToken == null");
+				return "fail";
+			}
+			
+			logger.info("[vip access_token] " + accessToken.toString());
+			String openId = accessToken.getOpenid();
+			if(openId == null) {
+				logger.info("[vip] get openid failed");
+				return "fail";
+			}
+			Map<String, Object> map = new HashMap<>();
+
+			String P_Func_Target = "P_VIP_" + state;
+			String qrKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target);
+			String exist = account().get(qrKey);
+			logger.info("[vip] qrkey: " + qrKey + " == " + exist);
+			QRCodeTicket qrTicket = gson.fromJson(exist, QRCodeTicket.class);
+			map.put("ticket", qrTicket.getTicket());
+			WXuser myself = getWXuserByOpenId(state);
+			map.put("uname", myself.getNickname());
+			map.put("face", myself.getHeadimgurl());
+			if(state.equals(openId)) {
+				//I am VIP
+				logger.info("[vip] I am VIP");
+				
+				List<KeyValue> invited = new ArrayList<>();
+				List<String> openids = new ArrayList<>();
+				String start = String.join(Const.delimiter, Const.Version.V1, openId, "Crew");
+				account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					String userid = k.substring(start.length() + Const.delimiter.length());
+					openids.add(userid);
+				});
+				openids.forEach(o ->{
+					WXuser u = getWXuserByOpenId(o);
+					KeyValue kv = new KeyValue(u.getHeadimgurl(), u.getNickname());
+					invited.add(kv);
+				});
+				map.put("count", "" + openids.size());
+				map.put("entries", invited);
+				return gson.toJson(map);
+			} else {
+				//I am invited
+				logger.info("[vip] I am invited");
+				String start = String.join(Const.delimiter, Const.Version.V1, state, "Crew");
+				AtomicInteger val = new AtomicInteger(1);
+				account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					val.incrementAndGet();
+				});
+				account().put(String.join(Const.delimiter, Const.Version.V1, state, "Visitor"), openId);
+				map.put("count", "" + val.get());
+				
+				return gson.toJson(map);
+			}
 		} else if("managereports".equals(action)){
 			logger.info("[managereports] lijiaming");
 			String random = parameter.getParameter("random");

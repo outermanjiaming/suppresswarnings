@@ -1,5 +1,7 @@
 package com.suppresswarnings.corpus.service.vip;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
@@ -53,10 +55,17 @@ public class VIPContext extends WXContext {
 					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()), openid());
 				}
 				u.content().setGlobalCommand(P_Func_Target, "加入素朴网联", openid(), time());
+				
+				String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");
+				AtomicInteger val = new AtomicInteger(1);
+				u.content().account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					val.incrementAndGet();
+				});
+				
 				WXnews news = new WXnews();
-				news.setTitle("尊敬的素朴网联VIP");
-				news.setDescription("点击进入VIP页面，通过你的二维码关注素朴网联公众号的用户，就是你的财富！");
-				news.setUrl("http://suppresswarnings.com/vip.html?state=" + qrTicket.getTicket());
+				news.setTitle("「素朴网联」专属vip二维码");
+				news.setDescription("你已经邀请了"+ val.get() +"位朋友，通过你的二维码关注素朴网联公众号的用户，就是你的财富！");
+				news.setUrl("http://suppresswarnings.com/vip.html?state=" + openid());
 				news.setPicUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
 				String json = gson.toJson(news);
 				u.output("news://" + json);

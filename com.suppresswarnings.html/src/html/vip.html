@@ -43,6 +43,16 @@
   </svg>
  </span>
  </li>
+ 
+ 
+ 
+ <li style="list-style: none; float: right;">
+ <div class="user" id="user"> 
+ 
+ 
+ 
+ </div>
+ </li>
  </ul>
 </div>
 
@@ -51,32 +61,135 @@
    		<img id="vipcard" class="vipimg" src="http://suppresswarnings.com/suppresswarnings.jpg"/>
    	</div>
    	<span>扫描我的二维码，邀请你加入素朴网联</span>
+   	<div class="count" id="count"> </div>
+   	<div class="invited" id="invited"> 
+   	
+   	</div>
 </div>
-
-<script type="text/javascript">
-
-function GetRequest() {
-    var url = location.search; //获取url中"?"符后的字串
-    var theRequest = new Object();
-    if (url.indexOf("?") != -1) {
-        var str = url.substr(1);
-        strs = str.split("&");
-        for(var i = 0; i < strs.length; i ++) {
-            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-        }
+	<script src="js/jweixin-1.2.0.js"></script>
+	<script src="js/base64.js"></script>
+<script>
+    function toggle(id){
+        $(id).toggle();
     }
-    return theRequest;
-}
+    
+    function GetRequest()
+	{
+	    var url = location.search; //获取url中"?"符后的字串
+	    var theRequest = new Object();
+	    if (url.indexOf("?") != -1) {
+	        var str = url.substr(1);
+	        strs = str.split("&");
+	        for(var i = 0; i < strs.length; i ++) {
+	            theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+	        }
+	    }
+	    return theRequest;
+	}
 
-var request = GetRequest()
-if (request.state == undefined) {
-    location.href="/user.html";
-} else {
-    $("#vipcard").attr("src", "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+request.state);
-}
+	var url = window.location.href;
+	var en = base64encode(url);
+	console.log("====== ======= " + en);
+$.ajax({
+	type: 'GET',
+	url: '/wx.http?action=jsapi_ticket&url='+en,
+	dataType: 'json',
+	success: function(data) {
+		wx.config({
+		    debug: false,
+		    appId: 'wx41b262e9b9d8885e',
+		    timestamp: data.timestamp,
+		    nonceStr: data.nonceStr,
+		    signature: data.signature,
+		    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+		});
+	
+		wx.ready(function () {
+		
+			wx.checkJsApi({
+			    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+			    success: function(res) {
+			        console.log("check js api ok: " + res)
+			    }
+			});
+		    wx.onMenuShareTimeline({ 
+		        title: '邀请你加入素朴网联',
+		        link: 'http://suppresswarnings.com/vip.html?state' + request.state,
+		        imgUrl: 'http://suppresswarnings.com/like.png',
+		        success: function () {
+		           console.log("===== lijiaming ====");
+		        }
+		    });
+		    
+		    wx.onMenuShareAppMessage({
+				title: '邀请你加入素朴网联',
+				desc: '素朴网联-立志于创建开放的盈利平台，泽润天下。',
+				link: 'http://suppresswarnings.com/vip.html?state=' + request.state,
+				imgUrl: 'http://suppresswarnings.com/like.png',
+				success: function () {
+					console.log("===== lijiaming ====");
+				}
+			});
+		});
+	},
+	error: function(xhr, type){
+		alert('Ajax error!');
+		dropload.resetload();
+	}
+});
+	
+	
+	
+$(function()
+{
+	var request = GetRequest();
+	
+	if(request.code == undefined)
+	{
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/vip.html&response_type=code&scope=snsapi_base&state="+request.state+"#wechat_redirect"
+	   window.location.href = locationUrl;
+	} 
+	else 
+	{
+		state = request.state
+		code = request.code
+		$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=jsapi_ticket&url='+en,
+			dataType: 'json',
+			success: function(data) {
+			    if(data == "fail") {
+			        console.log("lijiaming === " + data);
+			    } else {
+			        
+			        $("#vipcard").attr("src", "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+data.ticket);
+			        $("#count").html("目前，" + data.uname + "已经邀请了" + data.count + "位朋友加入了素朴网联")
+			        $("#user").append('<img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+data.face+'"/><span>' + data.uname + '</span>');
+			        
+			        var list = data.entries;
+			        if(list == undefined) {
+			            console.log("欢迎你加入素朴网联");
+			        } else {
+			            for(var i=0;i<list.length;i++) { 
+			                var user = list[i];
+			                $("#invited").append('<img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+user.value+'"/>');
+			            }
+			        }
+			        
+			    }
+			},
+			error: function(xhr, type){
+				alert('Ajax error!');
+				dropload.resetload();
+			}
+		});
+	}
+});
+	
 </script>
 
-   
+
+
    
    <footer class="footer navbar-fixed-bottom" style="z-index:-1;">
      <div style="text-align:center;width:100%;margin:0 auto; padding:5px 0;">
