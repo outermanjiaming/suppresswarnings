@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -145,6 +146,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public AtomicInteger bear = new AtomicInteger(2);
 	public AtomicInteger corpusCount = new AtomicInteger(0);
 	public List<Quiz> assimilatedQuiz = Collections.synchronizedList(new ArrayList<>());
+	public Map<String, KeyValue> notifyAdmins = new ConcurrentHashMap<>();
+	
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -203,29 +206,40 @@ public class CorpusService implements HTTPService, CommandProvider {
 		this.workHandler.clockOut(openId);
 		return this.workHandler.newJob(quiz, quizId, openId);
 	}
-	
-	public void connectChat(String wxid, String openid, String ask) {
-		java.util.Set<String> set = users.keySet();
-		WXuser myself = getWXuserByOpenId(openid);
-		logger.info("[coonect chat] users set: " + set);
-		for(String userid : set) {
-			if(openid.equals(userid)) {
-				logger.info("[connect chat] myself");
-				continue;
-			}
-			String ret = sendTxtTo("connect chat", "["+myself.getNickname()+"]" + ask, userid);
-			WXuser user = users.remove(userid);
-			logger.info("[coonect chat] after remove, users set: " + users.keySet());
-			if(SENDOK.equals(ret)) {
-				ChatContext chatContext = new ChatContext(wxid, userid, openid, this);
-				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(3));
-				logger.info("[connect chat] sent msg to user, ready to connect chat: " + user);
-				break;
-			} else {
-				logger.info("[connect chat] fail to connect user: " + user);
-			}
+	public void tellAdmins(String openid, String msg) {
+		notifyAdmins.put(uniqueKey("TellAdmins") + "$" + System.currentTimeMillis(), new KeyValue(openid, msg));
+	}
+	public void tellBossNow(String openid, String msg) {
+		String boss = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "Boss"));
+		if(boss == null || "None".equals(boss)) {
+			logger.error("boss is null " + openid);
+		} else {
+			atUser(boss, msg);
 		}
 	}
+	
+//	public void connectChat(String wxid, String openid, String ask) {
+//		java.util.Set<String> set = users.keySet();
+//		WXuser myself = getWXuserByOpenId(openid);
+//		logger.info("[coonect chat] users set: " + set);
+//		for(String userid : set) {
+//			if(openid.equals(userid)) {
+//				logger.info("[connect chat] myself");
+//				continue;
+//			}
+//			String ret = sendTxtTo("connect chat", "["+myself.getNickname()+"]" + ask, userid);
+//			WXuser user = users.remove(userid);
+//			logger.info("[coonect chat] after remove, users set: " + users.keySet());
+//			if(SENDOK.equals(ret)) {
+//				ChatContext chatContext = new ChatContext(wxid, userid, openid, this);
+//				contextx(userid, chatContext, TimeUnit.MINUTES.toMillis(3));
+//				logger.info("[connect chat] sent msg to user, ready to connect chat: " + user);
+//				break;
+//			} else {
+//				logger.info("[connect chat] fail to connect user: " + user);
+//			}
+//		}
+//	}
 	
 	public void forgetIt(String openid) {
 		logger.info("[corpus] forgetIt: " + openid);
@@ -484,6 +498,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 				});
 				
 				updateWXuser();
+				
+				Set<String> keys = notifyAdmins.keySet();
+				StringBuffer ks  = new StringBuffer();
+				for(String k : keys) {
+					KeyValue kv = notifyAdmins.remove(k);
+					ks.append(getWXuserByOpenId(kv.key()).getNickname() + " " + kv.value()).append("\n");
+				}
+				atUser("oDqlM1TyKpSulfMC2OsZPwhi-9Wk", ks.toString());
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
@@ -1120,6 +1142,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 						String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
 						account().put(subscribeHistoryKey, time);
 						account().put(subscribeKey, time + Const.delimiter + "unsubscribe");
+						unSubscribe(openid, subscribe);
 						return SUCCESS;
 					} else if("SCAN".equals(event)) {
 						//TODO different scene
@@ -1961,6 +1984,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String userKey = String.join(Const.delimiter, Const.Version.V1, "User", openId);
 		account().put(userKey, time);
 		userOnline(openId);
+		tellAdmins(openId, "新用户关注");
+	}
+	public void unSubscribe(String openid, String subscribe) {
+		forgetIt(openid);
+		tellAdmins(openid, "用户取消关注");
+		WXuser user = getWXuserByOpenId(openid);
+		tellBossNow(openid, "你邀请的朋友" +user.getNickname()+ "现在取消关注了，快去挽回一下朋友吧");
 	}
 	public void userOnline(String openid) {
 		if(users.containsKey(openid)) {
@@ -2228,8 +2258,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 				id = new AtomicInteger(v);
 				atomicIds.put(string, id);
 			}
-			
-			return string + Const.delimiter + id.getAndIncrement();
+			account().put(key, "" + id.incrementAndGet());
+			return string + Const.delimiter + id.get();
 		}
 	}
 	

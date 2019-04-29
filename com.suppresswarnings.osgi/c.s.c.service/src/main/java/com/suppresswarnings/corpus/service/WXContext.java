@@ -239,7 +239,7 @@ public class WXContext extends Context<CorpusService> {
 					u.output(result);
 					count = bear;
 				} else {
-					u.content().connectChat(wxid(), openid(), t);
+//					u.content().connectChat(wxid(), openid(), t);
 					//count to 2
 					//fetch a task todo
 					count --;
