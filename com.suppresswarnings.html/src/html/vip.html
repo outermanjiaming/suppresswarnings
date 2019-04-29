@@ -155,7 +155,7 @@ $(function()
 		code = request.code
 		$.ajax({
 			type: 'GET',
-			url: '/wx.http?action=jsapi_ticket&url='+en,
+			url: '/wx.http?action=vip&state='+state + '&ticket=' + code + '&random=' + Math.random(),
 			dataType: 'json',
 			success: function(data) {
 			    if(data == "fail") {
