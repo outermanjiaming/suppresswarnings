@@ -172,7 +172,7 @@ $(function()
 							});
 						},
 						error: function(xhr, type){
-							alert('Ajax error!');
+							alert('不能刷新，请重新进入！');
 						}
 					});
 					
@@ -180,8 +180,7 @@ $(function()
 			    }
 			},
 			error: function(xhr, type){
-				alert('Ajax error!');
-				dropload.resetload();
+				alert('不能刷新，请重新进入！');
 			}
 		});
 	}
