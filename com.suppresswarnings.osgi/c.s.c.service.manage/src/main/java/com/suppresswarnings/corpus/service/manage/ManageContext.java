@@ -39,6 +39,7 @@ public class ManageContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			u.output("http://suppresswarnings.com/managereports.html");
 			u.output("后台管理，等级森严，你可以输入以下指令：");
 			u.output("    " + goodsManage.name());
 			u.output("    " + examManage.name());

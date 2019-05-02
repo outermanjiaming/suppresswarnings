@@ -204,6 +204,10 @@ color: #666
 <script type="text/javascript" src="js/suppresswarnings.js"></script>
 <script>
 var indx = 0
+function show(id){
+	$("#"+id).slideToggle();
+}
+
 function addorder(order) {
 	var myorders = $("#myorders")
 	var repetition = parseFloat(order.repetition)
@@ -221,9 +225,9 @@ function addorder(order) {
     	'时间：<span>' + order.firsttime + '</span> - <span>' + order.lasttime + '</span></div>';
     var vip = order.vip;
     if(vip == "1") {
-        orderinfo = orderinfo + '<div class="vip" id="vip_"'+order.openid+'><h3> VIP </h3>';
+        var crewid = "crew_"+order.openid;
+        orderinfo = orderinfo + '<div class="vip" onClick="show('+crewid+')"><h3> VIP <p>邀请了'+order.count+'位朋友</p></h3><ul style="display:none" id='+crewid+'>';
         var entries = order.entries;
-         orderinfo = orderinfo + '<p>邀请了'+order.count+'位朋友</p><ul>';
          for(var i=0;i<entries.length;i++){
              var user = entries[i];
              orderinfo = orderinfo + '<li><img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+user.key+'"/>'+user.value+'</li>';
