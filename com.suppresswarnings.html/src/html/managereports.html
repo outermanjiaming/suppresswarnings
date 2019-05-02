@@ -226,7 +226,7 @@ function addorder(order) {
     var vip = order.vip;
     if(vip == "1") {
         var crewid = "crew_"+order.openid;
-        orderinfo = orderinfo + '<div class="vip" onClick="show('+'"'+crewid+'"'+'")"><h3>我是VIP，邀请了'+order.count+'位朋友</h3> <ul style="display:none" id='+crewid+'>';
+        orderinfo = orderinfo + '<div class="vip" onClick="show('+'\''+crewid+'\''+')"><h3>我是VIP，邀请了'+order.count+'位朋友</h3> <ul style="display:none" id='+crewid+'>';
         var entries = order.entries;
          for(var i=0;i<entries.length;i++){
              var user = entries[i];
