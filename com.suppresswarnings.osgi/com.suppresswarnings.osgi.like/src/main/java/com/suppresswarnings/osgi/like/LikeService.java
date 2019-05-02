@@ -214,12 +214,7 @@ public class LikeService implements HTTPService, CommandProvider {
 		
 		return result.toString();  
 	}
-	public void writeLikes() {
-		counters.forEach((projectid,value) -> {
-			String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "LikeCount", projectid);
-			data().put(countProjectLikeKey, "" + value.get());
-		});
-	}
+
 	public void activate() {
 		logger.info("LikeService activate");
 		handler = new LikeHandlerImpl(this);
@@ -229,12 +224,11 @@ public class LikeService implements HTTPService, CommandProvider {
 			try {
 				logger.info("start to execute git pull");
 				gitpull();
-				logger.info("start to write likes");
-				writeLikes();
 			} catch (Exception e) {
 				logger.error("Fail to git pull", e);
 			}
 		}, 3, 10, TimeUnit.SECONDS);
+		
 		service.execute(() ->{
 			try {
 				String head = String.join(Const.delimiter, Const.Version.V2, "Projectid");
@@ -276,7 +270,10 @@ public class LikeService implements HTTPService, CommandProvider {
 	public int like(String project) {
 		initLike(project);
 		AtomicInteger count = counters.get(project);
-		return count.incrementAndGet();
+		int cnt = count.incrementAndGet();
+		String countProjectLikeKey = String.join(Const.delimiter, Const.Version.V2, "Project", "LikeCount", project);
+		data().put(countProjectLikeKey, "" + cnt);
+		return cnt;
 	}
 	
 	@Deprecated

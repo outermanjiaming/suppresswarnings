@@ -1012,6 +1012,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[vip] get openid failed");
 				return "fail";
 			}
+			
 			Map<String, Object> map = new HashMap<>();
 
 			String P_Func_Target = "P_VIP_" + state;
