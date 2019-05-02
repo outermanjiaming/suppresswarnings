@@ -1136,7 +1136,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 			});
 			//TODO lijiaming
 			Collections.sort(list, (Map a, Map b) ->{
-				return Integer.compare(Integer.parseInt((String)b.get("sum")),Integer.parseInt((String)a.get("sum")));
+				return Integer.compare(Integer.parseInt((String)b.get("vip")),Integer.parseInt((String)a.get("vip")));
 			});
 			
 			return gson.toJson(list);
