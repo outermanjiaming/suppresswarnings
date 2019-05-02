@@ -4,3 +4,6 @@ Bundle-Name: Crawler
 Bundle-SymbolicName: com.suppresswarnings.osgi.crawler
 Bundle-Version: 1.0.0.qualifier
 Export-Package: com.suppresswarnings.osgi.crawler
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.corpus.service.http,
+ com.suppresswarnings.osgi.leveldb
