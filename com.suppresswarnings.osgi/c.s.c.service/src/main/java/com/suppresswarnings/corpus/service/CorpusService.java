@@ -505,7 +505,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					KeyValue kv = notifyAdmins.remove(k);
 					ks.append(getWXuserByOpenId(kv.key()).getNickname() + " " + kv.value()).append("\n");
 				}
-				atUser("oDqlM1TyKpSulfMC2OsZPwhi-9Wk", ks.toString());
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
@@ -522,7 +521,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 				info.append("数据备份：" + backup.toString()).append("\n");
 				info.append("后台工作：\n" + workHandler.report());
 				for(String one : admin) {
-					sendTxtTo("schedule report " + one, info.toString(), one);
+					atUser(one, ks.toString());
+					atUser(one, info.toString());
 				}
 			}
 		}, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(120), TimeUnit.MILLISECONDS);
@@ -1091,12 +1091,32 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			List<Map<String, String>> list = new ArrayList<>();
+			List<Map<String, Object>> list = new ArrayList<>();
 			counters.forEach((userid, counter) ->{
 				try {
 					logger.info("[managereports] counter for " + userid);
-					Map<String, String> map = new HashMap<>();
+					Map<String, Object> map = new HashMap<>();
 					WXuser user = getWXuserByOpenId(userid);
+					
+					if(authrized(userid, "VIP")) {
+						map.put("vip", "1");
+						List<KeyValue> invited = new ArrayList<>();
+						List<String> openids = new ArrayList<>();
+						String start = String.join(Const.delimiter, Const.Version.V1, userid, "Crew");
+						account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+							String crew = k.substring(start.length() + Const.delimiter.length());
+							openids.add(crew);
+						});
+						openids.forEach(o ->{
+							WXuser u = getWXuserByOpenId(o);
+							KeyValue kv = new KeyValue(u.getHeadimgurl(), u.getNickname());
+							invited.add(kv);
+						});
+						map.put("count", "" + openids.size());
+						map.put("entries", invited);
+					} else {
+						map.put("vip", "0");
+					}
 					map.put("username", user.getNickname());
 					map.put("image", user.getHeadimgurl());
 					map.put("openid", userid);
@@ -1115,8 +1135,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 				}
 			});
 			//TODO lijiaming
-			Collections.sort(list, (Map<String, String> a, Map<String, String> b) ->{
-				return Integer.compare(Integer.parseInt(b.get("sum")),Integer.parseInt(a.get("sum")));
+			Collections.sort(list, (Map a, Map b) ->{
+				return Integer.compare(Integer.parseInt((String)b.get("sum")),Integer.parseInt((String)a.get("sum")));
 			});
 			
 			return gson.toJson(list);
@@ -2098,6 +2118,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		logger.info("update user info: " + users.size());
 		users.forEach((k, v) -> {
+			counters.put(k, new Counter(k));
 			String accessToken = accessToken("Update User");
 			String userKey = String.join(Const.delimiter, Const.Version.V1, k, "User");
 			String json = account().get(userKey);

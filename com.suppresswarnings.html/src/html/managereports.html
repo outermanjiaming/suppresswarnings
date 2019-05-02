@@ -207,7 +207,9 @@ var indx = 0
 function addorder(order) {
 	var myorders = $("#myorders")
 	var repetition = parseFloat(order.repetition)
-    	repetition = repetition.toFixed(2)
+    	repetition = repetition.toFixed(2);
+    
+    
 	var orderinfo = '<div class="order_info">' +
     	indx +'. ID：<span>' + order.openid + '</span><br/>'+
     	'<span class="item_img"><img src="'+order.image+'" title="' +order.username+ '"></span><span>' + order.username + '</span><br/>'+
@@ -216,7 +218,19 @@ function addorder(order) {
     	'回复数量：<span>' + order.reply + '</span><br/>'+
     	'同义句数量：<span>' + order.similar + '</span><br/>'+
     	'总数：<span>' + order.sum + '</span><br/>'+
-    	'时间：<span>' + order.firsttime + '</span> - <span>' + order.lasttime + '</span></div>'
+    	'时间：<span>' + order.firsttime + '</span> - <span>' + order.lasttime + '</span></div>';
+    var vip = order.vip;
+    if(vip == "1") {
+        orderinfo = orderinfo + '<div class="vip" id="vip_"'+order.openid+'><h3> VIP </h3>';
+        var entries = order.entries;
+         orderinfo = orderinfo + '<p>邀请了'+order.count+'位朋友</p><ul>';
+         for(var i=0;i<entries.length;i++){
+             var user = entries[i];
+             orderinfo = orderinfo + '<li><img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+user.key+'"/>'+user.value+'</li>';
+         }
+         orderinfo = orderinfo + '</ul></div>';
+    }
+    	
 	$('<li class="dashedli"><div>' + orderinfo + '</div></li>').appendTo(myorders)
 }
 
