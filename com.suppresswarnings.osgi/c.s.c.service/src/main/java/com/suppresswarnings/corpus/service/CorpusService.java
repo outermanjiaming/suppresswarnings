@@ -1115,6 +1115,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 						map.put("count", "" + openids.size());
 						map.put("entries", invited);
 					} else {
+						map.put("count", "0");
 						map.put("vip", "0");
 					}
 					map.put("username", user.getNickname());
@@ -1134,10 +1135,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.error("[managereports] error while foreach", e);
 				}
 			});
-			//TODO lijiaming
-			Collections.sort(list, (Map a, Map b) ->{
-				return Integer.compare(Integer.parseInt((String)b.get("vip")),Integer.parseInt((String)a.get("vip")));
-			});
+			
+			Collections.sort(list, (Map<String, Object> a, Map<String, Object> b) -> Integer.compare(Integer.parseInt((String)b.get("count")),Integer.parseInt((String)a.get("count"))));
 			
 			return gson.toJson(list);
 		} else if("WX".equals(action)) {
@@ -1860,6 +1859,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		account().put(key, openid);
 		String mykey = String.join(Const.delimiter, Const.Version.V1, openid, "Code", "Activate", "Software");
 		account().put(mykey, code);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Activate", "Software", openid), openid);
 		return code;
 	}
 	public String jsAccessToken() {
@@ -2118,7 +2118,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		logger.info("update user info: " + users.size());
 		users.forEach((k, v) -> {
-			counters.put(k, new Counter(k));
+			counters.putIfAbsent(k, new Counter(k));
 			String accessToken = accessToken("Update User");
 			String userKey = String.join(Const.delimiter, Const.Version.V1, k, "User");
 			String json = account().get(userKey);
@@ -2163,7 +2163,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		} else {
 			logger.info("[corpus] getWXuserByOpenId using exist json: " + json);
 			user = gson.fromJson(json, WXuser.class);
-			if(user.getSubscribe() == 0) {
+			if(user.getSubscribe() == null || user.getSubscribe() == 0) {
 				logger.info("[corpus] get WXuser info: " + openId);
 				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
 				try {
@@ -2385,5 +2385,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			return little;
 		}
+	}
+	
+	public String getRandomText(String openid) {
+		int i = assimilatedQuiz.size();
+		int select = new Random().nextInt(i);
+		Quiz quiz = assimilatedQuiz.get(select);
+		String text = quiz.getQuiz().value();
+		data().put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "GoodBye", "" + System.currentTimeMillis()), text);
+		return text;
 	}
 }

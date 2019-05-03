@@ -38,6 +38,7 @@
       <module>c.s.c.service.vip</module>
       <module>c.s.c.service.crew</module>
       <module>c.s.c.service.captcha</module>
+      <module>c.s.c.service.activation</module>
   </modules>
   <dependencies>
   		<dependency>

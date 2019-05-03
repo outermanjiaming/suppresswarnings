@@ -12,5 +12,15 @@
   <artifactId>c.s.c.common</artifactId>
   <version>1.0.0</version>
   </dependency>
+  <dependency>
+   <groupId>cn.edu.hfut.dmic.webcollector</groupId>
+	    <artifactId>WebCollector</artifactId>
+	    <version>2.71</version>
+  </dependency>
+  <dependency>
+  <groupId>com.suppresswarnings</groupId>
+  <artifactId>com.suppresswarnings.things</artifactId>
+  <version>1.0.8</version>
+  </dependency>
   </dependencies>
 </project>

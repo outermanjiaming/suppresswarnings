@@ -21,11 +21,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.suppresswarnings.corpus.common.KeyValue;
-import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
 
-import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.model.Page;
 import cn.edu.hfut.dmic.webcollector.plugin.berkeley.BreadthCrawler;
@@ -61,39 +59,40 @@ public class NewsCrawler extends BreadthCrawler {
 //        Jobs jobs = new Jobs("10why-crawler", "http://www.10why.net/", "http:\\/\\/www\\.10why\\.net.+", "a");
 //        Jobs jobs = new Jobs("text-crawler", "https://www.pdflibr.com/SMSContent/4", "https://www.pdflibr.com/SMSContent/4", "tr");
 //        Jobs jobs = new Jobs("zhidao-crawler", "https://zhidao.baidu.com", "https:\\/\\/zhidao\\.baidu\\.com\\/question.+", "span");
-//        Jobs jobs = new Jobs("texts-crawler", "https://www.pdflibr.com/", "https:\\/\\/www\\.pdflibr\\.com\\/\\?page=.+", "div.sms-number-list");
-//        NewsCrawler crawler = new NewsCrawler(jobs);
-//        crawler.start(2);
-//        crawler.sets.forEach(kv ->{
-//        	System.err.println(kv.toString());
-//        });
-        AtomicReference<String> last = new AtomicReference<String>();
-        CrawlDatum cd = new CrawlDatum("https://www.pdflibr.com/SMSContent/4");
-        OkHttpRequester http = new OkHttpRequester().addSuccessCode(200);
-        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleWithFixedDelay(() -> {
-	        	try {
-	        		HashSet<String> set = new HashSet<>();
-	        		Page page = http.getResponse(cd);
-	                Elements e = page.select("tr");
-	                e.iterator().forEachRemaining(i->{
-	                	String text = i.text().split("\\s+")[2];
-	                	if(!set.contains(text) && text.contains("素朴网联")) {
-		                	set.add(text);
-	                	}
-	                });
-	                String msg = set.toString();
-	                if(msg.length() > 240) msg  = msg.substring(0, 239);
-	                if(!msg.equals(last.get())) {
-	                	last.set(msg);
-		                CallableGet post = new CallableGet("http://suppresswarnings.com/wx.http?action=report&token=9si2M&msg=%s", URLEncoder.encode(msg, "UTF-8"));
-		                String ret = post.call();
-		                System.err.println(" === ==== ==== ==== === ==== ==== === === === ==== " + ret);
-	                }
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-        	}, 2, 5, TimeUnit.SECONDS);
+        Jobs jobs = new Jobs("texts-crawler", "https://www.pdflibr.com/", "https:\\/\\/www\\.pdflibr\\.com\\/\\?page=.+", "div.sms-number-list");
+        NewsCrawler crawler = new NewsCrawler(jobs);
+        crawler.start(2);
+        crawler.sets.forEach(kv ->{
+        	System.err.println(kv.toString());
+//        	crawler.leveldb.put(kv.key(), kv.value());
+        });
+//        AtomicReference<String> last = new AtomicReference<String>();
+//        CrawlDatum cd = new CrawlDatum("https://www.pdflibr.com/SMSContent/4");
+//        OkHttpRequester http = new OkHttpRequester().addSuccessCode(200);
+//        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+//        service.scheduleWithFixedDelay(() -> {
+//	        	try {
+//	        		HashSet<String> set = new HashSet<>();
+//	        		Page page = http.getResponse(cd);
+//	                Elements e = page.select("tr");
+//	                e.iterator().forEachRemaining(i->{
+//	                	String text = i.text().split("\\s+")[2];
+//	                	if(!set.contains(text) && text.contains("素朴网联") || text.contains("爱奇艺")) {
+//		                	set.add(text);
+//	                	}
+//	                });
+//	                String msg = set.toString();
+//	                if(msg.length() > 240) msg  = msg.substring(0, 239);
+//	                if(!msg.equals(last.get())) {
+//	                	last.set(msg);
+//		                CallableGet post = new CallableGet("http://suppresswarnings.com/wx.http?action=report&token=9si2M&msg=%s", URLEncoder.encode(msg, "UTF-8"));
+//		                String ret = post.call();
+//		                System.err.println(" === ==== ==== ==== === ==== ==== === === === ==== " + ret);
+//	                }
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//        	}, 2, 100, TimeUnit.SECONDS);
     }
 	
 	@Override

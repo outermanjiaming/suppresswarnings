@@ -337,7 +337,7 @@ public class WXContext extends Context<CorpusService> {
 	
 	@Override
 	public State<Context<CorpusService>> exit() {
-		content().sendTxtTo("close " + getClass().getSimpleName(), "先这样吧，我们下次再聊！", openid());
+		content().sendTxtTo("close " + getClass().getSimpleName(), content().getRandomText(openid()), openid());
 		return init;
 	}
 	public void state(State<Context<CorpusService>> state) {
