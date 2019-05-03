@@ -212,7 +212,9 @@ function addorder(order) {
 	var myorders = $("#myorders")
 	var repetition = parseFloat(order.repetition)
     	repetition = repetition.toFixed(2);
-    
+    if(order.image == undefined){
+        return ;
+    }
     
 	var orderinfo = '<div class="order_info">' +
     	indx +'. ID：<span>' + order.openid + '</span><br/>'+
@@ -230,6 +232,9 @@ function addorder(order) {
         var entries = order.entries;
          for(var i=0;i<entries.length;i++){
              var user = entries[i];
+             if(user.key == undefined) {
+                 continue;
+             }
              orderinfo = orderinfo + '<li><img style="width: 20px;height: 20px;margin-right: 5px;margin-top:2px;" src="'+user.key+'"/>'+user.value+'</li>';
          }
          orderinfo = orderinfo + '</ul></div>';
