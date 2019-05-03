@@ -23,6 +23,7 @@ public class Counter {
 	long firstTime;
 	long lastTime;
 	HashSet<String> texts;
+	long now = System.currentTimeMillis();
 	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public Counter(String openid) {
 		this.openid = openid;
@@ -30,8 +31,8 @@ public class Counter {
 		this.replyCounter = new AtomicInteger(0);
 		this.similarCounter = new AtomicInteger(0);
 		this.existCounter = new AtomicInteger(0);
-		this.firstTime = Long.MAX_VALUE;
-		this.lastTime = 0;
+		this.firstTime = now;
+		this.lastTime = now;
 		this.texts = new HashSet<>();
 	}
 	

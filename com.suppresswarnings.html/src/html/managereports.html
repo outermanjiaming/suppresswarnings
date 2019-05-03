@@ -277,9 +277,9 @@ $(document).ready(function(){
 		    success: function( result ) {
 		    	closeDiv()
 		      if("fail" == result) {
-		    	  console.log('fail daigou manageorders')
+		    	  console.log('fail to manageorders')
 		      } else {
-		          console.log('good to manageorders: ' + result)
+		          console.log('good to manageorders')
 		          showDiv()
 			        var orderlist = JSON.parse(result)
 			        var length = orderlist.length
