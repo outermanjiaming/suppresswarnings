@@ -214,6 +214,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(boss == null || "None".equals(boss)) {
 			logger.error("boss is null " + openid);
 		} else {
+			decrement(boss);
 			atUser(boss, msg);
 		}
 	}
@@ -503,7 +504,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 				StringBuffer ks  = new StringBuffer();
 				for(String k : keys) {
 					KeyValue kv = notifyAdmins.remove(k);
-					ks.append(getWXuserByOpenId(kv.key()).getNickname() + " " + kv.value()).append("\n");
+					ks.append(kv.key()+ " " + kv.value()).append("\n");
 				}
 				
 				String[] admin = admins.split(",");
@@ -1224,10 +1225,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 							if(subscribe.contains("unsubscribe")) {
 								return xml(openid, "你又回来了，我很高兴，你愿意陪我聊天吗", fromOpenId);
 							} else {
-								return xml(openid, "你很关注我，谢谢你，你愿意和我聊天，教我说话吗", fromOpenId);
+								return xml(openid, "谢谢你关注我，你愿意和我聊天，教我说话吗", fromOpenId);
 							}
 						}
 					} else if("unsubscribe".equals(event)) {
+						String json = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "User"));
+						account().put(String.join(Const.delimiter, Const.Version.V1, openid, "User", "" + System.currentTimeMillis()), json);
+						
 						String subscribeKey = String.join(Const.delimiter, Const.Version.V1, "Subscribe", openid);
 						String subscribe = account().get(subscribeKey);
 						String time = "" + System.currentTimeMillis();
@@ -2076,23 +2080,25 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void subscribe(String openId, String time) {
 		String userKey = String.join(Const.delimiter, Const.Version.V1, "User", openId);
 		account().put(userKey, time);
-		userOnline(openId);
-		tellAdmins(openId, "新用户关注");
+		String nickname = userOnline(openId);
+		tellAdmins(openId, nickname + " 新关注");
 	}
 	public void unSubscribe(String openid, String subscribe) {
 		forgetIt(openid);
-		tellAdmins(openid, "用户取消关注");
 		WXuser user = getWXuserByOpenId(openid);
-		tellBossNow(openid, "你邀请的朋友" +user.getNickname()+ "现在取消关注了，快去挽回一下朋友吧");
+		tellAdmins(openid, user.getNickname() + " 取消关注");
+		tellBossNow(openid, "你邀请的朋友" + user.getNickname() + "现在取消关注了，快去挽回一下朋友吧");
 	}
-	public void userOnline(String openid) {
+	public String userOnline(String openid) {
 		if(users.containsKey(openid)) {
 			WXuser user = getWXuserByOpenId(openid);
 			logger.info("[user online] already online: " + user.toString());
+			return user.getNickname();
 		} else {
 			WXuser user = getWXuserByOpenId(openid);
 			users.put(openid, user);
 			logger.info("[user online] new online: " + user.toString());
+			return user.getNickname();
 		}
 	}
 	public String globalCommand(String sceneOrCommand) {
@@ -2361,7 +2367,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		synchronized (incrementers) {
 			AtomicInteger idx = incrementers.get(key);
 			if(idx == null) {
-				AtomicInteger val = new AtomicInteger(1);
+				AtomicInteger val = new AtomicInteger(0);
 				account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
 					val.incrementAndGet();
 				});
@@ -2370,6 +2376,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 			
 			return ""+idx.incrementAndGet();
+		}
+	}
+	
+	public void decrement(String openid) {
+		synchronized (incrementers) {
+			AtomicInteger idx = incrementers.get(openid);
+			if(idx == null) {
+				logger.error("[decrement] counter not found: " + openid);
+			} else {
+				idx.decrementAndGet();
+			}
+			
 		}
 	}
 	

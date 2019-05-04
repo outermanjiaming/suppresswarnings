@@ -36,11 +36,12 @@ public class CaptchaContext extends WXContext {
 				String stamp = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Captcha", number, "Time"));
 				long report = Long.valueOf(stamp);
 				if(System.currentTimeMillis() - report > TimeUnit.MINUTES.toMillis(10)) {
-					u.output("10分钟内没有收到验证码\n手机号：" + number);
+					u.output("10分钟内没有收到验证码\n请确认你使用该账号登录了爱奇艺会员，手机号：" + number);
 					return;
 				}
 				SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
-				u.output("当前时间：" + format.format(new Date()) + "\n更新时间：" + format.format(new Date(report)) +"\n手机号：" + number+ "\n验证码：" + text);
+				u.output("当前时间：" + format.format(new Date()) + "\n更新时间：" + format.format(new Date(report)) +"\n手机号：" + number+ "\n验证码：");
+				u.content().atUser(openid(), text);
 			}
 			
 			u.output("如果未收到验证码或者验证码已过期，请再次输入手机号：");
@@ -77,7 +78,7 @@ public class CaptchaContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("「素朴网联」提供免费共享的爱奇艺会员");
+			u.output("「素朴网联」提供免费共享的爱奇艺会员，账号：13727872757，使用该账号登录爱奇艺会员获取验证码，然后");
 			u.output("输入手机号：13727872757");
 		}
 
