@@ -23,10 +23,6 @@ public class CaptchaContextFactory implements ContextFactory<CorpusService> {
 		return TimeUnit.MINUTES.toMillis(3);
 	}
 
-	public String[] requiredAuth() {
-		return CaptchaContext.AUTH;
-	}
-
 	@Override
 	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
 		return new CaptchaContext(wxid, openid, content);

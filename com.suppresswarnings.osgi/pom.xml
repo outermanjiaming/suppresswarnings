@@ -39,6 +39,7 @@
       <module>c.s.c.service.crew</module>
       <module>c.s.c.service.captcha</module>
       <module>c.s.c.service.activation</module>
+      <module>c.s.c.service.share.phone</module>
   </modules>
   <dependencies>
   		<dependency>
