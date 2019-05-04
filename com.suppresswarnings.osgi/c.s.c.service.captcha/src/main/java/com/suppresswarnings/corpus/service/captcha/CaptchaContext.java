@@ -77,15 +77,8 @@ public class CaptchaContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("「素朴网联」使用须知\n" + 
-					"在使用前你应该知晓该电话号码是所有人共享\n" + 
-					"请不要用这个电话号码接收重要内容\n" + 
-					"该电话号码只用于爱奇艺会员登录\n" + 
-					"他人可以通过此电话号码找回密码，所以注册时应注意个人信息\n" + 
-					"由此造成经济损失概不负责\n" + 
-					"为了让大家共享，请勿修改密码\n" + 
-					"在使用时即代表以上条款已同意");
-			u.output("请输入手机号：13727872757");
+			u.output("「素朴网联」提供免费共享的爱奇艺会员");
+			u.output("输入手机号：13727872757");
 		}
 
 		@Override
