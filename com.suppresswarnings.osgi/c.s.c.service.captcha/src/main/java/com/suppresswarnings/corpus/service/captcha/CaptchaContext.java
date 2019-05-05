@@ -53,7 +53,6 @@ public class CaptchaContext extends WXContext {
 			if(t.length() > 4 && Pattern.compile("\\d+").matcher(t.substring(0, 4)).matches()) {
 				return captcha;
 			}
-			u.content().atUser(openid(), "感谢使用「素朴网联」的服务，如果再次需要验证码，请输入：" + CMD);
 			return init;
 		}
 
