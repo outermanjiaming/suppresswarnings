@@ -40,6 +40,7 @@
       <module>c.s.c.service.captcha</module>
       <module>c.s.c.service.activation</module>
       <module>c.s.c.service.share.phone</module>
+      <module>c.s.c.service.invite</module>
   </modules>
   <dependencies>
   		<dependency>

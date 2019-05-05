@@ -77,8 +77,14 @@ public class CaptchaContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("「素朴网联」提供免费共享的爱奇艺会员，账号：13727872757，使用该账号登录爱奇艺会员获取验证码，然后");
-			u.output("输入手机号：13727872757");
+			String key = String.join(Const.delimiter, Const.Version.V1, "Info", "CaptchaList");
+			StringBuffer sb = new StringBuffer();
+			u.content().account().page(key, key, null, 100, (k, v) ->{
+				String phone = k.substring(key.length() + Const.delimiter.length());
+				sb.append(phone).append(";");
+			});
+			u.output("「素朴网联」提供免费共享的爱奇艺会员，账号："+sb.toString()+"，选择一个账号登录爱奇艺会员获取验证码，然后");
+			u.output("输入手机号：");
 		}
 
 		@Override

@@ -78,9 +78,9 @@ public class CashoutContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			realValue = u.content().account().get(String.join(Const.delimiter, Const.Version.V2, openid(), "RealValue"));
 			if(realValue == null || "None".equals(realValue)) {
-				u.output("你还没有实名认证，提现需要实名信息（微信要求），请输入该微信号对应的真实姓名和身份证，比如：张三,430481199801107112");
+				u.output("你还没有实名认证，提现需要实名信息（微信要求），请输入该微信号对应的真实姓名");
 			} else {
-				u.output("你已经提交了实名认证，如果需要修改，请输入该微信号对应的真实姓名和身份证，比如：张三,430481199801107112");
+				u.output("你已经提交了实名认证，如果需要修改，请输入该微信号对应的真实姓名");
 			}
 		}
 
