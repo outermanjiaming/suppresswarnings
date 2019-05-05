@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "D:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\res\\merged\\debug\\layout\\activity_main.xml",
+        "source": "D:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\src\\main\\res\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "D:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\res\\merged\\debug\\layout\\dialog.xml",
+        "source": "D:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\src\\main\\res\\layout\\dialog.xml"
+    }
+]

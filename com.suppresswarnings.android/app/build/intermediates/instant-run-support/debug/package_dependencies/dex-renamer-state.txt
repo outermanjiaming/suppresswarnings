@@ -1,0 +1,10 @@
+#Sun May 05 14:49:31 CST 2019
+renamed.2=classes.dex
+renamed.1=classes3.dex
+renamed.0=classes2.dex
+base.2=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\butterknife-annotations-8.4.0_a2a255623276bf6fd1b525dcb3e3c692cac62c3e
+base.1=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\support-annotations-24.1.0_864df4e5c18d1d47544f6f600a2199d4c9ebef78
+base.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\classes_f75473c808a778b2cf8556517e43bb1904b6e359
+file.2=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\butterknife-annotations-8.4.0_a2a255623276bf6fd1b525dcb3e3c692cac62c3e\\classes.dex
+file.1=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\support-annotations-24.1.0_864df4e5c18d1d47544f6f600a2199d4c9ebef78\\classes.dex
+file.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10\\classes_f75473c808a778b2cf8556517e43bb1904b6e359\\classes.dex
