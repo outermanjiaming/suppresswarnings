@@ -1,0 +1,4 @@
+#Sun May 05 14:49:31 CST 2019
+base.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\5\\slice_0
+renamed.0=classes.dex
+file.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\5\\slice_0\\classes.dex
