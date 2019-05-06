@@ -175,13 +175,13 @@ $(function()
 				    timestamp: data.timestamp,
 				    nonceStr: data.nonceStr,
 				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage', 'uploadImage']
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'showMenuItems', 'uploadImage']
 				});
 			
 				wx.ready(function () {
 				    console.log(window.__wxjs_environment === 'miniprogram');
 					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage', 'uploadImage'],
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'showMenuItems', 'uploadImage'],
 					    success: function(res) {
 					        console.log("check js api ok: " + res)
 					    }
@@ -203,6 +203,10 @@ $(function()
 						success: function () {
 							console.log("===== lijiaming ====");
 						}
+					});
+					
+					wx.showMenuItems({
+						menuList: ['menuItem:profile', 'menuItem:addContact']
 					});
 				});
 			},
