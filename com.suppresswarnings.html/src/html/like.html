@@ -175,13 +175,13 @@ $(function()
 				    timestamp: data.timestamp,
 				    nonceStr: data.nonceStr,
 				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage']
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage']
 				});
 			
 				wx.ready(function () {
 				    console.log(window.__wxjs_environment === 'miniprogram');
 					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage'],
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage'],
 					    success: function(res) {
 					        console.log("check js api ok: " + res)
 					    }
@@ -324,6 +324,10 @@ function chooseImg() {
 		success: function (res) {
 			var localIds = res.localIds;
 			console.log(localIds);
+			wx.previewImage({
+				current: localIds[0],
+				urls: localIds
+			});
 		}
 	});
 }
