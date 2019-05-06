@@ -97,7 +97,7 @@
 	<div id ="inner" class="inner">
 	
 		<header>
-			<img id="bg" src="asset/images/bg.jpg">
+			<img onClick="chooseImg()" id="bg" src="asset/images/bg.jpg">
 			<p id="user-name">素朴网联</p>
 			<a href="./user.html"><img id="avt" class="data-avt" src="/suppresswarnings.jpg"></a>
 		</header>
@@ -175,13 +175,13 @@ $(function()
 				    timestamp: data.timestamp,
 				    nonceStr: data.nonceStr,
 				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage']
 				});
 			
 				wx.ready(function () {
 				    console.log(window.__wxjs_environment === 'miniprogram');
 					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage'],
 					    success: function(res) {
 					        console.log("check js api ok: " + res)
 					    }
@@ -316,6 +316,17 @@ $(function()
 	}
 
 
+function chooseImg() {
+   wx.chooseImage({
+		count: 4,
+		sizeType: ['original', 'compressed'],
+		sourceType: ['album', 'camera'],
+		success: function (res) {
+			var localIds = res.localIds;
+			console.log(localIds);
+		}
+	});
+}
 
 function getDelayTime()
 {

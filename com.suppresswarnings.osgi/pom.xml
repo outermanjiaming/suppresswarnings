@@ -41,6 +41,7 @@
       <module>c.s.c.service.activation</module>
       <module>c.s.c.service.share.phone</module>
       <module>c.s.c.service.invite</module>
+      <module>c.s.c.service.single</module>
   </modules>
   <dependencies>
   		<dependency>
