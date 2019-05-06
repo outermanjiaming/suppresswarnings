@@ -175,13 +175,13 @@ $(function()
 				    timestamp: data.timestamp,
 				    nonceStr: data.nonceStr,
 				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage']
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage', 'uploadImage']
 				});
 			
 				wx.ready(function () {
 				    console.log(window.__wxjs_environment === 'miniprogram');
 					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage'],
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'previewImage', 'uploadImage'],
 					    success: function(res) {
 					        console.log("check js api ok: " + res)
 					    }
