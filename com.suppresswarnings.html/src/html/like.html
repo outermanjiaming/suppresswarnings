@@ -175,13 +175,13 @@ $(function()
 				    timestamp: data.timestamp,
 				    nonceStr: data.nonceStr,
 				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'showMenuItems', 'uploadImage']
+				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'hideMenuItems', 'uploadImage']
 				});
 			
 				wx.ready(function () {
 				    console.log(window.__wxjs_environment === 'miniprogram');
 					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'showMenuItems', 'uploadImage'],
+					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'hideMenuItems', 'uploadImage'],
 					    success: function(res) {
 					        console.log("check js api ok: " + res)
 					    }
@@ -205,8 +205,8 @@ $(function()
 						}
 					});
 					
-					wx.showMenuItems({
-						menuList: ['menuItem:profile', 'menuItem:addContact']
+					wx.hideMenuItems({
+						menuList: ['menuItem:share:qq', 'menuItem:share:weiboApp', 'menuItem:share:facebook', 'menuItem:share:QZone', 'menuItem:editTag', 'menuItem:delete', 'menuItem:readMode']
 					});
 				});
 			},
