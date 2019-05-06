@@ -324,21 +324,19 @@ function chooseImg() {
 		success: function (res) {
 			var localIds = res.localIds;
 			console.log(localIds);
-			wx.previewImage({
-				current: localIds[0],
-				urls: localIds
-			});
+			$.toast(localIds, "text");
 			
-			wx.uploadImage({
-				localId: localIds,
-				isShowProgressTips: 1,
-				success: function (res) {
-				   var serverId = res.serverId;
-				   console.log(serverId);
-				   console.log(serverId);
-				   console.log(serverId);
-				}
-			});
+			for(var id in localIds) {
+				wx.uploadImage({
+					localId: id,
+					isShowProgressTips: 1,
+					success: function (res) {
+					   var serverId = res.serverId;
+					   $.toast(serverId, "text");
+					   console.log(serverId);
+					}
+				});
+			}
 		}
 	});
 }
