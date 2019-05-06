@@ -320,6 +320,27 @@ $(function()
 	}
 
 
+var i = 0, length = images.localId.length;
+    images.serverId = [];
+    function upload() {
+      wx.uploadImage({
+        localId: images.localId[i],
+        isShowProgressTips: 1,
+        success: function (res) {
+          i++;
+          //alert('宸蹭笂浼狅细' + i + '/' + length);
+          images.serverId.push(res.serverId);
+          if (i < length) {
+            upload();
+          }
+        },
+        fail: function (res) {
+          alert(JSON.stringify(res));
+        }
+      });
+    }
+    upload();
+
 function chooseImg() {
    wx.chooseImage({
 		count: 4,
@@ -328,15 +349,21 @@ function chooseImg() {
 		success: function (res) {
 			var localIds = res.localIds;
 			console.log(localIds);
-			wx.uploadImage({
-				localId: localIds,
-				isShowProgressTips: 1,
-				success: function (res) {
-				   var serverId = res.serverId;
-				   $.toast(serverId, "text");
-				   console.log(serverId);
-				}
-			});
+			for(var i=0;i<localIds.length;i++){
+			    var local = localIds[i];
+				wx.uploadImage({
+					localId: local,
+					isShowProgressTips: 1,
+					success: function (res) {
+					   var serverId = res.serverId;
+					   $.toast(serverId, "text");
+					   console.log(serverId);
+					},
+					fail: function (res) {
+			          $.toast(JSON.stringify(res), "text");
+			        }
+				});
+			}
 		}
 	});
 }
