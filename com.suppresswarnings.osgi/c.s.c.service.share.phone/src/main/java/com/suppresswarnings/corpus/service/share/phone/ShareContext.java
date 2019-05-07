@@ -6,7 +6,6 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
-import com.suppresswarnings.corpus.service.aiiot.Things;
 
 public class ShareContext extends WXContext {
 	public static final String[] AUTH = {"VIP"};
@@ -26,7 +25,7 @@ public class ShareContext extends WXContext {
 			number = t;
 			
 			if(numbers.contains(number)) {
-				String capt = call(u.content(), "获取第三方手机短信验证码", number);
+				String capt = u.content().remoteCall(openid(), code, "获取第三方手机短信验证码", number);
 				u.output(capt.replace(";", "\n"));
 			} else {
 				u.output("你输入的手机号不存在，请确认：" + number);
@@ -67,7 +66,7 @@ public class ShareContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			String ret = call(u.content(), "获取第三方手机号码", "获取第三方手机号码");
+			String ret = u.content().remoteCall(openid(), code, "获取第三方手机号码", "获取第三方手机号码");
 			u.output("「素朴网联」使用须知\n" + 
 					"在使用前你应该知晓下面的电话号码短信内容所有人都可以查看\n" + 
 					"请不要用这个电话号码接收重要内容\n" + 
@@ -100,24 +99,6 @@ public class ShareContext extends WXContext {
 		
 	};
 	
-	public String call(CorpusService service, String cmd, String input) {
-		Things thing = service.aiiot.things.get(code);
-		StringBuffer ret = new StringBuffer();
-		logger.info("[Captcha] remoteCall "+ thing);
-		if(thing == null) {
-			logger.info("[Captcha] remoteCall but thing is null for code: " + code);
-			ret.append("手机号暂时不可用");
-		}
-		if(thing.isClosed()) {
-			logger.info("[Captcha] thing is closed: " + thing.toString());
-			ret.append("手机号暂时不好用");
-		}
-		logger.info("[Captcha] remoteCall("+openid()+", "+thing+", "+cmd + "" + input+")");
-		String result = thing.execute(cmd, input);
-		if(result != null) ret.append(result);
-		return ret.toString();
-	}
-
 	public ShareContext(String wxid, String openid, CorpusService ctx) {
 		super(wxid, openid, ctx);
 		this.state(enter);

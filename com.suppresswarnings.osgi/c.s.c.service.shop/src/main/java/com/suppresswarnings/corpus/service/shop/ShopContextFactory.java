@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
-import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
 public class ShopContextFactory implements ContextFactory<CorpusService> {

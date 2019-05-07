@@ -22,5 +22,10 @@
   <artifactId>com.suppresswarnings.things</artifactId>
   <version>1.0.8</version>
   </dependency>
+  <dependency>
+<groupId>com.tencentcloudapi</groupId>
+<artifactId>tencentcloud-sdk-java</artifactId>
+<version>3.0.67</version>
+</dependency>
   </dependencies>
 </project>

@@ -53,6 +53,7 @@ import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.common.TTL;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
+import com.suppresswarnings.corpus.service.aiiot.Things;
 import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.game.Guard;
@@ -255,7 +256,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 		logger.info("[corpus] offWork: " + openid);
 		return this.workHandler.clockOut(openid);
 	}
-
+	public String remoteCall(String openid, String code, String cmd, String input) {
+		Things thing = aiiot.things.get(code);
+		StringBuffer ret = new StringBuffer();
+		logger.info("[corpus] remoteCall "+ thing);
+		if(thing == null) {
+			logger.info("[corpus] remoteCall but thing is null for code: " + code);
+			ret.append("设备为null");
+		} else if(thing.isClosed()) {
+			logger.info("[corpus] thing is closed: " + thing.toString());
+			ret.append("设备已关闭");
+		} else {
+			logger.info("[corpus] remoteCall("+ openid +", "+thing+", "+cmd + "" + input+")");
+			String result = thing.execute(cmd, input);
+			if(result != null) ret.append(result);
+		}
+		return ret.toString();
+	}
 	public String aiiot(String wxid, String openid, String code, String input, String origin, Context<CorpusService> context) {
 		if(code.contains(";")) {
 			StringBuffer sb = new StringBuffer();

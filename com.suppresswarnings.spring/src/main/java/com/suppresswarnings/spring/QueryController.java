@@ -34,6 +34,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tencentcloudapi.common.Credential;
+import com.tencentcloudapi.common.profile.ClientProfile;
+import com.tencentcloudapi.common.profile.HttpProfile;
+import com.tencentcloudapi.common.exception.TencentCloudSDKException;
+
+import com.tencentcloudapi.aai.v20180522.AaiClient;
+
+import com.tencentcloudapi.aai.v20180522.models.ChatRequest;
+import com.tencentcloudapi.aai.v20180522.models.ChatResponse;
+
+
 @Controller
 public class QueryController {
 	
@@ -44,17 +55,49 @@ public class QueryController {
 	ByteBuffer buffer = ByteBuffer.allocateDirect(2048);
 	
 	ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
-
+	Credential cred = new Credential("AKID72i8JGoReHemeHfmeGgqlRIuJUQAhwxi", "f5FAtNtGNGuJRKxOZUVGn7CetsbjcJlx");
+    HttpProfile httpProfile = new HttpProfile();
+    ClientProfile clientProfile = new ClientProfile();
+    AaiClient client = null;
 	
 	
 	@GetMapping("/index")
     public String index() {
 		System.out.println("/index -> index.html");
 		System.out.println(ev.getProperty("server.port", "8009"));
+		
+		try{
+			httpProfile.setEndpoint("aai.tencentcloudapi.com");
+			clientProfile.setHttpProfile(httpProfile);
+			client = new AaiClient(cred, "ap-beijing", clientProfile);
+            
+            String params = "{\"Text\":\"吃饭了吗\",\"User\":\"{\\\"id\\\":\\\"10010\\\",\\\"gender\\\":\\\"0\\\"}\",\"ProjectId\":1255895122}";
+            ChatRequest req = ChatRequest.fromJsonString(params, ChatRequest.class);
+            ChatResponse resp = client.Chat(req);
+            
+            System.out.println(resp.getAnswer());
+        } catch (TencentCloudSDKException e) {
+                System.out.println(e.toString());
+        }
+		
         return "index.html";
     }
 	
-	
+	@RequestMapping("chat")
+    @ResponseBody
+    public String chat(@RequestParam("input") String input){
+		System.out.println("input: " + input);
+		String params = "{\"Text\":\""+input+"\",\"User\":\"{\\\"id\\\":\\\"10010\\\",\\\"gender\\\":\\\"0\\\"}\",\"ProjectId\":1255895122}";
+		try {
+			ChatRequest req = ChatRequest.fromJsonString(params, ChatRequest.class);
+			ChatResponse resp = client.Chat(req);
+			return resp.getAnswer();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "无语😓";
+		}
+		
+	}
 	/**
      * 实现文件上传
      * */
@@ -254,4 +297,6 @@ public class QueryController {
     	
     	return result;
     }
+    
+    
 }

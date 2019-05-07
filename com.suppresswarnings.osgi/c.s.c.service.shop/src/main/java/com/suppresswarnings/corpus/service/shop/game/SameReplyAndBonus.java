@@ -18,6 +18,7 @@ public class SameReplyAndBonus extends Context<CorpusService> {
 	String openid;
 	String qrScene;
 	int n = 3;
+	String code = "T_Code_oDqlM1TyKpSulfMC2OsZPwhi-9Wk_IOT_Talk";
 	public SameReplyAndBonus(AtomicBoolean consumer, String ownerid, String openid, String qrScene, State<Context<CorpusService>> exit, Context<CorpusService> context){
 		super(context.content());
 		this.state = game;
@@ -47,6 +48,7 @@ public class SameReplyAndBonus extends Context<CorpusService> {
 				u.content().account().put(keyUser, openid());
 				consumer.compareAndSet(false, true);
 				u.output("接下来请耐心回答"+n+"个问题");
+				u.content().remoteCall(openid(), code, "传令下去", "接下来请耐心回答"+n+"个问题");
 				myself.start(u);
 			} else {
 				if(myself.finish()) {

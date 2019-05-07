@@ -17,6 +17,7 @@ public class Ally {
 	WaitingRoom room;
 	Iterator<Quiz> quiz;
 	Quiz current;
+	String code = "T_Code_oDqlM1TyKpSulfMC2OsZPwhi-9Wk_IOT_Talk";
 	List<KeyValue> qa = new ArrayList<>();
 	volatile int state = -1;
 	public String getOpenid() {
@@ -68,10 +69,13 @@ public class Ally {
 		context.content().data().put(keyReply, reply);
 		if(quiz.hasNext()) {
 			current = quiz.next();
-			context.output(current.getQuiz().value());
+			String question = current.getQuiz().value();
+			context.content().remoteCall(openid, code, "传令下去", question);
+			context.output(question);
 		} else {
 			state = 1;
 			context.output("你已完成答题，等待对方完成。你有一次机会可以和对手留言（双方都完成之后的3分钟之内）");
+			context.content().remoteCall(openid, code, "传令下去", "你已完成答题，等待对方完成。");
 		}
 	}
 	
