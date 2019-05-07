@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
+import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
@@ -23,7 +24,7 @@ public class SingleContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "Single"), time());
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "Single"), openid());
 			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "Single", openid()), openid());
 			AtomicInteger count = new AtomicInteger(0);
 			String start = String.join(Const.delimiter, Const.Version.V1, "Tag", "Single");
@@ -87,7 +88,10 @@ public class SingleContext extends WXContext {
 			} else {
 				u.output(quizs[index]);
 			}
-			u.output("你说：" + t);
+			
+			if(index > 0) {
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Single", "Question", time(), ""+index), t);
+			}
 			
 			index++;
 		}
@@ -121,7 +125,10 @@ public class SingleContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("太好了，未来对象正在寻找你！");
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Self", "Introduce", openid()),  t);
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Self", "Introduce"),  t);
+			u.content().data().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Self", "Introduce", openid(), time()),  t);
+			u.output("太好了，未来对象正在寻找你！你可以多提一些问题，或者多回答一些问题。");
 		}
 
 		@Override
@@ -141,36 +148,87 @@ public class SingleContext extends WXContext {
 		
 	};
 	
-	State<Context<CorpusService>> answer = new State<Context<CorpusService>>() {
+	State<Context<CorpusService>> answerBoy = new State<Context<CorpusService>>() {
+		
+		State<Context<CorpusService>> reply = new State<Context<CorpusService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 637372941813127676L;
+			List<KeyValue> quizs = null;
+			KeyValue q = null;
+			Iterator<KeyValue> itr = null;
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				if(quizs == null || quizs.isEmpty()) {
+					quizs = quiz(u.content(), current.key());
+					itr = quizs.iterator();
+				}
+				
+				if(itr.hasNext()) {
+					q = itr.next();
+					u.output(q.value());
+				} else {
+					u.output("未来男朋友觉得OK的话，会和你联系哦");
+				}
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if(finish()) {
+					quizs.clear();
+					return answerBoy;
+				}
+				return this;
+			}
+
+			@Override
+			public String name() {
+				return "回复问题";
+			}
+
+			@Override
+			public boolean finish() {
+				return !itr.hasNext();
+			}
+			
+		};
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -8031796296634830830L;
-		List<String> quiz = new ArrayList<>();
-		Iterator<String> iterator = null;
+		List<KeyValue> singles = new ArrayList<>();
+		Iterator<KeyValue> iterator = null;
+		KeyValue current = null;
 		boolean finish = false;
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			if(quiz.isEmpty()) {
-				quiz.add("你喜欢什么颜色？");
-				quiz.add("你想要生几个孩子？");
-				quiz.add("你会做家务吗？");
-				iterator = quiz.iterator();
-				u.output("接下来回答一些大家找对象都关注的问题：");
+			if(singles.isEmpty()) {
+				singles = singles(u.content(), "BoySingle");
+				iterator = singles.iterator();
+				u.output("接下来是一些未来男朋友的自我介绍，如果觉得满意就输入：可以");
 			}
-			if(iterator.hasNext()) u.output(iterator.next());
-			else u.output("完成！你的未来对象觉得OK的话，会和你联系哦");
+			if(iterator.hasNext()) {
+				current = iterator.next();
+				u.output("他的自我介绍：");
+				u.output(current.value());
+			} else {
+				u.output("先歇一会儿呗，为了让你更容易被发现，请用一句话介绍自己：");
+			}
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(finish()) {
-				quiz.clear();
+				singles.clear();
 				return finished;
 			}
 			finish = !iterator.hasNext();
+			if(u.yes(t, "可以")) {
+				return reply;
+			}
 			return this;
 		}
 
@@ -179,6 +237,129 @@ public class SingleContext extends WXContext {
 			return "我要回答";
 		}
 
+		@Override
+		public boolean finish() {
+			return finish;
+		}
+		
+	};
+	
+	
+	public List<KeyValue> quiz(CorpusService service, String openid) {
+		String start = String.join(Const.delimiter, Const.Version.V1, openid, "Single", "Question");
+		List<KeyValue> kvs = new ArrayList<>();
+		service.account().page(start, start, null, 30, (k,v) ->{
+			kvs.add(new KeyValue(k, v));
+		});
+		return kvs;
+	}
+	
+	
+	public List<KeyValue> singles(CorpusService service, String tag) {
+		String start = String.join(Const.delimiter, Const.Version.V1, "Tag", tag);
+		List<String> openids = new ArrayList<>();
+		service.account().page(start, start, null, 30, (k,v) ->{
+			openids.add(v);
+		});
+		List<KeyValue> kvs = new ArrayList<>();
+		openids.forEach(userid->{
+			String intro = service.account().get(String.join(Const.delimiter, Const.Version.V1, openid(), "Self", "Introduce"));
+			kvs.add(new KeyValue(userid, intro));
+		});
+		return kvs;
+	}
+
+	
+	State<Context<CorpusService>> answerGirl = new State<Context<CorpusService>>() {
+		
+		State<Context<CorpusService>> reply = new State<Context<CorpusService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2626648875391367360L;
+
+			List<KeyValue> quizs = null;
+			KeyValue q = null;
+			Iterator<KeyValue> itr = null;
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				if(quizs == null || quizs.isEmpty()) {
+					quizs = quiz(u.content(), current.key());
+					itr = quizs.iterator();
+				}
+				
+				if(itr.hasNext()) {
+					q = itr.next();
+					u.output(q.value());
+				} else {
+					u.output("未来女朋友觉得OK的话，会和你联系哦");
+				}
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if(finish()) {
+					quizs.clear();
+					return answerGirl;
+				}
+				return this;
+			}
+
+			@Override
+			public String name() {
+				return "回复问题";
+			}
+
+			@Override
+			public boolean finish() {
+				return !itr.hasNext();
+			}
+			
+		};
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8031796296634830830L;
+		List<KeyValue> singles = new ArrayList<>();
+		Iterator<KeyValue> iterator = null;
+		KeyValue current = null;
+		boolean finish = false;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			if(singles.isEmpty()) {
+				singles = singles(u.content(), "GirlSingle");
+				iterator = singles.iterator();
+				u.output("接下来是一些未来女朋友的自我介绍，如果觉得满意就输入：可以");
+			}
+			if(iterator.hasNext()) {
+				current = iterator.next();
+				u.output("她的自我介绍：");
+				u.output(current.value());
+			} else {
+				u.output("先歇一会儿呗，为了让你更容易被发现，请用一句话介绍自己：");
+			}
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(finish()) {
+				singles.clear();
+				return finished;
+			}
+			finish = !iterator.hasNext();
+			if(u.yes(t, "可以")) {
+				return reply;
+			}
+			return this;
+		}
+
+		@Override
+		public String name() {
+			return "我要回答";
+		}
+		
 		@Override
 		public boolean finish() {
 			return finish;
@@ -195,14 +376,16 @@ public class SingleContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "BoySingle"), openid());
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "BoySingle", openid()), openid());
 			u.output("你的未来女朋友也正在寻找你，她向你提了几个问题，你也可以向她提几个问题，请输入：\n我要提问\n我要回答");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(question.name().equals(t)) return question;
-			if(answer.name().equals(t)) return answer;
-			return girlfriend;
+			if(answerGirl.name().equals(t)) return answerGirl;
+			return this;
 		}
 
 		@Override
@@ -226,12 +409,16 @@ public class SingleContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("你想要一个什么样的男朋友？");
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "GirlSingle"), openid());
+			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "GirlSingle", openid()), openid());
+			u.output("你的未来男朋友也正在寻找你，他向你提了几个问题，你也可以向她提几个问题，请输入：\n我要提问\n我要回答");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return question;
+			if(question.name().equals(t)) return question;
+			if(answerBoy.name().equals(t)) return answerBoy;
+			return this;
 		}
 
 		@Override

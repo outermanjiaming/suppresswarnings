@@ -3,10 +3,10 @@ package com.suppresswarnings.corpus.service.share.phone;
 import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
+import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class ShareContextFactory extends AbstractAuthContextFactory {
+public class ShareContextFactory implements ContextFactory<CorpusService> {
 
 	@Override
 	public String command() {
@@ -24,12 +24,7 @@ public class ShareContextFactory extends AbstractAuthContextFactory {
 	}
 
 	@Override
-	public String[] requiredAuth() {
-		return ShareContext.AUTH;
-	}
-
-	@Override
-	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
+	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
 		return new ShareContext(wxid, openid, content);
 	}
 
