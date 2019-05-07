@@ -42,6 +42,7 @@
       <module>c.s.c.service.share.phone</module>
       <module>c.s.c.service.invite</module>
       <module>c.s.c.service.single</module>
+      <module>c.s.c.service.autocoin</module>
   </modules>
   <dependencies>
   		<dependency>
