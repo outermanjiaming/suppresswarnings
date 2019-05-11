@@ -24,7 +24,7 @@ public class WxpyContext extends WXContext {
 			logger.info("[wxpy] " + out);
 			WXnews news = new WXnews();
 			news.setTitle(CMD);
-			news.setDescription("点击进去，用另外一个手机扫码使用");
+			news.setDescription("点击进去，用另外一个手机扫码使用，" + out);
 			news.setUrl("http://suppresswarnings.com/robot.html?state=" + openid());
 			news.setPicUrl("http://suppresswarnings.com/robot.png");
 			String json = gson.toJson(news);
