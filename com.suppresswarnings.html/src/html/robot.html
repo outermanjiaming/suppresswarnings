@@ -100,7 +100,7 @@ $(function()
 		code = request.code
 		$.ajax({
 			type: 'GET',
-			url: '/wx.http?action=addget&key=robotkey&todo=get&random=' + Math.random(),
+			url: '/wx.http?action=addget&key='+state+'&todo=get&random=' + Math.random(),
 			dataType: 'text',
 			success: function(data) {
 			    console.log(data)
