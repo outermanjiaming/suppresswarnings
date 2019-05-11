@@ -1007,6 +1007,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return PingHandlerFactory.handle(parameter, this);
 		} else if("qrcode".equals(action)) {
 			return QRCodeHandlerFactory.handle(parameter, this);
+		} else if("addget".equals(action)) {
+			String todo = parameter.getParameter("todo");
+			logger.info("addget: " + todo);
+			String key = parameter.getParameter("key");
+			String value = parameter.getParameter("value");
+			if("add".equals(todo)) {
+				token().put(key, value);
+				return value;
+			} else if("get".equals(todo)) {
+				value = token().get(key);
+				return value;
+			} else {
+				return SUCCESS;
+			}
 		} else if("vip".equals(action)) {
 			logger.info("[vip] lijiaming");
 			String random = parameter.getParameter("random");

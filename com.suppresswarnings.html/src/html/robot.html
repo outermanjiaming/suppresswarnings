@@ -98,7 +98,20 @@ $(function()
 	{
 		state = request.state
 		code = request.code
-		$("#robotcard").append('<img src="data:image/png;base64,'+data.ticket+'"/>');
+		$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=addget&key=robotkey&todo=get&random=' + Math.random(),
+			dataType: 'text',
+			success: function(data) {
+			    console.log(data)
+			    $("#robotcard").append('<img src="data:image/png;base64,'+data+'"/>');
+			},
+			error: function(ret){
+			    console.log(ret)
+			}
+		});
+			
+		
 		var url = window.location.href;
 		var en = base64encode(url);
 		console.log("====== ======= " + en);
