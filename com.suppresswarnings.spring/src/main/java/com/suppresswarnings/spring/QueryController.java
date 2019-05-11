@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -37,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
-import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 
 import com.tencentcloudapi.aai.v20180522.AaiClient;
 
@@ -76,8 +76,9 @@ public class QueryController {
             ChatResponse resp = client.Chat(req);
             
             System.out.println(resp.getAnswer());
-        } catch (TencentCloudSDKException e) {
-                System.out.println(e.toString());
+            System.setOut(new PrintStream("/Users/lijiaming/qa_lijiaming_"+System.currentTimeMillis()+".log"));
+        } catch (Exception e) {
+            System.out.println(e.toString());
         }
 		
         return "index.html";
@@ -86,12 +87,18 @@ public class QueryController {
 	@RequestMapping("chat")
     @ResponseBody
     public String chat(@RequestParam("input") String input){
-		System.out.println("input: " + input);
-		String params = "{\"Text\":\""+input+"\",\"User\":\"{\\\"id\\\":\\\"10010\\\",\\\"gender\\\":\\\"0\\\"}\",\"ProjectId\":1255895122}";
+		
 		try {
-			ChatRequest req = ChatRequest.fromJsonString(params, ChatRequest.class);
+			ChatRequest req = new ChatRequest();
+			req.setUser("{\"id\":\"test\",\"gender\":\"male\"}");
+			req.setText(input);
+			req.setProjectId(1255895122);
 			ChatResponse resp = client.Chat(req);
-			return resp.getAnswer();
+			String reply = resp.getAnswer();
+			System.out.println(input);
+			System.out.println(reply);
+			System.out.println();
+			return reply;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "无语😓";

@@ -50,7 +50,7 @@ public class CrewContext extends WXContext {
 						u.content().account().put(crewKey, openid());
 						String start = String.join(Const.delimiter, Const.Version.V1, inviter, "Crew");
 						String idx = u.content().increment(counterBoss, start);
-						u.content().atUser(openid(), bossName+"说：很荣幸，你被我邀请加入素朴网联");
+						u.content().atUser(openid(), bossName+"说：很荣幸，你被我邀请加入素朴网联。请不要取消哈～");
 						u.content().atUser(inviter, "第"+idx+"位朋友"+user().getNickname()+"被你邀请加入素朴网联，邀请的用户成为你的资产，未来广告收益会给你分成，可以提现！");
 					} else {
 						u.content().atUser(openid(), "你已经被"+bossName+"邀请加入素朴网联");

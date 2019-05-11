@@ -34,7 +34,7 @@ public class SingleContext extends WXContext {
 			count.addAndGet(u.content().users.size());
 			u.content().data().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "Single", time(), random()),  openid());
 			
-			u.output("「素朴网联」已经拥有了"+count.get()+"，让大家可以向未来对象提出问题，或者回答未来对象的问题！请输入：\n我要男朋友\n我要女朋友");
+			u.output("「素朴网联」已经拥有了"+count.get()+"位单身，你需要找男朋友还是女朋友？请输入：\n我要男朋友\n我要女朋友");
 		}
 
 		@Override
@@ -248,7 +248,7 @@ public class SingleContext extends WXContext {
 	public List<KeyValue> quiz(CorpusService service, String openid) {
 		String start = String.join(Const.delimiter, Const.Version.V1, openid, "Single", "Question");
 		List<KeyValue> kvs = new ArrayList<>();
-		service.account().page(start, start, null, 30, (k,v) ->{
+		service.account().page(start, start, null, 5, (k,v) ->{
 			kvs.add(new KeyValue(k, v));
 		});
 		return kvs;
@@ -378,7 +378,7 @@ public class SingleContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "BoySingle"), openid());
 			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "BoySingle", openid()), openid());
-			u.output("你的未来女朋友也正在寻找你，她向你提了几个问题，你也可以向她提几个问题，请输入：\n我要提问\n我要回答");
+			u.output("你的未来女朋友也正在寻找你，你可以问她几个问题或者回答她的问题，请输入：\n我要提问\n我要回答");
 		}
 
 		@Override
@@ -411,7 +411,7 @@ public class SingleContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Tag", "GirlSingle"), openid());
 			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Tag", "GirlSingle", openid()), openid());
-			u.output("你的未来男朋友也正在寻找你，他向你提了几个问题，你也可以向她提几个问题，请输入：\n我要提问\n我要回答");
+			u.output("你的未来男朋友也正在寻找你，你可以问他一些问题或者回答他的问题，请输入：\n我要提问\n我要回答");
 		}
 
 		@Override

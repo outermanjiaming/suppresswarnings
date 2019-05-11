@@ -47,7 +47,7 @@ public class WXPayConfigImpl extends WXPayConfig {
 
 	@Override
 	InputStream getCertStream() {
-		File cert = new File("/etc/nginx/apiclient_cert.pem");
+		File cert = new File("/etc/nginx/apiclient_cert.p12");
 		try {
 			InputStream inputStream = new FileInputStream(cert);
 			return inputStream;

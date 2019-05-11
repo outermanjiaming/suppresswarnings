@@ -86,7 +86,7 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 public class CorpusService implements HTTPService, CommandProvider {
 	public static final String SUCCESS = "success";
 	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
-	
+	public static final String STUPID = "oDqlM1TyKpSulfMC2OsZPwhi-9Wk";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	public Format format = new Format(Const.WXmsg.msgFormat);
 	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
@@ -201,7 +201,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 	}
-	
 	
 	public String youGotMe(String openId, String quiz, String quizId) {
 		this.workHandler.clockOut(openId);
@@ -521,7 +520,14 @@ public class CorpusService implements HTTPService, CommandProvider {
 				StringBuffer ks  = new StringBuffer();
 				for(String k : keys) {
 					KeyValue kv = notifyAdmins.remove(k);
-					ks.append(kv.key()+ " " + kv.value()).append("\n");
+					String openid = kv.key();
+					String boss = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "Boss"));
+					if(boss == null || "None".equals(boss)) {
+						logger.error("boss is null " + openid);
+					} else {
+						boss = getWXuserByOpenId(boss).getNickname();
+					}
+					ks.append(boss + "->" + kv.value()).append("\n");
 				}
 				
 				String[] admin = admins.split(",");
@@ -1132,23 +1138,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 						});
 						map.put("count", "" + openids.size());
 						map.put("entries", invited);
-					} else {
-						map.put("count", "0");
-						map.put("vip", "0");
+						
+						map.put("username", user.getNickname());
+						map.put("image", user.getHeadimgurl());
+						map.put("openid", userid);
+						map.put("quiz", ""+counter.getQuizCounter().get());
+						map.put("reply", ""+counter.getReplyCounter().get());
+						map.put("exist", ""+counter.getExistCounter().get());
+						map.put("similar", ""+counter.getSimilarCounter().get());
+						map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
+						map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
+						map.put("openid", userid);
+						map.put("repetition", ""+counter.repetition());
+						map.put("sum", ""+counter.sum());
+						list.add(map);
 					}
-					map.put("username", user.getNickname());
-					map.put("image", user.getHeadimgurl());
-					map.put("openid", userid);
-					map.put("quiz", ""+counter.getQuizCounter().get());
-					map.put("reply", ""+counter.getReplyCounter().get());
-					map.put("exist", ""+counter.getExistCounter().get());
-					map.put("similar", ""+counter.getSimilarCounter().get());
-					map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
-					map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
-					map.put("openid", userid);
-					map.put("repetition", ""+counter.repetition());
-					map.put("sum", ""+counter.sum());
-					list.add(map);
 				} catch (Exception e) {
 					logger.error("[managereports] error while foreach", e);
 				}
@@ -1910,6 +1914,40 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		return null;
 	}
+	public String end(String origin, int length) {
+		if(origin.length() < length + 4) return origin;
+		int size = origin.length();
+		return origin.substring(size - length, size);
+	}
+	public void reward(WXPay wxPay) {
+		try {
+			Random random = new Random();
+			String openid = STUPID;
+			String orderid = "Reward" + random.nextInt(99999) + System.currentTimeMillis();
+			String nonce = Double.toHexString(random.nextDouble());
+			String check = "NO_CHECK";
+			String amount = "33";
+			String desc = "素朴网联鼓励用户邀请朋友";
+			String ip = "139.199.204.144";
+			
+			logger.info("[corpus reward] WXPay ready");
+			Map<String, String> reqData = new HashMap<>();
+			reqData.put("nonce_str", nonce);
+			reqData.put("partner_trade_no", orderid);
+			reqData.put("check_name", check);
+			reqData.put("openid", openid);
+			reqData.put("amount", amount);
+			reqData.put("desc", desc);
+			reqData.put("spbill_create_ip", ip);
+			reqData.put("device_info", "WEB");
+			Map<String, String> resultData = wxPay.reward(reqData);
+			logger.info("[corpus reward] result : " + resultData);
+			data().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reward", orderid, "Openid"), openid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reward", orderid), resultData.toString());
+		} catch (Exception e) {
+			logger.error("fail to reward", e);
+		}
+	}
 	
 	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) {
 		long timeStamp = current / 1000;
@@ -1917,6 +1955,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 			WXPayConfig config = new WXPayConfigImpl();
 			WXPay wxPay = new WXPay(config);
 			logger.info("[corpus prepay] WXPay ready");
+			
+			reward(wxPay);
+			logger.info("[prepay] end");
+			
 			Map<String, String> reqData = new HashMap<>();
 			reqData.put("timeStamp", ""+timeStamp);
 			reqData.put("device_info", "WEB");
@@ -1978,6 +2020,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[prepay] note orderid for auth pay: " + goodsid + ", " + openid + ", orderid" + orderid);
 				}
 			}
+			
 			return unifiedOrder;
 		} catch (Exception e) {
 			logger.error("获取预支付接口参数失败", e);
@@ -2141,7 +2184,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		logger.info("update user info: " + users.size());
 		users.forEach((k, v) -> {
-			counters.putIfAbsent(k, new Counter(k));
 			String accessToken = accessToken("Update User");
 			String userKey = String.join(Const.delimiter, Const.Version.V1, k, "User");
 			String json = account().get(userKey);
