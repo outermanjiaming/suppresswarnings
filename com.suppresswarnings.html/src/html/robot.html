@@ -104,7 +104,7 @@ $(function()
 			dataType: 'text',
 			success: function(data) {
 			    console.log(data)
-			    $("#robotcard").append('<img src="data:image/png;base64,'+data+'"/>');
+			    $("#robotcard").append('<img style="width:200px;height:200px;" src="data:image/png;base64,'+data+'" />');
 			},
 			error: function(ret){
 			    console.log(ret)
