@@ -60,11 +60,7 @@
  	<div id="robotcard" class="robotclass">
    		
    	</div>
-   	<span>扫描我的二维码，邀请你加入素朴网联</span>
-   	<div class="count" id="count"> </div>
-   	<div class="invited" id="invited"> 
-   	
-   	</div>
+   	<span>注意：用另外一个手机扫二维码</span>
 </div>
 	<script src="js/jweixin-1.2.0.js"></script>
 	<script src="js/base64.js"></script>
@@ -104,7 +100,7 @@ $(function()
 			dataType: 'text',
 			success: function(data) {
 			    console.log(data)
-			    $("#robotcard").append('<img style="width:200px;height:200px;" src="data:image/png;base64,'+data+'" />');
+			    $("#robotcard").append('<img style="width:180px;height:180px;" src="data:image/png;base64,'+data+'" />');
 			},
 			error: function(ret){
 			    console.log(ret)
@@ -138,8 +134,8 @@ $(function()
 					    }
 					});
 				    wx.onMenuShareTimeline({ 
-				        title: '邀请你加入素朴网联，守护素朴网联',
-				        link: 'http://suppresswarnings.com/robot.html?state=' + request.state,
+				        title: '快来玩一下微信机器人',
+				        link: 'http://suppresswarnings.com/robot.html?state=' + state,
 				        imgUrl: data.face,
 				        success: function () {
 				           console.log("===== lijiaming ====");
@@ -147,9 +143,9 @@ $(function()
 				    });
 				    
 				    wx.onMenuShareAppMessage({
-						title: '邀请你加入素朴网联',
-						desc: '邀请你加入素朴网联，守护素朴网联',
-						link: 'http://suppresswarnings.com/robot.html?state=' + request.state,
+						title: '快来玩一下微信机器人',
+						desc: '用另外一个手机扫码玩微信机器人',
+						link: 'http://suppresswarnings.com/robot.html?state=' + state,
 						imgUrl: data.face,
 						success: function () {
 							console.log("===== lijiaming ====");

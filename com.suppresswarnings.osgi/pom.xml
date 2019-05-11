@@ -43,6 +43,7 @@
       <module>c.s.c.service.invite</module>
       <module>c.s.c.service.single</module>
       <module>c.s.c.service.autocoin</module>
+      <module>c.s.c.service.wxpy</module>
   </modules>
   <dependencies>
   		<dependency>
