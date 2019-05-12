@@ -170,7 +170,7 @@ public class ThingsManager {
 					e.printStackTrace();
 					things.exception("ping = " + e.getMessage());
 				}
-			}, 1, 3, TimeUnit.SECONDS);
+			}, 5, 15, TimeUnit.SECONDS);
 			
 		    try {
 		    	while(run.get() && sslsocket.isConnected() && !sslsocket.isClosed()) {
@@ -191,11 +191,17 @@ public class ThingsManager {
 							String[] url_text = input.split("#");
 							if(url_text.length < 2) url_text = new String[] {input, input};
 							things.showQRCode(url_text[0], url_text[1]);
+							out.write("ok\n");
+							out.flush();
+						} else if(Things.Const.PING_PONG.equals(call)) {
+							out.write("pong\n");
+							out.flush();
+						} else {
+							String ret = execute(call, input);
+							if("true".equals(debug)) System.out.println("return " + ret);
+							out.write(ret + "\n");
+							out.flush();
 						}
-						String ret = execute(call, input);
-						if("true".equals(debug)) System.out.println("return " + ret);
-						out.write(ret + "\n");
-						out.flush();
 					} else {
 						execute(callInput[0], "我什么也没有说");
 						out.write("WRONG_FORMAT\n");

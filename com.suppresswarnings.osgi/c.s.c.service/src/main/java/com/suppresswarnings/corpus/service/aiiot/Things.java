@@ -100,6 +100,8 @@ public class Things implements Cloneable {
 
 	public long ping() {
 		this.last = update;
+		String pong = execute("ping", "pong");
+		logger.debug("[Things] ping pong " + pong);
 		this.update = System.currentTimeMillis();
 		this.diff = update - last;
 		return diff;

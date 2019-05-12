@@ -48,6 +48,7 @@ public interface Things {
 		String DEBUG_SWITCH = "suppresswarnings.debug";
 		String PING_FORAMT = "http://suppresswarnings.com/wx.http?action=ping&type=things&token=%s";
 		String SHOW_QRCODE = "suppresswarnings.showqrcode";
+		String PING_PONG = "ping";
 		String QRCODE_FILE = "suppresswarnings.qrcode.jpg";
 	}
 	/**
