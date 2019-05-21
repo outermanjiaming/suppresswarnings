@@ -118,13 +118,6 @@ public class Demo extends JFrame implements Things {
 		return "模拟灯具";
 	}
 	
-	
-	
-	@Override
-	public String code() {
-		return "Tao";
-	}
-	
 	@Override
 	public void showQRCode(String remoteQRCodeURL, String text) {
 		JFrameQR.show(remoteQRCodeURL, text);

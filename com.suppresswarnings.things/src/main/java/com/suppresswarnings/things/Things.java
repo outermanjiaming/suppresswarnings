@@ -24,10 +24,6 @@
 package com.suppresswarnings.things;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Random;
@@ -63,32 +59,26 @@ public interface Things {
 	 * @return String 操作物联网的唯一code
 	 */
 	default String code() {
-		try {
-			return InetAddress.getLocalHost().getHostAddress().toString();
-		} catch (UnknownHostException e) {
-			String path = System.getProperty("java.io.tmpdir", ".");
-			File code = new File(path, Const.CODE_FILE);
-			if(code.exists()) {
-				try {
-					byte[] bs = Files.readAllBytes(code.toPath());
-					return new String(bs, Const.UTF8);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			} else {
-				Random rand = new Random();
-				long time = System.currentTimeMillis();
-				String create = "T_AIIoT_" + time + "_" + rand.nextInt(9999);
-				try {
-					Files.write(code.toPath(), create.getBytes(Const.UTF8), StandardOpenOption.CREATE_NEW);
-				} catch (UnsupportedEncodingException e1) {
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+		String path = System.getProperty("java.io.tmpdir", ".");
+		File code = new File(path, Const.CODE_FILE);
+		if(code.exists()) {
+			try {
+				byte[] bs = Files.readAllBytes(code.toPath());
+				return new String(bs, Const.UTF8);
+			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
-			return code();
+		} else {
+			Random rand = new Random();
+			long time = System.currentTimeMillis();
+			String create = "T_AIIoT_" + time + "_" + rand.nextInt(99999);
+			try {
+				Files.write(code.toPath(), create.getBytes(Const.UTF8), StandardOpenOption.CREATE_NEW);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
+		return code();
 	}
 	
 	default void showQRCode(String remoteQRCodeURL, String text) {

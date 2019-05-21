@@ -36,7 +36,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -83,9 +82,7 @@ public class ThingsManager {
 	                }
 	                result = sbf.toString();
 	            }
-	        } catch (MalformedURLException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
+	        } catch (Exception e) {
 	            e.printStackTrace();
 	        } finally {
 	            if (null != br) {
