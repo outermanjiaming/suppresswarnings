@@ -8,7 +8,7 @@ public interface IView {
 
     void showProgressbar();
 
-    void showDialog();
+    void showDialog(String reason);
 
     void doCancel();
 

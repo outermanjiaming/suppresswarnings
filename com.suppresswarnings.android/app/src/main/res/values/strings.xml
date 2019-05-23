@@ -4,6 +4,7 @@
     <string name="app_name">素朴网联</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="wraning">激活码获取方式：关注"素朴网联"微信公众号，发送"我要激活码"</string>
+    <string name="wraning">在微信公众号「素朴网联」输入：我要激活码</string>
+    <string name="accessibility">「素朴网联」\n仅提供4个操作：点击，滑动，打开APP，返回。\n获取激活码：在公众号「素朴网联」输入：我要激活码</string>
 
 </resources>

@@ -3,6 +3,7 @@ package com.suppresswarnings.android.presenter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -12,37 +13,45 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.suppresswarnings.android.utils.HTTPUtil;
 import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.view.MyWebview;
+import com.suppresswarnings.android.utils.HTTPUtil;
 import com.suppresswarnings.android.view.IView;
+import com.suppresswarnings.android.view.MyWebview;
 
-import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class Presenter {
 
     private static final String url = "http://www.suppresswarnings.com/app.html";
-//    private static final String url = "http://www.suppresswarnings.com?token=" + getToken();
-
+    private static final String internal = "素朴网联sleep素朴网联swipe0素朴网联left素朴网联right素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
     private IView iView;
     private int version;
     private Context mContext;
     private MyWebview mWebview;
     private String openid;
     private String token;
-    Handler mHandler;
-
-    AtomicBoolean ok = new AtomicBoolean(false);
+    private Handler mHandler;
+    private ScheduledExecutorService service;
+    public AtomicReference<String> command = new AtomicReference<>();
+    public AtomicBoolean ok = new AtomicBoolean(false);
 
     public Presenter(IView iView, Context context, MyWebview webview) {
         this.iView = iView;
         this.mContext = context;
         this.mWebview = webview;
-        mHandler = new Handler(Looper.getMainLooper());
+        this.mHandler = new Handler(Looper.getMainLooper());
+        this.service = Executors.newSingleThreadScheduledExecutor();
         init();
+    }
+
+    public String url() {
+        return url + "?token=" + getToken();
     }
 
     /**
@@ -65,17 +74,18 @@ public class Presenter {
             if (commited) this.openid = temp;
         }
 
-        new Thread(new Runnable() {
+        service.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String x = HTTPUtil.checkValid(getToken(), "");
-                    ok.set("Paid".equals(x));
+                    boolean x =checkValidAndSetCommand("");
+                    Log.w("lijiaming", "check validate and set command = " + x);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+
                             if (!ok.get()) {
-                                handleCase(0, "未激活：请关注微信公众号“素朴网联”获取激活码");
+                                handleCase(0, Key.invalid);
                             } else {
                                 handleCase(1, "");
                             }
@@ -86,8 +96,20 @@ public class Presenter {
                     handleCase(3, e.getMessage());
                 }
             }
-        }).start();
+        }, 4, TimeUnit.HOURS.toSeconds(4), TimeUnit.SECONDS);
 
+    }
+
+    public boolean checkValidAndSetCommand(String code) throws Exception {
+        String x = HTTPUtil.checkValid(getToken(), code);
+        ok.set(HTTPUtil.valid(x));
+        if(ok.get() && x.split("~").length > 1) {
+            command.set(x.split("~")[1]);
+            handleCase(3, "获取了新命令");
+        } else {
+            command.set(internal);
+        }
+        return ok.get();
     }
 
     /**
@@ -98,25 +120,32 @@ public class Presenter {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                switch (type) {
-                    case 0:
-                        Log(msg);
-                        iView.showDialog();
-                        break;
-                    case 1:
-                        iView.loadWebview();
-                        break;
-                    case 2:
-                        if (!msg.equals("恭喜，激活成功")) {
-                            iView.doCancel();
-                        } else {
+                try {
+                    switch (type) {
+                        case 0:
                             Log(msg);
-                            iView.loadWebview();
-                        }
-                        break;
-                    case 3:
-                        Log(msg);
-                        break;
+                            if(!ok.get() && iView != null) {
+                                iView.showDialog("case 0");
+                            }
+                            break;
+                        case 1:
+                            Log("检验合格");
+                            iView.updateUI();
+                            break;
+                        case 2:
+                            if (!ok.get() && !msg.equals("恭喜，激活成功")) {
+                                iView.showDialog("case 2");
+                            } else {
+                                Log(msg);
+                                iView.updateUI();
+                            }
+                            break;
+                        case 3:
+                            Log(msg);
+                            break;
+                    }
+                } catch (Exception e) {
+                    Log.w("lijiaming", "error while handle Case: " + e.getMessage());
                 }
             }
         });
@@ -150,7 +179,7 @@ public class Presenter {
         //DOM Storage
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         //不使用缓存，只从网络获取数据.
-        mWebview.loadUrl(url);
+        mWebview.loadUrl(url());
         mWebview.setWebViewClient(webViewClient);
     }
 
@@ -210,10 +239,25 @@ public class Presenter {
     }
 
     public String createOpenid() {
-        return version + "A" + new Random().nextInt(1000);
+        String m_szDevIDShort = "35" +
+                Build.BOARD.length()%10 +
+                Build.BRAND.length()%10 +
+                Build.CPU_ABI.length()%10 +
+                Build.DEVICE.length()%10 +
+                Build.DISPLAY.length()%10 +
+                Build.HOST.length()%10 +
+                Build.ID.length()%10 +
+                Build.MANUFACTURER.length()%10 +
+                Build.MODEL.length()%10 +
+                Build.PRODUCT.length()%10 +
+                Build.TAGS.length()%10 +
+                Build.TYPE.length()%10 +
+                Build.USER.length()%10 ;
+        return version + "A" + m_szDevIDShort;
     }
 
     public void doCancel() {
         iView.doCancel();
+        service.shutdown();
     }
 }
