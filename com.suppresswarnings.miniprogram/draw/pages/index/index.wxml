@@ -1,0 +1,7 @@
+<!--index.wxml-->
+<view class="draw">
+<canvas canvas-id='canvas' style='width:{{windowW}}px;height:{{windowH}}px'>
+<text>{{whoami}}</text>
+<button type='success' bindtap='clickName' class="whoami">点击</button>
+</canvas>
+</view>

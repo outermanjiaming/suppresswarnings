@@ -34,6 +34,7 @@ public class CashoutContext extends WXContext {
 				request = String.join(Const.delimiter, Const.Version.V2, "Cashout", "Request", hourly, time(), openid());
 				u.content().account().put(request, openid());
 				u.content().account().put(String.join(Const.delimiter, Const.Version.V2, openid(), "Cashout", "Request", hourly), time());
+				u.content().requestApprove(openid(), 30);
 				u.output("恭喜你，提现请求已经发出，财务部门正在审核，预计24小时内审核到账");
 			} else {
 				//is doing

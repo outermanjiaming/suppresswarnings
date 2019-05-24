@@ -17,7 +17,10 @@ public class AutoCoinContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("让你的闲置手机帮你工作！「自动刷金币」可以代替你看新闻看视频，轻松赚金币！使用须知：仅支持安卓手机，并且需要root权限，需要后台运行权限。请不要在重要的私人手机上开放root权限！需要下载「自动刷金币」app请在浏览器打开该链接：http://suppresswarnings.com/third.html");
+			u.output("让手机为你工作！");
+			u.output("「素朴网联」APP可以为你看新闻看视频，轻松赚金币！");
+			u.output("请在浏览器打开下载链接");
+			u.output("http://suppresswarnings.com/third.html");
 		}
 
 		@Override

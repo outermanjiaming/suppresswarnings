@@ -11,20 +11,25 @@ package com.suppresswarnings.corpus.service.manage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
+import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.daigou.Goods;
 import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
 import com.suppresswarnings.corpus.service.wx.WXnews;
+import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ManageContext extends WXContext {
 	public static final String CMD = "我的后台管理";
@@ -41,10 +46,10 @@ public class ManageContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			u.output("http://suppresswarnings.com/managereports.html");
 			u.output("后台管理，等级森严，你可以输入以下指令：");
-			u.output("    " + goodsManage.name());
-			u.output("    " + examManage.name());
-			u.output("    " + corpusManage.name());
-			u.output("    " + thingsManage.name());
+			u.output(goodsManage.name());
+			u.output(examManage.name());
+			u.output(corpusManage.name());
+			u.output(cashoutManage.name());
 		}
 
 		@Override
@@ -52,7 +57,7 @@ public class ManageContext extends WXContext {
 			if(goodsManage.name().equals(t)) return goodsManage;
 			if(examManage.name().equals(t)) return examManage;
 			if(corpusManage.name().equals(t)) return corpusManage;
-			if(thingsManage.name().equals(t)) return thingsManage;
+			if(cashoutManage.name().equals(t)) return cashoutManage;
 			return enter;
 		}
 
@@ -67,115 +72,32 @@ public class ManageContext extends WXContext {
 		}
 	};
 	
-	State<Context<CorpusService>> thingsManage = new State<Context<CorpusService>>() {
-		String thingInfo = null;
-		State<Context<CorpusService>> thingsDesc = new State<Context<CorpusService>>() {
-
-			@Override
-			public void accept(String t, Context<CorpusService> u) {
-				u.output("请输入设备的描述信息：（比如 床头灯）");
-			}
-
-			@Override
-			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				return thingsQR;
-			}
-
-			@Override
-			public String name() {
-				return "设备信息";
-			}
-
-			@Override
-			public boolean finish() {
-				return false;
-			}
-			
-		};
-		
-		State<Context<CorpusService>> thingsQR = new State<Context<CorpusService>>() {
-			@Override
-			public void accept(String t, Context<CorpusService> u) {
-				thingInfo = t;
-				String scene_str = "T_AIIoT_" + time() + "_" + random();
-				String accessToken = u.content().accessToken("AIIoT QR for " + scene_str);
-				//TODO lijiaming time limit
-				int seconds = (int) TimeUnit.DAYS.toSeconds(30);
-
-				String qrCode = u.content().qrCode(accessToken, seconds, "QR_STR_SCENE", scene_str);
-				Gson gson = new Gson();
-				QRCodeTicket qrTicket = gson.fromJson(qrCode, QRCodeTicket.class);
-
-				WXnews news = new WXnews();
-				news.setTitle(scene_str);
-				news.setDescription("Code:"+scene_str+", 设备启动时使用Code注册设备，扫码绑定设备（有效期30天）");
-				news.setUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
-				news.setPicUrl(news.getUrl());
-				String json = gson.toJson(news);
-				
-				u.output("news://" + json);
-				
-				String keyType = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Creator", scene_str);
-				u.content().account().put(keyType, openid());
-				
-				String myThings = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "Creator", time());
-				u.content().account().put(myThings, scene_str);
-				
-				String aiiotKey = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "QRCode", scene_str);
-				u.content().account().put(aiiotKey, qrCode);
-				
-				String url2scene = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "URLScene", qrTicket.getUrl());
-				u.content().account().put(url2scene,  scene_str);
-				
-				String keyInfo = String.join(Const.delimiter, Const.Version.V1, "AIIoT", "Info", scene_str);
-				u.content().account().put(keyInfo, thingInfo);
-				
-				u.content().setGlobalCommand(scene_str, "智能家居设备", openid(), time());
-			}
-
-			@Override
-			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-				return thingsManage;
-			}
-
-			@Override
-			public String name() {
-				return "生成二维码";
-			}
-
-			@Override
-			public boolean finish() {
-				return false;
-			}
-			
-		};
-		
+	
+	State<Context<CorpusService>> cashoutManage = new State<Context<CorpusService>>() {
+		Iterator<String> itr;
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			String myThingsHead = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", "Creator");
-			List<String> codes = new ArrayList<>();
-			u.content().account().page(myThingsHead, myThingsHead, null, 20, (x, y) ->{
-				codes.add(y);
-			});
-			
-			if(!codes.isEmpty()) {
-				u.output("你已经创建了这些设备：" + codes.toString());
+			boolean admin = u.content().isAdmin(openid(), "cashoutManage", time());
+			if(admin) {
+				u.output("欢迎使用工资管理");
+				Set<String> set = u.content().todoSet();
+				u.output("待审核的提现请求：" + set.size());
+				itr = set.iterator();
+				u.output("请输入：" + approve.name());
+			} else {
+				u.output("目前仅支持管理员发工资");
 			}
-			u.output("你可以输入：");
-			u.output("    生成二维码");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if("生成二维码".equals(t)) {
-				return thingsDesc;
-			}
-			return thingsManage;
+			if(approve.name().equals(t)) return approve;
+			return enter;
 		}
 
 		@Override
 		public String name() {
-			return "设备管理";
+			return "工资管理";
 		}
 
 		@Override
@@ -183,7 +105,77 @@ public class ManageContext extends WXContext {
 			return false;
 		}
 		
+		State<Context<CorpusService>> approve = new State<Context<CorpusService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2938299575404413791L;
+			String string;
+			WXuser who;
+			KeyValue kv;
+			boolean finish = false;
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				if(name().equals(t)) {
+					u.output("你正在审核提现请求，请认真操作，每一步操作都将详细追踪，退出请输入：完成");
+				} else {
+					if(string == null) {
+						u.output("用户openid不存在");
+					} else {
+						if(who == null || who.getSubscribe() == 0) {
+							u.output("用户不存在");
+						} else {
+							if("同意".equals(t)) {
+								
+								u.output("你同意了审核提现请求: " + string + " "  + who.getNickname());
+								u.content().approvedRunnable(openid(), string, 30);
+							} else if("拒绝".equals(t)){
+								u.output("你拒绝了审核提现请求: "  + string + " " + who.getNickname());
+								u.content().rejectRunnable(openid(), string, 30);
+							} else {
+								u.output("你输入了错误的命令，该用户的提现请求无法被再次审核：" + string + " " + who.getNickname());
+							}
+						}
+					}
+				}
+				if(itr != null && itr.hasNext()) {
+					string = itr.next();
+					who = u.content().getWXuserByOpenId(string);
+					if(who == null || who.getSubscribe() == 0) {
+						u.output("用户不存在");
+					} else {
+						kv = u.content().approve(string);
+						u.output("你正在审核" + string + " " + who.getNickname() + "提现请求：" + kv.value() + "分");
+					}
+					u.output("请输入「同意」或「拒绝」");
+				} else {
+					finish = true;
+					u.output("你完成了所有的提现申请");
+				}
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if("完成".equals(t) || finish()) {
+					return enter;
+				}
+				
+				return approve;
+			}
+
+			@Override
+			public String name() {
+				return "审核";
+			}
+
+			@Override
+			public boolean finish() {
+				return finish;
+			}
+			
+		};
 	};
+	
 	State<Context<CorpusService>> corpusManage = new State<Context<CorpusService>>() {
 		long lastTime = 0;
 		@Override

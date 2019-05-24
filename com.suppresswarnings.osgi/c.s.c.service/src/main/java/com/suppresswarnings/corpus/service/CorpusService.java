@@ -88,6 +88,117 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
 	public static final String STUPID = "oDqlM1TyKpSulfMC2OsZPwhi-9Wk";
 	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	
+	
+	class Expire {
+		long last;
+		long expire;
+
+		public Expire(long wait) {
+			this.last = System.currentTimeMillis();
+			this.expire = last + wait;
+		}
+		
+		public boolean expired() {
+			return System.currentTimeMillis() > expire;
+		}
+		
+		public void reset() {
+			this.last = System.currentTimeMillis();
+		}
+
+		@Override
+		public String toString() {
+			return "Expire [" + last + " -> " + (expire - last) + "]";
+		}
+	}
+	
+	
+	class CashoutRunnable implements Runnable {
+		String approver;
+		String openid;
+		int cent;
+		long time;
+		long runTime;
+		String result;
+		
+		public String getApprover() {
+			return approver;
+		}
+
+		public void setApprover(String approver) {
+			this.approver = approver;
+		}
+
+		public String getOpenid() {
+			return openid;
+		}
+
+		public void setOpenid(String openid) {
+			this.openid = openid;
+		}
+
+		public int getCent() {
+			return cent;
+		}
+
+		public void setCent(int cent) {
+			this.cent = cent;
+		}
+
+		public long getTime() {
+			return time;
+		}
+
+		public void setTime(long time) {
+			this.time = time;
+		}
+
+		public long getRunTime() {
+			return runTime;
+		}
+
+		public void setRunTime(long runTime) {
+			this.runTime = runTime;
+		}
+
+		public String getResult() {
+			return result;
+		}
+
+		public void setResult(String result) {
+			this.result = result;
+		}
+		
+		CashoutRunnable(String approver, String openid, int cent) {
+			this.approver = approver;
+			this.openid = openid;
+			this.cent = cent;
+			this.time = System.currentTimeMillis();
+		}
+		
+		@Override
+		public String toString() {
+			return "CashoutRunnable [approver=" + approver + ", openid=" + openid + ", cent=" + cent + ", time=" + time
+					+ ", runTime=" + runTime + ", result=" + result + "]";
+		}
+
+		@Override
+		public void run() {
+			this.runTime = System.currentTimeMillis();
+			logger.info("[CashoutRunnable] approved cashout start " + runTime);
+			String ret = reward(approver + "批准" + openid + "提现" + cent + "分，时间" + new Date(), openid);
+			this.result = ret;
+			logger.info("[CashoutRunnable] approved cashout result " + this);
+			save();
+		}
+		
+		public void save() {
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Approve", "Cashout", approver, openid, ""+time), gson.toJson(this));
+			logger.info("[CashoutRunnable] approved cashout saved");
+		}
+	}
+	
 	public Format format = new Format(Const.WXmsg.msgFormat);
 	Map<String, TTL> secondlife = new ConcurrentHashMap<String, TTL>();
 	LinkedBlockingQueue<TTL> ttl = new LinkedBlockingQueue<TTL>(100000);
@@ -95,7 +206,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public Map<String, ContextFactory<CorpusService>> factories = new HashMap<>();
 	public Map<String, Context<?>> contexts = new ConcurrentHashMap<String, Context<?>>();
 	public Map<String, WXuser> users = new ConcurrentHashMap<String, WXuser>();
-	public ExecutorService threadpool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100));
+	public Map<String, Expire> caches = new ConcurrentHashMap<String, Expire>();
+	public ExecutorService threadpool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1000));
 	public ThreadPoolExecutor atUserPool = new ThreadPoolExecutor(2, 10, 7200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100000), new ThreadFactory() {
 		int index = 0;
 		@Override
@@ -148,7 +260,15 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public AtomicInteger corpusCount = new AtomicInteger(0);
 	public List<Quiz> assimilatedQuiz = Collections.synchronizedList(new ArrayList<>());
 	public Map<String, KeyValue> notifyAdmins = new ConcurrentHashMap<>();
-	
+	List<Map<String, Object>> list = new ArrayList<>();
+	Map<String, Runnable> approvedRunnable = new ConcurrentHashMap<>();
+	Map<String, KeyValue> tobeApproved = new ConcurrentHashMap<>();
+	public Set<String> todoSet() {
+		return tobeApproved.keySet();
+	}
+	public KeyValue approve(String openid) {
+		return tobeApproved.remove(openid);
+	}
 	public LevelDB account(){
 		if(account != null) {
 			return account;
@@ -218,7 +338,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 			atUser(boss, msg);
 		}
 	}
-	
+	public void approvedRunnable(String approver, String openid, int cent) {
+		approvedRunnable.put(openid, new CashoutRunnable(approver, openid, cent));
+	}
+	public void rejectRunnable(String approver, String openid, int cent) {
+		approvedRunnable.remove(openid);
+		atUser(openid, "提现申请被拒绝了，金额：" + cent + "分");
+	}
 //	public void connectChat(String wxid, String openid, String ask) {
 //		java.util.Set<String> set = users.keySet();
 //		WXuser myself = getWXuserByOpenId(openid);
@@ -548,6 +674,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 					atUser(one, ks.toString());
 					atUser(one, info.toString());
 				}
+				Set<String> openids = approvedRunnable.keySet();
+				openids.forEach(action -> {
+					Runnable runnable = approvedRunnable.remove(action);
+					threadpool.execute(runnable);
+				});
 			}
 		}, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(120), TimeUnit.MILLISECONDS);
 		logger.info("[corpus] scheduler admins info starts in 5 minutes");
@@ -780,6 +911,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
 		String quizId = data().get(taskKey);
 		return quizId;
+	}
+	
+	private static final String AUTO_COIN_CMD = "back素朴网联home素朴网联open,cn.weli.story/cn.etouch.ecalendar.MainActivity素朴网联sleep素朴网联back素朴网联sleep素朴网联sleep素朴网联sleep素朴网联scroll素朴网联sleep素朴网联click素朴网联sleep素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联back素朴网联sleep素朴网联sleep素朴网联sleep素朴网联scroll素朴网联click素朴网联sleep素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联back素朴网联sleep素朴网联sleep素朴网联sleep素朴网联scroll素朴网联click素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联back素朴网联sleep素朴网联sleep素朴网联sleep";
+	public String getAutocoinCommand(String openid) {
+		StringBuffer sb = new StringBuffer();
+		String defaultCmd = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Autocoin", "DefaultCMD"));
+		if(isNull(defaultCmd)) {
+			defaultCmd = AUTO_COIN_CMD;
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Autocoin", "DefaultCMD"), AUTO_COIN_CMD);
+		}
+		
+		sb.append(defaultCmd);
+		logger.info("getAutocoinCommand for: " + openid);
+		return sb.toString();
+	}
+	public boolean isNull(String value) {
+		return value == null || "null".equals(value) || "None".equals(value);
+	}
+	public String getOpenidByIdentity(String identity) {
+		String code = account().get(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Code", identity));
+		if(isNull(code)) return null;
+		String openid = account().get(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Openid", code));
+		if(isNull(openid)) return null;
+		return openid;
 	}
 	public int fillWork() {
 		AtomicInteger integer = new AtomicInteger(0);
@@ -1128,52 +1283,61 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[managereports] check auth failed");
 				return "fail";
 			}
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			List<Map<String, Object>> list = new ArrayList<>();
-			counters.forEach((userid, counter) ->{
-				try {
-					logger.info("[managereports] counter for " + userid);
-					Map<String, Object> map = new HashMap<>();
-					WXuser user = getWXuserByOpenId(userid);
-					
-					if(authrized(userid, "VIP")) {
-						map.put("vip", "1");
-						List<KeyValue> invited = new ArrayList<>();
-						List<String> openids = new ArrayList<>();
-						String start = String.join(Const.delimiter, Const.Version.V1, userid, "Crew");
-						account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
-							String crew = k.substring(start.length() + Const.delimiter.length());
-							openids.add(crew);
-						});
-						openids.forEach(o ->{
-							WXuser u = getWXuserByOpenId(o);
-							KeyValue kv = new KeyValue(u.getHeadimgurl(), u.getNickname());
-							invited.add(kv);
-						});
-						map.put("count", "" + openids.size());
-						map.put("entries", invited);
-						
-						map.put("username", user.getNickname());
-						map.put("image", user.getHeadimgurl());
-						map.put("openid", userid);
-						map.put("quiz", ""+counter.getQuizCounter().get());
-						map.put("reply", ""+counter.getReplyCounter().get());
-						map.put("exist", ""+counter.getExistCounter().get());
-						map.put("similar", ""+counter.getSimilarCounter().get());
-						map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
-						map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
-						map.put("openid", userid);
-						map.put("repetition", ""+counter.repetition());
-						map.put("sum", ""+counter.sum());
-						list.add(map);
-					}
-				} catch (Exception e) {
-					logger.error("[managereports] error while foreach", e);
-				}
-			});
 			
-			Collections.sort(list, (Map<String, Object> a, Map<String, Object> b) -> Integer.compare(Integer.parseInt((String)b.get("count")),Integer.parseInt((String)a.get("count"))));
-			
+			Expire cache = caches.get("managereports");
+			logger.info("[managereports] " + cache);
+			if(cache == null || cache.expired()) {
+				threadpool.execute(() ->{
+					List<Map<String, Object>> temp = new ArrayList<>();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					counters.forEach((userid, counter) ->{
+						try {
+							logger.info("[managereports] counter for " + userid);
+							Map<String, Object> map = new HashMap<>();
+							WXuser user = getWXuserByOpenId(userid);
+							
+							if(authrized(userid, "VIP")) {
+								map.put("vip", "1");
+								List<KeyValue> invited = new ArrayList<>();
+								List<String> openids = new ArrayList<>();
+								String start = String.join(Const.delimiter, Const.Version.V1, userid, "Crew");
+								account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+									String crew = k.substring(start.length() + Const.delimiter.length());
+									openids.add(crew);
+								});
+								openids.forEach(o ->{
+									WXuser u = getWXuserByOpenId(o);
+									KeyValue kv = new KeyValue(u.getHeadimgurl(), u.getNickname());
+									invited.add(kv);
+								});
+								map.put("count", "" + openids.size());
+								map.put("entries", invited);
+								
+								map.put("username", user.getNickname());
+								map.put("image", user.getHeadimgurl());
+								map.put("openid", userid);
+								map.put("quiz", ""+counter.getQuizCounter().get());
+								map.put("reply", ""+counter.getReplyCounter().get());
+								map.put("exist", ""+counter.getExistCounter().get());
+								map.put("similar", ""+counter.getSimilarCounter().get());
+								map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
+								map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
+								map.put("openid", userid);
+								map.put("repetition", ""+counter.repetition());
+								map.put("sum", ""+counter.sum());
+								temp.add(map);
+							}
+						} catch (Exception e) {
+							logger.error("[managereports] error while foreach", e);
+						}
+					});
+					list.clear();
+					list.addAll(temp);
+					temp.clear();
+					Collections.sort(list, (Map<String, Object> a, Map<String, Object> b) -> Integer.compare(Integer.parseInt((String)b.get("count")),Integer.parseInt((String)a.get("count"))));
+					caches.put("managereports", new Expire(TimeUnit.MINUTES.toMillis(3)));
+				});
+			}
 			return gson.toJson(list);
 		} else if("WX".equals(action)) {
 			logger.info("[WX] request: " + parameter.toString());
@@ -1658,29 +1822,63 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return gson.toJson(map);
 		} else if("validate".equals(action)) {
 			String identity = parameter.getParameter("identity");
+			String code = parameter.getParameter("token");
+			String expireKey = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Expire", identity);
+			
 			if(identity == null||"".equals(identity)) {
 				return "fail";
 			} else {
 				String existKey = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Identity", identity);
 				String exist = account().get(existKey);
+				
 				if("Paid".equals(exist)) {
-					return "Paid";
+					String openid = getOpenidByIdentity(identity);
+					String expireAt = account().get(expireKey);
+					if(expireAt == null || "None".equals(expireAt)) {
+						long expire = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24);
+						account().put(expireKey, "" + expire);
+						return "Paid~" + getAutocoinCommand(openid);
+					} else {
+						try {
+							long expire = Long.parseLong(expireAt);
+							if(expire > System.currentTimeMillis()) {
+								return "Paid~" + getAutocoinCommand(openid);
+							} else {
+								if(code == null || "".equals(code)) {
+									logger.info("[validate] 验证:" + code + " expireAt: " + expireAt + " now: " + System.currentTimeMillis());
+									return "expired~激活码过期了，请重新获取(" + expireAt + ")";
+								} else {
+									logger.info("[validate] 首次激活:" + code);
+								}
+							}
+						} catch (Exception e) {
+							logger.error("激活码过期了", e);
+						}
+					}
 				}
 			}
-			String token = parameter.getParameter("token");
-			if(token == null || "".equals(token)) {
-				return "fail";
+			
+			if(code == null || "".equals(code)) {
+				return "fail~激活码不能为空";
 			} else {
-				String key = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", token);
+				String key = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", code);
 				String exist = account().get(key);
 				if("Used".equals(exist) || "".equals(exist) || null == exist) {
-					return "fail";
+					return "fail~激活码不存在或已被使用";
 				} else {
+					long now = System.currentTimeMillis();
+					long expire = now + TimeUnit.HOURS.toMillis(24);
 					account().put(key, "Used");
-					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Bind", token), identity);
+					//TODO identity -> code -> openid
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Bind", code), identity);
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Code", identity), code);
 					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Identity", identity), "Paid");
-					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", token, ""+ System.currentTimeMillis()), exist);
-					return "Paid";
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", code, ""+ now), exist);
+					account().put(expireKey, "" + expire);
+					logger.info("[validate] 激活:" + code + " expireAt: " + expire + " now: " + System.currentTimeMillis());
+					String openid = getOpenidByIdentity(identity);
+					atUser(STUPID, "用户激活:" + openid + " " + identity + " " + code);
+					return "Paid~" + getAutocoinCommand(openid);
 				}
 			}
 		} else if("next".equals(action)){
@@ -1895,10 +2093,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 			key = String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Software", code);
 			exist = account().get(key);
 		}
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Openid", code), openid);
 		account().put(key, openid);
 		String mykey = String.join(Const.delimiter, Const.Version.V1, openid, "Code", "Activate", "Software");
 		account().put(mykey, code);
-		account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Activate", "Software", openid), openid);
+		account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Activate", "Software", openid), code);
 		return code;
 	}
 	public String jsAccessToken() {
@@ -1933,35 +2132,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		int size = origin.length();
 		return origin.substring(size - length, size);
 	}
-	public void reward(WXPay wxPay) {
-		try {
-			Random random = new Random();
-			String openid = STUPID;
-			String orderid = "Reward" + random.nextInt(99999) + System.currentTimeMillis();
-			String nonce = Double.toHexString(random.nextDouble());
-			String check = "NO_CHECK";
-			String amount = "33";
-			String desc = "素朴网联鼓励用户邀请朋友";
-			String ip = "139.199.204.144";
-			
-			logger.info("[corpus reward] WXPay ready");
-			Map<String, String> reqData = new HashMap<>();
-			reqData.put("nonce_str", nonce);
-			reqData.put("partner_trade_no", orderid);
-			reqData.put("check_name", check);
-			reqData.put("openid", openid);
-			reqData.put("amount", amount);
-			reqData.put("desc", desc);
-			reqData.put("spbill_create_ip", ip);
-			reqData.put("device_info", "WEB");
-			Map<String, String> resultData = wxPay.reward(reqData);
-			logger.info("[corpus reward] result : " + resultData);
-			data().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reward", orderid, "Openid"), openid);
-			account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reward", orderid), resultData.toString());
-		} catch (Exception e) {
-			logger.error("fail to reward", e);
-		}
-	}
 	
 	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) {
 		long timeStamp = current / 1000;
@@ -1969,9 +2139,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			WXPayConfig config = new WXPayConfigImpl();
 			WXPay wxPay = new WXPay(config);
 			logger.info("[corpus prepay] WXPay ready");
-			
-			reward(wxPay);
-			logger.info("[prepay] end");
 			
 			Map<String, String> reqData = new HashMap<>();
 			reqData.put("timeStamp", ""+timeStamp);
@@ -2219,6 +2386,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	 * @return
 	 */
 	public WXuser getWXuserByOpenId(String openId) {
+		if(openId == null) return null;
 		WXuser user = users.get(openId);
 		if(user != null && user.getSubscribe() == 1) {
 			logger.info("[corpus] getWXuserByOpenId: " + user.getNickname());
@@ -2485,5 +2653,26 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String text = quiz.getQuiz().value();
 		data().put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "GoodBye", "" + System.currentTimeMillis()), text);
 		return text;
+	}
+	public String requestApprove(String openid, int cent) {
+		if(cent < 30 || cent > 10000) {
+			return "提现金额不合法，未能提交";
+		}
+		tobeApproved.put(openid, new KeyValue(openid, "" + cent));
+		logger.info("[requestApprove] 用户发起了提现申请(" + cent+"分)");
+		return "提现申请成功，等待审核";
+	}
+	
+	public String reward(String reason, String openid) {
+		CallableGet get = new CallableGet("http://localhost:8998/pay?input=%s&sign=%s&time=%s", openid, System.getProperty("wx.key"), ""+ System.currentTimeMillis());
+		try {
+			String result = get.call();
+			logger.info("[reward] openid: " + openid + ", result: " + result);
+			atUser(STUPID, new Date().toString() + " [reward] reason: "+ reason + "openid: " + openid + ", result: " + result);
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "Error";
+		}
 	}
 }

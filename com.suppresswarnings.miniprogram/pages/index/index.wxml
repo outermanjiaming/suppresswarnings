@@ -1,6 +1,0 @@
-<!--index.wxml-->
-<view class="container">
-
-  <web-view src="https://suppresswarnings.com/like.html" bindmessage="素朴网联"></web-view>
-  
-</view>

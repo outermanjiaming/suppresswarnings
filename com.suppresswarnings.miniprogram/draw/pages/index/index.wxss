@@ -1,0 +1,10 @@
+
+.whoami {
+  font-size: 39rpx;
+  background: #fff;
+  position: fixed;
+  bottom: 10px;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
