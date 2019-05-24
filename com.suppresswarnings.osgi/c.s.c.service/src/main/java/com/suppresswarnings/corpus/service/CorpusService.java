@@ -122,6 +122,30 @@ public class CorpusService implements HTTPService, CommandProvider {
 		long runTime;
 		String result;
 		
+		public String approverName() {
+			WXuser a = getWXuserByOpenId(approver);
+			if(a == null || a.getSubscribe() == 0) {
+				return "已取消：" + approver;
+			}
+			String name = getRealValue(approver);
+			if(name != null) {
+				return name;
+			}
+			return a.getNickname();
+		}
+		
+		public String userName() {
+			WXuser a = getWXuserByOpenId(openid);
+			if(a == null || a.getSubscribe() == 0) {
+				return "已取消：" + openid;
+			}
+			String name = getRealValue(openid);
+			if(name != null) {
+				return name;
+			}
+			return a.getNickname();
+		}
+		
 		public String getApprover() {
 			return approver;
 		}
@@ -179,7 +203,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		
 		@Override
 		public String toString() {
-			return "CashoutRunnable [approver=" + approver + ", openid=" + openid + ", cent=" + cent + ", time=" + time
+			return "CashoutRunnable [approver=" + getApprover() + ", openid=" + getOpenid() + ", cent=" + cent + ", time=" + time
 					+ ", runTime=" + runTime + ", result=" + result + "]";
 		}
 
@@ -187,7 +211,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		public void run() {
 			this.runTime = System.currentTimeMillis();
 			logger.info("[CashoutRunnable] approved cashout start " + runTime);
-			String ret = reward(approver + "批准" + openid + "提现" + cent + "分，时间" + new Date(), openid);
+			String ret = reward(approverName() + "批准" + userName() + "提现" + cent + "分，时间" + new Date(), openid, cent);
 			this.result = ret;
 			logger.info("[CashoutRunnable] approved cashout result " + this);
 			save();
@@ -660,16 +684,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 				StringBuffer info = new StringBuffer();
 				info.append("（仅通知管理员）\n周期汇报：第").append(times).append("次").append("\n");
 				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
-				info.append("当前用户：" + users.size() + "人").append("\n");
+				info.append("用户统计：" + users.size())
+					.append('/').append(ttl.size()).append("\n");
 				info.append("当前对话: " + contexts.size()).append("\n");
-				info.append("providers：" + providers.size()).append("\n");
-				info.append("factories: " + factories.size()).append("\n");
-				info.append("所有问题: " + questionToAid.size()).append("\n");
-				info.append("问题聚类: " + aidToAnswers.size()).append("\n");
-				info.append("空闲对话: " + ttl.size()).append("\n");
-				info.append("总数据量：" + corpusCount.get()).append("\n");
+				info.append("组件统计：" + providers.size())
+					.append('/').append(factories.size()).append("\n");
+				info.append("问题统计: " + questionToAid.size())
+					.append("/").append(aidToAnswers.size())
+					.append("/").append(corpusCount.get()).append("\n");
 				info.append("数据备份：" + backup.toString()).append("\n");
-				info.append("后台工作：\n" + workHandler.report());
+//				info.append("后台工作：\n" + workHandler.report());
+				info.append("访问计数：");
+				atomicIds.forEach((k, v) ->{
+					info.append("    " + k + "=" + v.get());
+				});
 				for(String one : admin) {
 					atUser(one, ks.toString());
 					atUser(one, info.toString());
@@ -686,6 +714,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 
 	public void deactivate() {
 		logger.info("[corpus] deactivate.");
+		contexts.forEach((openid, ctx) -> {
+			atUser(openid, "和你聊天太有趣了，我暂时关机离开一下，等我一下哈");
+		}) ;
+		
+		
 		if(backup != null) {
 			backup.close();
 		}
@@ -2645,7 +2678,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return little;
 		}
 	}
-	
+	public String getRealValue(String openid) {
+		return account().get(String.join(Const.delimiter, Const.Version.V2, openid, "RealValue"));
+	}
 	public String getRandomText(String openid) {
 		int i = assimilatedQuiz.size();
 		int select = new Random().nextInt(i);
@@ -2658,17 +2693,23 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(cent < 30 || cent > 10000) {
 			return "提现金额不合法，未能提交";
 		}
+		if(tobeApproved.containsKey(openid)) {
+			return "请耐心等待，勿重复提交";
+		}
 		tobeApproved.put(openid, new KeyValue(openid, "" + cent));
 		logger.info("[requestApprove] 用户发起了提现申请(" + cent+"分)");
 		return "提现申请成功，等待审核";
 	}
 	
-	public String reward(String reason, String openid) {
-		CallableGet get = new CallableGet("http://localhost:8998/pay?input=%s&sign=%s&time=%s", openid, System.getProperty("wx.key"), ""+ System.currentTimeMillis());
+	public String reward(String reason, String openid, int cent) {
+		if(cent < 30 || cent > 10000) {
+			return "提现金额不合法，未能提交";
+		}
+		CallableGet get = new CallableGet("http://localhost:8998/pay?input=%s&sign=%s&time=%s&cent=%s", openid, System.getProperty("wx.key"), ""+ System.currentTimeMillis(), cent);
 		try {
 			String result = get.call();
 			logger.info("[reward] openid: " + openid + ", result: " + result);
-			atUser(STUPID, new Date().toString() + " [reward] reason: "+ reason + "openid: " + openid + ", result: " + result);
+			atUser(STUPID, new Date().toString() + "提现：" + cent + ",理由：" + reason + "，用户: " + openid + ", 结果: " + result);
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();

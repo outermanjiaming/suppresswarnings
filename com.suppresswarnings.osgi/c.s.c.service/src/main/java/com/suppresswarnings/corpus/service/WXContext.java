@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
@@ -169,12 +170,12 @@ public class WXContext extends Context<CorpusService> {
 			if(cf != null) {
 				//leave from worker user
 				u.content().forgetIt(openid());
-				
+				u.content().uniqueKey(command);
 				Context<CorpusService> ctx = cf.getInstance(wxid(), openid(), u.content());
 				if(cf.ttl() != ContextFactory.forever) {
 					u.content().contextx(openid, ctx, cf.ttl());
 				} else {
-					u.content().context(openid, ctx);
+					u.content().contextx(openid, ctx, TimeUnit.MINUTES.toMillis(5));
 				}
 				ctx.test(t);
 				u.output(ctx.output());

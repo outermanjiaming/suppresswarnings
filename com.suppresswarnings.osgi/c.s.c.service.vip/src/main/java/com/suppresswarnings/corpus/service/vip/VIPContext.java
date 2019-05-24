@@ -1,7 +1,9 @@
 package com.suppresswarnings.corpus.service.vip;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -68,7 +70,7 @@ public class VIPContext extends WXContext {
 				
 				WXnews news = new WXnews();
 				news.setTitle("「素朴网联」专属vip二维码");
-				news.setDescription("你邀请了"+ val.get() +"位朋友，这是你的财富！需要爱奇艺VIP，请输入：我要验证码");
+				news.setDescription("你邀请了"+ val.get() +"位朋友，这是你的财富！专属命令：我要验证码，我要领工资，我要发公告");
 				news.setUrl("http://suppresswarnings.com/vip.html?state=" + openid());
 				news.setPicUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
 				String json = gson.toJson(news);
@@ -84,6 +86,12 @@ public class VIPContext extends WXContext {
 			}
 			if(t.startsWith("我要验证码")) {
 				return captcha;
+			}
+			if(salary.name().equals(t)) {
+				return salary;
+			}
+			if(alert.name().equals(t)) {
+				return alert;
 			}
 			if(t.length() > 4 && Pattern.compile("\\d+").matcher(t.substring(0, 4)).matches()) {
 				return update;
@@ -141,6 +149,106 @@ public class VIPContext extends WXContext {
 		@Override
 		public String name() {
 			return "验证码";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
+	
+	State<Context<CorpusService>> salary = new State<Context<CorpusService>>() {
+		int unit = 30;
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5881707174758294449L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			boolean stop = false;
+			String lasttime = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Lasttime"));
+			if(lasttime == null || "None".equals(lasttime)) {
+				logger.info("[VIP salary] 用户首次领工资: " + user());
+			} else {
+				long lastt = Long.parseLong(lasttime);
+				if(System.currentTimeMillis() - lastt < TimeUnit.HOURS.toMillis(2)) {
+					u.output("你不要这么频繁来领工资，稍等一下咯");
+					stop = true;
+				}
+			}
+			
+			if(stop) {
+				u.output("可以多邀请好朋友关注我们公众号，试试输入：我要邀请");
+				return;
+			}
+			
+			String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");
+			AtomicInteger all = new AtomicInteger(0);
+			AtomicInteger cancel = new AtomicInteger(0);
+			AtomicInteger pay = new AtomicInteger(0);
+			List<String> openids = new ArrayList<>();
+			u.content().account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+				all.incrementAndGet();
+				openids.add(v);
+			});
+			openids.forEach(userid-> {
+				WXuser one = u.content().getWXuserByOpenId(userid);
+				if(one == null || one.getSubscribe() == 0) {
+					cancel.incrementAndGet();
+				}
+			});
+			
+			String paidHistoryStart = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History");
+			u.content().account().page(paidHistoryStart, paidHistoryStart, null, Integer.MAX_VALUE, (k,v)->{
+				int paid = Integer.parseInt(v);
+				pay.addAndGet(paid);
+			});
+			String money = "(邀请总人数 %s - 取消关注人数 %s - 已结算人数 %s ) * 单价 %s";
+			logger.info(String.format(money + " %s", all.get(), cancel.get(), pay.get(), unit, user().toString()));
+			
+			String paidKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Paid");
+			String paid = u.content().account().get(paidKey);
+			
+			String paidLastKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Last");
+			String last = u.content().account().get(paidLastKey);
+			
+			if(paid == null || "None".equals(paid)) {
+				u.output("恭喜你解锁新功能：我要领工资。工资计算器：" + String.format(money, all.get(), cancel.get(), pay.get(), unit));
+			} else {
+				u.output("你上次领工资获得了" + last + "分，看看这次能领多少分");
+			}
+			
+			
+			int left = all.get() - cancel.get() - pay.get();
+			if(left <= 1) {
+				u.output("这一阶段你邀请新增的人数还不足1人，下次积累多一点了，再来领工资吧！");
+			} else {
+				int cent = left * unit;
+				
+				u.content().account().put(paidLastKey, "" + cent);
+				u.content().account().put(paidKey, "" + left);
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Lasttime"), time());
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History", time()), "" + left);
+				String approve = u.content().requestApprove(openid(), cent);
+				u.output("本次总工资：" + cent + "分，继续加油哦～");
+				u.output(approve);
+			}
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(name().equals(t)) {
+				return salary;
+			}
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "我要领工资";
 		}
 
 		@Override
@@ -251,6 +359,141 @@ public class VIPContext extends WXContext {
 		@Override
 		public String name() {
 			return "更新验证码";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
+	
+	State<Context<CorpusService>> alert = new State<Context<CorpusService>>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1352576423633422537L;
+		String ad = null;
+		State<Context<CorpusService>> send = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4871517349629706826L;
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				if(ad == null) {
+					u.output("你还没有设置公告");
+				} else {
+					openids.forEach(userid -> {
+						u.content().atUser(userid, ad);
+					});
+					u.output("已经向"+ openids.size() + "位用户发送了公告");
+					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Alert", "Info", openid(), time()), ad);
+				}
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				return init;
+			}
+
+			@Override
+			public String name() {
+				return "发送公告";
+			}
+
+			@Override
+			public boolean finish() {
+				return true;
+			}
+			
+		};
+		State<Context<CorpusService>> info = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1679422214009820876L;
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss");
+				String date = sdf.format(new Date());
+				ad = "「素朴网联公告：" + t + "，时间：" + date + "」";
+				u.output(ad);
+				u.output("请仔细阅读你要发送的公告");
+				u.output("如果没有问题，请输入：发送");
+				u.output("如果放弃发送，请输入：放弃");
+				u.output("如果要修改，请重新输入公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				if("发送".equals(t)) {
+					return send;
+				}
+				if("放弃".equals(t)) {
+					return init;
+				}
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "公告内容";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			
+		};
+		
+		List<String> openids = null;
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			if(openids == null) {
+				String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");
+				AtomicInteger all = new AtomicInteger(0);
+				AtomicInteger cancel = new AtomicInteger(0);
+				List<String> userids = new ArrayList<>();
+				u.content().account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					all.incrementAndGet();
+					userids.add(v);
+				});
+				if(userids.isEmpty()) {
+					
+				} else {
+					openids = new ArrayList<>();
+				}
+				userids.forEach(userid-> {
+					WXuser one = u.content().getWXuserByOpenId(userid);
+					if(one == null || one.getSubscribe() == 0) {
+						cancel.incrementAndGet();
+					} else {
+						openids.add(userid);
+					}
+				});
+			}
+			
+			u.output("请输入公告，将发送给" + openids.size() + "个用户：");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(name().equals(t)) {
+				return alert;
+			}
+			
+			return info;
+		}
+
+		@Override
+		public String name() {
+			return "我要发公告";
 		}
 
 		@Override

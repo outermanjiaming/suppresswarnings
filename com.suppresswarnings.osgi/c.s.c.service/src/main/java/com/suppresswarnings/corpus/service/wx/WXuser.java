@@ -27,7 +27,7 @@ public class WXuser {
 	String qr_scene;//二维码扫码场景（开发者自定义）
 	String qr_scene_str;//二维码扫码场景描述（开发者自定义）
 	public Integer getSubscribe() {
-		return subscribe;
+		return subscribe == null ? 0 : subscribe;
 	}
 	public void setSubscribe(Integer subscribe) {
 		this.subscribe = subscribe;
