@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -160,6 +161,7 @@ public class VIPContext extends WXContext {
 	
 	State<Context<CorpusService>> salary = new State<Context<CorpusService>>() {
 		int unit = 30;
+		AtomicBoolean first = new AtomicBoolean(true);
 		
 		/**
 		 * 
@@ -168,7 +170,11 @@ public class VIPContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			boolean stop = false;
+			if(!first.compareAndSet(true, false)) {
+				u.output("不要重复提交，没有用的");
+				return;
+			}
+
 			String lasttime = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Lasttime"));
 			if(lasttime == null || "None".equals(lasttime)) {
 				logger.info("[VIP salary] 用户首次领工资: " + user());
@@ -176,13 +182,9 @@ public class VIPContext extends WXContext {
 				long lastt = Long.parseLong(lasttime);
 				if(System.currentTimeMillis() - lastt < TimeUnit.HOURS.toMillis(2)) {
 					u.output("你不要这么频繁来领工资，稍等一下咯");
-					stop = true;
+					u.output("你可以多邀请好朋友关注我们公众号");
+					return;
 				}
-			}
-			
-			if(stop) {
-				u.output("可以多邀请好朋友关注我们公众号，试试输入：我要邀请");
-				return;
 			}
 			
 			String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");

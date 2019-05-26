@@ -50,6 +50,7 @@ public class ManageContext extends WXContext {
 			u.output(examManage.name());
 			u.output(corpusManage.name());
 			u.output(cashoutManage.name());
+			u.output(alert.name());
 		}
 
 		@Override
@@ -58,6 +59,7 @@ public class ManageContext extends WXContext {
 			if(examManage.name().equals(t)) return examManage;
 			if(corpusManage.name().equals(t)) return corpusManage;
 			if(cashoutManage.name().equals(t)) return cashoutManage;
+			if(alert.name().equals(t)) return alert;
 			return enter;
 		}
 
@@ -126,13 +128,16 @@ public class ManageContext extends WXContext {
 							u.output("用户不存在");
 						} else {
 							if("同意".equals(t)) {
-								
 								u.output("你同意了审核提现请求: " + string + " "  + who.getNickname());
-								u.content().approvedRunnable(openid(), string, 30);
+								u.content().approvedRunnable(openid(), string, Integer.parseInt(kv.value()));
+								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Accept", "Cashout", openid(), time()), kv.toString());
+								u.content().atUser(string, "恭喜你，管理员同意了你的提现请求：" + kv.value() + "分，继续加油");
 							} else if("拒绝".equals(t)){
 								u.output("你拒绝了审核提现请求: "  + string + " " + who.getNickname());
-								u.content().rejectRunnable(openid(), string, 30);
+								u.content().rejectRunnable(openid(), string, Integer.parseInt(kv.value()));
+								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reject", "Cashout", openid(), time()), kv.toString());
 							} else {
+								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Wrong", "Cashout", openid(), time()), kv.toString());
 								u.output("你输入了错误的命令，该用户的提现请求无法被再次审核：" + string + " " + who.getNickname());
 							}
 						}
@@ -950,6 +955,157 @@ public class ManageContext extends WXContext {
 		@Override
 		public String name() {
 			return "暂未实现";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
+	
+	State<Context<CorpusService>> alert = new State<Context<CorpusService>>() {
+		State<Context<CorpusService>> info = new State<Context<CorpusService>>() {
+
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("正在发送公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "发送公告";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+		};
+		State<Context<CorpusService>> alluser = new State<Context<CorpusService>>() {
+
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("所有用户总共有N人，正在发送公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "所有人";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+		};
+		
+		State<Context<CorpusService>> allvip = new State<Context<CorpusService>>() {
+
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("所有vip总共有N人，正在发送公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "所有vip";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+		};
+		
+		State<Context<CorpusService>> myvip = new State<Context<CorpusService>>() {
+
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("你授权开通的vip总共有N人，正在发送公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "我的vip";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+		};
+		
+		State<Context<CorpusService>> mycrew = new State<Context<CorpusService>>() {
+
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("你邀请的朋友总共有N人，正在发送公告");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				
+				return info;
+			}
+
+			@Override
+			public String name() {
+				return "我的员工";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+		};
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			u.output("步骤：1.选择人群，2.输入公告，3.确认发布公告");
+			u.output("你要向哪些人发布公告？请输入：所有人，所有vip, 我的vip，我的员工");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(alluser.name().equals(t)) return alluser;
+			if(allvip.name().equals(t)) return allvip;
+			if(myvip.name().equals(t)) return myvip;
+			if(mycrew.name().equals(t)) return mycrew;
+			return alert;
+		}
+
+		@Override
+		public String name() {
+			return "发布公告";
 		}
 
 		@Override
