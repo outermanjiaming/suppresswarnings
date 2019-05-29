@@ -201,6 +201,12 @@ public class MainActivity extends Activity implements IView {
 
         presenter = new Presenter(this, MainActivity.this, webview);
         loadWebview();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            presenter.Log("一切正常");
+        } else {
+            presenter.Log("你的手机系统版本低于7.0不能自动控制，我们提供了另外一套方案但是需要ROOT。");
+        }
     }
 
     @Override
@@ -233,10 +239,11 @@ public class MainActivity extends Activity implements IView {
             final EditText inputServer = new EditText(MainActivity.this);
             inputServer.setGravity(Gravity.CENTER);
             TextView textView = new TextView(MainActivity.this);
-            textView.setText("(免责申明：「素朴网联」仅为内部人员提供自动化操作，请勿擅自传播并用于商业行为。)");
+            textView.setText("免责申明：\n    我们仅提供自动化操作，不针对任何APP\n\n如何获取激活码？\n    在微信公众号「素朴网联」输入：我要激活码");
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
             LinearLayout layout = new LinearLayout(this);
             layout.setLayoutParams(lp);
             layout.setOrientation(LinearLayout.VERTICAL);
@@ -252,8 +259,7 @@ public class MainActivity extends Activity implements IView {
             layout.addView(textView);
 
             alertDialog = new AlertDialog.Builder(webview.getContext())
-                .setTitle("请输入激活码")
-                .setMessage("如何获取激活码？在微信公众号「素朴网联」输入：我要激活码")
+                .setMessage("请输入激活码")
                 .setView(layout)
                 .setCancelable(false)
                 .setNegativeButton("我要激活码", new DialogInterface.OnClickListener() {

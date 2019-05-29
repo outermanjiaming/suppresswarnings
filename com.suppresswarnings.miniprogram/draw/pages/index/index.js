@@ -1,12 +1,21 @@
 // pages/canvas/canvas.js
 Page({
   data: {
+    times : 1,
     whoami : "wx.request.result"
+  },
+  canvasFrame(){
+    wx.navigateTo({
+      url: '/pages/canvas/canvas'
+    })
   },
   clickName() {
     var that = this;
     wx.request({
       url: 'https://suppresswarnings.com/wx.http?action=miniprogram',
+      data :{
+        t: that.data.times
+      },
       success: function (res) {
         console.log(res.data)
         that.setData({ whoami: res.data });
@@ -17,7 +26,8 @@ Page({
       },
       complete: function (res) {
         console.log(res.data)
-        that.setData({ whoami: that.data.whoami + '-complete-' + res });
+        that.data.times ++;
+        that.setData({ whoami: that.data.whoami + '-complete-' + that.data.times});
       }
     })
     

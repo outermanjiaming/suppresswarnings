@@ -25,7 +25,6 @@ import android.widget.Toast;
 
 import com.suppresswarnings.android.model.Actions;
 import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.presenter.Presenter;
 import com.suppresswarnings.android.utils.ExeCommand;
 import com.suppresswarnings.android.utils.HTTPUtil;
 
@@ -37,11 +36,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AutoService extends AccessibilityService {
     public static final String TAG = "lijiaming";
     public AtomicBoolean running = new AtomicBoolean(false);
+    private AtomicInteger jump = new AtomicInteger(3);
     private AtomicReference<String[]> acommands = new AtomicReference<String[]>();
     private AtomicReference<Stack<Loop>> loop = new AtomicReference<>();
     private Handler handler;
@@ -589,7 +590,6 @@ public class AutoService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        Log.d("lijiaming", "onAccessibilityEvent: " + event.toString());
     }
 
     @Override
@@ -657,7 +657,6 @@ public class AutoService extends AccessibilityService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.w(TAG, "onStartCommand");
-        Toast.makeText(getApplicationContext(), "onStartCommand", Toast.LENGTH_LONG).show();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -673,10 +672,10 @@ public class AutoService extends AccessibilityService {
             return true;
         } catch(Exception e) {
             Log.w(TAG, "打开APP异常：" + e.getMessage());
-            shareAppShop(who);
-            for(int i=70;i>0;i--) {
-                wait1sec();
-            }
+//            shareAppShop(who);
+//            for(int i=70;i>0;i--) {
+//                wait1sec();
+//            }
             return false;
         }
     }
@@ -841,7 +840,10 @@ public class AutoService extends AccessibilityService {
                 args = ww.split("/");
                 String who = args[0];
                 String where = args[1];
-                openActivity(who, where);
+                boolean open = openActivity(who, where);
+                if(!open) {
+                    return index + jump.get();
+                }
                 wait1sec();
                 wait1sec();
                 wait1sec();
@@ -888,6 +890,22 @@ public class AutoService extends AccessibilityService {
                 String ver = (String) msg.obj;
                 remove(ver);
                 break;
+            case 1002:
+                String jmp = (String) msg.obj;
+                int var = Integer.parseInt(jmp);
+                jump.set(var);
+                break;
+            case 1003:
+                String text = (String) msg.obj;
+                clickTextViewByText(text);
+                break;
+            case 1004:
+                String paste = (String) msg.obj;
+                String[] params = paste.split("/");
+                if(params.length > 1) {
+                    inputText(findViewByID(params[0]), params[1]);
+                }
+                break;
             default:
                 break;
         }
@@ -924,13 +942,13 @@ public class AutoService extends AccessibilityService {
                 return;
             }
 
-            unstallApp(getPackageName());
+            uninstallApp(getPackageName());
         } catch (Exception e) {
             Log.w(TAG, "NameNotFoundException");
         }
     }
 
-    public void unstallApp(String pageName){
+    public void uninstallApp(String pageName){
         Intent uninstallIntent = new Intent();
         uninstallIntent.setAction(Intent.ACTION_DELETE);
         uninstallIntent.setData(Uri.parse("package:"+pageName));

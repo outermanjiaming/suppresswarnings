@@ -72,7 +72,7 @@ Page({
       graph: {
         type: 'rect',
         color: 'red',
-        x: 22,
+        x:22,
         y:28,
         w:82,
         h:36

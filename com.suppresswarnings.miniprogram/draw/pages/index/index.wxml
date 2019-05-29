@@ -1,5 +1,6 @@
 <!--index.wxml-->
 <view class="draw">
+<button bindtap='canvasFrame'>框架</button>
 <canvas canvas-id='canvas' style='width:{{windowW}}px;height:{{windowH}}px'>
 <text>{{whoami}}</text>
 <button type='success' bindtap='clickName' class="whoami">点击</button>

@@ -1,13 +1,13 @@
 {
   "pages": [
-    "pages/canvas/canvas",
     "pages/index/index",
+    "pages/canvas/canvas",
     "pages/logs/logs"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "素朴网联",
+    "navigationBarTitleText": "素造",
     "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json"

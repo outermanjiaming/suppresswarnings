@@ -226,6 +226,51 @@ public enum ActionType {
 		public int what() {
 			return 1001;
 		}
+	},JUMP {
+		@Override
+		String action() {
+			return "skip ";
+		}
+
+		@Override
+		String input(String input) {
+			return empty(input) ? "3" : input;
+		}
+
+		@Override
+		public int what() {
+			return 1002;
+		}
+	},TAP {
+		@Override
+		String action() {
+			return "input tap ";
+		}
+
+		@Override
+		String input(String input) {
+			return empty(input) ? " " : input;
+		}
+
+		@Override
+		public int what() {
+			return 1003;
+		}
+	},PASTE {
+		@Override
+		String action() {
+			return "input ";
+		}
+
+		@Override
+		String input(String input) {
+			return empty(input) ? " " : input;
+		}
+
+		@Override
+		public int what() {
+			return 1004;
+		}
 	};
 	abstract String action();
 	abstract String input(String input);

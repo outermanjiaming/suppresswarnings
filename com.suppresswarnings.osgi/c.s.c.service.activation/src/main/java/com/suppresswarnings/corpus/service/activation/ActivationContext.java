@@ -26,16 +26,18 @@ public class ActivationContext extends WXContext {
 			if(exist == null || "None".equals(exist)) {
 				String activationCode = u.content().generateActivateCode(openid());
 				u.output(activationCode);
-				u.content().atUser(openid(), "首次试用免费获得激活码，下次觉得好用请支付购买。");
 			} else {
 				WXnews news = new WXnews();
-				news.setTitle("请点击进入支付后获得激活码");
+				news.setTitle("购买激活码");
 				news.setDescription("点击进入支付页面，支付完成之后可以得到激活码！");
 				news.setUrl("http://suppresswarnings.com/payment.html?state=" + code);
 				Gson gson = new Gson();
 				String json = gson.toJson(news);
 				u.output("news://" + json);
 			}
+			
+			String activationCode = u.content().generateActivateCode(openid());
+			u.content().atUser(openid(), "本次试用免费获得激活码，下次觉得好用请支付购买。" + activationCode);
 		}
 
 		@Override
