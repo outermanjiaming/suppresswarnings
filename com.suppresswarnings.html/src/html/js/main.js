@@ -28,13 +28,7 @@ function _initLogoSvg() {
 		});
     },
     document.getElementById("xiaoshuSvg"));
-    
-    
-    Snap.load("img/logo.svg",
-    function(svg) {
-        this.appendChild(svg.node);
-    },
-    document.getElementById("logo"));
+  
 }
 function _animate(){
 	Snap.load("img/xiaoshu.svg",
