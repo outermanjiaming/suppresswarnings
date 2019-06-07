@@ -1,7 +1,5 @@
 package com.suppresswarnings.android.model;
 
-import com.suppresswarnings.android.utils.ActionType;
-
 public class Actions {
     ActionType actionType;
     String input;

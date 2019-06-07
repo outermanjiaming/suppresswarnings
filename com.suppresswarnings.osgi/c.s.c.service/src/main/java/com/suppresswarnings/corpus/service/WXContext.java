@@ -181,6 +181,31 @@ public class WXContext extends Context<CorpusService> {
 				u.output(ctx.output());
 			} else {
 				logger.info("[WXContext] "+ openid() + "\tAccost words: " + t);
+				
+				if(t.startsWith("我要") || t.startsWith("我是") || t.startsWith("我有")) {
+					String remote = u.content().remoteCall(openid(), "T_Things_MQTT_Publish_201906011732", "发布MQTT消息", String.join("#", openid(), t));
+					u.output("发布消息到MQTT：" + remote);
+				}
+				
+				if(t.startsWith("@")) {
+					String[] ww = t.split("\\s+");
+					if(ww.length < 2) {
+						u.output("你使用了 @ 功能，但是格式不对，请在@谁谁谁之后 加一个空格再输入内容");
+					} else {
+						String who = ww[0];
+						String what = ww[1];
+						String code = who.substring(1);
+						String userid = u.content().token().get(String.join(Const.delimiter, Const.Version.V1, "Token", "For", "@User", code));
+						logger.info("[WX @功能] userid = " + userid);
+						if(userid != null) {
+							ChatContext chatContext = new ChatContext(wxid(), openid(), userid, content());
+							u.content().contextx(openid(), chatContext, TimeUnit.MINUTES.toMillis(2));
+							chatContext.test(what);
+							return;
+						}
+					}
+				}
+				
 				if(quizId == null) {
 					quizId = u.content().getTodoQuizid();
 					logger.info("[WXContext] quizId was null, Now = " + quizId);
@@ -317,14 +342,15 @@ public class WXContext extends Context<CorpusService> {
 			
 		};
 	}
+	
 	public WXContext(String wxid, String openid, CorpusService ctx) {
 		super(ctx);
 		this.wxid = wxid;
 		this.openid = openid;
 		this.state = init;
 		this.quizId = ctx.getTodoQuizid();
-		ctx.userOnline(openid);
 	}
+	
 	public WXuser user() {
 		if(user == null) user = content().getWXuserByOpenId(openid());
 		return user;

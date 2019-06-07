@@ -25,6 +25,7 @@ public class CrewContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			String myvip = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()));
 			logger.info("[Crew] am i vip: " + myvip);
+			Gson gson = new Gson();
 			if(myvip == null || "None".equals(myvip)) {
 				logger.info("[Crew] user invited " + openid() + t);
 				//can be invited 
@@ -33,7 +34,6 @@ public class CrewContext extends WXContext {
 				String inviter = u.content().account().get(qrOpenidKey);
 				if(inviter == null || "None".equals(inviter)) {
 					logger.info("[Crew] inviter is null: " + qrOpenidKey);
-					u.output("你居然自己发现了怎么加入素朴网联");
 				} else {
 					String bossKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Boss");
 					String vipBoss = String.join(Const.delimiter, Const.Version.V1, "Boss", inviter);
@@ -56,6 +56,19 @@ public class CrewContext extends WXContext {
 						u.content().atUser(openid(), "你已经被"+bossName+"邀请加入素朴网联");
 					}
 				}
+				
+				String article = "https://mp.weixin.qq.com/s/2dkcH0vRvqFsfKk70zuARw";
+				String set = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Setting", "Article"));
+				if(!u.content().isNull(set)) {
+					article = set;
+				}
+				WXnews news = new WXnews();
+				news.setTitle("请阅读文章并点击广告");
+				news.setDescription("请关注「素朴网联」请点击文章，请点击广告！");
+				news.setUrl(article);
+				news.setPicUrl("https://suppresswarnings.com/like.png");
+				String json = gson.toJson(news);
+				u.output("news://" + json);
 			} else {
 				logger.info("[Crew] you are VIP already: " + openid());
 				synchronized (crew) {
@@ -65,7 +78,7 @@ public class CrewContext extends WXContext {
 					String qrSceneKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target, "Scene");
 					String qrOpenidKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target, "Openid");
 					String exist = u.content().account().get(qrKey);
-					Gson gson = new Gson();
+					
 					QRCodeTicket qrTicket = null;
 					if(exist == null || "None".equals(exist)) {
 						String access = u.content().accessToken("Generate Permanent QRCode");

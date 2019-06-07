@@ -162,6 +162,7 @@ public class ManageContext extends WXContext {
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 				if("完成".equals(t) || finish()) {
+					finish = false;
 					return enter;
 				}
 				

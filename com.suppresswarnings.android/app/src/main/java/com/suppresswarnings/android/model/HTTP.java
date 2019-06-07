@@ -1,6 +1,4 @@
-package com.suppresswarnings.android.utils;
-
-import com.suppresswarnings.android.model.Actions;
+package com.suppresswarnings.android.model;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -8,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class HTTPUtil {
+public class HTTP {
 
 	public static String checkValid(String mac, String token) throws Exception {
 		URL url = new URL("http://suppresswarnings.com/wx.http?action=validate&identity="+mac+"&token="+token);

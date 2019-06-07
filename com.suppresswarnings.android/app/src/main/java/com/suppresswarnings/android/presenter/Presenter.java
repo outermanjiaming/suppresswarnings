@@ -14,7 +14,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.utils.HTTPUtil;
+import com.suppresswarnings.android.model.HTTP;
 import com.suppresswarnings.android.view.IView;
 import com.suppresswarnings.android.view.MyWebview;
 
@@ -101,11 +101,10 @@ public class Presenter {
     }
 
     public boolean checkValidAndSetCommand(String code) throws Exception {
-        String x = HTTPUtil.checkValid(getToken(), code);
-        ok.set(HTTPUtil.valid(x));
+        String x = HTTP.checkValid(getToken(), code);
+        ok.set(HTTP.valid(x));
         if(ok.get() && x.split("~").length > 1) {
             command.set(x.split("~")[1]);
-            handleCase(3, "获取了新命令");
         } else {
             command.set(internal);
         }
@@ -129,7 +128,6 @@ public class Presenter {
                             }
                             break;
                         case 1:
-                            Log("检验合格");
                             iView.updateUI();
                             break;
                         case 2:

@@ -34,11 +34,12 @@ public class ChatContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			if(!connected) {
 				connected = true;
+				logger.info("[chat] sendTxtTo " + userid);
 				u.content().sendTxtTo("chat context", t, userid);
 				String key = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Chat", "OpenId", openid, "UserId", userid, time(),random());
 				u.content().data().put(key, t);
 				Context<?> exist = u.content().context(userid);
-				if(exist instanceof ChatContext) {
+				if(exist != null && exist instanceof ChatContext) {
 					ChatContext that = (ChatContext) exist;
 					that.said(t);
 					logger.info("[ChatContext] bugfix: don't replace context");

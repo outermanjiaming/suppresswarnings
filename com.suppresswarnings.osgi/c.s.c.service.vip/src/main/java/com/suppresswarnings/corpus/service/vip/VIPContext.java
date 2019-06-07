@@ -187,57 +187,63 @@ public class VIPContext extends WXContext {
 				}
 			}
 			
-			String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");
-			AtomicInteger all = new AtomicInteger(0);
-			AtomicInteger cancel = new AtomicInteger(0);
-			AtomicInteger pay = new AtomicInteger(0);
-			List<String> openids = new ArrayList<>();
-			u.content().account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
-				all.incrementAndGet();
-				openids.add(v);
-			});
-			openids.forEach(userid-> {
-				WXuser one = u.content().getWXuserByOpenId(userid);
-				if(one == null || one.getSubscribe() == 0) {
-					cancel.incrementAndGet();
-				}
-			});
-			
-			String paidHistoryStart = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History");
-			u.content().account().page(paidHistoryStart, paidHistoryStart, null, Integer.MAX_VALUE, (k,v)->{
-				int paid = Integer.parseInt(v);
-				pay.addAndGet(paid);
-			});
-			String money = "(邀请总人数 %s - 取消关注人数 %s - 已结算人数 %s ) * 单价 %s";
-			logger.info(String.format(money + " %s", all.get(), cancel.get(), pay.get(), unit, user().toString()));
-			
-			String paidKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Paid");
-			String paid = u.content().account().get(paidKey);
-			
-			String paidLastKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Last");
-			String last = u.content().account().get(paidLastKey);
-			
-			if(paid == null || "None".equals(paid)) {
-				u.output("恭喜你解锁新功能：我要领工资。工资计算器：" + String.format(money, all.get(), cancel.get(), pay.get(), unit));
-			} else {
-				u.output("你上次领工资获得了" + last + "分，看看这次能领多少分");
-			}
-			
-			
-			int left = all.get() - cancel.get() - pay.get();
-			if(left <= 1) {
-				u.output("这一阶段你邀请新增的人数还不足1人，下次积累多一点了，再来领工资吧！");
-			} else {
-				int cent = left * unit;
+			u.content().threadpool.submit(() ->{
+				StringBuffer output = new StringBuffer();
+				String start = String.join(Const.delimiter, Const.Version.V1, openid(), "Crew");
+				AtomicInteger all = new AtomicInteger(0);
+				AtomicInteger cancel = new AtomicInteger(0);
+				AtomicInteger pay = new AtomicInteger(0);
+				List<String> openids = new ArrayList<>();
+				u.content().account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
+					all.incrementAndGet();
+					openids.add(v);
+				});
+				openids.forEach(userid-> {
+					WXuser one = u.content().getWXuserByOpenId(userid);
+					if(one == null || one.getSubscribe() == 0) {
+						cancel.incrementAndGet();
+					}
+				});
 				
-				u.content().account().put(paidLastKey, "" + cent);
-				u.content().account().put(paidKey, "" + left);
-				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Lasttime"), time());
-				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History", time()), "" + left);
-				String approve = u.content().requestApprove(openid(), cent);
-				u.output("本次总工资：" + cent + "分，继续加油哦～");
-				u.output(approve);
-			}
+				String paidHistoryStart = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History");
+				u.content().account().page(paidHistoryStart, paidHistoryStart, null, Integer.MAX_VALUE, (k,v)->{
+					int paid = Integer.parseInt(v);
+					pay.addAndGet(paid);
+				});
+				String money = "(邀请总人数 %s - 取消关注人数 %s - 已结算人数 %s ) * 单价 %s\n";
+				logger.info(String.format(money + " %s", all.get(), cancel.get(), pay.get(), unit, user().toString()));
+				
+				String paidKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Paid");
+				String paid = u.content().account().get(paidKey);
+				
+				String paidLastKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Last");
+				String last = u.content().account().get(paidLastKey);
+				
+				if(paid == null || "None".equals(paid)) {
+					output.append("恭喜你解锁新功能：我要领工资。");
+				} else {
+					output.append("你上次领工资获得了" + last + "分，看看这次能领多少分：");
+				}
+				output.append("工资计算器：" + String.format(money, all.get(), cancel.get(), pay.get(), unit));
+				
+				int left = all.get() - cancel.get() - pay.get();
+				if(left <= 1) {
+					output.append("这段时间你邀请的人数太少了，先积累多一点了，再来领工资吧！加油哦～");
+				} else {
+					int cent = left * unit;
+					
+					u.content().account().put(paidLastKey, "" + cent);
+					u.content().account().put(paidKey, "" + left);
+					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "Lasttime"), time());
+					u.content().account().put(String.join(Const.delimiter, Const.Version.V1, openid(), "Salary", "History", time()), "" + left);
+					String approve = u.content().requestApprove(openid(), cent);
+					output.append("本次总工资：" + cent + "分，继续加油哦～");
+					output.append(approve);
+				}
+				
+				u.content().atUser(openid(), output.toString());
+			});
+			u.output("已经提交了请求，稍后将收到消息，请勿重复提交，避免误操作清零。");
 		}
 
 		@Override

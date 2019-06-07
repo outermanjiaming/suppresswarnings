@@ -11,7 +11,7 @@ public class WxpyContext extends WXContext {
 	public static final String CMD = "我要微信机器人";
 	String code = "T_Things_Robot_201905111755";
 	Gson gson = new Gson();
-	State<Context<CorpusService>> wxpy = new State<Context<CorpusService>>() {
+	State<Context<CorpusService>> enter = new State<Context<CorpusService>>() {
 
 		/**
 		 * 
@@ -33,10 +33,34 @@ public class WxpyContext extends WXContext {
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			if(CMD.equals(t)) {
-				return wxpy;
-			}
 			return init;
+		}
+
+		@Override
+		public String name() {
+			return "微信机器人";
+		}
+
+		@Override
+		public boolean finish() {
+			return true;
+		}
+	};
+	State<Context<CorpusService>> wxpy = new State<Context<CorpusService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7296937873701644997L;
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			enter.accept(t, u);
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return enter;
 		}
 
 		@Override

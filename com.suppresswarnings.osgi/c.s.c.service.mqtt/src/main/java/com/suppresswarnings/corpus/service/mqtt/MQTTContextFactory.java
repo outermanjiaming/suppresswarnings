@@ -1,4 +1,4 @@
-package com.suppresswarnings.corpus.service.vip;
+package com.suppresswarnings.corpus.service.mqtt;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,30 +6,31 @@ import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class VIPContextFactory extends AbstractAuthContextFactory {
+public class MQTTContextFactory extends AbstractAuthContextFactory {
 
 	@Override
 	public String command() {
-		return VIPContext.CMD;
+		return MQTTContext.CMD;
 	}
 
 	@Override
 	public String description() {
-		return "用户VIP+邀请机制。如果需要购买权限，请点击链接：https://suppresswarnings.com/payment.html?state=VIP";
+		return "消息订阅发布";
 	}
 
 	@Override
 	public long ttl() {
-		return TimeUnit.MINUTES.toMillis(3);
+		return TimeUnit.DAYS.toMillis(30);
 	}
 
 	@Override
 	public String[] requiredAuth() {
-		return VIPContext.AUTH;
+		return MQTTContext.AUTH;
 	}
 
 	@Override
 	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
-		return new VIPContext(wxid, openid, content);
+		return new MQTTContext(wxid, openid, content);
 	}
+
 }

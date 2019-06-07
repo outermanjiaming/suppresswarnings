@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.suppresswarnings.android"
-    android:versionCode="3"
-    android:versionName="视频专刷版" >
+    android:versionCode="1"
+    android:versionName="1.0.0" >
 
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -25,6 +25,7 @@
         <activity
             android:name="com.suppresswarnings.android.MainActivity"
             android:windowSoftInputMode="stateHidden|adjustResize"
+            android:launchMode="singleInstance"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

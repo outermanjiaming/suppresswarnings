@@ -8,6 +8,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Path;
 import android.net.Uri;
 import android.os.Build;
@@ -24,9 +26,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
 
 import com.suppresswarnings.android.model.Actions;
-import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.utils.ExeCommand;
-import com.suppresswarnings.android.utils.HTTPUtil;
+import com.suppresswarnings.android.model.HTTP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +37,19 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AutoService extends AccessibilityService {
     public static final String TAG = "lijiaming";
+    public static final String[] CANT = {"com.android", "com.google"};
     public AtomicBoolean running = new AtomicBoolean(false);
+    public AtomicBoolean pause = new AtomicBoolean(false);
+    public AtomicBoolean myself = new AtomicBoolean(true);
+    public AtomicBoolean ready  = new AtomicBoolean(false);
+    public AtomicReference<String> packages = new AtomicReference<String>();
     private AtomicInteger jump = new AtomicInteger(3);
+    private AtomicInteger ignore = new AtomicInteger(-1);
     private AtomicReference<String[]> acommands = new AtomicReference<String[]>();
     private AtomicReference<Stack<Loop>> loop = new AtomicReference<>();
     private Handler handler;
@@ -80,7 +87,7 @@ public class AutoService extends AccessibilityService {
         }
 
     }
-    String[] commands = "素朴网联sleep素朴网联swipe0素朴网联left素朴网联right素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep".split("素朴网联");
+    String[] commands = "素朴网联sleep素朴网联swipe0素朴网联left素朴网联right素朴网联sleep素朴网联sleep素朴网联info,这是一条通知。素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep".split("素朴网联");
 
     public Handler handler(){
         if(handler == null) {
@@ -588,15 +595,31 @@ public class AutoService extends AccessibilityService {
         }
     }
 
+    AtomicBoolean clicked = new AtomicBoolean(false);
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        String p = ""+event.getPackageName();
+        Log.w(TAG, running.get() + " => " + p + " => "  + this);
+        myself.set(getPackageName().equals(p));
+        if(!running.get() && event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+            clicked.set(true);
+            Toast.makeText(getApplicationContext(), "点击了APP，稍等一下", Toast.LENGTH_LONG).show();
+        }
+        if(clicked.get() && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if(!getPackageName().equals(p)) {
+                myself.set(false);
+                for(String ct : CANT) {
+                    if(!p.startsWith(ct)) {
+                        Toast.makeText(getApplicationContext(), "窗口刷新了，正在跳转", Toast.LENGTH_LONG).show();
+                        packages.set(p);
+                        clicked.set(false);
+                        shua();
+                    }
+                }
+            }
+        }
     }
 
-    @Override
-    public void onInterrupt() {
-        Log.w(TAG, "onInterrupt");
-        running.set(false);
-    }
 
     @Override
     protected void onServiceConnected() {
@@ -604,7 +627,8 @@ public class AutoService extends AccessibilityService {
         Log.w(TAG, "1/2. onServiceConnected = " + this);
         AutoService.INSTANCE = this;
         Log.w(TAG, "2/2. onServiceConnected = " + getInstance());
-        Toast.makeText(getApplicationContext(), "准备好了，可以点击图标执行命令了", Toast.LENGTH_LONG).show();
+        ready.set(true);
+        Toast.makeText(getApplicationContext(), "准备就绪，请手动打开APP", Toast.LENGTH_LONG).show();
         handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -616,6 +640,7 @@ public class AutoService extends AccessibilityService {
                     case 1:
                         String input = (String) msg.obj;
                         Log.w(TAG,  "收到命令 input = " + input);
+                        ignore.set(-1);
                         if (input != null && input.length() > 2) {
                             acommands.set(input.split("素朴网联"));
                         } else {
@@ -627,14 +652,11 @@ public class AutoService extends AccessibilityService {
                         action();
                         break;
                     case 200:
+                        clicked.set(false);
                         running.set(false);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             disableSelf();
                         }
-                        break;
-                    case 1000:
-                    case 1001:
-                        doMessage(msg, 0);
                         break;
                     default:
                         break;
@@ -647,20 +669,17 @@ public class AutoService extends AccessibilityService {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if(getInstance() != null) {
-                    backHome("服务连接");
+                try{
+                    Log.w(TAG, "schedule service connected");
+                    performHomeClick();
+                } catch (Exception e) {
+
                 }
             }
-        }, 1000);
+        }, 3000);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.w(TAG, "onStartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    public boolean openActivity(String who, String where) {
+    public boolean openActivity(String who) {
         try {
             Log.w(TAG, "打开APP：" + who);
             wait1sec();
@@ -685,8 +704,10 @@ public class AutoService extends AccessibilityService {
         if(acommands.get() == null) {
             acommands.set(commands);
             Log.w(TAG, "采用默认命令");
+        } else {
+            Log.w(TAG, "采用新命令");
         }
-
+        pause.set(false);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -704,7 +725,7 @@ public class AutoService extends AccessibilityService {
                             open = true;
                             for (String open : opens) {
                                 Log.w(TAG, "打开APP：" + open);
-                                Actions action = HTTPUtil.actions(open);
+                                Actions action = HTTP.actions(open);
                                 if (action != null) {
                                     try {
                                         Log.w(TAG, "执行命令：" + open);
@@ -726,6 +747,10 @@ public class AutoService extends AccessibilityService {
                         int index = 0;
                         int last = 0;
                         for (;index<cmds.length;) {
+                            if(pause.get()) {
+                                wait1sec();
+                                continue;
+                            }
                             if(last == index) index = last + 1;
                             if(index > cmds.length - 1) {
                                 Log.w(TAG, "最后一条指令:" + index);
@@ -749,7 +774,7 @@ public class AutoService extends AccessibilityService {
 
                             }
 
-                            Actions action = HTTPUtil.actions(cmd);
+                            Actions action = HTTP.actions(cmd);
                             if (action != null) {
                                 try {
                                     Message next = new Message();
@@ -766,12 +791,15 @@ public class AutoService extends AccessibilityService {
                             }
                         }
 
-                        Log.w(TAG, getInstance().running.get()?"在3秒之内你可以点击图标停止执行":Key.stopped);
-
                         new Timer().schedule(new TimerTask() {
                             @Override
                             public void run() {
-                                if (getInstance().running.get()) {
+                                Log.w(TAG, "action scheduler");
+                                if(pause.get()) {
+                                    Log.w(TAG, "正在暂停");
+                                    return;
+                                }
+                                if (getInstance() != null && getInstance().running.get()) {
                                     Log.w(TAG, "「素朴网联」循环执行");
                                     Message next = new Message();
                                     next.setAsynchronous(false);
@@ -794,15 +822,57 @@ public class AutoService extends AccessibilityService {
         },800);
     }
 
-    public  void backHome(String reason){
-        Log.w(TAG, "backHome reason = " + reason);
-        startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        wait1sec();
-        wait1sec();
-        wait1sec();
+    public void backHome(String reason){
+        try {
+            running.set(false);
+            Log.w(TAG, "backHome reason = " + reason);
+            Intent intent = new Intent(getApplicationContext() , MainActivity.class);
+            startActivity(intent);
+            wait1sec();
+            wait1sec();
+            wait1sec();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    AtomicLong did = new AtomicLong(0);
+    public void shua() {
+        if(System.currentTimeMillis() - did.get() < 30000) {
+            Log.w(TAG, "无法shua太快");
+            return;
+        }
+        did.set(System.currentTimeMillis());
+        String p = packages.get();
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo info = pm.getApplicationInfo(p, 0);
+            backHome("刷APP", "你要刷这个APP吗："+ info.loadLabel(pm) +"\n\n\n\n\n\n\n\n\n选择A就执行：点击-滑动-等待-返回-循环，选择B就执行：滑动-等待-循环");
+        } catch (Exception e) {
+            Log.w(TAG, "无法获取APP的信息："+ p);
+        }
+    }
+
+    public void backHome(String reason, String todo){
+        try {
+            Log.w(TAG, "backHome reason = " + reason);
+            Intent intent = new Intent(getApplicationContext() , MainActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("todo", todo);
+            intent.putExtras(bundle);
+            startActivity(intent);
+            pause.set(true);
+            TimeUnit.SECONDS.sleep(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
     public int doMessage(Message msg, int index) {
-
+        if(pause.get()) {
+            return index;
+        }
         switch (msg.what) {
             case 0:
                 wait1sec();
@@ -836,11 +906,8 @@ public class AutoService extends AccessibilityService {
                 performClick(x, y);
                 break;
             case 507:
-                String ww = (String) msg.obj;
-                args = ww.split("/");
-                String who = args[0];
-                String where = args[1];
-                boolean open = openActivity(who, where);
+                String who = (String) msg.obj;
+                boolean open = openActivity(who);
                 if(!open) {
                     return index + jump.get();
                 }
@@ -882,10 +949,6 @@ public class AutoService extends AccessibilityService {
                     Log.w(TAG, "got WHILE cmd but loop was not set");
                     break;
                 }
-            case 1000:
-                String cmd = (String) msg.obj;
-                update(cmd);
-                break;
             case 1001:
                 String ver = (String) msg.obj;
                 remove(ver);
@@ -906,32 +969,29 @@ public class AutoService extends AccessibilityService {
                     inputText(findViewByID(params[0]), params[1]);
                 }
                 break;
+            case 9999:
+                if(ignore.get() == index) {
+                    break;
+                }
+                running.set(false);
+                String reason = (String) msg.obj;
+                ignore.set(index);
+                backHome("服务端通知", reason);
+                break;
             default:
+                Log.w(TAG, "无效命令");
                 break;
         }
         return index + 1;
     }
 
     public void wait1sec() {
-        if(!running.get()) {
-            Log.w(TAG, "「素朴网联」停止执行");
-            return;
-        }
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.w(TAG, "wait 1 sec end");
-    }
-
-    public void update(String cmd) {
-        if(cmd.contains("UPDATE") ) {
-            cmd = cmd.substring("UPDATE".length());
-        }
-        Log.w(TAG, "cmd: " + cmd);
-        String str3 = new ExeCommand(false).run(cmd, 0).getResult();
-        Log.w(TAG, "str3: " + str3);
+        Log.w(TAG, "wait 1 sec end, running = " + running.get());
     }
 
     public void remove(String ver) {
@@ -966,6 +1026,18 @@ public class AutoService extends AccessibilityService {
     public boolean onUnbind(Intent intent) {
         Log.w(TAG, "onUnbind");
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onInterrupt() {
+        Log.w(TAG, "onInterrupt");
+        running.set(false);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.w(TAG, "onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override

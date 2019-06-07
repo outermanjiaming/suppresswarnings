@@ -1,4 +1,4 @@
-package com.suppresswarnings.android.utils;
+package com.suppresswarnings.android.model;
 
 public enum ActionType {
 	SWIPE0 {
@@ -196,36 +196,6 @@ public enum ActionType {
 		public int what() {
 			return 602;
 		}
-	},UPDATE {
-		@Override
-		String action() {
-			return "sh ";
-		}
-
-		@Override
-		String input(String input) {
-			return empty(input) ? " " : input;
-		}
-
-		@Override
-		public int what() {
-			return 1000;
-		}
-	},REMOVE {
-		@Override
-		String action() {
-			return "sh rm ";
-		}
-
-		@Override
-		String input(String input) {
-			return empty(input) ? " " : input;
-		}
-
-		@Override
-		public int what() {
-			return 1001;
-		}
 	},JUMP {
 		@Override
 		String action() {
@@ -270,6 +240,21 @@ public enum ActionType {
 		@Override
 		public int what() {
 			return 1004;
+		}
+	},INFO {
+		@Override
+		String action() {
+			return "alert ";
+		}
+
+		@Override
+		String input(String input) {
+			return empty(input) ? " " : input;
+		}
+
+		@Override
+		public int what() {
+			return 9999;
 		}
 	};
 	abstract String action();
