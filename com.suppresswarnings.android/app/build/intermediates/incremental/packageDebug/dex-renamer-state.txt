@@ -1,7 +1,0 @@
-#Sun May 05 14:49:32 CST 2019
-base.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run-bootstrap_98594b1b1401e1923366a3ad9c48fb969154167f
-renamed.1=classes2.dex
-renamed.0=classes.dex
-file.1=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run_74f927eefb295429a377d919652ae221dcdd30a6\\classes.dex
-base.1=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run_74f927eefb295429a377d919652ae221dcdd30a6
-file.0=D\:\\workspace\\suppresswarnings\\com.suppresswarnings.android\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run-bootstrap_98594b1b1401e1923366a3ad9c48fb969154167f\\classes.dex
