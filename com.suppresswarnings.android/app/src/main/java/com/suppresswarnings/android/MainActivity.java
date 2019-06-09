@@ -2,11 +2,16 @@ package com.suppresswarnings.android;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
@@ -15,28 +20,42 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.suppresswarnings.android.model.HTTP;
 import com.suppresswarnings.android.model.Key;
 import com.suppresswarnings.android.presenter.Presenter;
-import com.suppresswarnings.android.model.HTTP;
 import com.suppresswarnings.android.view.FloatingView;
 import com.suppresswarnings.android.view.IView;
 import com.suppresswarnings.android.view.MyWebview;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 public class MainActivity extends Activity implements IView {
     AtomicBoolean stopped = new AtomicBoolean(false);
@@ -44,12 +63,13 @@ public class MainActivity extends Activity implements IView {
     TextView warning;
     LinearLayout background;
     ProgressBar progressBar;
+    private ListView lv;
+    private Adapter adapter;
     String TAG = "lijiaming";
     Presenter presenter;
-    String[] template = {
-            "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,200素朴网联swipe1素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep",
-            "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联right素朴网联left素朴网联sleep素朴网联loop,200素朴网联swipe0素朴网联sleep素朴网联click素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,3素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe1素朴网联sleep素朴网联swipe1素朴网联sleep素朴网联while素朴网联sleep素朴网联back素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep"
-    };
+    String templateA = "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,200素朴网联swipe1素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
+    String templateB = "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联left素朴网联left素朴网联sleep素朴网联loop,200素朴网联swipe0素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联click素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,2素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe1素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联while素朴网联sleep素朴网联back素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
+    String[] template = {templateA,templateB};
     MainActivity context;
     FloatingView floatBall;
     WindowManager windowManager;
@@ -57,6 +77,9 @@ public class MainActivity extends Activity implements IView {
     AtomicLong clicked = new AtomicLong(0);
 
     public void showFloatBall() {
+        if (!Settings.canDrawOverlays(context)) {
+            startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 1234);
+        }
         floatBall = new FloatingView(context);
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         floatBallParams = new WindowManager.LayoutParams();
@@ -83,12 +106,17 @@ public class MainActivity extends Activity implements IView {
                         Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
                     } else {
                         try {
+                            if(AutoService.getInstance().crazy.get()) {
+                                Log.w(TAG, "不要crazy点击自己");
+                                return;
+                            }
                             if(presenter == null || !presenter.ok.get()) {
                                 Toast.makeText(context, "需要激活", Toast.LENGTH_SHORT).show();
+                                showDialog("未激活");
                             } else {
                                 if(AutoService.getInstance().running.compareAndSet(true, false)) {
                                     Toast.makeText(context, "停止执行", Toast.LENGTH_SHORT).show();
-                                } else if(AutoService.getInstance().myself.get()) {
+                                } else if(AutoService.getInstance().ready.get()) {
                                     Toast.makeText(context, "执行命令", Toast.LENGTH_SHORT).show();
                                     if(presenter.command.get() != null) {
                                         String cmd = presenter.command.get();
@@ -101,6 +129,8 @@ public class MainActivity extends Activity implements IView {
                                     Message message = new Message();
                                     message.what = 100;
                                     AutoService.getInstance().handler().sendMessage(message);
+                                } else {
+                                    presenter.Log("请打开无障碍权限");
                                 }
                             }
                         } catch (Exception e) {
@@ -108,6 +138,8 @@ public class MainActivity extends Activity implements IView {
                         }
                     }
 
+                    Log.w(TAG, presenter.toString());
+                    Log.w(TAG, presenter.command + "");
                     Log.w(TAG, "start command: " + presenter.command.get());
                     Vibrator vibrator = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
                     vibrator.vibrate(200);
@@ -122,18 +154,19 @@ public class MainActivity extends Activity implements IView {
             @Override
             public boolean onLongClick(View v) {
                 Log.w(TAG, "onLongClick");
-                Toast.makeText(context, "关闭进程3秒之后消失", Toast.LENGTH_SHORT).show();
-                try {
-                    Message message = new Message();
-                    message.what = 200;
-                    AutoService.getInstance().handler().sendMessage(message);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-                doCancel();
-
                 Vibrator vibrator = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
                 vibrator.vibrate(1500);
+                Toast.makeText(context, "关闭进程3秒之后消失", Toast.LENGTH_SHORT).show();
+                if(AutoService.getInstance() != null) {
+                    try {
+                        Message message = new Message();
+                        message.what = 200;
+                        AutoService.getInstance().handler().sendMessage(message);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                doCancel();
                 return true;
             }
         });
@@ -150,14 +183,7 @@ public class MainActivity extends Activity implements IView {
         background = findViewById(R.id.background);
         progressBar = findViewById(R.id.progressbar);
         presenter = new Presenter(this, MainActivity.this, webview);
-        presenter.Log("请为「素朴网联」打开'无障碍'权限");
-        context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-        Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
         loadWebview();
-
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
-            presenter.Log("你的手机系统版本低于7.0不能自动控制，我们提供了另外一套方案但是需要ROOT。");
-        }
     }
 
     @Override
@@ -169,12 +195,441 @@ public class MainActivity extends Activity implements IView {
     public void updateUI() {
         progressBar.setVisibility(View.GONE);
         background.setVisibility(View.GONE);
+
+        lv=findViewById(R.id.lv);
+        adapter = new Adapter(context);
+        Log.w(TAG, "adapter = " + adapter);
+
+        adapter.addItem("悬浮球");
+        adapter.addItem("无障碍");
+        adapter.addItem("修改A模板");
+        adapter.addItem("修改B模板");
+        adapter.addItem("查看命令");
+        adapter.addItem("选择APP");
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.w(TAG, i + "," + l + " = " + view);
+                if(presenter == null || !presenter.ok.get()) {
+                    showDialog("未激活");
+                    Log.w(TAG, "未激活");
+                    return;
+                }
+                final Switch aSwitch = view.findViewById(R.id.aSwitch);
+                if(aSwitch.isChecked()){
+                    aSwitch.setChecked(false);
+                    Log.w(TAG, "aSwitch.setChecked(      );");
+                    //进行业务处理
+                    switch (i) {
+                        case 0:
+                            Log.w(TAG, "remove floatball");
+                            windowManager.removeView(floatBall);
+                            break;
+                        case 1:
+                            if(AutoService.getInstance() != null) {
+                                try {
+                                    Message message = new Message();
+                                    message.what = 200;
+                                    AutoService.getInstance().handler().sendMessage(message);
+                                }catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            break;
+                        default:
+                            presenter.Log("新功能还没有实现");
+                            break;
+                    }
+                }else {
+                    aSwitch.setChecked(true);
+                    //进行业务处理
+                    Log.w(TAG, "aSwitch.setChecked(true);");
+                    switch (i) {
+
+                        case 0:
+                            showFloatBall();
+                            break;
+
+                        case 1:
+
+                            if(AutoService.getInstance() == null) {
+                                presenter.Log("请为「素朴网联」打开'无障碍'权限");
+                                context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                                Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
+                            } else {
+                                presenter.Log("打开选择APP了吗");
+                            }
+
+                            break;
+                        case 2:
+                            showEditView("修改命令模板A", template, 1, new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+
+                            break;
+                        case 3:
+                            showEditView("修改命令模板B", template, 0, new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+
+                            break;
+                        case 4:
+                            showTextView("查看当前命令", new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+                            break;
+                        case 5:
+                            if(AutoService.getInstance() == null) {
+                                presenter.Log("打开无障碍权限了吗");
+                            } else {
+                                showSingleAlertDialog(new Consumer<String>() {
+                                    @Override
+                                    public void accept(String s) {
+                                        aSwitch.setChecked(false);
+                                    }
+                                });
+                            }
+                            break;
+                        default:
+                            presenter.Log("新功能还没有实现");
+                            break;
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
     public void showProgressbar() {
         warning.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
+    }
+
+    public List<Pair<String,String>> reloadButtons() {
+        final PackageManager pm = context.getPackageManager();
+        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RecentTaskInfo> recentTasks = am.getRecentTasks(30, 0x0002);
+        int numTasks = recentTasks.size();
+        Log.w(TAG, "numTasks = "+numTasks);
+        List<Pair<String, String>> pairs = new ArrayList<>();
+        for (int i = 0; i < numTasks; i++) {
+            final ActivityManager.RecentTaskInfo info = recentTasks.get(i);
+            Log.w(TAG, "baseActivity = "+info.baseActivity);
+            Intent intent = new Intent(info.baseIntent);
+            if (info.origActivity != null) {
+                intent.setComponent(info.origActivity);
+            }
+            intent.setFlags((intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) | Intent.FLAG_ACTIVITY_NEW_TASK);
+            final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
+
+            if (resolveInfo != null) {
+                final ActivityInfo activityInfo = resolveInfo.activityInfo;
+                final String title = activityInfo.loadLabel(pm).toString();
+                Pair<String, String> one = new Pair<>(title, activityInfo.packageName);
+                pairs.add(one);
+            }
+        }
+
+        List<ApplicationInfo>  list = pm.getInstalledApplications(0);
+        list.sort(new Comparator<ApplicationInfo>() {
+            @Override
+            public int compare(ApplicationInfo o1, ApplicationInfo o2) {
+                String s1 = (String)o1.loadLabel(pm);
+                String s2 = (String)o2.loadLabel(pm);
+                return firstPinYin(s2).toUpperCase().compareTo(firstPinYin(s1).toUpperCase());
+            }
+        });
+        for(ApplicationInfo ai : list) {
+            String title = (String)ai.loadLabel(pm);
+            Pair<String, String> one = new Pair<>(firstPinYin(title) + "   " + title, ai.packageName);
+            if(!pairs.contains(one)) {
+                pairs.add(one);
+            }
+        }
+        return pairs;
+    }
+
+    public String firstPinYin(String input) {
+        HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
+        defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        defaultFormat.setVCharType(HanyuPinyinVCharType.WITH_V);
+        char c = input.charAt(0);
+        String[] pinyinArray = null;
+        try {
+            pinyinArray = PinyinHelper.toHanyuPinyinStringArray(c, defaultFormat);
+        } catch (Exception e){
+
+        }
+
+        if (pinyinArray != null) {
+            return "" + pinyinArray[0].charAt(0);
+        }
+
+        return "" + c;
+    }
+
+    public void showSingleAlertDialog(final Consumer<String> callback) {
+        final List<Pair<String,String>> items = reloadButtons();
+
+        final String[] apps = new String[items.size()];
+        for(int i = 0;i<apps.length;i++) {
+            try {
+                Pair<String,String> info = items.get(i);
+                apps[i] = info.first;
+            } catch (Exception e) {
+                Toast.makeText(context, "异常获取APP", Toast.LENGTH_SHORT).show();
+            }
+        }
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle("请选择APP");
+        final AtomicInteger chose = new AtomicInteger();
+        alertBuilder.setSingleChoiceItems(apps, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(context, apps[i], Toast.LENGTH_SHORT).show();
+                chose.set(i);
+            }
+        });
+        alertBuilder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Pair<String, String> info = items.get(chose.get());
+                shua(info.first, info.second);
+                callback.accept("ok");
+            }
+        });
+        alertBuilder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                presenter.Log("未选择APP");
+                callback.accept("no");
+            }
+        });
+        alertBuilder.create().show();
+
+    }
+
+    public void showEditView(String message, final String[] ref, final int index, final Consumer<String> callback) {
+        final EditText inputServer = new EditText(context);
+        inputServer.setGravity(Gravity.CENTER);
+        final String old = ref[index];
+        TextView textView = new TextView(context);
+        textView.setText(old);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    cm.setText(old);
+                    Toast.makeText(context, "复制成功。", Toast.LENGTH_LONG).show();
+                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromInputMethod(context.getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+                    Log.w(TAG, "不能复制");
+                }
+
+            }
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setLayoutParams(lp);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        ViewGroup.LayoutParams vlp = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                400);
+
+        inputServer.setHint("请输入新的命令模板（提示：%s代表某个APP的包名）");
+        inputServer.setLayoutParams(vlp);
+        textView.setMovementMethod(new ScrollingMovementMethod());
+        textView.setLayoutParams(vlp);
+        layout.addView(textView);
+        layout.addView(inputServer);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setMessage(message)
+                .setView(layout)
+                .setCancelable(false)
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.w(TAG, "命令没修改");
+                        callback.accept(old);
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    public void onClick(final DialogInterface dialog, int which) {
+                        String now = inputServer.getText().toString().trim();
+                        ref[index] = now;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            callback.accept(now);
+                        }
+                    }
+                }).create();
+
+        alertDialog.show();
+    }
+
+    public void showTextView(String message, final Consumer<String> callback) {
+        final EditText inputServer = new EditText(context);
+        inputServer.setGravity(Gravity.CENTER);
+        TextView textView = new TextView(context);
+        final String cmd = presenter == null ? "" : presenter.command.get();
+        textView.setText(cmd);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    cm.setText(cmd);
+                    Toast.makeText(context, "复制成功，可以分享给朋友。", Toast.LENGTH_LONG).show();
+                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromInputMethod(context.getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+                    Log.w(TAG, "不能复制");
+                }
+
+            }
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setLayoutParams(lp);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        ViewGroup.LayoutParams vlp = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                400);
+        inputServer.setHint("请输入新的命令");
+        inputServer.setLayoutParams(vlp);
+        textView.setMovementMethod(new ScrollingMovementMethod());
+        textView.setLayoutParams(vlp);
+        layout.addView(textView);
+        layout.addView(inputServer);
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setMessage(message)
+                .setView(layout)
+                .setCancelable(false)
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.w(TAG, "查看 取消");
+                        callback.accept("cancel");
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    public void onClick(final DialogInterface dialog, int which) {
+                        Log.w(TAG, "查看 确定");
+                        String now = inputServer.getText().toString().trim();
+                        if(presenter != null) {
+                            presenter.command.set(now);
+                        }
+                        callback.accept("ok");
+                    }
+                }).create();
+
+        alertDialog.show();
+    }
+
+    public void shua(String app, final String p) {
+            if(presenter == null || !presenter.ok.get()) {
+                Toast.makeText(context, "需要激活", Toast.LENGTH_SHORT).show();
+            }
+            AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setMessage("确认刷这个APP吗？" + app + "(" + p+")")
+                    .setCancelable(true)
+                    .setNegativeButton("【阅读】", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            HTTP.report(presenter.getToken(), "NO:shua:" + p);
+                                        } catch (Exception ex) {
+                                            presenter.handleCase(3, "不能连接服务器：" + ex.getMessage());
+                                        }
+
+                                    }
+                                }).start();
+
+                                String old = presenter.command.get() == null ? "" : presenter.command.get();
+                                String cmd = String.format(template[1], p) + old;
+                                presenter.command.set(cmd);
+                                Message set = new Message();
+                                set.what = 1;
+                                set.obj = cmd;
+                                Log.w(TAG, "set command = " + cmd);
+
+                                AutoService.getInstance().handler().sendMessage(set);
+                                Message start = new Message();
+                                start.what = 100;
+                                Log.w(TAG, "start command: " + presenter.command.get());
+                                AutoService.getInstance().handler().sendMessage(start);
+                            } catch (Exception e) {
+                                presenter.Log(e.getMessage());
+                            }
+                        }
+                    })
+                    .setPositiveButton("【观看】", new DialogInterface.OnClickListener() {
+
+                        public void onClick(final DialogInterface dialog, int which) {
+                            try {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            HTTP.report(presenter.getToken(), "YES:shua:"+p);
+                                        } catch (Exception ex) {
+                                            presenter.handleCase(3, "不能连接服务器：" + ex.getMessage());
+                                        }
+
+                                    }
+                                }).start();
+                                String old = presenter.command.get() == null ? "" : presenter.command.get();
+                                String cmd = String.format(template[0], p) + old;
+
+                                presenter.command.set(cmd);
+                                Message set = new Message();
+                                set.what = 1;
+                                set.obj = cmd;
+                                Log.w(TAG, "set command = " + cmd);
+                                AutoService.getInstance().handler().sendMessage(set);
+
+                                Message start = new Message();
+                                start.what = 100;
+                                Log.w(TAG, "start command: " + presenter.command.get());
+                                AutoService.getInstance().handler().sendMessage(start);
+                            } catch (Exception e) {
+                                presenter.Log(e.getMessage());
+                            }
+
+                        }
+                    }).create();
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    Log.w(TAG, "onDismiss setVisibility VISIBLE");
+                }
+            });
+            dialog.show();
     }
 
     @Override
@@ -206,7 +661,7 @@ public class MainActivity extends Activity implements IView {
         layout.addView(inputServer);
         layout.addView(textView);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(webview.getContext())
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setMessage("请输入激活码")
                 .setView(layout)
                 .setCancelable(false)
@@ -238,7 +693,6 @@ public class MainActivity extends Activity implements IView {
                                 try {
                                     presenter.checkValidAndSetCommand(code);
                                     if(presenter.ok.get()) {
-                                        showFloatBall();
                                         presenter.handleCase(2, "恭喜，激活成功");
                                         dialog.dismiss();
                                     } else {
@@ -259,163 +713,51 @@ public class MainActivity extends Activity implements IView {
         alertDialog.show();
     }
 
-    @Override
-    public void doCancel(){
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                finish();
-                stopped.set(true);
-            }
-        }, 3000);
-    }
 
     @Override
-    protected void onDestroy() {
+    public void doCancel(){
+
         //释放资源
         if (presenter != null) {
             presenter.destroy();
             presenter = null;
         }
+
+        windowManager.removeView(floatBall);
+        floatBall = null;
+
+        stopped.set(true);
+        finish();
+
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//
+//                throw new RuntimeException("暴力停止");
+//            }
+//        }, 3000);
+    }
+
+    @Override
+    protected void onDestroy() {
         stopped.set(true);
         super.onDestroy();
     }
 
     @Override
-    protected void onNewIntent (Intent intent){
+    protected void onNewIntent(Intent intent){
         setIntent(intent);
         Log.w(TAG, "on new intent");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(context)) {
-                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 1234);
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1198);
-            }
-
-            if (PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1199);
-            }
-
-            if (PackageManager.PERMISSION_DENIED == checkSelfPermission(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)) {
-                requestPermissions(new String[]{Manifest.permission.BIND_ACCESSIBILITY_SERVICE}, 1200);
-            }
-        }
-
         Bundle bundle = intent.getExtras();
         if(bundle != null) {
             final String todo = bundle.getString("todo");
             Log.w(TAG, "todo = " + todo);
             if(todo != null) {
-                final AtomicBoolean shua = new AtomicBoolean();
-                if(todo.contains("你要刷这个APP吗")) {
-                    shua.set(true);
-                }
-                Log.w(TAG, todo);
-                if(presenter == null || !presenter.ok.get()) {
-                    Toast.makeText(context, "需要激活", Toast.LENGTH_SHORT).show();
-                }
-                AlertDialog dialog = new AlertDialog.Builder(context)
-                        .setMessage(todo)
-                        .setCancelable(true)
-                        .setNegativeButton("【 A 】", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                try {
-                                    Log.w(TAG, "【 A 】" + shua.get());
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                HTTP.report(presenter.getToken(), "NO:"+todo);
-                                            } catch (Exception ex) {
-                                                presenter.handleCase(3, "不能连接服务器：" + ex.getMessage());
-                                            }
-
-                                        }
-                                    }).start();
-                                    if(shua.get()) {
-                                        String old = presenter.command.get() == null ? "" : presenter.command.get();
-                                        String cmd = String.format(template[1], AutoService.getInstance().packages.get()) + old;
-                                        presenter.command.set(cmd);
-                                        Message set = new Message();
-                                        set.what = 1;
-                                        set.obj = cmd;
-                                        Log.w(TAG, "set command = " + cmd);
-                                        AutoService.getInstance().handler().sendMessage(set);
-                                        Message start = new Message();
-                                        start.what = 100;
-                                        Log.w(TAG, "start command: " + presenter.command.get());
-                                        AutoService.getInstance().handler().sendMessage(start);
-                                    } else {
-                                        Intent home = new Intent(Intent.ACTION_MAIN);
-                                        home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        home.addCategory(Intent.CATEGORY_HOME);
-                                        startActivity(home);
-                                        presenter.Log("现在去打开任何一个APP");
-                                    }
-                                } catch (Exception e) {
-                                    Log.w(TAG, "【 A 】error: " + shua.get());
-                                    presenter.Log(e.getMessage());
-                                }
-                            }
-                        })
-                        .setPositiveButton("【 B 】", new DialogInterface.OnClickListener() {
-
-                            public void onClick(final DialogInterface dialog, int which) {
-                                try {
-                                    Log.w(TAG, "【 B 】" + shua.get());
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                HTTP.report(presenter.getToken(), "YES:"+todo);
-                                            } catch (Exception ex) {
-                                                presenter.handleCase(3, "不能连接服务器：" + ex.getMessage());
-                                            }
-
-                                        }
-                                    }).start();
-                                    if(shua.get()) {
-                                        String old = presenter.command.get() == null ? "" : presenter.command.get();
-                                        String cmd = String.format(template[0], AutoService.getInstance().packages.get()) + old;
-
-                                        presenter.command.set(cmd);
-                                        Message set = new Message();
-                                        set.what = 1;
-                                        set.obj = cmd;
-                                        Log.w(TAG, "set command = " + cmd);
-                                        AutoService.getInstance().handler().sendMessage(set);
-                                        Message start = new Message();
-                                        start.what = 100;
-                                        Log.w(TAG, "start command: " + presenter.command.get());
-                                        AutoService.getInstance().handler().sendMessage(start);
-                                    } else {
-                                        Intent home = new Intent(Intent.ACTION_MAIN);
-                                        home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        home.addCategory(Intent.CATEGORY_HOME);
-                                        startActivity(home);
-                                        presenter.Log("打开任何一个APP");
-                                    }
-                                } catch (Exception e) {
-                                    Log.w(TAG, "【 B 】error: " + shua.get());
-                                    presenter.Log(e.getMessage());
-                                }
-
-                            }
-                        }).create();
-                dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        showFloatBall();
-                        Log.w(TAG, "onDismiss setVisibility VISIBLE");
-                    }
-                });
-                dialog.show();
+                presenter.Log(todo);
+            } else {
+                presenter.Log("欢迎回到「素朴网联」");
             }
+
         }
     }
 }

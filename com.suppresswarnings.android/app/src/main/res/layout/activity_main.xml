@@ -4,13 +4,14 @@
     android:layout_height="match_parent"
     android:background="#ffffffff"
     android:orientation="vertical">
-
     <com.suppresswarnings.android.view.MyWebview
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="0dp" />
+
+
 
     <ProgressBar
         android:id="@+id/progressbar"
@@ -45,4 +46,12 @@
         android:text="@string/wraning"
         android:textColor="#fff"
         android:textSize="16sp" />
+    <ListView
+        android:id="@+id/lv"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+
 </RelativeLayout>

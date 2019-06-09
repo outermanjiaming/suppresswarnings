@@ -69,7 +69,7 @@ public enum ActionType {
 
 		@Override
 		String input(String input) {
-			return empty(input) ? "400 400" : input.replace(";", " ");
+			return empty(input) ? "400 450" : input.replace(";", " ");
 		}
 
 		@Override

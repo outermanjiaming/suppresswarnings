@@ -83,7 +83,6 @@ public class Presenter {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-
                             if (!ok.get()) {
                                 handleCase(0, Key.invalid);
                             } else {
@@ -101,6 +100,9 @@ public class Presenter {
     }
 
     public boolean checkValidAndSetCommand(String code) throws Exception {
+        //TODO delete next line
+        //if(ok.compareAndSet(false, true)) return ok.get();
+
         String x = HTTP.checkValid(getToken(), code);
         ok.set(HTTP.valid(x));
         if(ok.get() && x.split("~").length > 1) {
@@ -128,13 +130,15 @@ public class Presenter {
                             }
                             break;
                         case 1:
+                            Log.w("lijiaming", "case 1 iView.updateUI();");
                             iView.updateUI();
                             break;
                         case 2:
                             if (!ok.get() && !msg.equals("恭喜，激活成功")) {
-                                iView.showDialog("case 2");
+                                iView.showDialog("激活失败");
                             } else {
                                 Log(msg);
+                                Log.w("lijiaming", "case 2 iView.updateUI();");
                                 iView.updateUI();
                             }
                             break;
@@ -185,8 +189,7 @@ public class Presenter {
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public void onPageFinished(WebView view, String url) {
-            //页面加载完成
-            iView.updateUI();
+            Log.w("lijiaming", "onPageFinished");
         }
 
         @Override
