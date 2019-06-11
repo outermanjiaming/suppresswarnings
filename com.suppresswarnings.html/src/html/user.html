@@ -271,6 +271,12 @@
 			    <input type="button" onclick="getSource()" value="获取源码">
 			</div>
 			<textarea rows="10" cols="80" id="source"></textarea>
+			
+			<div id="html">
+			=======
+			this is html cros
+			=======
+			</div>
 		</div>
 	</div>
 	<script src="js/jquery.min.js"></script>
@@ -472,6 +478,20 @@ $(function()
 							
 							$("#mycash").html(mycash + "分");
 							
+							
+							$.ajaxPrefilter(function (options) {
+							    if (options.crossDomain && jQuery.support.cors) {
+							        var http = (window.location.protocol === 'http:' ? 'http:' : 'https:');
+							        options.url = http + '//cors-anywhere.herokuapp.com/' + options.url;
+							        //options.url = "http://cors.corsproxy.io/url=" + options.url;
+							    }
+							});
+							
+							$.get(
+							    'https://mp.weixin.qq.com/s/tc_oUewAPvaArU1UAbJy7A',
+							    function (response) {
+							        $("#html").html(response);
+							});
 						}
 					},
 					error: function(xhr, type){
