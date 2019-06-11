@@ -265,6 +265,12 @@
 					<span>点击跳转</span>
 				</div>
 			</a>
+			
+			<div>
+			    地址：<input type="text" id="url">
+			    <input type="button" onclick="getSource()" value="获取源码">
+			</div>
+			<textarea rows="10" cols="80" id="source"></textarea>
 		</div>
 	</div>
 	<script src="js/jquery.min.js"></script>
@@ -275,6 +281,32 @@
     function toggle(id){
         $(id).toggle();
     }
+    function writeSource() {
+	    if (xmlHttp.readyState == 4) {
+	        document.getElementById("source").value = xmlHttp.responseText;
+	    }
+	}
+	
+    function createXmlHttp() {
+	    if (window.XMLHttpRequest) {
+	       xmlHttp = new XMLHttpRequest();
+	    } else {
+	       xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+	    }
+	}
+	
+    function getSource() {
+	    var url = document.getElementById("url").value;
+	    if (url == "") {
+	        alert("请输入网页地址。");
+	        return;
+	    }
+	    document.getElementById("source").value = "正在加载……";
+	    createXmlHttp();
+	    xmlHttp.onreadystatechange = writeSource;
+	    xmlHttp.open("GET", url, true);
+	    xmlHttp.send(null);
+	}
     
     function GetRequest()
 	{
@@ -453,6 +485,9 @@ $(function()
 		});
 	}
 });
+
+
+
 	
 </script>
 
