@@ -71,7 +71,7 @@ public class VIPContext extends WXContext {
 				
 				WXnews news = new WXnews();
 				news.setTitle("「素朴网联」专属vip二维码");
-				news.setDescription("你邀请了"+ val.get() +"位朋友，这是你的财富！专属命令：我要验证码，我要领工资，我要发公告");
+				news.setDescription("你邀请了"+ val.get() +"位朋友，这是你的财富！专属命令：我要验证码，我要领工资，我要发公告，我要激活码");
 				news.setUrl("http://suppresswarnings.com/vip.html?state=" + openid());
 				news.setPicUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
 				String json = gson.toJson(news);
@@ -106,6 +106,80 @@ public class VIPContext extends WXContext {
 		@Override
 		public String name() {
 			return CMD;
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+	};
+	State<Context<CorpusService>> activation = new State<Context<CorpusService>>() {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8111131627641046588L;
+
+		private String create(Context<CorpusService> u) {
+			String myKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Code", "Activate", "Scene");
+			String qrScene = "T_Code_Activate_" + time() + random();
+			u.content().account().put(myKey, qrScene);
+			String openidKey = String.join(Const.delimiter, Const.Version.V1, "Openid", "Activate", "Scene", qrScene);
+			u.content().account().put(openidKey, openid());
+			String expire = String.join(Const.delimiter, Const.Version.V1, "Expire", "Activate", "Scene", qrScene);
+			long expired = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(23);
+			u.content().account().put(expire, ""+expired);
+			u.content().setGlobalCommand(qrScene, "我要激活码", qrScene, "" + System.currentTimeMillis());
+			String accessToken = u.content().accessToken("VIP 获取激活码二维码");
+			String json = u.content().qrCode(accessToken, (int)TimeUnit.HOURS.toSeconds(23), "QR_STR_SCENE", qrScene);
+			String jsonKey = String.join(Const.delimiter, Const.Version.V1, "Json", "Activate", "Scene", qrScene);
+			u.content().account().put(jsonKey, json);
+			return json;
+		}
+		
+		public void toNews(String json, Context<CorpusService> u) {
+			Gson gson = new Gson();
+			QRCodeTicket qrTicket = gson.fromJson(json, QRCodeTicket.class);
+			WXnews news = new WXnews();
+			news.setTitle("「素朴网联」激活码的二维码");
+			news.setDescription("用户扫码即可获得激活码，激活码有效期24小时，该二维码24小时后失效");
+			news.setUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
+			news.setPicUrl("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + qrTicket.getTicket());
+			u.output("news://" + gson.toJson(news));
+		}
+
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			String myKey = String.join(Const.delimiter, Const.Version.V1, openid(), "Code", "Activate", "Scene");
+			String exist = u.content().account().get(myKey);
+			if(u.content().isNull(exist)) {
+				String json = create(u);
+				toNews(json, u);
+			} else {
+				String expire = String.join(Const.delimiter, Const.Version.V1, "Expire", "Activate", "Scene", exist);
+				long expired = Long.parseLong(expire);
+				if(expired - System.currentTimeMillis() < 0) {
+					String json = create(u);
+					toNews(json, u);
+				} else {
+					String jsonKey = String.join(Const.delimiter, Const.Version.V1, "Json", "Activate", "Scene", exist);
+					String json = u.content().account().get(jsonKey);
+					toNews(json, u);
+				}
+			}
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			if(name().equals(t)) {
+				return activation;
+			}
+			return init;
+		}
+
+		@Override
+		public String name() {
+			return "我要激活码";
 		}
 
 		@Override

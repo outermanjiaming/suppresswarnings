@@ -34,8 +34,8 @@ public class ChatContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			if(!connected) {
 				connected = true;
-				logger.info("[chat] sendTxtTo " + userid);
-				u.content().sendTxtTo("chat context", t, userid);
+				logger.info("[chat] atUser " + userid);
+				u.content().atUser(userid, t);
 				String key = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Chat", "OpenId", openid, "UserId", userid, time(),random());
 				u.content().data().put(key, t);
 				Context<?> exist = u.content().context(userid);
@@ -47,7 +47,7 @@ public class ChatContext extends WXContext {
 				}
 				ChatContext context = new ChatContext(wxid, userid, openid, u.content());
 				u.content().contextx(userid, context , TimeUnit.MINUTES.toMillis(5));
-				u.output("已经建立对话连接，对方收到了你的回答！");
+				u.output("已建立对话连接，对方收到了你的消息！");
 				
 				context.connect(u);
 				connect(context);
@@ -86,7 +86,7 @@ public class ChatContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.content().sendTxtTo("chat context", t, userid);
+			u.content().atUser(userid, t);
 			String key = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Chat", "OpenId", openid, "UserId", userid, time(),random());
 			u.content().data().put(key, t);
 			chatContext.said(t);
@@ -129,13 +129,14 @@ public class ChatContext extends WXContext {
 		this.said = t;
 	}
 	public String said() {
+		if(said == null) return "null";
 		return said;
 	}
 
 	@Override
 	public State<Context<CorpusService>> exit() {
 		super.exit();
-		content().sendTxtTo("close " + getClass().getSimpleName(), "会话超时，感谢您使用本次服务，下次再聊！", userid);
+		content().atUser(userid, "断开连接了，下次再聊");
 		content().contexts.remove(userid);
 		return init;
 	}

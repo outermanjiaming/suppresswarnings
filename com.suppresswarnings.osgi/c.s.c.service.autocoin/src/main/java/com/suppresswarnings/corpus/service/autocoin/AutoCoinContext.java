@@ -11,7 +11,7 @@ import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 
 public class AutoCoinContext extends WXContext {
-	public static final String CMD = "我要自动赚钱";
+	public static final String CMD = "我要app";
 	String commands = "";
 
 	State<Context<CorpusService>> auto = new State<Context<CorpusService>>() {
@@ -23,8 +23,7 @@ public class AutoCoinContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("让手机为你工作！");
-			u.output("「素朴网联」APP可以为你看新闻看视频，轻松赚金币！");
+			u.output("「素朴网联」APP可以自动操作手机！");
 			u.output("请在浏览器打开下载链接");
 			u.output("http://suppresswarnings.com/third.html");
 			u.output("（你可以自己写命令，请输入：" + command.name()+"）");
@@ -247,7 +246,7 @@ public class AutoCoinContext extends WXContext {
 
 		@Override
 		public String name() {
-			return "我要自动赚钱";
+			return "我要app";
 		}
 
 		@Override

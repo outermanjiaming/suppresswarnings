@@ -15,7 +15,7 @@ public class VIPContextFactory extends AbstractAuthContextFactory {
 
 	@Override
 	public String description() {
-		return "用户VIP+邀请机制。如果需要购买权限，请点击链接：https://suppresswarnings.com/payment.html?state=VIP";
+		return "素朴网联VIP机制，提供更高级的操作。";
 	}
 
 	@Override

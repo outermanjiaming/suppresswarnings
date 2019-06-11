@@ -333,6 +333,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return switches;
 	}
 	public void atUser(String openid, String message) {
+		logger.info("atUser " + openid + ": " + message);
 		ATuser user = new ATuser(this, openid, message, System.currentTimeMillis());
 		atUserPool.execute(user);
 	}

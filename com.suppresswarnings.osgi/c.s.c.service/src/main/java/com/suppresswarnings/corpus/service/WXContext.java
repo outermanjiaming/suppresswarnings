@@ -184,11 +184,11 @@ public class WXContext extends Context<CorpusService> {
 				
 				if(t.startsWith("我要") || t.startsWith("我是") || t.startsWith("我有")) {
 					String remote = u.content().remoteCall(openid(), "T_Things_MQTT_Publish_201906011732", "发布MQTT消息", String.join("#", openid(), t));
-					u.output("发布消息到MQTT：" + remote);
+					u.output("已加入需求反应堆：" + remote);
 				}
 				
 				if(t.startsWith("@")) {
-					String[] ww = t.split("\\s+");
+					String[] ww = t.split("\\s+", 2);
 					if(ww.length < 2) {
 						u.output("你使用了 @ 功能，但是格式不对，请在@谁谁谁之后 加一个空格再输入内容");
 					} else {
@@ -198,9 +198,10 @@ public class WXContext extends Context<CorpusService> {
 						String userid = u.content().token().get(String.join(Const.delimiter, Const.Version.V1, "Token", "For", "@User", code));
 						logger.info("[WX @功能] userid = " + userid);
 						if(userid != null) {
-							ChatContext chatContext = new ChatContext(wxid(), openid(), userid, content());
+							ChatContext chatContext = new ChatContext(wxid(), openid(), userid, u.content());
 							u.content().contextx(openid(), chatContext, TimeUnit.MINUTES.toMillis(2));
 							chatContext.test(what);
+							u.output(chatContext.output());
 							return;
 						}
 					}

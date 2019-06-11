@@ -25,6 +25,7 @@ public class CrewContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			String myvip = u.content().account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", openid()));
 			logger.info("[Crew] am i vip: " + myvip);
+			
 			Gson gson = new Gson();
 			if(myvip == null || "None".equals(myvip)) {
 				logger.info("[Crew] user invited " + openid() + t);

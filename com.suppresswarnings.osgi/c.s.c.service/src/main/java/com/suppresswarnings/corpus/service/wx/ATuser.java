@@ -66,7 +66,7 @@ public class ATuser implements Runnable {
 		service.account().put(key, service.toJson(this));
 	}
 	
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
 		String openid = "123";
 		String code = "xxx";
 		String message = "@Override \npublic String code() {\nreturn \""+code+"\";\n}\n//在实现Things接口的代码中增加这些代码";
@@ -82,5 +82,9 @@ public class ATuser implements Runnable {
 		map.put("text", gson.toJson(msg));
 		String result = gson.toJson(map);
 		System.out.println(result);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("@user + hello".split("\\s+",2)[1]);
 	}
 }
