@@ -1,8 +1,15 @@
 <!--index.wxml-->
 <view class="draw">
-<button bindtap='canvasFrame'>框架</button>
-<canvas canvas-id='canvas' style='width:{{windowW}}px;height:{{windowH}}px'>
-<text>{{whoami}}</text>
-<button type='success' bindtap='clickName' class="whoami">点击</button>
-</canvas>
+  <official-account></official-account>
+  <button bindtap='canvasFrame'>框架</button>
+  <button type='success' bindtap='clickName' class="whoami">刷题</button>
+  <text>请求状态：{{whoami}}</text>
+  <view class='canvas'>
+    <canvas canvas-id='canvas' style='width:320px;height:320px;justify-content: center; border: 1px solid #ccc;'>
+
+
+
+    </canvas>
+  </view>
+
 </view>
