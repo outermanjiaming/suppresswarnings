@@ -12,9 +12,6 @@
 	
 	<style>
 	</style>
-	<script type="text/javascript">
-		location.href="https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzU3ODU3MTAyMg==&scene=126&bizpsid=0#wechat_redirect";
-	</script>
 </head>
 
 
@@ -146,7 +143,7 @@ $(function()
 	   } else {
 		 projectid = request.state
 	   }
-	   var url = window.location.href;
+	   var url = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzU3ODU3MTAyMg==&scene=126&bizpsid=0'
 	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri="+url+"&response_type=code&scope=snsapi_base&state="+projectid+"#wechat_redirect"
 	   window.location.href = locationUrl;
 	} 
