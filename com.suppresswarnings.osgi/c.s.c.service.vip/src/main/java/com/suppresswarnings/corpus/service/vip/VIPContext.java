@@ -88,6 +88,9 @@ public class VIPContext extends WXContext {
 			if(t.startsWith("我要验证码")) {
 				return captcha;
 			}
+			if(activation.name().equals(t)) {
+				return activation;
+			}
 			if(salary.name().equals(t)) {
 				return salary;
 			}
