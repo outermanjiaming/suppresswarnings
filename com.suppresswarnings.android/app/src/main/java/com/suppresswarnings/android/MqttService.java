@@ -1,4 +1,4 @@
 package com.suppresswarnings.android;
 
-public class NanoServer {
+public class MqttService {
 }
