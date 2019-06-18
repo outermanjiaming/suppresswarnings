@@ -13,8 +13,8 @@ public class Chat
 {
     public static void main(String [] args) {
         try{
-
-            Credential cred = new Credential("AKID72i8JGoReHemeHfmeGgqlRIuJUQAhwxi", "f5FAtNtGNGuJRKxOZUVGn7CetsbjcJlx");
+        	//TODO the id & key was updated
+            Credential cred = new Credential("KIDA72i8JGoReHomeHfmeGgqlRIuJUQAhwxi", "f5FAtNtGNightKxOZUVGn7CetsbjcJlx");
             
             HttpProfile httpProfile = new HttpProfile();
             httpProfile.setEndpoint("aai.tencentcloudapi.com");
