@@ -1,4 +1,4 @@
-package com.suppresswarnings.android.view;
+package com.xiaomi.ad.mimo.demo.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -23,6 +23,7 @@ public class MyWebview extends WebView {
         setWebViewClient();
     }
 
+
     @Override
     public boolean onCheckIsTextEditor() {
         return true;
@@ -41,7 +42,7 @@ public class MyWebview extends WebView {
         webSettings.setSupportZoom(false);
         webSettings.setUseWideViewPort(true);
 
-        setOnTouchListener(new View.OnTouchListener() {
+        setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {

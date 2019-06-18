@@ -1,4 +1,4 @@
-package com.suppresswarnings.android;
+package com.xiaomi.ad.mimo.demo;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -26,6 +25,10 @@ public class Adapter extends BaseAdapter {
         list_title.add(title);
     }
 
+    public void update(String title, int i) {
+        list_title.set(i, title);
+        Log.w("Adapter","update(" + i + " => " + title + ")");
+    }
     @Override
     public int getCount() {
         return list_title.size();
@@ -45,10 +48,8 @@ public class Adapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         view = LayoutInflater.from(mContext).inflate(R.layout.item,null);
         TextView tv = view.findViewById(R.id.tv);
-        Switch aSwitch = view.findViewById(R.id.aSwitch);
         String title = list_title.get(i);
         tv.setText(title);
-        Log.w("lijiaming", "getView again......" + i + " == "+ title + " : " + view);
         return view;
     }
 }

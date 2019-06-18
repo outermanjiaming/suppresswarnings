@@ -1,22 +1,27 @@
-package com.suppresswarnings.android.presenter;
+package com.xiaomi.ad.mimo.demo.presenter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.model.HTTP;
-import com.suppresswarnings.android.view.IView;
-import com.suppresswarnings.android.view.MyWebview;
+import com.xiaomi.ad.mimo.demo.MainActivity;
+import com.xiaomi.ad.mimo.demo.model.HTTP;
+import com.xiaomi.ad.mimo.demo.model.Key;
+import com.xiaomi.ad.mimo.demo.view.IView;
+import com.xiaomi.ad.mimo.demo.view.MyWebview;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static android.content.Context.MODE_PRIVATE;
 
 public class Presenter {
-
+    private static final String TAG = "Presenter";
     private static final String url = "http://www.suppresswarnings.com/app.html";
     private static final String internal = "素朴网联sleep素朴网联swipe0素朴网联left素朴网联right素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
     private IView iView;
@@ -79,7 +84,7 @@ public class Presenter {
             public void run() {
                 try {
                     boolean x =checkValidAndSetCommand("");
-                    Log.w("lijiaming", "check validate and set command = " + x);
+                    Log.w(TAG, "check validate and set command = " + x);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -100,9 +105,6 @@ public class Presenter {
     }
 
     public boolean checkValidAndSetCommand(String code) throws Exception {
-        //TODO delete next line
-        //if(ok.compareAndSet(false, true)) return ok.get();
-
         String x = HTTP.checkValid(getToken(), code);
         ok.set(HTTP.valid(x));
         if(ok.get() && x.split("~").length > 1) {
@@ -130,7 +132,7 @@ public class Presenter {
                             }
                             break;
                         case 1:
-                            Log.w("lijiaming", "case 1 iView.updateUI();");
+                            Log.w(TAG, "case 1 iView.updateUI();");
                             iView.updateUI();
                             break;
                         case 2:
@@ -138,7 +140,7 @@ public class Presenter {
                                 iView.showDialog("激活失败");
                             } else {
                                 Log(msg);
-                                Log.w("lijiaming", "case 2 iView.updateUI();");
+                                Log.w(TAG, "case 2 iView.updateUI();");
                                 iView.updateUI();
                             }
                             break;
@@ -147,7 +149,7 @@ public class Presenter {
                             break;
                     }
                 } catch (Exception e) {
-                    Log.w("lijiaming", "error while handle Case: " + e.getMessage());
+                    Log.w(TAG, "error while handle Case: " + e.getMessage());
                 }
             }
         });
@@ -166,30 +168,40 @@ public class Presenter {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         //设置js可以直接打开窗口，如window.open()，默认为false
         settings.setJavaScriptEnabled(true);
-        //是否允许执行js，默认为false。设置true时，会提醒可能造成XSS漏洞
-        settings.setSupportZoom(true);
-        //是否可以缩放，默认true
-        settings.setBuiltInZoomControls(true);
-        //是否显示缩放按钮，默认false
-        settings.setUseWideViewPort(true);
-        //设置此属性，可任意比例缩放。大视图模式
-        settings.setLoadWithOverviewMode(true);
-        //和setUseWideViewPort(true)一起解决网页自适应问题
-        settings.setAppCacheEnabled(true);
-        //是否使用缓存
-        settings.setDomStorageEnabled(true);
-        //DOM Storage
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setUseWideViewPort(false);
+        settings.setLoadWithOverviewMode(false);
+        settings.setAppCacheEnabled(false);
+        settings.setDomStorageEnabled(false);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        //不使用缓存，只从网络获取数据.
         mWebview.loadUrl(url());
         mWebview.setWebViewClient(webViewClient);
+        mWebview.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+                try {
+                    Intent intent = new Intent(mContext , MainActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("todo", "" + message);
+                    intent.putExtras(bundle);
+                    mContext.startActivity(intent);
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (Exception e) {
+                    Log.w(TAG, "Exception onJsAlert");
+                } finally {
+                    result.confirm();
+                }
+                return true;
+            }
+        });
     }
 
     //WebViewClient主要帮助WebView处理各种通知、请求事件
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public void onPageFinished(WebView view, String url) {
-            Log.w("lijiaming", "onPageFinished");
+            Log.w(TAG, "onPageFinished");
         }
 
         @Override
@@ -197,6 +209,7 @@ public class Presenter {
             //页面开始加载
             iView.showProgressbar();
         }
+
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -218,7 +231,16 @@ public class Presenter {
      */
     @JavascriptInterface //仍然必不可少
     public void getClient(String str) {
-        Log("js调用android: " + str);
+        try {
+            Intent intent = new Intent(mContext , MainActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("todo", "" + str);
+            intent.putExtras(bundle);
+            mContext.startActivity(intent);
+            TimeUnit.SECONDS.sleep(3);
+        } catch (Exception e) {
+            Log.w(TAG, "Exception getClient");
+        }
     }
 
     public void Log(String msg) {

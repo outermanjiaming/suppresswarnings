@@ -55,7 +55,8 @@ public class QueryController {
 	ByteBuffer buffer = ByteBuffer.allocateDirect(2048);
 	
 	ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
-	Credential cred = new Credential("AKID72i8JGoReHemeHfmeGgqlRIuJUQAhwxi", "f5FAtNtGNGuJRKxOZUVGn7CetsbjcJlx");
+	//TODO the id & key was updated
+	Credential cred = new Credential("KIDA72i8JGoReHomeHfmeGgqlRIuJUQAhwxi", "f5FAtNightGuJOKExOZUVGn7CetsbjcJlx");
     HttpProfile httpProfile = new HttpProfile();
     ClientProfile clientProfile = new ClientProfile();
     AaiClient client = null;

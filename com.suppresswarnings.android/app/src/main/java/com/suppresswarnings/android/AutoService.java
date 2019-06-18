@@ -1,4 +1,4 @@
-package com.suppresswarnings.android;
+package com.xiaomi.ad.mimo.demo;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -27,8 +27,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.suppresswarnings.android.model.Actions;
-import com.suppresswarnings.android.model.HTTP;
+import com.xiaomi.ad.mimo.demo.model.Actions;
+import com.xiaomi.ad.mimo.demo.model.HTTP;
 
 import java.util.List;
 import java.util.Random;
@@ -37,6 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AutoService extends AccessibilityService {
-    public static final String TAG = "lijiaming";
+    public static final String TAG = "AutoService";
     public AtomicLong lastTime = new AtomicLong(System.currentTimeMillis());
     public AtomicBoolean running = new AtomicBoolean(false);
     public AtomicBoolean pause = new AtomicBoolean(false);
@@ -58,16 +59,43 @@ public class AutoService extends AccessibilityService {
     private AtomicInteger increment = new AtomicInteger(1000);
     private AtomicInteger otherCount = new AtomicInteger(0);
     private AtomicInteger checkTimes = new AtomicInteger(0);
+    private AtomicInteger exeWithoutEvent = new AtomicInteger(0);
     private AtomicReference<String> currActivity = new AtomicReference();
     private AtomicReference<String> current = new AtomicReference<String>();
     private AtomicReference<String[]> acommands = new AtomicReference<String[]>();
     private AtomicReference<Stack<Loop>> loop = new AtomicReference<>();
     private AtomicReference<StopRunnable> lastRunnable = new AtomicReference<StopRunnable>();
     private AtomicReference<AccessibilityNodeInfo> lastWindow = new AtomicReference();
-    private String activity = null;
+
     private Handler handler;
-    private ScheduledExecutorService service = Executors.newScheduledThreadPool(2);
+    private static String activity = null;
     private static AutoService INSTANCE =  null;
+    private ScheduledFuture future = null;
+    private ScheduledExecutorService service = Executors.newScheduledThreadPool(2);
+
+
+    public void stopRunning() {
+        if(lastRunnable.get() != null) {
+            lastRunnable.get().stop();
+            lastRunnable.set(null);
+        }
+        lock.set(false);
+        running.set(false);
+        pause.set(true);
+        loop.set(null);
+        jump.set(0);
+        ignore.set(-1);
+        activity = null;
+        current.set(null);
+        currActivity.set(null);
+        exeWithoutEvent.set(0);
+        checkTimes.set(0);
+        otherCount.set(0);
+        tooLong.set(0);
+        afterOpen.set(-1);
+        backHome("手动点击停止执行");
+    }
+
     class Loop {
         int times;
         int index;
@@ -76,7 +104,7 @@ public class AutoService extends AccessibilityService {
             this.index = index;
         }
 
-        public int loop(int next) {
+        int loop(int next) {
             try {
                 this.times --;
                 if(this.times > 0) {
@@ -94,7 +122,6 @@ public class AutoService extends AccessibilityService {
                 }
             } catch (Exception e) {
                 Log.w(TAG, "loop error : " + e.getMessage());
-                testNotify("Exception", "loop error: " + e.getMessage());
                 playRingtone();
                 return next;
             }
@@ -122,6 +149,7 @@ public class AutoService extends AccessibilityService {
 
     public void finish() {
         Log.w(TAG, "stop the world");
+        testNotify("素朴网联停止执行", "stop the world");
         playRingtone();
         playRingtone();
         playRingtone();
@@ -192,7 +220,7 @@ public class AutoService extends AccessibilityService {
             TimeUnit.SECONDS.sleep(1);
         } catch(Exception e) {
             Log.w(TAG, "打开APP异常：" + e.getMessage());
-            testNotify("Exception", "try to openActivity(), performBackClick: "+ e.getMessage());
+            testNotify("Exception501", e.getMessage());
             playRingtone();
             try {
                 Thread.sleep(500);
@@ -228,13 +256,13 @@ public class AutoService extends AccessibilityService {
         int width = dm.widthPixels;
         int height = dm.heightPixels;
         Path path = new Path();
-        int start = 600;
+        int start = 800;
         int stop = 400;
         int x = width / 2;
         path.moveTo(x, start);
         pathS(path, start, stop, x);
         Log.w(TAG, "performScrollBackward");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -253,7 +281,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -293,12 +321,12 @@ public class AutoService extends AccessibilityService {
         int height = dm.heightPixels;
         Path path = new Path();
         int start = 400;
-        int stop = 600;
+        int stop = 800;
         int x = width / 2;
         path.moveTo(x, start);
         pathS(path, start, stop, x);
         Log.w(TAG, "performScrollForward");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -317,7 +345,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -422,7 +450,7 @@ public class AutoService extends AccessibilityService {
         int yy = Math.min(Integer.parseInt(y), height);
         path.moveTo(xx, yy);
         Log.w(TAG, "performClick");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 20)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -441,7 +469,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -459,7 +487,7 @@ public class AutoService extends AccessibilityService {
         path.moveTo(x, start);
         pathS(path, start, stop, x);
         Log.w(TAG, "performSwipe0");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -478,7 +506,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -497,7 +525,7 @@ public class AutoService extends AccessibilityService {
         path.moveTo(x, start);
         pathS(path, start, stop, x);
         Log.w(TAG, "performSwipe1");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
 
@@ -517,7 +545,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -536,7 +564,7 @@ public class AutoService extends AccessibilityService {
         path.moveTo(start, y);
         pathN(path, start, stop, y);
         Log.w(TAG, "performLeft");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -555,7 +583,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -575,9 +603,10 @@ public class AutoService extends AccessibilityService {
     //TODO crazy
     public void crazyClick() {
         if(mad.get()) {
-
+            testNotify("crazyClick", "already mad");
             return;
         }
+        testNotify("crazyClick", "going mad");
         mad.set(true);
         try {
             AccessibilityNodeInfo window = lastWindow.get();
@@ -587,7 +616,7 @@ public class AutoService extends AccessibilityService {
                     return;
                 }
                 for(int i = 0; i<count; i++) {
-                    AccessibilityNodeInfo childNode = window.getChild(i);
+                    AccessibilityNodeInfo childNode = window.getChild(count - 1 - i);
                     Log.w(TAG, "first : " + i);
                     if(childNode == null) continue;
                     if(childNode.isClickable()) {
@@ -597,7 +626,7 @@ public class AutoService extends AccessibilityService {
 
                     int count_1 = childNode.getChildCount();
                     for(int j = 0; j<count_1; j++) {
-                        AccessibilityNodeInfo childNode1 = childNode.getChild(j);
+                        AccessibilityNodeInfo childNode1 = childNode.getChild(count_1 - 1 -j);
                         Log.w(TAG, "second : " + j);
                         if(childNode1 == null) continue;
                         if(childNode1.isClickable()) {
@@ -607,7 +636,7 @@ public class AutoService extends AccessibilityService {
 
                         int count_2 = childNode1.getChildCount();
                         for(int k = 0; k<count_2; k++) {
-                            AccessibilityNodeInfo childNode2 = childNode1.getChild(k);
+                            AccessibilityNodeInfo childNode2 = childNode1.getChild(count_2 - 1 -k);
                             Log.w(TAG, "third : " + k);
                             if(childNode2 == null) continue;
                             if(childNode2.isClickable()) {
@@ -624,7 +653,7 @@ public class AutoService extends AccessibilityService {
         } catch (Exception e) {
             mad.set(false);
             crazy.set(false);
-            Log.w(TAG, "crazy error");
+            Log.w(TAG, "crazy error = " + e.getMessage());
             testNotify("Exception", "crazy error: " + e.getMessage());
             playRingtone();
         }
@@ -665,7 +694,7 @@ public class AutoService extends AccessibilityService {
                 path.moveTo(x, y);
                 x = x + rand;
                 Log.w(TAG, "\n\t\t\tcrazyClick (" + x + "," + y + ")\n");
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     GestureDescription.Builder builder = new GestureDescription.Builder();
                     GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 10, 20)).build();
                     boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -684,7 +713,7 @@ public class AutoService extends AccessibilityService {
 
                     Log.w(TAG, "dispatch result = " + result);
                 } else {
-                    Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+                    Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
                 }
 
                 try {
@@ -723,7 +752,7 @@ public class AutoService extends AccessibilityService {
         path.moveTo(start, y);
         pathN(path, start, stop, y);
         Log.w(TAG, "performRight");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             GestureDescription.Builder builder = new GestureDescription.Builder();
             GestureDescription gd = builder.addStroke(new GestureDescription.StrokeDescription(path, 100, 800)).build();
             boolean result = dispatchGesture(gd, new GestureResultCallback() {
@@ -742,7 +771,7 @@ public class AutoService extends AccessibilityService {
 
             Log.w(TAG, "dispatch result = " + result);
         } else {
-            Log.w(TAG, "VERSION.SDK_INT = " + android.os.Build.VERSION.SDK_INT);
+            Log.w(TAG, "VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
         }
         wait1sec();
     }
@@ -767,7 +796,7 @@ public class AutoService extends AccessibilityService {
         }
     }
 
-    public void checkZombie(AtomicBoolean crazy, AtomicBoolean running, AtomicBoolean pause, AtomicBoolean ready, AtomicInteger count, AtomicLong lastTime) {
+    public void checkZombie(AtomicBoolean crazy, AtomicBoolean running, AtomicBoolean pause, AtomicBoolean ready, AtomicInteger count, AtomicLong lastTime, AtomicInteger noEventCount) {
         if(!ready.get()) {
             crazy.set(false);
             Log.w(TAG, "calm: !ready.get()");
@@ -789,25 +818,74 @@ public class AutoService extends AccessibilityService {
             Log.w(TAG, "crazy reason: count.get() > 10 && System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(30)");
             return;
         }
+
+        if(noEventCount.get() > 10 && System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(10)) {
+            noEventCount.set(0);
+            crazy.set(true);
+            Log.w(TAG, "crazy reason: count.get() > 10 && System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(30)");
+            return;
+        }
     }
 
-
+    AtomicReference<AccessibilityNodeInfo> sameWindow = new AtomicReference<AccessibilityNodeInfo>();
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         lastTime.set(System.currentTimeMillis());
         ready.set(true);
         myself.set(getPackageName().equals(event.getPackageName()));
-        Log.d(TAG, "event:" + event.getPackageName() + ": " + event.getClassName());
-        if(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED == event.getEventType()){
+        Log.w(TAG, "event:" + event.getPackageName() + " : " + event.getClassName() + " : " + event.toString());
+
+        if(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED == event.getEventType()
+                || AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED == event.getEventType()){
+
+            try {
+                AccessibilityNodeInfo same = sameWindow.get();
+                Log.w(TAG, "reading window " + same);
+                AccessibilityNodeInfo window = getRootInActiveWindow();
+                sameWindow.set(window);
+                if(same != null && same.equals(window)) {
+                    Log.w(TAG, "same window, ignore");
+                } else if(window != null){
+                    int count = window.getChildCount();
+                    if(count <=0) {
+                        return;
+                    }
+                    for(int i = 0; i<count; i++) {
+                        AccessibilityNodeInfo childNode = window.getChild(i);
+                        Log.w(TAG, "first : " + i);
+                        if(childNode == null) continue;
+
+                        int count_1 = childNode.getChildCount();
+                        for(int j = 0; j<count_1; j++) {
+                            AccessibilityNodeInfo childNode1 = childNode.getChild(j);
+                            Log.w(TAG, "second : " + j);
+                            if(childNode1 == null) continue;
+                            int count_2 = childNode1.getChildCount();
+                            for(int k = 0; k<count_2; k++) {
+                                AccessibilityNodeInfo childNode2 = childNode1.getChild(k);
+                                Log.w(TAG, "third : " + k);
+                                if(childNode2 == null) continue;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "reading error = " + e.getMessage());
+            }
+
+
             String act = ""+event.getClassName();
-            if(event.getPackageName().equals(current.get())){
+            if(activity == null && event.getPackageName().equals(current.get()) && !act.startsWith("android")){
                 currActivity.set(act);
-                testNotify(""+event.getPackageName(),  act);
+                Log.d(TAG, "event:" + event.getPackageName() + " : " + event.getClassName() + " : (YES)" + event.toString());
             }
         }
+
         if(current.get() != null && current.get().equals(event.getPackageName())) {
             crazy.set(false);
+            exeWithoutEvent.set(0);
             checkTimes.set(0);
+            otherCount.set(0);
         }
 
         if(running.get()) {
@@ -815,7 +893,7 @@ public class AutoService extends AccessibilityService {
                 otherCount.incrementAndGet();
                 if(otherCount.get() > 20) {
                     otherCount.set(0);
-                    action();
+                    action("otherCount.get() > 20");
                     Log.w(TAG, "程序为什么不工作？");
                 }
             }
@@ -827,7 +905,7 @@ public class AutoService extends AccessibilityService {
 
         Log.w(TAG, "\t\t\t" + event.toString());
 
-        checkZombie(crazy, running, pause, ready, otherCount, lastTime);
+        checkZombie(crazy, running, pause, ready, otherCount, lastTime, exeWithoutEvent);
         if(crazy.get()) {
             crazyClick();
         }
@@ -837,86 +915,43 @@ public class AutoService extends AccessibilityService {
     Runnable checkNoEvent = new Runnable() {
         @Override
         public void run() {
-            Log.w(TAG, "checkNoEvent = " + checkTimes.incrementAndGet());
+            if(running.get()){
+                checkTimes.incrementAndGet();
+            }
+            if(!running.get() && INSTANCE == null) {
+                future.cancel(true);
+            }
             if(checkTimes.get() > 10 && System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(30)) {
+                Log.w(TAG, "checkNoEvent reason: System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(30) = " + checkTimes.incrementAndGet());
                 crazy.set(true);
                 checkTimes.set(0);
-                Log.w(TAG, "checkNoEvent reason: System.currentTimeMillis() - lastTime.get() > TimeUnit.SECONDS.toMillis(30) = " + checkTimes.incrementAndGet());
             }
         }
     };
 
-    @Override
-    protected void onServiceConnected() {
-        super.onServiceConnected();
-        try {
-            Log.w(TAG, "1/2. onServiceConnected = " + this);
-            AutoService.INSTANCE = this;
-            Log.w(TAG, "2/2. onServiceConnected = " + getInstance());
-            ready.set(true);
-            service.scheduleWithFixedDelay(checkNoEvent, 10,10, TimeUnit.SECONDS);
-            handler = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message msg) {
-                    Log.w(TAG, "doMessage = " + msg.toString());
-                    switch (msg.what) {
-                        case 0:
-                            wait1sec();
-                            break;
-                        case 1:
-                            String input = (String) msg.obj;
-                            Log.w(TAG,  "收到命令 input = " + input);
-                            ignore.set(-1);
-                            if (input != null && input.length() > 2) {
-                                acommands.set(input.split("素朴网联"));
-                            } else {
-                                acommands.set(commands);
-                            }
-                            break;
-                        case 100:
-                            action();
-                            break;
-                        case 200:
-                            finish();
-                            break;
-                        default:
-                            break;
-                    }
-
-                    return false;
-                }
-            });
-            Log.w(TAG, "schedule service connected");
-            backHome("请打开任何一个APP");
-        } catch (Exception e) {
-            Log.w(TAG, "error");
-            testNotify("Exception", "connected error: " + e.getMessage());
-            playRingtone();
-        }
-    }
 
     public boolean openActivity(String who) {
         try {
             Log.w(TAG, "打开APP：" + who);
             wait1sec();
             Intent intent = getPackageManager().getLaunchIntentForPackage(who);
+            //BUGFIX: use them together
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             current.set(who);
             TimeUnit.SECONDS.sleep(15);
             return true;
         } catch(Exception e) {
             Log.w(TAG, "打开APP异常：" + e.getMessage());
-            testNotify("Exception", "openActivity error: " + e.getMessage());
             playRingtone();
             return false;
         }
     }
 
-    public void action() {
+    public void action(String from) {
         try{
             if(lock.get() && running.get()) {
                 Log.w(TAG, "action() is locked");
-                testNotify("lock.get()", "action() is locked");
                 return;
             }
             lock.set(true);
@@ -950,10 +985,10 @@ public class AutoService extends AccessibilityService {
         } catch (Exception e) {
             lock.set(false);
             Log.w(TAG, "fail to action()");
-            testNotify("Exception", "fail to action()");
             playRingtone();
         }
     }
+
 
     class StopRunnable implements Runnable {
         AtomicBoolean quit = new AtomicBoolean(false);
@@ -987,8 +1022,8 @@ public class AutoService extends AccessibilityService {
                     Log.w(TAG, "最后一条指令:" + index);
                     break;
                 }
-
-                checkZombie(crazy, running, pause, ready, otherCount, lastTime);
+                exeWithoutEvent.incrementAndGet();
+                checkZombie(crazy, running, pause, ready, otherCount, lastTime, exeWithoutEvent);
                 if(crazy.get()) {
                     crazyClick();
                 }
@@ -1022,7 +1057,6 @@ public class AutoService extends AccessibilityService {
                         index = doMessage(next, index);
                     } catch (Exception e) {
                         Log.w(TAG, "异常执行：" + cmd + " \t\tindex: " + index);
-                        testNotify("Exception", "fail to doMessage: " + e.getMessage());
                         playRingtone();
                     }
 
@@ -1031,27 +1065,6 @@ public class AutoService extends AccessibilityService {
                     Log.w(TAG, "忽略未知命令：" + cmd);
                 }
             }
-
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Log.w(TAG, "action scheduler");
-                    if(pause.get()) {
-                        Log.w(TAG, "正在暂停");
-                        return;
-                    }
-                    if (getInstance() != null && getInstance().running.get()) {
-                        Log.w(TAG, "「素朴网联」循环执行");
-                        Message next = new Message();
-                        next.setAsynchronous(false);
-                        next.what = 100;
-                        handler().sendMessage(next);
-                    } else {
-                        backHome("已经停止，回到「素朴网联」" + this);
-                    }
-                }
-            }, 3000);
-
             lock.set(false);
         }
     }
@@ -1087,7 +1100,6 @@ public class AutoService extends AccessibilityService {
             wait1sec();
             wait1sec();
         } catch (Exception e) {
-            testNotify("Exception", "fail to backHome: " + e.getMessage());
             playRingtone();
         }
 
@@ -1104,7 +1116,6 @@ public class AutoService extends AccessibilityService {
             pause.set(true);
             TimeUnit.SECONDS.sleep(3);
         } catch (Exception e) {
-            testNotify("Exception", "fail to backHome: " + e.getMessage());
             playRingtone();
         }
 
@@ -1250,7 +1261,7 @@ public class AutoService extends AccessibilityService {
                 tooLong.incrementAndGet();
                 if(tooLong.get() > 120) {
                     tooLong.set(0);
-                    action();
+                    action("tooLong.get() > 120");
                 }
             }
             TimeUnit.SECONDS.sleep(1);
@@ -1275,6 +1286,17 @@ public class AutoService extends AccessibilityService {
     }
 
     public void uninstallApp(String pageName){
+        pause.set(true);
+        mad.set(false);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.w(TAG, "crazy uninstall 1");
+                crazy.set(true);
+                crazyClick();
+                Log.w(TAG, "crazy uninstall 2");
+            }
+        }, 2000);
         Intent uninstallIntent = new Intent();
         uninstallIntent.setAction(Intent.ACTION_DELETE);
         uninstallIntent.setData(Uri.parse("package:"+pageName));
@@ -1284,8 +1306,8 @@ public class AutoService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        finish();
         Log.w(TAG, "onDestroy");
-        running.set(false);
     }
 
     @Override
@@ -1307,6 +1329,55 @@ public class AutoService extends AccessibilityService {
     }
 
     @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        testNotify("素朴网联连接成功", "onServiceConnected");
+        try {
+            Log.w(TAG, "1/2. onServiceConnected = " + this);
+            AutoService.INSTANCE = this;
+            Log.w(TAG, "2/2. onServiceConnected = " + getInstance());
+            ready.set(true);
+            future = service.scheduleWithFixedDelay(checkNoEvent, 5,5, TimeUnit.SECONDS);
+            handler = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message msg) {
+                    Log.w(TAG, "doMessage = " + msg.toString());
+                    switch (msg.what) {
+                        case 0:
+                            wait1sec();
+                            break;
+                        case 1:
+                            String input = (String) msg.obj;
+                            Log.w(TAG,  "收到命令 input = " + input);
+                            ignore.set(-1);
+                            if (input != null && input.length() > 2) {
+                                acommands.set(input.split("素朴网联"));
+                            } else {
+                                acommands.set(commands);
+                            }
+                            break;
+                        case 100:
+                            action("case 100");
+                            break;
+                        case 200:
+                            finish();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return false;
+                }
+            });
+            Log.w(TAG, "schedule service connected");
+            backHome("请选择任何一个APP");
+        } catch (Exception e) {
+            Log.w(TAG, "connected error = " + e.getMessage());
+            playRingtone();
+        }
+    }
+
+    @Override
     public String toString() {
         return "AutoService{ running = " + running.get() + ", handler=" + handler + '}';
     }
@@ -1314,7 +1385,7 @@ public class AutoService extends AccessibilityService {
 
     public void testNotify(String title, String message){
         try {
-            Log.w(TAG, "testotify");
+            Log.w(TAG, "testNotify");
             Notification.Builder mBuilder =
                     new Notification.Builder(this)
                             .setSmallIcon(R.drawable.ic_launcher)

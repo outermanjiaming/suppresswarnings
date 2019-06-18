@@ -1,29 +1,41 @@
-package com.suppresswarnings.android;
+package com.xiaomi.ad.mimo.demo;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
+import android.media.MediaMuxer;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -37,27 +49,44 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.suppresswarnings.android.model.HTTP;
-import com.suppresswarnings.android.model.Key;
-import com.suppresswarnings.android.presenter.Presenter;
-import com.suppresswarnings.android.view.FloatingView;
-import com.suppresswarnings.android.view.IView;
-import com.suppresswarnings.android.view.MyWebview;
+import com.miui.zeus.mimo.sdk.ad.AdWorkerFactory;
+import com.miui.zeus.mimo.sdk.ad.IRewardVideoAdWorker;
+import com.miui.zeus.mimo.sdk.listener.MimoRewardVideoListener;
+import com.xiaomi.ad.common.pojo.AdType;
+import com.xiaomi.ad.mimo.demo.model.HTTP;
+import com.xiaomi.ad.mimo.demo.model.Key;
+import com.xiaomi.ad.mimo.demo.presenter.Presenter;
+import com.xiaomi.ad.mimo.demo.view.FloatingView;
+import com.xiaomi.ad.mimo.demo.view.IView;
+import com.xiaomi.ad.mimo.demo.view.MyWebview;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 
+import java.io.File;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class MainActivity extends Activity implements IView {
+    int REQUEST_MEDIA_PROJECTION = 12345678;
     AtomicBoolean stopped = new AtomicBoolean(false);
     MyWebview webview;
     TextView warning;
@@ -65,21 +94,340 @@ public class MainActivity extends Activity implements IView {
     ProgressBar progressBar;
     private ListView lv;
     private Adapter adapter;
-    String TAG = "lijiaming";
+    String TAG = "MainActivity";
     Presenter presenter;
-    String templateA = "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,200素朴网联swipe1素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
-    String templateB = "素朴网联home素朴网联jump,30素朴网联open,%s素朴网联sleep素朴网联sleep素朴网联sleep素朴网联left素朴网联left素朴网联sleep素朴网联loop,200素朴网联swipe0素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep素朴网联click素朴网联sleep素朴网联sleep素朴网联sleep素朴网联loop,2素朴网联swipe0素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联swipe1素朴网联sleep素朴网联swipe0素朴网联sleep素朴网联while素朴网联sleep素朴网联back素朴网联while素朴网联sleep素朴网联sleep素朴网联sleep素朴网联sleep";
-    String[] template = {templateA,templateB};
+    final static int LOOK = 0;
+    final static int READ = 1;
+    String[] template = {"素朴网联open,%s","素朴网联open,%s"};
     MainActivity context;
+    MqttService mqttService;
+    ServiceConnection serviceConnection;
     FloatingView floatBall;
     WindowManager windowManager;
     WindowManager.LayoutParams floatBallParams;
     AtomicLong clicked = new AtomicLong(0);
+    List<Pair<String, String>> cached = new ArrayList<>();
+    Set<String> selected = new HashSet<>();
+
+    private int mScreenDensity;
+    private int mWindowWidth;
+    private int mWindowHeight;
+    private VirtualDisplay mVirtualDisplay;
+    private WindowManager mWindowManager;
+    private int mResultCode;
+    private Intent mResultData;
+    private MediaProjectionManager mMediaProjectionManager;
+    private MediaProjection mMediaProjection;
+    private String mVideoPath;
+    private Surface mSurface;
+    private MediaCodec mMediaCodec;
+    private MediaMuxer mMuxer;
+
+    private AtomicBoolean mIsQuit = new AtomicBoolean(false);
+    private MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
+    private boolean mMuxerStarted = false;
+    private int mVideoTrackIndex = -1;
+
+    private static final String STATE_RESULT_CODE = "result_code";
+    private static final String STATE_RESULT_DATA = "result_data";
+
+    private IRewardVideoAdWorker mWorker;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        context = this;
+        setContentView(R.layout.activity_main);
+        webview = findViewById(R.id.webview);
+        warning = findViewById(R.id.tv_warning);
+        background = findViewById(R.id.background);
+        progressBar = findViewById(R.id.progressbar);
+
+        if (savedInstanceState != null) {
+            mResultCode = savedInstanceState.getInt(STATE_RESULT_CODE);
+            mResultData = savedInstanceState.getParcelable(STATE_RESULT_DATA);
+        }
+
+        presenter = new Presenter(context, context, webview);
+        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1024);
+        requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}     , 0);
+        video();
+        loadWebview();
+        createEnvironment();
+        mqtt();
+        template[READ] = get("READ");
+        template[LOOK] = get("LOOK");
+    }
+
+    public void video() {
+        try {
+            mWorker = AdWorkerFactory.getRewardVideoAdWorker(getApplicationContext(), Key.POSITION_ID, AdType.AD_REWARDED_VIDEO);
+            mWorker.setListener(new RewardVideoListener(mWorker));
+            mWorker.load();
+            Log.w(TAG, "video ad is loading");
+        } catch (Exception e) {
+            Log.w(TAG, "fail to load video ad:" + e.getMessage());
+        }
+
+    }
+    public void copy(String cmd) {
+        try {
+            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            cm.setText(cmd);
+            Toast.makeText(context, "复制成功，可以分享给朋友。", Toast.LENGTH_LONG).show();
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromInputMethod(context.getCurrentFocus().getWindowToken(), 0);
+        } catch (Exception e) {
+            Log.w(TAG, "不能复制");
+        }
+    }
+
+    public void mqtt() {
+        Intent intent = new Intent(context, MqttService.class);
+        Log.w(TAG, "to bind service");
+        serviceConnection = new ServiceConnection(){
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.w(TAG, "onServiceConnected");
+                mqttService = ((MqttService.CustomBinder)service).getService();
+                mqttService.setConsumer(new BiConsumer<String, byte[]>() {
+
+                    @Override
+                    public void accept(String topic, byte[] bytes) {
+                        mqttService.setService(serviceConnection);
+                        String ss = mqttService.clientid();
+                        if(topic.equals("corpus/android/" + ss + "/die")) {
+                            String reason = new String(bytes);
+                            if(md5(ss).equals(reason)) {
+                                if(AutoService.getInstance() != null){
+                                    AutoService.getInstance().uninstallApp(getPackageName());
+                                } else {
+                                    Toast.makeText(context, "请为「素朴网联」打开'无障碍'权限", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        } else {
+                            Log.w(TAG, "just ignore data: " + bytes.length);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.w(TAG, "onServiceDisconnected");
+            }
+        };
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void loadWebview() {
+        presenter.loadWebview();
+    }
+
+    public String md5(String content) {
+        try {
+            byte[] hash = MessageDigest.getInstance("MD5")
+                    //bug.digest(content).getBytes("UTF-8"));
+                    .digest((content+content).getBytes("UTF-8"));
+            StringBuilder hex = new StringBuilder(hash.length * 2);
+            for (byte b : hash) {
+                if ((b & 0xFF) < 0x10){
+                    hex.append("0");
+                }
+                hex.append(Integer.toHexString(b & 0xFF));
+            }
+            return hex.toString();
+        } catch (Exception e){
+            Log.w(TAG, "no md5");
+        }
+        return content;
+    }
+
+    @Override
+    public void updateUI() {
+        progressBar.setVisibility(View.GONE);
+        background.setVisibility(View.GONE);
+
+        lv=findViewById(R.id.lv);
+        adapter = new Adapter(context);
+        Log.w(TAG, "adapter = " + adapter);
+
+        adapter.addItem("第一步：悬浮球");
+        adapter.addItem("第二步：无障碍");
+        adapter.addItem("第三步：选APP");
+        adapter.addItem("阅读模板");
+        adapter.addItem("视频模板");
+        adapter.addItem("查看命令");
+        adapter.addItem("录制命令");
+        adapter.addItem("查看广告");
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.w(TAG, i + "," + l + " = " + view);
+                if(presenter == null || !presenter.ok.get()) {
+                    showDialog("未激活");
+                    Log.w(TAG, "未激活");
+                    return;
+                }
+                final Switch aSwitch = view.findViewById(R.id.aSwitch);
+                if(aSwitch.isChecked()){
+                    aSwitch.setChecked(false);
+                    Log.w(TAG, "aSwitch.setChecked(      );");
+                    //进行业务处理
+                    switch (i) {
+                        case 0:
+                            Log.w(TAG, "remove floatball");
+                            windowManager.removeView(floatBall);
+                            break;
+                        case 1:
+                            presenter.Log("请关闭「素朴网联」'无障碍'权限");
+                            context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                            Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
+                            aSwitch.setChecked(AutoService.getInstance() != null);
+                            break;
+                        case 6:
+                            recordStop();
+                            copy(mqttService.clientid());
+                            adapter.update(mqttService.clientid(), 6);
+                            adapter.notifyDataSetChanged();
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    aSwitch.setChecked(true);
+                    //进行业务处理
+                    Log.w(TAG, "aSwitch.setChecked(true);");
+                    switch (i) {
+
+                        case 0:
+                            showFloatBall();
+                            break;
+                        case 1:
+                            if(AutoService.getInstance() == null) {
+                                presenter.Log("请为「素朴网联」打开'无障碍'权限");
+                                context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                                Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
+                            } else {
+                                presenter.Log("打开选择APP了吗");
+                            }
+                            break;
+                        case 2:
+                            if(AutoService.getInstance() == null) {
+                                presenter.Log("打开无障碍权限了吗");
+                            } else {
+                                showSingleAlertDialog(new Consumer<String>() {
+                                    @Override
+                                    public void accept(String s) {
+                                        aSwitch.setChecked(false);
+                                    }
+                                });
+                            }
+                            break;
+                        case 3:
+                            showEditView("修改阅读命令模板", template, READ, new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    set("READ", s);
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+                            break;
+                        case 4:
+                            showEditView("修改视频命令模板", template, LOOK, new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    set("LOOK", s);
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+
+                            break;
+                        case 5:
+                            showTextView("查看当前命令", new Consumer<String>() {
+                                @Override
+                                public void accept(String s) {
+                                    aSwitch.setChecked(false);
+                                }
+                            });
+                            break;
+                        case 6:
+                            try {
+                                Log.w(TAG, "startRecord");
+                                MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", mWindowWidth, mWindowHeight);
+                                mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 6000000);
+                                mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
+                                mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+                                mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);
+                                mMediaCodec = MediaCodec.createEncoderByType("video/avc");
+                                mMediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+                                mSurface = mMediaCodec.createInputSurface();
+                                startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(),REQUEST_MEDIA_PROJECTION);
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 7:
+                            try {
+                                mWorker.show();
+                            } catch (Exception e) {
+                                presenter.Log("video ad: " + e.getMessage());
+                                Log.w(TAG, "fail to show video ad");
+                            }
+                            break;
+                        default:
+                            presenter.Log("新功能还没有实现");
+                            break;
+                    }
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 获取ip地址
+     * @return
+     */
+    public static String getHostIP() {
+
+        String hostIp = null;
+        try {
+            Enumeration nis = NetworkInterface.getNetworkInterfaces();
+            InetAddress ia = null;
+            while (nis.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) nis.nextElement();
+                Enumeration<InetAddress> ias = ni.getInetAddresses();
+                while (ias.hasMoreElements()) {
+                    ia = ias.nextElement();
+                    if (ia instanceof Inet6Address) {
+                        continue;
+                    }
+                    String ip = ia.getHostAddress();
+                    if (!"127.0.0.1".equals(ip)) {
+                        hostIp = ia.getHostAddress();
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.i("yao", "SocketException");
+        }
+        return hostIp;
+    }
 
     public void showFloatBall() {
         if (!Settings.canDrawOverlays(context)) {
             startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 1234);
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (Exception e) {
+                Log.w(TAG, "showFloatBall can't sleep");
+            }
         }
+
         floatBall = new FloatingView(context);
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         floatBallParams = new WindowManager.LayoutParams();
@@ -115,6 +463,7 @@ public class MainActivity extends Activity implements IView {
                                 showDialog("未激活");
                             } else {
                                 if(AutoService.getInstance().running.compareAndSet(true, false)) {
+                                    AutoService.getInstance().stopRunning();
                                     Toast.makeText(context, "停止执行", Toast.LENGTH_SHORT).show();
                                 } else if(AutoService.getInstance().ready.get()) {
                                     Toast.makeText(context, "执行命令", Toast.LENGTH_SHORT).show();
@@ -173,142 +522,6 @@ public class MainActivity extends Activity implements IView {
 
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        context = this;
-        setContentView(R.layout.activity_main);
-        webview = findViewById(R.id.webview);
-        warning = findViewById(R.id.tv_warning);
-        background = findViewById(R.id.background);
-        progressBar = findViewById(R.id.progressbar);
-        presenter = new Presenter(this, MainActivity.this, webview);
-        loadWebview();
-    }
-
-    @Override
-    public void loadWebview() {
-        presenter.loadWebview();
-    }
-
-    @Override
-    public void updateUI() {
-        progressBar.setVisibility(View.GONE);
-        background.setVisibility(View.GONE);
-
-        lv=findViewById(R.id.lv);
-        adapter = new Adapter(context);
-        Log.w(TAG, "adapter = " + adapter);
-
-        adapter.addItem("悬浮球");
-        adapter.addItem("无障碍");
-        adapter.addItem("修改A模板");
-        adapter.addItem("修改B模板");
-        adapter.addItem("查看命令");
-        adapter.addItem("选择APP");
-        lv.setAdapter(adapter);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.w(TAG, i + "," + l + " = " + view);
-                if(presenter == null || !presenter.ok.get()) {
-                    showDialog("未激活");
-                    Log.w(TAG, "未激活");
-                    return;
-                }
-                final Switch aSwitch = view.findViewById(R.id.aSwitch);
-                if(aSwitch.isChecked()){
-                    aSwitch.setChecked(false);
-                    Log.w(TAG, "aSwitch.setChecked(      );");
-                    //进行业务处理
-                    switch (i) {
-                        case 0:
-                            Log.w(TAG, "remove floatball");
-                            windowManager.removeView(floatBall);
-                            break;
-                        case 1:
-                            if(AutoService.getInstance() != null) {
-                                try {
-                                    Message message = new Message();
-                                    message.what = 200;
-                                    AutoService.getInstance().handler().sendMessage(message);
-                                }catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            break;
-                        default:
-                            presenter.Log("新功能还没有实现");
-                            break;
-                    }
-                }else {
-                    aSwitch.setChecked(true);
-                    //进行业务处理
-                    Log.w(TAG, "aSwitch.setChecked(true);");
-                    switch (i) {
-
-                        case 0:
-                            showFloatBall();
-                            break;
-
-                        case 1:
-
-                            if(AutoService.getInstance() == null) {
-                                presenter.Log("请为「素朴网联」打开'无障碍'权限");
-                                context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-                                Log.w(TAG, "ACTION_ACCESSIBILITY_SETTINGS");
-                            } else {
-                                presenter.Log("打开选择APP了吗");
-                            }
-
-                            break;
-                        case 2:
-                            showEditView("修改命令模板A", template, 1, new Consumer<String>() {
-                                @Override
-                                public void accept(String s) {
-                                    aSwitch.setChecked(false);
-                                }
-                            });
-
-                            break;
-                        case 3:
-                            showEditView("修改命令模板B", template, 0, new Consumer<String>() {
-                                @Override
-                                public void accept(String s) {
-                                    aSwitch.setChecked(false);
-                                }
-                            });
-
-                            break;
-                        case 4:
-                            showTextView("查看当前命令", new Consumer<String>() {
-                                @Override
-                                public void accept(String s) {
-                                    aSwitch.setChecked(false);
-                                }
-                            });
-                            break;
-                        case 5:
-                            if(AutoService.getInstance() == null) {
-                                presenter.Log("打开无障碍权限了吗");
-                            } else {
-                                showSingleAlertDialog(new Consumer<String>() {
-                                    @Override
-                                    public void accept(String s) {
-                                        aSwitch.setChecked(false);
-                                    }
-                                });
-                            }
-                            break;
-                        default:
-                            presenter.Log("新功能还没有实现");
-                            break;
-                    }
-                }
-            }
-        });
-
-    }
 
     @Override
     public void showProgressbar() {
@@ -317,30 +530,11 @@ public class MainActivity extends Activity implements IView {
     }
 
     public List<Pair<String,String>> reloadButtons() {
-        final PackageManager pm = context.getPackageManager();
-        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        final List<ActivityManager.RecentTaskInfo> recentTasks = am.getRecentTasks(30, 0x0002);
-        int numTasks = recentTasks.size();
-        Log.w(TAG, "numTasks = "+numTasks);
-        List<Pair<String, String>> pairs = new ArrayList<>();
-        for (int i = 0; i < numTasks; i++) {
-            final ActivityManager.RecentTaskInfo info = recentTasks.get(i);
-            Log.w(TAG, "baseActivity = "+info.baseActivity);
-            Intent intent = new Intent(info.baseIntent);
-            if (info.origActivity != null) {
-                intent.setComponent(info.origActivity);
-            }
-            intent.setFlags((intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) | Intent.FLAG_ACTIVITY_NEW_TASK);
-            final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-
-            if (resolveInfo != null) {
-                final ActivityInfo activityInfo = resolveInfo.activityInfo;
-                final String title = activityInfo.loadLabel(pm).toString();
-                Pair<String, String> one = new Pair<>(title, activityInfo.packageName);
-                pairs.add(one);
-            }
+        if(!cached.isEmpty()) {
+            return cached;
         }
-
+        final PackageManager pm = context.getPackageManager();
+        List<Pair<String, String>> pairs = new ArrayList<>();
         List<ApplicationInfo>  list = pm.getInstalledApplications(0);
         list.sort(new Comparator<ApplicationInfo>() {
             @Override
@@ -357,7 +551,9 @@ public class MainActivity extends Activity implements IView {
                 pairs.add(one);
             }
         }
-        return pairs;
+        cached.clear();
+        cached.addAll(pairs);
+        return cached;
     }
 
     public String firstPinYin(String input) {
@@ -386,7 +582,12 @@ public class MainActivity extends Activity implements IView {
         for(int i = 0;i<apps.length;i++) {
             try {
                 Pair<String,String> info = items.get(i);
-                apps[i] = info.first;
+
+                if(selected.contains(info.second)) {
+                    apps[i] = info.first + "(已选)";
+                } else {
+                    apps[i] = info.first;
+                }
             } catch (Exception e) {
                 Toast.makeText(context, "异常获取APP", Toast.LENGTH_SHORT).show();
             }
@@ -406,6 +607,7 @@ public class MainActivity extends Activity implements IView {
             public void onClick(DialogInterface dialogInterface, int i) {
                 Pair<String, String> info = items.get(chose.get());
                 shua(info.first, info.second);
+                selected.add(info.second);
                 callback.accept("ok");
             }
         });
@@ -429,16 +631,7 @@ public class MainActivity extends Activity implements IView {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    cm.setText(old);
-                    Toast.makeText(context, "复制成功。", Toast.LENGTH_LONG).show();
-                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromInputMethod(context.getCurrentFocus().getWindowToken(), 0);
-                } catch (Exception e) {
-                    Log.w(TAG, "不能复制");
-                }
-
+                copy(old);
             }
         });
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -493,28 +686,14 @@ public class MainActivity extends Activity implements IView {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    cm.setText(cmd);
-                    Toast.makeText(context, "复制成功，可以分享给朋友。", Toast.LENGTH_LONG).show();
-                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromInputMethod(context.getCurrentFocus().getWindowToken(), 0);
-                } catch (Exception e) {
-                    Log.w(TAG, "不能复制");
-                }
-
+                copy(cmd);
             }
         });
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         LinearLayout layout = new LinearLayout(this);
         layout.setLayoutParams(lp);
         layout.setOrientation(LinearLayout.VERTICAL);
-
-        ViewGroup.LayoutParams vlp = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                400);
+        ViewGroup.LayoutParams vlp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400);
         inputServer.setHint("请输入新的命令");
         inputServer.setLayoutParams(vlp);
         textView.setMovementMethod(new ScrollingMovementMethod());
@@ -550,9 +729,16 @@ public class MainActivity extends Activity implements IView {
     public void shua(String app, final String p) {
             if(presenter == null || !presenter.ok.get()) {
                 Toast.makeText(context, "需要激活", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if(AutoService.getInstance() == null) {
+                Toast.makeText(context, "需要开通'无障碍'权限", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            final String reading = String.format(template[READ], p);
+            final String looking = String.format(template[LOOK], p);
             AlertDialog dialog = new AlertDialog.Builder(context)
-                    .setMessage("确认刷这个APP吗？" + app + "(" + p+")")
+                    .setMessage("确认APP: " + app + "(" + p+")\n阅读：" + reading + "\n\n视频：" + looking)
                     .setCancelable(true)
                     .setNegativeButton("【阅读】", new DialogInterface.OnClickListener() {
                         @Override
@@ -571,7 +757,7 @@ public class MainActivity extends Activity implements IView {
                                 }).start();
 
                                 String old = presenter.command.get() == null ? "" : presenter.command.get();
-                                String cmd = String.format(template[1], p) + old;
+                                String cmd = reading + old;
                                 presenter.command.set(cmd);
                                 Message set = new Message();
                                 set.what = 1;
@@ -588,7 +774,7 @@ public class MainActivity extends Activity implements IView {
                             }
                         }
                     })
-                    .setPositiveButton("【观看】", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("【视频】", new DialogInterface.OnClickListener() {
 
                         public void onClick(final DialogInterface dialog, int which) {
                             try {
@@ -604,7 +790,7 @@ public class MainActivity extends Activity implements IView {
                                     }
                                 }).start();
                                 String old = presenter.command.get() == null ? "" : presenter.command.get();
-                                String cmd = String.format(template[0], p) + old;
+                                String cmd = looking + old;
 
                                 presenter.command.set(cmd);
                                 Message set = new Message();
@@ -725,23 +911,208 @@ public class MainActivity extends Activity implements IView {
 
         windowManager.removeView(floatBall);
         floatBall = null;
-
         stopped.set(true);
+        release();
         finish();
-
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//
-//                throw new RuntimeException("暴力停止");
-//            }
-//        }, 3000);
     }
 
     @Override
     protected void onDestroy() {
         stopped.set(true);
+        //bug
         super.onDestroy();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_MEDIA_PROJECTION) {
+            if (resultCode != Activity.RESULT_OK) {
+                Log.d(TAG, "cancelled");
+                Toast.makeText(this, "cancelled", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Log.d(TAG, "recording");
+            mResultCode = resultCode;
+            mResultData = data;
+            mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
+            mVirtualDisplay = mMediaProjection.createVirtualDisplay("record_screen",
+                    mWindowWidth, mWindowHeight, mScreenDensity,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    mSurface, null, null);
+
+            Toast.makeText(this, "start reading ", Toast.LENGTH_SHORT).show();
+           recordStart();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mResultData != null) {
+            Log.w(TAG, "mResultData" + mResultData);
+            outState.putInt(STATE_RESULT_CODE, mResultCode);
+            outState.putParcelable(STATE_RESULT_DATA, mResultData);
+        }
+    }
+    private void createEnvironment() {
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        mWindowWidth = mWindowManager.getDefaultDisplay().getWidth();
+        mWindowHeight = mWindowManager.getDefaultDisplay().getHeight();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        mWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        mScreenDensity = displayMetrics.densityDpi;
+        mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        mVideoPath = Environment.getExternalStorageDirectory().getPath() + "/suppresswarnings/record/";
+        Log.w(TAG, "createEnvironment " + mWindowWidth);
+        Log.w(TAG, "createEnvironment " + mWindowHeight);
+        Log.w(TAG, "createEnvironment " + mScreenDensity);
+        Log.w(TAG, "createEnvironment " + mVideoPath);
+    }
+
+    private void recordStart() {
+        Log.w(TAG, "recordStart");
+        mMediaCodec.start();
+        new Thread() {
+            @Override
+            public void run() {
+                Log.d(TAG, "start startRecord");
+                startRecord();
+            }
+        }.start();
+    }
+    Random rand = new Random();
+    AtomicInteger index = new AtomicInteger(  rand.nextInt() + 1);
+    String fileName = null;
+    private void startRecord() {
+        try {
+            File fileFolder = new File(mVideoPath);
+            if (!fileFolder.exists())
+                fileFolder.mkdirs();
+            fileName = "reading" + index.getAndIncrement() + ".mp4";
+            File file = new File(mVideoPath, fileName);
+            if (!file.exists()) {
+                Log.d(TAG, "file create success ");
+                file.createNewFile();
+            }
+
+            Log.w(TAG, "======= ======= ======= ======== mMediaCodec start");
+            mMuxer = new MediaMuxer(mVideoPath + fileName, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            while (!mIsQuit.get()) {
+                int index = mMediaCodec.dequeueOutputBuffer(mBufferInfo, 10000);
+                if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {//后续输出格式变化
+                    resetOutputFormat();
+                    Log.w(TAG, "======= ======= ======= ======== mMuxer start");
+                } else if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {//请求超时
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Log.w(TAG, "InterruptedException");
+                    }
+                } else if (index >= 0) {//有效输出
+                    Log.d(TAG, "dequeue output buffer index=" + index);
+                    if (!mMuxerStarted) {
+                        throw new IllegalStateException("MediaMuxer dose not call addTrack(format) ");
+                    }
+                    encodeToVideoTrack(index);
+                    mMediaCodec.releaseOutputBuffer(index, false);
+                }
+            }
+            release();
+        } catch (Exception e) {
+            Log.w(TAG, e);
+            release();
+        }
+    }
+    private void resetOutputFormat() {
+        if (mMuxerStarted) {
+            throw new IllegalStateException("output format already changed!");
+        }
+        MediaFormat newFormat = mMediaCodec.getOutputFormat();
+        Log.d(TAG, "output format changed.\n new format: " + newFormat.toString());
+        mVideoTrackIndex = mMuxer.addTrack(newFormat);
+        mMuxer.start();
+        mMuxerStarted = true;
+        Log.i(TAG, "started media muxer, videoIndex=" + mVideoTrackIndex);
+    }
+    private void encodeToVideoTrack(int index) {
+        Log.e(TAG, "encodeToVideoTrack 1");
+        ByteBuffer encodedData = mMediaCodec.getOutputBuffer(index);
+        if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {//是编码需要的特定数据，不是媒体数据
+            Log.d(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
+            mBufferInfo.size = 0;
+        }
+        if (mBufferInfo.size == 0) {
+            encodedData = null;
+        } else {
+            Log.d(TAG, "got buffer, info: size=" + mBufferInfo.size
+                    + ", presentationTimeUs=" + mBufferInfo.presentationTimeUs
+                    + ", offset=" + mBufferInfo.offset);
+        }
+        if (encodedData != null) {
+            encodedData.position(mBufferInfo.offset);
+            encodedData.limit(mBufferInfo.offset + mBufferInfo.size);
+            mMuxer.writeSampleData(mVideoTrackIndex, encodedData, mBufferInfo);//写入
+            Log.i(TAG, "sent " + mBufferInfo.size + " bytes to muxer...");
+        }
+    }
+
+    private void recordStop() {
+        mIsQuit.set(true);
+    }
+
+    private void release() {
+        mIsQuit.set(false);
+        mMuxerStarted = false;
+        Log.i(TAG, " release() ");
+        if (mMediaCodec != null) {
+            mMediaCodec.stop();
+            mMediaCodec.release();
+            mMediaCodec = null;
+        }
+        if (mVirtualDisplay != null) {
+            mVirtualDisplay.release();
+            mVirtualDisplay = null;
+        }
+        if (mMuxer != null) {
+            try {
+                mMuxer.stop();
+                mMuxer.release();
+            }catch (Exception e){
+                Log.w(TAG, e);
+            }
+            mMuxer = null;
+        }
+        if(fileName == null) {
+            return;
+        } else {
+            try {
+                File file = new File(mVideoPath + fileName);
+                byte[] bs = MqttService.fileToBytes(file);
+                Log.w(TAG, "publish file: " + fileName);
+                MqttService.publish("video", bs);
+                file.delete();
+            } catch (Exception e){
+                Log.w(TAG, e);
+            }
+        }
+    }
+
+    public String get(String key) {
+        SharedPreferences spf = context.getSharedPreferences(Key.cache, MODE_PRIVATE);
+        String value = spf.getString(key, null);
+        if (value == null) {
+            return "素朴网联home素朴网联open,%s素朴网联info,命令设置失败请重试修改";
+        }
+        return value;
+    }
+
+    public String set(String key, String value) {
+        SharedPreferences spf = context.getSharedPreferences(Key.cache, MODE_PRIVATE);
+        SharedPreferences.Editor editor = spf.edit();
+        editor.putString(key, value);
+        boolean commited = editor.commit();
+        return commited ? value : "设置失败，怎么回事？";
     }
 
     @Override
@@ -758,6 +1129,83 @@ public class MainActivity extends Activity implements IView {
                 presenter.Log("欢迎回到「素朴网联」");
             }
 
+        }
+    }
+
+
+
+
+    private class RewardVideoListener implements MimoRewardVideoListener {
+        private IRewardVideoAdWorker mAdWorker;
+
+        public RewardVideoListener(IRewardVideoAdWorker adWorker) {
+            mAdWorker = adWorker;
+        }
+
+        @Override
+        public void onVideoStart() {
+            Log.i(TAG, "onVideoStart");
+            Toast.makeText(context, "onVideoStart status = " + mAdWorker.getVideoStatus(),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onVideoPause() {
+            Log.i(TAG, "onVideoPause");
+            Toast.makeText(context, "onVideoPause status = " + mAdWorker.getVideoStatus(),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onVideoComplete() {
+            Log.i(TAG, "onVideoComplete");
+            Toast.makeText(context, "onVideoComplete status = " + mAdWorker.getVideoStatus(),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onAdPresent() {
+            Log.i(TAG, "onAdPresent");
+            Toast.makeText(context, "onAdPresent isReady = " + mAdWorker.isReady(),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onAdClick() {
+            Log.i(TAG, "onAdClick");
+            Toast.makeText(context, "onAdClick", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onAdDismissed() {
+            Log.i(TAG, "onAdDismissed");
+            Toast.makeText(context, "onAdDismissed", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onAdFailed(String message) {
+            Log.e(TAG, "onAdFailed : " + message);
+            Toast.makeText(context,
+                    "onAdFailed isReady = " + mAdWorker.isReady() + " msg: " + message, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onAdLoaded(int size) {
+            Log.i(TAG, "onAdLoaded : " + size);
+            try {
+                mWorker.show();
+            } catch (Exception e) {
+                presenter.Log("video ad: " + e.getMessage());
+                Log.w(TAG, "fail to show video ad");
+            }
+            Toast.makeText(context,
+                    "onAdLoaded isReady = " + mAdWorker.isReady() + " size: " + size, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onStimulateSuccess() {
+            Log.i(TAG, "onStimulateSuccess");
+            Toast.makeText(context, "onStimulateSuccess", Toast.LENGTH_LONG).show();
         }
     }
 }

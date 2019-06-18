@@ -1,4 +1,4 @@
-package com.suppresswarnings.android.view;
+package com.xiaomi.ad.mimo.demo.view;
 
 public interface IView {
 

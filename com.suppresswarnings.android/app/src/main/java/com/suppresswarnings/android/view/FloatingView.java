@@ -1,4 +1,4 @@
-package com.suppresswarnings.android.view;
+package com.xiaomi.ad.mimo.demo.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,9 +8,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
-import com.suppresswarnings.android.R;
-
 import java.util.concurrent.atomic.AtomicInteger;
+import com.xiaomi.ad.mimo.demo.R;
 
 public class FloatingView extends View {
 
@@ -37,6 +36,10 @@ public class FloatingView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(bitmap,0, 0, paint);
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2);
+        canvas.drawRect(0,0,width,height,paint);
     }
 
 }

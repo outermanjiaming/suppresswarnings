@@ -1,4 +1,4 @@
-package com.suppresswarnings.android.model;
+package com.xiaomi.ad.mimo.demo.model;
 
 public enum ActionType {
 	SWIPE0 {
