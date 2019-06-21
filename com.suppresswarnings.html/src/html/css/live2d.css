@@ -43,12 +43,8 @@
 }
 
 .reply {
-    width: 220px;
-    height: 50px;
     margin: auto;
     padding: 7px;
-    top: -100px;
-    left: 0px;
     text-align: left;
     border: 1px solid rgba(42,89,167,.4);
     border-radius: 12px;
