@@ -20,12 +20,6 @@ function _initLogoSvg() {
 		Svg.selectAll("#yezi path").forEach(function(e, index) {
 			e.attr({"transform":"sclae(0) translate(0,0)"});
 		});
-		Svg.selectAll("#liketext").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate(0,0)"});
-		});
-		Svg.selectAll("#githubtext").forEach(function(e, index) {
-			e.attr({"transform":"sclae(0) translate(200,0)"});
-		});
     },
     document.getElementById("xiaoshuSvg"));
   

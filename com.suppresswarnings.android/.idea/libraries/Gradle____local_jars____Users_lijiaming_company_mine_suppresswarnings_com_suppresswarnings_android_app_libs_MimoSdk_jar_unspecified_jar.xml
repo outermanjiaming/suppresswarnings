@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: __local_jars__:/Users/lijiaming/company/mine/suppresswarnings/com.suppresswarnings.android/app/libs/MimoSdk.jar:unspecified@jar">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/MimoSdk.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
