@@ -43,6 +43,10 @@
 }
 
 .reply {
+	opacity: 0;
+	top: -60px;
+    left: 0px;
+    height:35px;
     margin: auto;
     padding: 7px;
     text-align: left;
