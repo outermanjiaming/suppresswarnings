@@ -108,12 +108,18 @@ function showHitokoto(){
         showMessage(result.hitokoto, 8000);
     });
 }
+function reply() {
+    var msg = $('.reply').val();
+    console.log('reply current message = ' + msg);
+    $('.reply').val('');
+}
+function onreply(event){ if(event.keyCode==13){ reply(); } }
 
 function showMessage(text, timeout){
     if(Array.isArray(text)) text = text[Math.floor(Math.random() * text.length + 1)-1];
     //console.log('showMessage', text);
     $('.message').stop();
-    $('.message').html(text).fadeTo(200, 1);
+    $('.message').html(text + '<input type="text" class="reply" name="reply" onkeypress="return onreply(event);" id="reply" style="width:100%;height:25px;margin-left: 0px;" placeholder="回复"/>').fadeTo(200, 1);
     if (timeout === null) timeout = 5000;
     hideMessage(timeout);
 }

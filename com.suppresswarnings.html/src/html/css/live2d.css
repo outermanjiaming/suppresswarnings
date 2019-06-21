@@ -42,6 +42,32 @@
     animation-timing-function: ease-in-out;
 }
 
+.reply {
+    opacity: 0;
+    width: 220px;
+    height: auto;
+    margin: auto;
+    padding: 7px;
+    top: -100px;
+    left: 0px;
+    text-align: left;
+    border: 1px solid rgba(42,89,167,.4);
+    border-radius: 12px;
+    background-color: rgba(42,89,167,.2);
+    box-shadow: 0 3px 15px 2px rgba(42,89,167,.4);
+    font-size: 13px;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    overflow: hidden;
+    position: absolute;
+    animation-delay: 5s;
+    animation-duration: 50s;
+    animation-iteration-count: infinite;
+    animation-name: shake;
+    animation-timing-function: ease-in-out;
+}
+
 .hide-button {
     position: absolute;
     top: 10px;
