@@ -43,9 +43,8 @@
 }
 
 .reply {
-    opacity: 0;
     width: 220px;
-    height: auto;
+    height: 50px;
     margin: auto;
     padding: 7px;
     top: -100px;
@@ -59,7 +58,7 @@
     font-weight: 400;
     text-overflow: ellipsis;
     text-transform: uppercase;
-    overflow: hidden;
+    overflow: block;
     position: absolute;
     animation-delay: 5s;
     animation-duration: 50s;
