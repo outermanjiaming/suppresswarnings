@@ -29,23 +29,12 @@ function _animate(){
     function(svg) {
 		pathMove("xiaoshu","tudi",800);
 		setTimeout(function(){
-				  _textMove();
-				},800);
-		setTimeout(function(){
 			pathMove("xiaoshu","shugan",1000);
 			setTimeout(function(){
 				_mianMove("xiaoshu","yezi",500);
 			},1000)
 		},800);
 	});
-}
-function _textMove(){
-	var svg = Snap("#xiaoshu");
-    var like = svg.select("#liketext");
-	like.animate({"transform":"sclae(1) translate(200,180)"},1000,mina.backout);
-	
-	var github = svg.select("#githubtext");
-	github.animate({"transform":"sclae(1) translate(50,180)"},1000,mina.backout);
 }
 function _mianMove(dom,id,time,stopTime){
 	var sTime=(stopTime)?stopTime:80;
