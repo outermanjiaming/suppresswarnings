@@ -2,7 +2,7 @@
     user-select: none;
     position: fixed;
     left: 15px;
-    bottom: 0px;
+    bottom: 50px;
     width: 225px;
     height: 252px;
     z-index: 10000;
@@ -41,32 +41,30 @@
     animation-name: shake;
     animation-timing-function: ease-in-out;
 }
-
 .reply {
-	opacity: 0;
-	top: -60px;
-    left: 0px;
-    height:35px;
-    margin: auto;
-    padding: 7px;
-    text-align: left;
-    border: 1px solid rgba(42,89,167,.4);
-    border-radius: 12px;
-    background-color: rgba(42,89,167,.2);
-    box-shadow: 0 3px 15px 2px rgba(42,89,167,.4);
-    font-size: 13px;
-    font-weight: 400;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    overflow: block;
-    position: absolute;
-    animation-delay: 5s;
-    animation-duration: 50s;
-    animation-iteration-count: infinite;
-    animation-name: shake;
-    animation-timing-function: ease-in-out;
+	opacity: 1;
+	bottom: -35px;
+	left: 0px;
+	height:35px;
+	margin: auto;
+	padding: 7px;
+	text-align: left;
+	border: 1px solid rgba(0,0,0,.4);
+	border-radius: 12px;
+	background-color: rgba(255, 255, 255, 1);
+	box-shadow: 0 3px 15px 2px rgba(0,0,0,.4);
+	font-size: 13px;
+	font-weight: 400;
+	text-overflow: ellipsis;
+	text-transform: uppercase;
+	overflow: hidden;
+	position: absolute;
+	animation-delay: 5s;
+	animation-duration: 50s;
+	animation-iteration-count: infinite;
+	animation-name: shake;
+	animation-timing-function: ease-in-out;
 }
-
 .hide-button {
     position: absolute;
     top: 10px;
