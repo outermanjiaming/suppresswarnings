@@ -119,6 +119,7 @@ function reply() {
 	    }
 	 });
 	 showMessage(reply, 8000);
+	 $('#reply').val('')
 }
 function onreply(event){ if(event.keyCode==13){ reply(); } }
 
