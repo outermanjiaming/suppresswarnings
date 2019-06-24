@@ -1,0 +1,221 @@
+<html>  
+<head>  
+<title>Hack Us</title>
+<meta name="description" content="素朴网联提供黑客平台，各位黑客大侠可以前来贡献" />
+<meta name="keywords" content="素朴网联，黑客，聊天平台，交流平台，SuppressWarnings，suppresswarnings.com，「素朴网联」" />
+    <script src="https://csdnimg.cn/public/common/libs/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <style>
+        *{font-family: "微软雅黑"; margin: 0; padding: 0;}
+html,
+body{width: 100%; height: 100%; background: #000; position: relative;}
+a {text-decoration: none;color: #ccc;margin-right: 3px;}
+.msgInfo{position: fixed; right: 2%; top: 2%; height: 580; width: 400px;}
+.msgInfo .hd{width: 100%; text-align: center; height: 40px; line-height: 40px; color: #fff; }
+.msgInfo .bd{ padding: 20px; height: 460px; overflow: auto; line-height: 30px;}
+.msgInfo .bd p{margin: 2px 0;color: #83F361;}
+
+.renBox{margin-left: 2%; margin-top: 2%; width: 96%; height: 96%; position: relative; overflow: hidden; float: left;}
+.renBox .ren{display: inline-block; position: absolute; left: 500px; top: 500px;}
+.renBox .ren .renHead{ display: inline-block; width: 20px; height: 20px; border-radius: 10px; background: #fff;}
+.renBox .ren .sayInfo{color: #fff; position: absolute; top: -30px; width: 200px; left: -90px; text-align: center;}
+.renBox div{color: #83F361;margin-left: 100%; width: 100%; overflow: hidden; height: 30px;line-height: 30px; font-size: 20px;}
+
+
+.firstStep{position: fixed; width: 100%; height: 100%; z-index: 999; background: #000; text-align: center;}
+.firstStep .firstName{display: inline-block; padding-top: 300px;}
+.firstStep .firstName .username{width: 300px; height: 40px; border: 0; padding: 0 10px;}
+.firstStep .firstName .btn{width: 100px; height: 40px; border: 0; background: #333; color: #fff; cursor: pointer;}
+
+.sd .message{width: 300px; height: 40px; border: 0; padding: 0 10px;}
+.sd .btn{width: 100px; height: 40px; border: 0; background: #333; color: #fff; cursor: pointer;}
+    </style>
+<script>
+window.onunload = function(){
+  alert("unload is work");
+}
+window.onbeforeunload = function(){
+  alert("onbeforeunload is work");   
+}
+document.onkeydown = function(e) {
+    e = window.event || e;
+    var k = e.keyCode;
+    //屏蔽ctrl+R，F5键，ctrl+F5键  F3键！验证
+    if ((e.metaKey == true && e.keyCode == 82) || (e.ctrlKey == true && k == 82) || (k == 116) || (e.ctrlKey == true && k == 116) || k==114) {
+        e.keyCode = 0;
+        alert("当前页面不能刷新！");
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
+
+    }
+    //屏蔽 Ctrl+n   验证可以实现效果
+    if (e.ctrlKey && k == 78){
+        e.keyCode = 0;
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
+        }
+    //屏蔽F11   验证可以实现效果
+    if (k == 122) {
+        e.keyCode = 0;
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
+    }
+    //屏蔽 shift+F10  验证可以实现效果      
+    if ((e.shiftKey && k == 121)||(e.ctrlKey && k == 121)){
+        e.keyCode = 0;
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
+        }
+    //屏蔽 Alt+ 方向键 ← ;屏蔽 Alt+ 方向键 → ！验证
+    if ((e.altKey)
+            && ((k == 37) || (k == 39))) {
+        alert("不准你使用ALT+方向键前进或后退网页！");
+        e.keyCode = 0;
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
+    }
+
+};
+
+//屏蔽右键菜单，！验证
+document.oncontextmenu = function(event) {
+    if (window.event) {
+        event = window.event;
+    }
+    try {
+        var the = event.srcElement;
+        if (!((the.tagName == "INPUT" && the.type.toLowerCase() == "text") || the.tagName == "TEXTAREA")) {
+            return false;
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+var socket;  
+var myname = '匿名'
+function init(username){
+  var host = "ws://suppresswarnings.com/mqtt/"+username;
+  try{  
+    socket = new WebSocket(host);  
+    socket.onopen    = function(msg){
+        log('您已经进入聊天室: ' + JSON.stringify(msg))
+        myname = username;
+        $('.message').attr('placeholder',myname + ' 请随便说点什么');
+    };
+    socket.onmessage = function(msg){
+        log(msg.data);
+    };
+    socket.onclose   = function(msg){
+        log("与服务器连接断开");
+    };
+  } catch(ex){
+      log(ex);
+  }
+  $(".message").focus();
+}  
+   
+function msgok(){  
+  var txt,msg;  
+  txt = $(".message");
+  msg = txt.val();
+  if(!msg){
+      alert("Message can not be empty");
+      return;
+  }
+  txt.val('');
+  txt.focus();  
+  try{
+        socket.send(msg);
+      $('.sayInfo').html(msg)
+  } catch(ex){
+      log(ex);
+  }
+}  
+   
+window.onbeforeunload=function(){  
+    try{  
+        socket.send('quit');  
+        socket.close();  
+        socket=null;  
+    }  
+    catch(ex){  
+        log(ex);  
+    }  
+};  
+
+function nameok(){
+    var _name = $('input[name="username"]').val();
+    if(!_name){
+        alert('请给自己取个名字吧')
+    }else{
+        $('.firstStep').remove()
+        init(_name)
+    }
+}
+
+function log(msg){
+    $('.msgInfo .bd').append('<p>'+ msg +'</p>');
+    var _html = $('<div>',{'class':'showMsg'});
+    _html.html(msg);
+    $('.renBox').append(_html);
+    _html.animate({
+        'marginLeft':'-100%'
+    }, 10000, function(){
+        _html.remove()
+    })
+}
+function show(obj){
+    obj.fadeIn()
+}
+function onmsg(event){ if(event.keyCode==13){ msgok(); } }
+function onname(event){ if(event.keyCode==13){ nameok(); } }
+</script>
+</head>  
+  
+  
+<body>
+<div class="renBox">
+
+<!--- we are building it, not ready yet, just for chating right now --->
+
+</div>
+<div class="msgInfo">
+    <div class="hd"> </div>
+    <div class="bd"></div>
+    <div class="sd">
+      <input type="text" class="message" onkeypress="return onmsg(event);" name="message" placeholder="随便聊聊，没事的！" /><input type="button" class="btn" onclick="msgok()" value="发送" />
+  </div>
+</div>
+
+</body>
+<div class="firstStep">
+    <div class="firstName">
+        <input type="text" class="username" onkeypress="return onname(event);"  name="username" placeholder="给自己取一个响亮的名字！" /><input type="button" class="btn" onclick="nameok()" value="进入聊天" />
+    </div>
+</div>
+<script>  
+$(".username").focus();
+$(".username").animate({
+        'marginLeft':'-100px'
+    }, 100, function(){
+        $(".username").animate({
+            'marginLeft':'0'
+        }, 200, function(){
+            $(".username").animate({
+                'marginLeft':'100px'
+            }, 100, function(){
+                $(".username").animate({
+                    'marginLeft':'0'
+                }, 200, function(){
+                    $(".username").focus()
+                })
+            })
+        })
+    })
+</script>
+</html> 
