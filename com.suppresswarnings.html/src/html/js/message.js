@@ -109,9 +109,16 @@ function showHitokoto(){
     });
 }
 function reply() {
-    var msg = $('.reply').val();
-    console.log('reply current message = ' + msg);
-    $('.reply').val('');
+    var reply = $('#reply').val()
+    console.log('reply current message = ' + reply);
+	 $.ajax({
+	    url: '/wx.http?action=addget&todo=add&key=001.Corpus.Collect.Website.' + Math.random() + '&value=' + reply,
+	    dataType: "text",
+	    success: function (result){
+	        console.log(result);
+	    }
+	 });
+	 showMessage(reply, 8000);
 }
 function onreply(event){ if(event.keyCode==13){ reply(); } }
 
@@ -134,10 +141,17 @@ function initLive2d (){
     $('.hide-button').fadeOut(0).on('click', () => {
         $('#landlord').css('display', 'none')
     })
+    
+    $('.send-button').fadeOut(0).on('click', () => {
+        reply()
+    })
+    
     $('#landlord').hover(() => {
         $('.hide-button').fadeIn(600)
+        $('.send-button').fadeIn(600)
     }, () => {
         $('.hide-button').fadeOut(600)
+        $('.send-button').fadeOut(600)
     })
 }
 initLive2d ();
