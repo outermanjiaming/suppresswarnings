@@ -372,7 +372,7 @@ function ajaxAddLike(id)
 			if(data.code == 0)
 			{
 				$(ui).html(uname+"，"+uiHtml);
-				$.toast("点赞成功", "text");
+				$.toast("点赞成功+1", "text");
 				var heart = document.getElementById(id);
 				$(heart).removeClass("glyphicon-heart-empty");
 				$(heart).addClass("glyphicon-heart");
@@ -380,7 +380,7 @@ function ajaxAddLike(id)
 			else
 			{
 				$(ui).html(uiHtml.replace(uname+"，", ""));
-				$.toast("点出去的赞<br/>泼出去的水", "text");
+				$.toast("点过赞了+0", "text");
 				uiHtml = ui.innerHTML;
 				$(ui).html('<font class="myself" style="color:black">' + uname + '，</font>' + uiHtml);
 			}
@@ -403,7 +403,7 @@ function ajaxAddComment(id)
 		return;
 	}
 	hideTextInput();
-	
+	var value = textComment.value.replace('<', '《').replace('>','》')
 	$.ajax({
 		type: 'POST',
 		url: '/like.http?action=comment',
@@ -411,16 +411,16 @@ function ajaxAddComment(id)
 			projectid: projectid,
 			code: code,
 			name: uname,
-			comment: textComment.value.replace('<', '《').replace('>','》')
+			comment: value
 		},
 		dataType: 'json',
 		success: function(data){
 			if(data.code == 0)
 			{
 				var ui = document.getElementById("comments_"+projectid);	
-				ui.innerHTML = "<p><span>"+uname+"：</span>"+textComment.value+"</p>"+ui.innerHTML;	
+				ui.innerHTML = "<p><span>"+uname+"：</span>"+value+"</p>"+ui.innerHTML;	
 				textComment.value = "";
-				$.toast("操作成功", "text");
+				$.toast("操作成功+1", "text");
 			}
 			else
 			{
@@ -464,7 +464,7 @@ function ajaxGetQrcode(id)
 			console.log("===== lijiaming ====");
 		}
 	});
-	$.toast("请点击右上角分享给朋友", "text");
+	$.toast("点击右上角<br/>分享给朋友", "text");
 }
 
 
