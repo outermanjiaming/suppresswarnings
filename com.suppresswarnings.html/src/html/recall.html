@@ -93,6 +93,7 @@ $(function()
 	else 
 	{
 		var newsn = 'SN' + Math.random()
+		newsn = newsn.substr(5)
 		state = request.state
 		code = request.code
 		$("#robotcard").html(state + '<br/><br/><br/>' + code)
