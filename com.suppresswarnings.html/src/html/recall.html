@@ -94,7 +94,7 @@ $(function()
 	{
 		state = request.state
 		code = request.code
-		$("#robotcard").text(state)
+		$("#robotcard").text(state + '<br/><br/><br/>' + code)
 		
 		var url = window.location.href;
 		var en = base64encode(url);
