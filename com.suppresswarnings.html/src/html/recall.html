@@ -92,6 +92,7 @@ $(function()
 	} 
 	else 
 	{
+		var newsn = 'SN' + Math.random()
 		state = request.state
 		code = request.code
 		$("#robotcard").html(state + '<br/><br/><br/>' + code)
@@ -139,7 +140,7 @@ $(function()
 					});
 				    wx.onMenuShareTimeline({ 
 				        title: '检查你的机器人管理的用户是否在工作',
-				        link: 'http://suppresswarnings.com/statistic.html?state=' + state,
+				        link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
 				        imgUrl: 'http://suppresswarnings.com/robot.png',
 				        success: function () {
 				           console.log("===== lijiaming ====");
@@ -149,7 +150,7 @@ $(function()
 				    wx.onMenuShareAppMessage({
 						title: '检查你的机器人管理的用户是否在工作',
 						desc: '用于统计机器人任务召回率:机器人分享链接给所有群，统计每个群的用户点击量。',
-						link: 'http://suppresswarnings.com/statistic.html?state=' + state,
+						link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
 						imgUrl: 'http://suppresswarnings.com/robot.png',
 						success: function () {
 							console.log("===== lijiaming ====");
