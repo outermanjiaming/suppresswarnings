@@ -98,7 +98,7 @@ $(function()
 		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
-			dataType: 'json',
+			dataType: 'text',
 			success: function(data) {
 			    if(data == "fail") {
 			        console.log("lijiaming === " + data);
