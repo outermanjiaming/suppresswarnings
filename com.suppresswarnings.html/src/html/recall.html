@@ -60,7 +60,7 @@
  	<div id="robotcard" class="robotclass">
    		
    	</div>
-   	<span>注意：用另外一个手机扫二维码（每次都需要在公众号「素朴网联」输入：我要微信机器人）</span>
+   	<span>检查你的机器人管理的用户是否在工作</span>
 </div>
 	<script src="js/jweixin-1.2.0.js"></script>
 	<script src="js/base64.js"></script>
@@ -87,26 +87,14 @@ $(function()
 	
 	if(request.code == undefined)
 	{
-	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/robot.html&response_type=code&scope=snsapi_base&state="+request.state+"#wechat_redirect"
+	   locationUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx41b262e9b9d8885e&redirect_uri=http://suppresswarnings.com/recall.html&response_type=code&scope=snsapi_base&state="+request.state+"#wechat_redirect"
 	   window.location.href = locationUrl;
 	} 
 	else 
 	{
 		state = request.state
 		code = request.code
-		$.ajax({
-			type: 'GET',
-			url: '/wx.http?action=addget&key='+state+'&todo=get&random=' + Math.random(),
-			dataType: 'text',
-			success: function(data) {
-			    console.log(data)
-			    $("#robotcard").append('<img style="width:180px;height:180px;" src="data:image/png;base64,'+data+'" />');
-			},
-			error: function(ret){
-			    console.log(ret)
-			}
-		});
-			
+		$("#robotcard").text(state)
 		
 		var url = window.location.href;
 		var en = base64encode(url);
@@ -134,19 +122,19 @@ $(function()
 					    }
 					});
 				    wx.onMenuShareTimeline({ 
-				        title: '快来玩一下微信机器人',
-				        link: 'http://suppresswarnings.com/robot.html?state=' + state,
-				        imgUrl: data.face,
+				        title: '检查你的机器人管理的用户是否在工作',
+				        link: 'http://suppresswarnings.com/statistic.html?state=' + state,
+				        imgUrl: 'http://suppresswarnings.com/robot.png',
 				        success: function () {
 				           console.log("===== lijiaming ====");
 				        }
 				    });
 				    
 				    wx.onMenuShareAppMessage({
-						title: '快来玩一下微信机器人',
-						desc: '用另外一个手机扫码玩微信机器人',
-						link: 'http://suppresswarnings.com/robot.html?state=' + state,
-						imgUrl: data.face,
+						title: '检查你的机器人管理的用户是否在工作',
+						desc: '用于统计机器人任务召回率:机器人分享链接给所有群，统计每个群的用户点击量。',
+						link: 'http://suppresswarnings.com/statistic.html?state=' + state,
+						imgUrl: 'http://suppresswarnings.com/robot.png',
 						success: function () {
 							console.log("===== lijiaming ====");
 						}

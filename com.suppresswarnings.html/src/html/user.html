@@ -275,32 +275,6 @@
     function toggle(id){
         $(id).toggle();
     }
-    function writeSource() {
-	    if (xmlHttp.readyState == 4) {
-	        document.getElementById("source").value = xmlHttp.responseText;
-	    }
-	}
-	
-    function createXmlHttp() {
-	    if (window.XMLHttpRequest) {
-	       xmlHttp = new XMLHttpRequest();
-	    } else {
-	       xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
-	    }
-	}
-	
-    function getSource() {
-	    var url = document.getElementById("url").value;
-	    if (url == "") {
-	        alert("请输入网页地址。");
-	        return;
-	    }
-	    document.getElementById("source").value = "正在加载……";
-	    createXmlHttp();
-	    xmlHttp.onreadystatechange = writeSource;
-	    xmlHttp.open("GET", url, true);
-	    xmlHttp.send(null);
-	}
     
     function GetRequest()
 	{
@@ -465,21 +439,6 @@ $(function()
 							}
 							
 							$("#mycash").html(mycash + "分");
-							
-							
-							$.ajaxPrefilter(function (options) {
-							    if (options.crossDomain && jQuery.support.cors) {
-							        var http = (window.location.protocol === 'http:' ? 'http:' : 'https:');
-							        options.url = http + '//cors-anywhere.herokuapp.com/' + options.url;
-							        //options.url = "http://cors.corsproxy.io/url=" + options.url;
-							    }
-							});
-							
-							$.get(
-							    'https://mp.weixin.qq.com/s/tc_oUewAPvaArU1UAbJy7A',
-							    function (response) {
-							        $("#html").html(response);
-							});
 						}
 					},
 					error: function(xhr, type){
