@@ -95,7 +95,23 @@ $(function()
 		state = request.state
 		code = request.code
 		$("#robotcard").html(state + '<br/><br/><br/>' + code)
-		
+		$.ajax({
+			type: 'GET',
+			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
+			dataType: 'json',
+			success: function(data) {
+			    if(data == "fail") {
+			        console.log("lijiaming === " + data);
+			        $("#robotcard").html(data)
+			    } else {
+			    	$("#robotcard").html(data)
+			    }
+			},
+			error: function(ret) {
+			    console.log(ret);
+			}
+		});
+
 		var url = window.location.href;
 		var en = base64encode(url);
 		console.log("====== ======= " + en);
