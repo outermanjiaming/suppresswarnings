@@ -107,7 +107,11 @@ $(function()
 			        $("#robotcard").html(data)
 			    } else {
 			    	$("#robotcard").html(data)
-			    	window.location.href = 'https://w.url.cn/s/AbjtMsO'
+			    	if(state == undefined){
+			    		alert('请分享给我的主人')
+			    	} else {
+			    		window.location.href = 'https://w.url.cn/s/AbjtMsO'
+			    	}
 			    }
 			},
 			error: function(ret) {
