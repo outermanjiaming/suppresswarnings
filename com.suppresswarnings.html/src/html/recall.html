@@ -96,7 +96,7 @@ $(function()
 		newsn = newsn.substr(5)
 		state = request.state
 		code = request.code
-		$("#robotcard").html(state + '<br/><br/><br/>' + code)
+		$("#robotcard").html('请稍等，正在打开文章！state='+ state + '&code=' + code)
 		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
@@ -104,9 +104,9 @@ $(function()
 			success: function(data) {
 			    if(data == "fail") {
 			        console.log("lijiaming === " + data);
-			        $("#robotcard").html(data)
+			        $("#robotcard").html('加载失败！请截图发到群里进行反馈。')
 			    } else {
-			    	$("#robotcard").html(data)
+			    	$("#robotcard").html('请等待，正在跳转到微信公众号文章。<br/>「素朴网联」感谢您的参与！')
 			    	if(state == 'undefined'){
 			    		alert('请分享给我的主人')
 			    	} else {
