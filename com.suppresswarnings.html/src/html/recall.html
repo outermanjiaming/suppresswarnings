@@ -97,7 +97,6 @@ $(function()
 		state = request.state
 		code = request.code
 		$("#robotcard").html(state + '<br/><br/><br/>' + code)
-		alert(state)
 		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
@@ -108,7 +107,6 @@ $(function()
 			        $("#robotcard").html(data)
 			    } else {
 			    	$("#robotcard").html(data)
-			    	alert(state)
 			    	if(state == 'undefined'){
 			    		alert('请分享给我的主人')
 			    	} else {
