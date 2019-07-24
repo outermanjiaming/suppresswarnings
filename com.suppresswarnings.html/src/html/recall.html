@@ -97,6 +97,7 @@ $(function()
 		state = request.state
 		code = request.code
 		$("#robotcard").html(state + '<br/><br/><br/>' + code)
+		alert(state)
 		$.ajax({
 			type: 'GET',
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
