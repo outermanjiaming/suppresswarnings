@@ -102,7 +102,57 @@ $(function()
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
 			dataType: 'text',
 			success: function(data) {
-				alert(data)
+				
+				var url = window.location.href;
+				var en = base64encode(url);
+				console.log("====== ======= " + en);
+				$.ajax({
+					type: 'GET',
+					url: '/wx.http?action=jsapi_ticket&url='+en,
+					dataType: 'json',
+					success: function(data) {
+						wx.config({
+						    debug: false,
+						    appId: 'wx41b262e9b9d8885e',
+						    timestamp: data.timestamp,
+						    nonceStr: data.nonceStr,
+						    signature: data.signature,
+						    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+						});
+					
+						wx.ready(function () {
+						
+							wx.checkJsApi({
+							    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+							    success: function(res) {
+							        console.log("check js api ok: " + res)
+							    }
+							});
+						    wx.onMenuShareTimeline({ 
+						        title: '检查你的机器人管理的用户是否在工作',
+						        link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
+						        imgUrl: 'http://suppresswarnings.com/robot.png',
+						        success: function () {
+						           console.log("===== lijiaming ====");
+						        }
+						    });
+						    
+						    wx.onMenuShareAppMessage({
+								title: '检查你的机器人管理的用户是否在工作',
+								desc: '用于统计机器人任务召回率:机器人分享链接给所有群，统计每个群的用户点击量。',
+								link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
+								imgUrl: 'http://suppresswarnings.com/robot.png',
+								success: function () {
+									console.log("===== lijiaming ====");
+								}
+							});
+						});
+					},
+					error: function(ret) {
+					    console.log(ret);
+					}
+				});
+		
 			    if(data == "fail") {
 			        console.log("lijiaming === " + data);
 			        $("#robotcard").html('加载失败！请截图发到群里进行反馈。')
@@ -120,55 +170,7 @@ $(function()
 			}
 		});
 
-		var url = window.location.href;
-		var en = base64encode(url);
-		console.log("====== ======= " + en);
-		$.ajax({
-			type: 'GET',
-			url: '/wx.http?action=jsapi_ticket&url='+en,
-			dataType: 'json',
-			success: function(data) {
-				wx.config({
-				    debug: false,
-				    appId: 'wx41b262e9b9d8885e',
-				    timestamp: data.timestamp,
-				    nonceStr: data.nonceStr,
-				    signature: data.signature,
-				    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
-				});
-			
-				wx.ready(function () {
-				
-					wx.checkJsApi({
-					    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
-					    success: function(res) {
-					        console.log("check js api ok: " + res)
-					    }
-					});
-				    wx.onMenuShareTimeline({ 
-				        title: '检查你的机器人管理的用户是否在工作',
-				        link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
-				        imgUrl: 'http://suppresswarnings.com/robot.png',
-				        success: function () {
-				           console.log("===== lijiaming ====");
-				        }
-				    });
-				    
-				    wx.onMenuShareAppMessage({
-						title: '检查你的机器人管理的用户是否在工作',
-						desc: '用于统计机器人任务召回率:机器人分享链接给所有群，统计每个群的用户点击量。',
-						link: 'http://suppresswarnings.com/recall.html?state=' + newsn,
-						imgUrl: 'http://suppresswarnings.com/robot.png',
-						success: function () {
-							console.log("===== lijiaming ====");
-						}
-					});
-				});
-			},
-			error: function(ret) {
-			    console.log(ret);
-			}
-		});
+		
 	}
 });
 	
