@@ -102,6 +102,7 @@ $(function()
 			url: '/wx.http?action=recall&state='+state + '&ticket=' + code + '&random=' + Math.random(),
 			dataType: 'text',
 			success: function(data) {
+				alert(data)
 			    if(data == "fail") {
 			        console.log("lijiaming === " + data);
 			        $("#robotcard").html('加载失败！请截图发到群里进行反馈。')
@@ -110,7 +111,7 @@ $(function()
 			    	if(state == 'undefined'){
 			    		alert('请分享给我的主人')
 			    	} else {
-			    		window.location.href = 'https://w.url.cn/s/AbjtMsO'
+			    		window.location.href = data
 			    	}
 			    }
 			},
