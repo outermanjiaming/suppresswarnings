@@ -1,8 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/canvas/canvas",
-    "pages/logs/logs"
+    "pages/logs/logs",
+    "pages/quiz/quiz"
   ],
   "window": {
     "backgroundTextStyle": "light",

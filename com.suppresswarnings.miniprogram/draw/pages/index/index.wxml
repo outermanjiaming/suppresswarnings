@@ -1,15 +1,23 @@
 <!--index.wxml-->
-<view class="draw">
+<view>
   <official-account></official-account>
-  <button bindtap='canvasFrame'>框架</button>
-  <button type='success' bindtap='clickName' class="whoami">刷题</button>
-  <text>请求状态：{{whoami}}</text>
   <view class='canvas'>
-    <canvas canvas-id='canvas' style='width:320px;height:320px;justify-content: center; border: 1px solid #ccc;'>
+    <canvas canvas-id='canvas' class="draw" bindtouchstart="MoveStart" bindtouchmove="JudgeGestures" bindtouchend="MoveEnd">
+
+
 
 
 
     </canvas>
   </view>
+  <view>
+    <text class="entrance">一注考试复习</text>
+    <view wx:key="index" wx:for="{{['一注材料', '一注物理', '一注场地','一注经济','一注结构','一注建知']}}" class="buttons">
+      <button size="mini" class="entry" bindtap="playQuiz" data-title="{{item}}" data-index="{{index}}">{{index+1}}. {{item}}</button>
+    </view>
+  </view>
 
+  <view class="vip">
+      <text bindtap="iamvip"> 开通会员 </text>
+  </view>
 </view>

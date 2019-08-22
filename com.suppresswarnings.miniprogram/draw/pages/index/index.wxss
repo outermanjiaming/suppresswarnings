@@ -3,12 +3,34 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-top: 30px;
 }
-.whoami {
-  font-size: 39rpx;
-  background: #fff;
-  bottom: 10px;
+
+.draw {
+  width:320px;
+  height:320px;
+  justify-content: center; 
+  border: 1px solid #e6e6e6;
+}
+
+.entrance {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 10px;
+}
+.entry {
+  float: left;
+  padding: 5px 5px;
+  margin: 5px 5px;
+  width: 30%;
+}
+
+.vip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 50px;
   width: 100%;
-  justify-content: center;
 }

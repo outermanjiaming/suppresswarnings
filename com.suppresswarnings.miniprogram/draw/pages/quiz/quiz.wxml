@@ -1,0 +1,26 @@
+<!--pages/quiz/quiz.wxml-->
+<view>
+  <view class="center">
+    <text class="title">控制台</text>
+    <button size="mini">答题复习</button>
+    <button size="mini">模拟考试</button>
+  </view>
+  <view class="center">
+    <text class="title">状态栏</text>
+    <button size="mini">答题模式</button>
+    <button size="mini">3/1829</button>
+    <button size="mini">我的错题</button>
+    <button size="mini">标星</button>
+  </view>
+  <view class="question">
+    <text class="title">操作面板</text>
+
+    <view class="quiz">勒·柯布西耶把比例与人体尺度结合在一起，提出了独特的（   ）。</view>
+    <button size="mini" class="options">A “模度”体系</button>
+    <button size="mini" class="options right">B 相似形要素</button>
+    <button size="mini" class="options">C 原始体型</button>
+    <button size="mini" class="options wrong">D 黄金比例</button>
+
+    <view class="explain">根本没什么好解释的，老师课上都讲的很清楚了，你当时干啥去了？</view>
+  </view>
+</view>
