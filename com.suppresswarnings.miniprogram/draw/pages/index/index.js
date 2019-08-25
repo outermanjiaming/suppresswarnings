@@ -57,6 +57,7 @@ Page({
       return;
     }
     if (e.timeStamp - this.touchStartTime < 300){
+      var that = this
       wx.showActionSheet({
         itemList: ['删除'],
         success: function (res) {
@@ -82,6 +83,7 @@ Page({
     this.onUpdate();
   },
   JudgeGestures: function(e) {
+    
     var arr = e.touches[0];
     if (this.data.moving['state'] == 1) {
       var who = this.data.moving['id'];
@@ -93,6 +95,22 @@ Page({
       var dy = this.data.moving['dy'];
       box[0] = arr['x'] - dx;
       box[1] = arr['y'] - dy;
+      if(box[0] < 0) {
+        box[0] = 0
+      }
+      if(box[0] + box[2] > 320) {
+        box[0] = 320 - box[2]
+      }
+
+      if(box[1] < 0) {
+        box[1] = 0
+      }
+
+      if(box[1] + box[3] > 320) {
+        box[1] = 320 - box[3]
+      }
+      this.data.box[who] = box;
+      console.log(JSON.stringify(this.data.box))
       this.onUpdate();
     }
   },
@@ -149,16 +167,8 @@ Page({
   playQuiz(e){
     var index = e.target.dataset.index
     var title = e.target.dataset.title
-    wx.showModal({
-      title: title,
-      content: '确定回答吗？题库索引：' + index,
-      success(res) {
-        if(res.confirm) {
-          wx.navigateTo({
-            url: '../quiz/quiz?index=' + index,
-          })
-        }
-      }
+    wx.navigateTo({
+      url: '../quiz/quiz?index=' + index,
     })
   },
   iamvip:function(e) {

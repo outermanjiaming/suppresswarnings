@@ -7,20 +7,23 @@
   </view>
   <view class="center">
     <text class="title">状态栏</text>
-    <button size="mini">答题模式</button>
-    <button size="mini">3/1829</button>
-    <button size="mini">我的错题</button>
-    <button size="mini">标星</button>
+    <button size="mini" bindtap="changemode">{{study ? '复习模式(切答题)' : '答题模式(切复习)'}}</button>
+    <button size="mini">{{index}}/{{list.length}}</button>
+    <button size="mini" bindtap="showrong">我的错题</button>
+    <button size="mini" bindtap="starquiz">标星</button>
   </view>
   <view class="question">
     <text class="title">操作面板</text>
 
-    <view class="quiz">勒·柯布西耶把比例与人体尺度结合在一起，提出了独特的（   ）。</view>
-    <button size="mini" class="options">A “模度”体系</button>
-    <button size="mini" class="options right">B 相似形要素</button>
-    <button size="mini" class="options">C 原始体型</button>
-    <button size="mini" class="options wrong">D 黄金比例</button>
+    <view class="quiz">{{quiz.question}}</view>
+    <button size="mini" bindtap="choose" data-option="A" class="options {{option['A']}}">A {{quiz.optionsA}}</button>
+    <button size="mini" bindtap="choose" data-option="B" class="options {{option['B']}}">B {{quiz.optionsB}}</button>
+    <button size="mini" bindtap="choose" data-option="C" class="options {{option['C']}}">C {{quiz.optionsC}}</button>
+    <button size="mini" bindtap="choose" data-option="D" class="options {{option['D']}}">D {{quiz.optionsD}}</button>
 
-    <view class="explain">根本没什么好解释的，老师课上都讲的很清楚了，你当时干啥去了？</view>
+    <view class="explain">{{quiz.chose ? quiz.explain : ''}}</view>
+  </view>
+  <view class="operation">
+  <button size="large" bindtap="nextquiz">下一题</button>
   </view>
 </view>

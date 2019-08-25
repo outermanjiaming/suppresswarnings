@@ -34,3 +34,11 @@
 .wrong {
   background: red;
 }
+
+.operation {
+ position: fixed;
+ bottom: 34px;
+ width: 100%;
+ height: constant(safe-area-inset-bottom);
+ background-color: #fff;
+}
