@@ -1,4 +1,5 @@
 // pages/quiz/quiz.js
+var touchStartTime = 0
 const head = 'https://suppresswarnings.com/like.http?action=draw'
 Page({
 
@@ -11,6 +12,8 @@ Page({
     count:0,
     current:'',
     quiz:{},
+    mywrong:0,
+    mystar:0,
     option:{'A':'', 'B':'', 'C':'', 'D':''},
     study:false
   }, 
@@ -22,10 +25,32 @@ Page({
     })
   },
   starquiz(e) {
-    var quiz = this.data.quiz
-    var star = wx.getStorageSync('star') || []
-    star.unshift(quiz)
-    wx.setStorageSync('star', star)
+    if (e.timeStamp - this.touchStartTime < 300) {
+      var quiz = this.data.quiz
+      var star = wx.getStorageSync('star') || []
+      var now = []
+      for (var i in star) {
+        var q = star[i]
+        if(q == undefined) {
+          continue
+        }
+        if(q.id === quiz.id) {
+          console.log('delete .... ')
+          delete star[i]
+        } else {
+          now.push(q)
+        }
+      }
+      now.unshift(quiz)
+      wx.setStorageSync('star', now)
+      this.setData({
+        mystar: now.length
+      })
+      wx.showToast({
+        title: '双击标星',
+      })
+    }
+    this.touchStartTime = e.timeStamp
   },
   choose(e) {
     var chose = e.target.dataset.option
@@ -40,8 +65,26 @@ Page({
       option[quiz.right] = 'right'
       quiz.chose = chose
       var wrong = wx.getStorageSync('wrong') || []
-      wrong.unshift(quiz)
-      wx.setStorageSync('wrong', wrong)
+      var now = []
+      for (var i in wrong) {
+        var q = wrong[i]
+        if (q == undefined) {
+          continue
+        }
+        if (q.id === quiz.id) {
+          delete wrong[i]
+        } else {
+          now.push(q)
+        }
+      }
+      now.unshift(quiz)
+      wx.setStorageSync('wrong', now)
+      wx.showToast({
+        title: '错题收藏',
+      })
+      this.setData({
+        mywrong:now.length
+      })
     }
     this.setData({
       quiz: quiz,
@@ -49,16 +92,18 @@ Page({
     })
   },
   changemode(e) {
-    var study = this.data.study
+    var study = !this.data.study
     this.setData({
-      study:!study
+      study:study
     })
     var quiz = this.data.quiz
+    var option = { 'A': '', 'B': '', 'C': '', 'D': '' }
     if(study) {
       quiz.chose = true
+      option[quiz.right] = 'right'
+    } else {
+      quiz.chose = false
     }
-    var option = { 'A': '', 'B': '', 'C': '', 'D': '' }
-    option[quiz.right] = 'right'
     this.setData({
       quiz:quiz,
       option: option
@@ -148,6 +193,13 @@ Page({
       complete(res) {
         wx.hideLoading()
       }
+    })
+
+    var wrong = wx.getStorageSync('wrong') || []
+    var star = wx.getStorageSync('star') || []
+    this.setData({
+      mywrong:wrong.length,
+      mystar: star.length
     })
   },
 

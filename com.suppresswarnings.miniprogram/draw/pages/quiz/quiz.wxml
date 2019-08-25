@@ -1,29 +1,30 @@
 <!--pages/quiz/quiz.wxml-->
 <view>
   <view class="center">
-    <text class="title">控制台</text>
-    <button size="mini">答题复习</button>
+    <text class="title">操作面板</text>
     <button size="mini">模拟考试</button>
-  </view>
-  <view class="center">
-    <text class="title">状态栏</text>
-    <button size="mini" bindtap="changemode">{{study ? '复习模式(切答题)' : '答题模式(切复习)'}}</button>
+    <button size="mini" bindtap="changemode" class="{{study ? 'right' : ''}}">{{study ? '复习模式(切答题)' : '答题模式(切复习)'}}</button>
     <button size="mini">{{index}}/{{list.length}}</button>
-    <button size="mini" bindtap="showrong">我的错题</button>
-    <button size="mini" bindtap="starquiz">标星</button>
+    
   </view>
   <view class="question">
-    <text class="title">操作面板</text>
+    <text class="title">使用说明：双击标星，错题自动收藏</text>
 
-    <view class="quiz">{{quiz.question}}</view>
+    <view class="quiz" bindtap="starquiz">{{quiz.question}}</view>
     <button size="mini" bindtap="choose" data-option="A" class="options {{option['A']}}">A {{quiz.optionsA}}</button>
     <button size="mini" bindtap="choose" data-option="B" class="options {{option['B']}}">B {{quiz.optionsB}}</button>
     <button size="mini" bindtap="choose" data-option="C" class="options {{option['C']}}">C {{quiz.optionsC}}</button>
     <button size="mini" bindtap="choose" data-option="D" class="options {{option['D']}}">D {{quiz.optionsD}}</button>
 
-    <view class="explain">{{quiz.chose ? quiz.explain : ''}}</view>
+    <view class="explain" bindtap="starquiz">{{quiz.chose ? quiz.explain : ''}}</view>
   </view>
   <view class="operation">
-  <button size="large" bindtap="nextquiz">下一题</button>
+  <button size="xlarge" bindtap="nextquiz">下一题</button>
+  </view>
+
+  <view class="center">
+  <text class="title">温故知新</text>
+<button size="mini" bindtap="showrong">我的错题 {{mywrong}}</button>
+    <button size="mini" bindtap="showstar">我的标星 {{mystar}}</button>
   </view>
 </view>

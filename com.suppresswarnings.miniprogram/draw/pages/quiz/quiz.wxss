@@ -10,7 +10,7 @@
 .center{
   text-align: center;
   justify-content: center; 
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .quiz {
@@ -28,7 +28,7 @@
 }
 
 .right {
-  background: green;
+  background: lightgreen;
 }
 
 .wrong {
@@ -37,8 +37,13 @@
 
 .operation {
  position: fixed;
- bottom: 34px;
+ padding: 0px;
+ bottom: 0px;
  width: 100%;
  height: constant(safe-area-inset-bottom);
  background-color: #fff;
+}
+
+.explain {
+  padding: 5px 5px;
 }

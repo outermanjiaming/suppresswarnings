@@ -1,8 +1,10 @@
 var touchStartTime = 0
+const colors = ['lightgreen', 'lightblue', 'gray', 'yellow', 'pink']
 const head = 'https://suppresswarnings.com/wx.http?action=draw'
 Page({
   data: {
     times: 1,
+    count: 0,
     box: {},
     moving: {
       'state': 0,
@@ -54,6 +56,16 @@ Page({
     console.log('you touched ' + who);
     this.data.frames = {};
     if (who == '0') {
+      if (e.timeStamp - this.touchStartTime < 300) {
+        var i = Math.floor((Math.random() * colors.length) + 1);
+        var x = Math.floor((Math.random() * 100) + 1);
+        var y = Math.floor((Math.random() * 100) + 1);
+        var idx = this.data.count
+        var ctx = this.data.canvas
+        this.house(ctx, colors[i], arr['x'], arr['y'], x, y, 'c' + idx);
+        this.onUpdate()
+      }
+      this.touchStartTime = e.timeStamp;
       return;
     }
     if (e.timeStamp - this.touchStartTime < 300){
@@ -110,7 +122,6 @@ Page({
         box[1] = 320 - box[3]
       }
       this.data.box[who] = box;
-      console.log(JSON.stringify(this.data.box))
       this.onUpdate();
     }
   },
@@ -152,6 +163,11 @@ Page({
     ctx.fillRect(x, y, dx, dy);
     var arr = [x, y, dx, dy, color];
     this.data.box[id] = arr;
+    var cnt = this.data.count
+    cnt += 1
+    this.setData({
+      count: cnt
+    })
   },
   inside: function(x, y) {
     var id = '0';
