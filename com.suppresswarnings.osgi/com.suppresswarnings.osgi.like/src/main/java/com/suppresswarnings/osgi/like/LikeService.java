@@ -24,11 +24,13 @@ import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
+import com.suppresswarnings.osgi.like.impl.DrawHandlerImpl;
 import com.suppresswarnings.osgi.like.impl.LikeHandlerImpl;
 import com.suppresswarnings.osgi.like.model.Page;
 import com.suppresswarnings.osgi.like.model.Result;
 import com.suppresswarnings.osgi.like.model.User;
 import com.suppresswarnings.osgi.like.model.Project;
+import com.suppresswarnings.osgi.like.model.Quiz;
 import com.suppresswarnings.osgi.network.http.HTTPService;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
@@ -38,6 +40,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public Gson gson = new Gson();
 	private LevelDB account, data, token;
 	public LikeHandler handler;
+	public DrawHandler drawHandler;
 	public Map<String, AtomicInteger> counters;
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
@@ -126,6 +129,38 @@ public class LikeService implements HTTPService, CommandProvider {
 			User user = handler.myself(openid);
 			Result result = new Result(user);
 			return gson.toJson(result);
+		} else if("draw".equals(action)) {
+			String todo = parameter.getParameter("todo");
+			if("insert".equals(todo)) {
+				String category = parameter.getParameter("category");
+				String chapter = parameter.getParameter("chapter");
+				String userid = parameter.getParameter("userid");
+				String question = parameter.getParameter("question");
+				String type = parameter.getParameter("type");
+				String optionsA = parameter.getParameter("optionsA");
+				String optionsB = parameter.getParameter("optionsB");
+				String optionsC = parameter.getParameter("optionsC");
+				String optionsD = parameter.getParameter("optionsD");
+				String right = parameter.getParameter("right");
+				String explain = parameter.getParameter("explain");
+				String id = drawHandler.insert(userid, category == null ? "-1":category, chapter == null ? "-1":chapter, question, type, optionsA, optionsB, optionsC, optionsD, right, explain);
+				return gson.toJson(new Result(id));
+			} else if("list".equals(todo)) {
+				String category = parameter.getParameter("category");
+				String chapter = parameter.getParameter("chapter");
+				String userid = parameter.getParameter("userid");
+				List<String> list = drawHandler.list(userid, category == null ? "-1":category, chapter == null ? "":chapter);
+				return gson.toJson(new Result(list));
+			} else if("select".equals(todo)) {
+				String category = parameter.getParameter("category");
+				String chapter = parameter.getParameter("chapter");
+				String userid = parameter.getParameter("userid");
+				String id = parameter.getParameter("id");
+				if(id != null) {
+					Quiz data = drawHandler.select(userid, category, chapter, id);
+					return gson.toJson(new Result(data));
+				} 
+			}
 		}
 		return gson.toJson(new Result(400, "unknown action"));
 	}
@@ -218,6 +253,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public void activate() {
 		logger.info("LikeService activate");
 		handler = new LikeHandlerImpl(this);
+		drawHandler = new DrawHandlerImpl(this);
 		counters = new ConcurrentHashMap<>();
 		
 		service.scheduleWithFixedDelay(()->{
