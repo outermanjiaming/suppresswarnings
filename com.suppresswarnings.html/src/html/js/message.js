@@ -156,5 +156,4 @@ function initLive2d (){
     })
 }
 initLive2d ();
-init('index-' + Math.random())
 
