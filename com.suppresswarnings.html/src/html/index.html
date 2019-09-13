@@ -40,7 +40,7 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
             userName = 'SuppressWarnings',  
             password = 'SuppressWarnings',
             topic = 'corpus/html/index';
-        client = new Paho.MQTT.Client(hostname, port, clientId);
+        client = new Paho.MQTT.Client(hostname, port, '/mqtt/html', clientId);
         //建立客户端实例  
         var options = {
             invocationContext: {
