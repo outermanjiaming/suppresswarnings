@@ -58,7 +58,7 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
             onSuccess: onConnect,
             onFailure: function (e) {
                 console.log(e);
-                s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onFailure()}";
+                s = "{time:" + new Date() + ", onFailure()}";
                 console.log(s);
             }
         };
@@ -66,7 +66,7 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
         //连接服务器并注册连接成功处理事件  
         function onConnect() {
             console.log("onConnected");
-            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onConnected()}";
+            s = "{time:" + new Date() + ", onConnected()}";
             console.log(s);
             client.subscribe(topic);
         }
@@ -79,7 +79,7 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
         //注册消息接收处理事件  
         function onConnectionLost(responseObject) {
             console.log(responseObject);
-            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onConnectionLost()}";
+            s = "{time:" + new Date() + ", onConnectionLost()}";
             console.log(s);
             if (responseObject.errorCode !== 0) {
                 console.log("onConnectionLost:" + responseObject.errorMessage);
@@ -88,13 +88,13 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
         }
 
         function onMessageArrived(message) {
-            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onMessageArrived()}";
+            s = "{time:" + new Date() + ", onMessageArrived()}";
             console.log(s);
             console.log("收到消息:" + message.payloadString);
         }
 
         function send() {
-            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", content:test, from: web console}";
+            s = "{time:" + new Date() + ", content:test, from: web console}";
             message = new Paho.MQTT.Message(s);
             message.destinationName = topic;
             client.send(message);
