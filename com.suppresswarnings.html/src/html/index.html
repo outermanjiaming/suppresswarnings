@@ -26,6 +26,80 @@
 }
 pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+
+    <script>
+        var hostname = 'suppresswarnings.com', //'192.168.1.2',
+            port = 8083,
+            clientId = 'client-lijiaming',
+            timeout = 5,
+            keepAlive = 100,
+            cleanSession = false,
+            ssl = false,
+            // userName = 'mao2080',  
+            // password = '123',  
+            topic = 'corpus/html/index';
+        client = new Paho.MQTT.Client(hostname, port, clientId);
+        //建立客户端实例  
+        var options = {
+            invocationContext: {
+                host: hostname,
+                port: port,
+                path: client.path,
+                clientId: clientId
+            },
+            timeout: timeout,
+            keepAliveInterval: keepAlive,
+            cleanSession: cleanSession,
+            useSSL: ssl,
+            // userName: userName,  
+            // password: password,  
+            onSuccess: onConnect,
+            onFailure: function (e) {
+                console.log(e);
+                s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onFailure()}";
+                console.log(s);
+            }
+        };
+        client.connect(options);
+        //连接服务器并注册连接成功处理事件  
+        function onConnect() {
+            console.log("onConnected");
+            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onConnected()}";
+            console.log(s);
+            client.subscribe(topic);
+        }
+
+        client.onConnectionLost = onConnectionLost;
+
+        //注册连接断开处理事件  
+        client.onMessageArrived = onMessageArrived;
+
+        //注册消息接收处理事件  
+        function onConnectionLost(responseObject) {
+            console.log(responseObject);
+            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onConnectionLost()}";
+            console.log(s);
+            if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:" + responseObject.errorMessage);
+                console.log("连接已断开");
+            }
+        }
+
+        function onMessageArrived(message) {
+            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", onMessageArrived()}";
+            console.log(s);
+            console.log("收到消息:" + message.payloadString);
+        }
+
+        function send() {
+            s = "{time:" + new Date().Format("yyyy-MM-dd hh:mm:ss") + ", content:test, from: web console}";
+            message = new Paho.MQTT.Message(s);
+            message.destinationName = topic;
+            client.send(message);
+        }
+</script>
 </head>
 <body>
 
@@ -56,6 +130,7 @@ pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-s
 		      <input type="text" id="reply" class="reply" name="reply" onkeypress="return onreply(event);" style="width:100%;margin-left: 0px;" placeholder="发送 一句话"/>
 		    </div>
      	  	<div id="xiaoshuSvg" onclick="return alert('了解“素朴网联”小程序：酒吧近场群聊小程序')"></div>
+          <input type="button" name="send" onclick="send" value="Send" />
          </td>
         </tr>
       </tbody>
