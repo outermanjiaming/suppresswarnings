@@ -103,26 +103,6 @@ initTips();
 
 window.setInterval(showHitokoto,12000);
 
-var socket;  
-var myname = '匿名'
-function init(username){
-  var host = "ws://suppresswarnings.com/mqtt/"+username;
-  try{  
-    socket = new WebSocket(host);  
-    socket.onopen    = function(msg){
-        console.log('you are in')
-        myname = username
-    };
-    socket.onmessage = function(msg){
-        console.log(msg.data);
-        showMessage(msg.data, 8000);
-    };
-    socket.onclose   = function(msg){
-        console.log("与服务器连接断开");
-    };
-  } catch(ex){
-  }
-}
 function showHitokoto(){
     $.getJSON('https://v1.hitokoto.cn',function(result){
         showMessage(result.hitokoto, 8000);
@@ -138,10 +118,6 @@ function reply() {
 	        console.log(result);
 	    }
 	 });
-	 try{
-        socket.send(reply);
-	  } catch(ex){
-	  }
 	 showMessage(reply, 8000);
 	 $('#reply').val('')
 }
