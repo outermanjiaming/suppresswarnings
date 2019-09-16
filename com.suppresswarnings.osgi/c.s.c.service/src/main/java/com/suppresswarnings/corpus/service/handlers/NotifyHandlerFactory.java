@@ -1,10 +1,13 @@
 package com.suppresswarnings.corpus.service.handlers;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.RequestHandler;
@@ -18,6 +21,7 @@ import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class NotifyHandlerFactory {
 	static org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
+	static Gson gson = new Gson();
 	static RequestHandler invest = (parameter, service, args) ->{
 		String result = args[0];
 		String orderid = args[1];
@@ -43,6 +47,89 @@ public class NotifyHandlerFactory {
 		}
 		return "success";
 	};
+	static RequestHandler minipay = (parameter, service, args) ->{
+		logger.info("processing minipay");
+		String result = args[0];
+		String orderid = args[1];
+		String openid = args[2];
+		String goodsid = args[3];
+		String cashfee = args[4];
+		if("SUCCESS".equals(result)) {
+			if(goodsid.startsWith("coin")) {
+				String coinKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Coin");
+				String coin = service.account().get(coinKey);
+				String myFeeKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "MyCoin", "Fee", orderid);
+				service.account().put(myFeeKey, cashfee);
+				service.publish("corpus/mini/coin/" + openid, orderid + ";" + openid + ";" + openid + ";" + goodsid + ";充值金币" + coin + ";" + cashfee);
+				if(!service.isNull(coin)) {
+					//unlock the coin
+					AtomicBoolean lock = service.switches("mycoin" + openid);
+					lock.set(false);
+					service.updateCoin(openid, Integer.parseInt(coin));
+				} else {
+					logger.error("coin is not set");
+				}
+			} else {
+				//unlock the coin
+				AtomicBoolean lock = service.switches("mycoin" + openid);
+				lock.set(false);
+				//every time you buy something, you got 1 coin
+				service.updateCoin(openid, 1);
+				String groupid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Groupid"));
+				String notice = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Notice"));
+				if(goodsid.startsWith("packet")) {
+					String count = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Count"));
+					AtomicBoolean redlock = service.switches("haspacket" + groupid);
+					service.publish("corpus/mini/packet/" + groupid, orderid + ";" + openid + ";" + openid + ";" + goodsid + ";" + notice + ";" + cashfee);
+					synchronized(redlock) {
+						String packetKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", groupid, "Redpacket", orderid);
+						service.account().put(packetKey, count);
+						//this is I have sent, not I owned
+						String sentPacketKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Sent", "Redpacket", groupid, orderid);
+						service.account().put(sentPacketKey, count);
+						redlock.set(false);
+					}
+				} else if(goodsid.startsWith("gift")) {
+					String userid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Userid"));
+					String sendGiftKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", openid, "Gift", "Send", orderid);
+					String haveGiftKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", userid, "Gift", "Have", orderid);
+					service.account().put(sendGiftKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
+					service.account().put(haveGiftKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
+					service.publish("corpus/mini/gift/" + groupid, orderid + ";" + openid + ";" + userid + ";" + goodsid + ";" + notice + ";" + cashfee);
+				}
+			}
+				
+			
+			return "success";
+		} else {
+			
+			return "fail";
+		}
+	};
+	
+	static RequestHandler reserve = (parameter, service, args) ->{
+		logger.info("processing reserve");
+		String result = args[0];
+		String orderid = args[1];//can get everything we need
+		String openid = args[2];//who paid this
+		String goodsid = args[3];//here must be someone's openid
+		String cashfee = args[4];
+		if("SUCCESS".equals(result)) {
+			String userid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Userid"));
+			String notice = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Notice"));
+			String groupid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Groupid"));
+			String sendReserveKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", openid, "Reserve", "Send", orderid);
+			String haveReserveKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", userid, "Reserve", "Have", orderid);
+			service.account().put(sendReserveKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
+			service.account().put(haveReserveKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
+			service.publish("corpus/mini/reserve/" + groupid, orderid + ";" + openid + ";" + userid + ";" + goodsid + ";" + notice + ";" + cashfee);
+			return "success";
+		} else {
+			
+			return "fail";
+		}
+	};
+	
 	static RequestHandler sponsor = (parameter, service, args) ->{
 		String result = args[0];
 		String orderid = args[1];
@@ -110,7 +197,6 @@ public class NotifyHandlerFactory {
 			String check = wxPay.sign(map, SignType.HMACSHA256);
 			String sign = map.get("sign");
 			boolean equal = check.equals(sign);
-			logger.info("[corpus] lijiaming: equal = " + equal + "\ncheck = " + check + "\nsign=" + sign);
 			if(!equal) {
 				return "fail";
 			}
@@ -168,6 +254,12 @@ public class NotifyHandlerFactory {
 			} else if(orderid.startsWith("Like")) {
 				logger.info("赞助金额：" + cashfee + " for " + goodid);
 				return sponsor.handler(parameter, service, result, orderid, openid, attach, cashfee);
+			} else if(orderid.startsWith("mini")) {
+				minipay.handler(parameter, service, result, orderid, openid, attach, cashfee);
+				return "";
+			} else if(orderid.startsWith("reserve")) {
+				reserve.handler(parameter, service, result, orderid, openid, attach, cashfee);
+				return "";
 			} else {
 				return RequestHandler.simple.handler(parameter, service);
 			}

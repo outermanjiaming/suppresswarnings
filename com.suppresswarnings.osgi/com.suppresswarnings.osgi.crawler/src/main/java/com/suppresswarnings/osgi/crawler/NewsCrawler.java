@@ -69,13 +69,13 @@ public class NewsCrawler extends BreadthCrawler {
         System.out.println( "Hello Crawler!" );
 //        Jobs jobs = new Jobs("jianshu-crawler", "https://www.jianshu.com/p/82d81319ad69", "https:\\/\\/www\\.jianshu\\.com\\/p\\/.+", "h1[class=title]");
 //        Jobs jobs = new Jobs("meizu-crawler", "https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats%20(URL:%20https://bbs.meizu.cn/forum.php?mod=forumdisplay&fid=103&orderby=heats&filter=dateline&dateline=7948800&orderby=heats)", "https:\\/\\/bbs\\.meizu\\.cn\\/thread.+", "td[class=t_f]");
-        Jobs jobs = new Jobs("AA-roadcode", "https://www.aa.co.nz/RoadCodeQuizController/getSet", "https://www.aa.co.nz/RoadCodeQuizController/getSet", "a[class=xst gv]");
-//        Jobs jobs = new Jobs("csdn-crawler", "https://blog.csdn.net/dQCFKyQDXYm3F8rB0/article/details/79990871", "https:\\/\\/blog\\.csdn\\.net\\/.*\\/article\\/details\\/.*", "h1[class=csdn_top]");
+//        Jobs jobs = new Jobs("AA-roadcode", "https://www.aa.co.nz/RoadCodeQuizController/getSet", "https://www.aa.co.nz/RoadCodeQuizController/getSet", "a[class=xst gv]");
+        Jobs jobs = new Jobs("wx-crawler", "https://mp.weixin.qq.com/s/tc_oUewAPvaArU1UAbJy7A", "https:\\/\\/mp\\.weixin\\.qq\\.com\\/.*", "html");
         
 //        Jobs jobs = new Jobs("10why-crawler", "http://www.10why.net/", "http:\\/\\/www\\.10why\\.net.+", "a");
 //        Jobs jobs = new Jobs("zhidao-crawler", "https://zhidao.baidu.com", "https:\\/\\/zhidao\\.baidu\\.com\\/question.+", "span");
         NewsCrawler crawler = new NewsCrawler(jobs);
-        crawler.start(5);
+        crawler.start(1);
     } 
 
 	@Override

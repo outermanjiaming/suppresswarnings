@@ -35,17 +35,14 @@ public class HttpClientHolder {
 			X509TrustManager trustManager = new X509TrustManager() {  
 		        @Override  
 		        public void checkClientTrusted(java.security.cert.X509Certificate[] paramArrayOfX509Certificate, String paramString) throws CertificateException {
-		        	logger.info("[HttpClientHolder] checkClientTrusted: doing nothing");
 		        }  
 		  
 		        @Override  
 		        public void checkServerTrusted(java.security.cert.X509Certificate[] paramArrayOfX509Certificate, String paramString) throws CertificateException {
-		        	logger.info("[HttpClientHolder] checkServerTrusted: doing nothing");
 		        }  
 		  
 		        @Override  
 		        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-		        	logger.info("[HttpClientHolder] getAcceptedIssuers: doing nothing");
 		            return null;
 		        }  
 		    };

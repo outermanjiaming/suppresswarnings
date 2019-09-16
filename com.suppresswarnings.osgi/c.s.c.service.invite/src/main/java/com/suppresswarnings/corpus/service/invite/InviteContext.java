@@ -58,13 +58,21 @@ public class InviteContext extends WXContext {
 				}
 			}
 			
-			String code = "T_Invite_" + openid();
-			String access = u.content().accessToken("Generate Temp QRCode");
-			String json = u.content().qrCode(access, (int)TimeUnit.DAYS.toSeconds(7), "QR_STR_SCENE", code);
-			u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", code, "Openid"), openid());
-			u.content().setGlobalCommand(code, CMD, openid(), time());
+			String P_Func_Target = "P_VIP_" + openid();
+			String qrKey = String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target);
+			String exist = u.content().account().get(qrKey);
+			if(u.content().isNull(exist)) {
+				String access = u.content().accessToken("Generate Temp QRCode");
+				String json = u.content().qrCode(access, (int)TimeUnit.DAYS.toSeconds(7), "QR_STR_SCENE", P_Func_Target);
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target, "Openid"), openid());
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", P_Func_Target), json);
+				logger.info("save it to db");
+				u.content().setGlobalCommand(P_Func_Target, CMD, openid(), time());
+				exist = json;
+			}
+			
 			Gson gson = new Gson();
-			QRCodeTicket qrTicket = gson.fromJson(json, QRCodeTicket.class);
+			QRCodeTicket qrTicket = gson.fromJson(exist, QRCodeTicket.class);
 			WXnews news = new WXnews();
 			news.setTitle("「素朴网联」你的专属二维码");
 			news.setDescription("「素朴网联」全民行动，邀请好朋友加入素朴网联，邀请的朋友就是你的财富！");

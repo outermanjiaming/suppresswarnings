@@ -45,7 +45,6 @@ public class AIIoT implements Closeable {
 	Random random = new Random();
 	CorpusService service;
 	int sslPort;
-	String quizId;
 	AtomicBoolean on = new AtomicBoolean(true);
 	SSLServerSocket serverSocket;
 	ScheduledExecutorService scheduledExecutorService;
@@ -93,7 +92,6 @@ public class AIIoT implements Closeable {
 	}
 	
 	public void working() throws Exception {
-		this.quizId = service.getTodoQuizid();
 		Properties config = new Properties();
 		config.load(new FileInputStream(Config.serverConfigFilePath));
 		logger.info("[AIIoT] load config: " + config.size());
@@ -155,6 +153,7 @@ public class AIIoT implements Closeable {
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "AIIoT", "CMD", code), commands);
 				Things exist = things.remove(code);
 				if(exist != null) {
+					service.tellAdmins("AIIoT", "设备更新");
 					exist.close();
 					logger.info("[AIIoT] close previos things");
 				}
@@ -183,7 +182,7 @@ public class AIIoT implements Closeable {
 		
 		//counter for quiz
 		for(String cmd : commands) {
-			String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid, ""+System.currentTimeMillis(), ""+random.nextInt(9999));
+			String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", "gh_b3ac48e83f7d", "Answer", openid, ""+System.currentTimeMillis(), ""+random.nextInt(9999));
 			String aid = service.data().get(answerKey);
 			if(aid == null) {
 				service.data().put(answerKey, cmd);
@@ -202,17 +201,21 @@ public class AIIoT implements Closeable {
 	public Things newThings(String desc, String code, Socket socket) {
 		if(socket == null) {
 			logger.info("[AIIoT] socket is null");
+			return null;
 		}
 		if(socket.isClosed()) {
 			logger.info("[AIIoT] socket is closed");
+			return null;
 		}
 		//check code 
 		Things things = new Things(desc, code, socket);
+		service.tellAdmins("AIIoT", "设备上线:" + desc);
 		return things;
 	}
 
 	@Override
 	public void close() {
+		service.tellAdmins("AIIoT", "AIIoT关闭");
 		on.set(false);
 		things.forEach((code, thing) ->{
 			try {

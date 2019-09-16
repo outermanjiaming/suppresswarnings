@@ -13,7 +13,7 @@ public class LikeContext extends WXContext {
 	public static final String CMD = "我要发起点赞";
 	Project project = new Project();
 	Gson gson = new Gson();
-	int count = 4;
+	int count = 1;
 	State<Context<CorpusService>> like = new State<Context<CorpusService>>() {
 
 		/**
@@ -24,7 +24,8 @@ public class LikeContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			project.setOpenid(openid());
-			project.setProjectid(String.join(Const.delimiter, "Project", time(), openid()));
+			long timer = CorpusService.STOP_THE_WORLD - System.currentTimeMillis();
+			project.setProjectid(String.join(Const.delimiter, "Project", "" + timer, openid()));
 			project.setBonusCent("1000");
 			project.setTime(time());
 			
@@ -71,60 +72,17 @@ public class LikeContext extends WXContext {
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
 			project.setTitle(t);
-			u.output("请上传图片（最多"+count+"张）：");
+			u.output("请上传一张图片（二维码或者宣传图）：");
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			count --;
-			return picture;
+			return finish;
 		}
 
 		@Override
 		public String name() {
 			return "点赞宣传语";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
-	
-	State<Context<CorpusService>> picture = new State<Context<CorpusService>>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 7086519805654327293L;
-		
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			
-			String image = t;
-			if(t.startsWith("IMAGE_")) {
-				image = t.substring("IMAGE_".length());
-			}
-			project.addPicture(image);
-			if(count > 0) u.output("请输入“完成”或继续上传图片（最多"+count+"张）：");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			count --;
-			if(count < 1) {
-				this.accept(t, u);
-				return finish;
-			}
-			if("完成".equals(t)) {
-				return finish;
-			}
-			return picture;
-		}
-
-		@Override
-		public String name() {
-			return "点赞图片";
 		}
 
 		@Override
@@ -142,6 +100,11 @@ public class LikeContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
+			String image = t;
+			if(t.startsWith("IMAGE_")) {
+				image = t.substring("IMAGE_".length());
+			}
+			project.addPicture(image);
 			project.setTarget("1000");
 			logger.info(project.toString());
 			save();

@@ -45,6 +45,9 @@
       <module>c.s.c.service.autocoin</module>
       <module>c.s.c.service.wxpy</module>
       <module>c.s.c.service.mqtt</module>
+      <module>com.suppresswarnings.osgi.wxthings</module>
+      <module>c.s.c.service.moneytree</module>
+      <module>c.s.c.service.invest</module>
   </modules>
   <dependencies>
   		<dependency>

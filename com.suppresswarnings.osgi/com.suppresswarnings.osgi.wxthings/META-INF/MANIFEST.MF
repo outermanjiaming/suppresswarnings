@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: wxthings
+Bundle-SymbolicName: com.suppresswarnings.osgi.wxthings
+Bundle-Version: 1.0.0.osgi
+Import-Package: com.suppresswarnings.corpus.common,
+ com.suppresswarnings.osgi.network.http,
+ org.slf4j;version="1.7.2"
+Service-Component: OSGI-INF/component.xml

@@ -9,6 +9,11 @@
  */
 package com.suppresswarnings.corpus.service;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +46,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.suppresswarnings.corpus.common.ACrypt;
 import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
@@ -58,12 +64,16 @@ import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.game.Guard;
 import com.suppresswarnings.corpus.service.handlers.DaigouHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.MiniprogramHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.NotifyHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.PingHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.QRCodeHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.ShortUrlHandlerFactory;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
+import com.suppresswarnings.corpus.service.mqtt.MqttPublish;
+import com.suppresswarnings.corpus.service.sdk.MiniPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfigImpl;
@@ -324,7 +334,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		LevelDB instance = (LevelDB) provider.instance();
 		return instance;
 	}
-	public AtomicBoolean switches(String key) {
+	//TODO bugfix:synchronized
+	public synchronized AtomicBoolean switches(String key) {
 		AtomicBoolean switches = atomicSwitches.get(key);
 		if(switches == null) {
 			switches = new AtomicBoolean(false);
@@ -332,20 +343,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		return switches;
 	}
+	
+	public void publish(String topic, String payload) {
+		String md5sum = ACrypt.md5(payload + payload);
+		String check = topic + "/" + md5sum;
+		threadpool.execute(new MqttPublish(payload, "tcp://suppresswarnings.com:1883", check, SuppressWarnings.class.getSimpleName(), SuppressWarnings.class.getSimpleName(), CorpusService.class.getSimpleName()));
+	}
+	
 	public void atUser(String openid, String message) {
 		logger.info("atUser " + openid + ": " + message);
 		ATuser user = new ATuser(this, openid, message, System.currentTimeMillis());
 		atUserPool.execute(user);
-	}
-	
-	public void informUsers(String openid, String message) {
-		threadpool.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				workHandler.informUsersExcept(openid, message, users);
-			}
-		});
 	}
 	
 	public String youGotMe(String openId, String quiz, String quizId) {
@@ -366,6 +374,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	public void approvedRunnable(String approver, String openid, int cent) {
 		approvedRunnable.put(openid, new CashoutRunnable(approver, openid, cent));
+		logger.warn(approver + "审批" +openid+ "提现" + cent + "分");
 	}
 	public void rejectRunnable(String approver, String openid, int cent) {
 		approvedRunnable.remove(openid);
@@ -413,12 +422,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 		logger.info("[corpus] remoteCall "+ thing);
 		if(thing == null) {
 			logger.info("[corpus] remoteCall but thing is null for code: " + code);
-			ret.append("设备为null");
 		} else if(thing.isClosed()) {
 			logger.info("[corpus] thing is closed: " + thing.toString());
-			ret.append("设备已关闭");
 		} else {
-			logger.info("[corpus] remoteCall("+ openid +", "+thing+", "+cmd + "" + input+")");
+			logger.info("[corpus] remoteCall("+ openid +", "+thing+", "+cmd + ";" + input+")");
 			String result = thing.execute(cmd, input);
 			if(result != null) ret.append(result);
 		}
@@ -474,7 +481,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	public void activate() {
 		CorpusService that = this;
-		
+		System.setProperty("mqtt", SuppressWarnings.class.getName());
 		logger.info("[corpus] activate");
 		System.out.println("服务正在启动");
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
@@ -537,10 +544,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					
 					workHandler = new WorkHandler(that, Const.WXmsg.openid);
 					workHandler.working();
-					String quizId = getTodoQuizid();
-					if(quizId != null) {
-						fillQuestionsAndAnswers(quizId);
-					}
 					logger.info("[corpus] workHandler working");
 				} catch (Exception e) {
 					logger.error("[corpus] fail to delay execute", e);
@@ -601,7 +604,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			long last = System.currentTimeMillis();
 			String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg");
 			String expireKey = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Expire", "973rozg");
-			
+			String jskey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Token", "973rozg");
+			String jsexpireKey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Expire", "973rozg");
 			@Override
 			public void run() {
 				try {
@@ -623,12 +627,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 					String jsjson = jsget.call();
 					@SuppressWarnings("unchecked")
 					Map<String, Object> map = gson.fromJson(jsjson, Map.class);
-					String jskey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Token", "973rozg");
-					String jsexpireKey = String.join(Const.delimiter, Const.Version.V1, "JsAccessToken", "Expire", "973rozg");
+					
 					String ticket = (String) map.get("ticket");
 					token().put(jskey, ticket);
 					token().put(jsexpireKey, "" + expireAt);
 					logger.info("[js access token] refresh " + jsjson);
+					
+					hitokoto();
 				} catch (Exception e) {
 					logger.error("[access token] Exception when refresh", e);
 				}
@@ -648,11 +653,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 					logger.info("[corpus] it's too early, no need to send report");
 					return;
 				}
-				String quizId = getTodoQuizid();
-				if(quizId != null) {
-					fillQuestionsAndAnswers(quizId);
-				}
-				
 				
 				String admins = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Admins"));
 				if(admins == null) {
@@ -684,6 +684,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
+				if(notifyAdmins.size() > 0) {
+					String filename = System.currentTimeMillis() + times + ".html";
+					String path = System.getProperty("path.html") + filename;
+					try {
+						Files.write(Paths.get(path), ks.toString().getBytes(), StandardOpenOption.CREATE_NEW);
+					} catch (Exception e) {
+						logger.error("fail to write notifyAdmins file", e);
+					}
+					info.append("https://suppresswarnings.com/" + filename);
+				}
 				info.append("（仅通知管理员）\n周期汇报：第").append(times).append("次").append("\n");
 				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
 				info.append("用户统计：" + users.size()).append("\n");
@@ -695,14 +705,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 				info.append("问题统计: " + questionToAid.size())
 					.append("/").append(aidToAnswers.size())
 					.append("/").append(corpusCount.get()).append("\n");
-				info.append("待审批：").append(tobeApproved.size()).append(",已执行的异步任务：").append(atUserPool.getCompletedTaskCount()).append("\n");
+				info.append("待审批：").append(tobeApproved.size()).append(",已执行：").append(atUserPool.getCompletedTaskCount()).append("\n");
 //				info.append("后台工作：\n" + workHandler.report());
 				info.append("访问计数：");
 				atomicIds.forEach((k, v) ->{
 					info.append("\n" + k + "\t" + v.get());
 				});
 				for(String one : admin) {
-					atUser(one, ks.toString());
 					atUser(one, info.toString());
 				}
 				Set<String> openids = approvedRunnable.keySet();
@@ -718,7 +727,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void deactivate() {
 		logger.info("[corpus] deactivate.");
 		contexts.forEach((openid, ctx) -> {
-			atUser(openid, "和你聊天太有趣了，我暂时关机离开一下，等我一下哈");
+			sendTxtTo("@User", "我闭关修炼10分钟，先告辞了！", openid);
 		}) ;
 		
 		
@@ -791,8 +800,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t listn - listn <startkey> <limit> - list some values by start limit.\n");
 		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
 		buffer.append("\t findn - findn <startkey> <what> <limit> - find them and delete some key-values by what value.\n");
-		buffer.append("\t aiiot - aiiot <exam> <word> - speak words on things\n");
-		buffer.append("\t cashout - cashout <limit> - list all cashout request\n");
+		buffer.append("\t action - action <method name> - invoke method\n");
 		
 		return buffer.toString();
 	}
@@ -813,31 +821,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		int result = leveldb.put(key, value);
 		ci.println("[putkv] " + result + " put: "+ key + " = " + value);
 	}
-	AtomicInteger start = new AtomicInteger(0);
-	public void _aiiot(CommandInterpreter ci) {
-		String cmd = ci.nextArgument();
-		String length = ci.nextArgument();
-		int size = Integer.valueOf(length);
-		String code = "Robot_AIIoT_0001";
-		Context<CorpusService> context = new Context<CorpusService>(this) {
-			
-			@Override
-			public State<Context<CorpusService>> exit() {
-				return null;
-			}
-			
-		};
-		if("exam".equals(cmd)) {
-			for(int i=0;i<size && start.get() < assimilatedQuiz.size();i++) {
-				String input = assimilatedQuiz.get(start.getAndIncrement()).getQuiz().value();
-				String ret = aiiot.remoteCall("appid", "myself", code, cmd, input, context);
-				logger.info("generate mp3 remote: " + ret);
-			}
-		}
-		
-		ci.println("[aiiot] " + length + ", " + cmd + ", " + start.get());
-	}
-	
 	public void _getkv(CommandInterpreter ci) {
 		logger.info("[getkv] " + leveldb);
 		if(leveldb == null) return;
@@ -943,10 +926,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 		});
 	}
 	
-	public String getTodoQuizid() {
-		String taskKey = String.join(Const.delimiter, Const.Version.V1, "Task", "Quiz", "Reply");
-		String quizId = data().get(taskKey);
-		return quizId;
+	public String hitokoto() {
+		try {
+			CallableGet hitokotoget = new CallableGet("https://v1.hitokoto.cn", "");
+			String hitokotojson = hitokotoget.call();
+			@SuppressWarnings("unchecked")
+			Map<String, Object> hitokotomap = gson.fromJson(hitokotojson, Map.class);
+			String hitokoto = (String) hitokotomap.get("hitokoto");
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Hitokoto"), hitokoto);
+			data().put(String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Hitokoto", ""+hitokotomap.get("id")), hitokoto);
+			return hitokoto;
+		} catch (Exception e) {
+			logger.error("hitokoto", e);
+			return "";
+		}
 	}
 	
 	private static final String AUTO_COIN_CMD = "素朴网联back素朴网联home素朴网联open,com.suppresswarnings.android/com.suppresswarnings.android.MainActivity素朴网联sleep素朴网联left素朴网联right素朴网联swipe10素朴网联swipe1素朴网联scroll素朴网联scoll素朴网联click";
@@ -973,6 +966,42 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public boolean isNull(String value) {
 		return value == null || "null".equals(value) || "None".equals(value);
 	}
+	
+	public String updateCoin(String openid, int coin) {
+		logger.info("update coins: " + openid + ":" + coin);
+		AtomicBoolean lock = this.switches("mycoin" + openid);
+		if(lock.get() && coin < 0) {
+			logger.info("mycoin " + openid + " is locked");
+			return "0";
+		}
+		synchronized(lock) {
+			//TODO bugly after crash, mem is gone
+			String time = "" + System.currentTimeMillis();
+			String rand = "" + random.nextInt(99999);
+			String myCoinKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "MyCoin", "Coin");
+			String myCoin = this.account().get(myCoinKey);
+			if(this.isNull(myCoin)) {
+				//default 8 coins
+				myCoin = "8";
+				logger.info("set default coin:" + myCoin);
+				tellAdmins(openid, "default coin:" + myCoin);
+			}
+			if(coin == 0) {
+				return myCoin;
+			}
+			
+			int coins = Integer.parseInt(myCoin);
+			int sum = coins + coin;
+			if(sum <= 0) {
+				lock.compareAndSet(false, true);
+				logger.error("user coins locked: " + openid);
+			}
+			this.account().put(myCoinKey, "" + sum);
+			this.account().put(String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "MyCoin", "Stream", time, rand), "" + coin);
+			return "" + sum;
+		}
+	}
+	
 	public String getOpenidByIdentity(String identity) {
 		String code = account().get(String.join(Const.delimiter, Const.Version.V1, "Code", "Activate", "Code", identity));
 		if(isNull(code)) return null;
@@ -1001,6 +1030,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		return counter.report();
 	}
 	
+	public void collectV2(String value) {
+		String key = String.join(Const.delimiter, Const.Version.V2, "Corpus", "Collect", value);
+		data().put(key, value);
+	}
+	
 	public void fillCounter(Quiz quiz){
 		List<KeyValue> kvs = quizAnswerReplyOrSimilar.matches(quiz.getQuiz().key());
 		String openid = kvs.get(1).value();
@@ -1012,7 +1046,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		}
 		String time = kvs.get(2).value();
 		counter.quiz(Long.parseLong(time), quiz.getQuiz().value());
-		
 		List<KeyValue> replys = quiz.getReply();
 		for(KeyValue reply : replys) {
 			List<KeyValue> replyKV = quizAnswerReplyOrSimilar.matches(reply.key());
@@ -1042,7 +1075,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	
 	
 	public synchronized void fillQuestionsAndAnswers(String quizId){
-		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus","Quiz", quizId, "Answer");
+		String start = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer");
 		counters.clear();
 		corpusCount.set(0);
 		assimilatedQuiz.clear();
@@ -1124,26 +1157,17 @@ public class CorpusService implements HTTPService, CommandProvider {
 		fillWork();
 	}
 	
-	public void _cashout(CommandInterpreter ci) {
-		String count = ci.nextArgument();
-		Integer val = Integer.valueOf(count);
-		AtomicInteger integer = new AtomicInteger(0);
-		String start = String.join(Const.delimiter, Const.Version.V2, "Cashout", "Request");
-		account().page(start, start, null, val, (k, v) ->{
-			WXuser user = getWXuserByOpenId(v);
-			String realName = account().get(String.join(Const.delimiter, Const.Version.V2, v, "RealValue"));
-			ci.println(integer.incrementAndGet() + ". " + k + " = " + v + " real: " + realName + " user: " + user.toString());
-			String informKey = String.join(Const.delimiter, Const.Version.V2, "@User", "Cashout", "Inform", v);
-			String informCashoutRequest = account().get(informKey);
-			if(informCashoutRequest == null || "None".equals(informCashoutRequest)) {
-				account().put(informKey, k);
-				atUser(v, "素朴网联正在审核提现请求，请稍等，（微信公众平台规定）提现金额少于30分无法通过企业付款，请谅解！");
-			} else {
-				ci.println(integer.get() + ". 已经通知用户。" + k);
-			}
-			
-		});
-		ci.println(integer.incrementAndGet() + ". 完成");
+	public void _action(CommandInterpreter ci) {
+		try {
+			String arg = ci.nextArgument();
+			Class<?> clazz = this.getClass();
+			Method method = clazz.getDeclaredMethod(arg);
+			method.invoke(this);
+			ci.println("method invoke done: " + arg);
+		} catch (Exception e) {
+			ci.println("fail to action");
+		}
+		ci.println("action execute done");
 	}
 	
 	public void _interception(CommandInterpreter ci) {
@@ -1197,6 +1221,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public String getName() {
 		return "wx.http";
 	}
+	
 	@Override
 	public String start(Parameter parameter) throws Exception {
 		// TODO get action to do things
@@ -1206,6 +1231,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return PingHandlerFactory.handle(parameter, this);
 		} else if("qrcode".equals(action)) {
 			return QRCodeHandlerFactory.handle(parameter, this);
+		} else if("shorturl".equals(action))  {
+			return ShortUrlHandlerFactory.handle(parameter, this);
+		} else if("miniprogram".equals(action)) {  
+			return MiniprogramHandlerFactory.handle(parameter, this);
 		} else if("addget".equals(action)) {
 			String todo = parameter.getParameter("todo");
 			logger.info("addget: " + todo);
@@ -1220,6 +1249,39 @@ public class CorpusService implements HTTPService, CommandProvider {
 			} else {
 				return SUCCESS;
 			}
+		} else if("recall".equals(action)) {
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				logger.info("[recall] random == null");
+				return "fail";
+			}
+			String CODE = parameter.getParameter("ticket");
+			if(CODE == null) {
+				logger.info("[recall] ticket == null");
+				return "fail";
+			}
+			String state = parameter.getParameter("state");
+			if(state == null) {
+				logger.info("[recall] state == null");
+				return "fail";
+			}
+			JsAccessToken accessToken = jsAccessToken(CODE);
+			if(accessToken == null) {
+				logger.info("[recall access_token] accessToken == null");
+				return "fail";
+			}
+			
+			String openId = accessToken.getOpenid();
+			logger.info("[recall] get openid ok: " + openId);
+			if(openId == null) {
+				logger.info("[recall] get openid failed");
+				return "fail";
+			}
+			account().put(String.join(Const.delimiter, "Robot", "Recall", state, openId), openId);
+			account().put(String.join(Const.delimiter, "Robot", "Recall", openId, state), state);
+			data().put(String.join(Const.delimiter, "Robot", "Recall", state, openId, "" + System.currentTimeMillis()), openId);
+			publish("corpus/python/recall/" + state, openId);
+			return article(openId);
 		} else if("vip".equals(action)) {
 			logger.info("[vip] lijiaming");
 			String random = parameter.getParameter("random");
@@ -1243,7 +1305,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			
-			logger.info("[vip access_token] " + accessToken.toString());
 			String openId = accessToken.getOpenid();
 			if(openId == null) {
 				logger.info("[vip] get openid failed");
@@ -1316,7 +1377,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			
-			logger.info("[managereports access_token] " + accessToken.toString());
 			String openId = accessToken.getOpenid();
 			if(openId == null) {
 				logger.info("[managereports] get openid failed");
@@ -1392,16 +1452,10 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String openid =  parameter.getParameter("openid");
 			String echoStr = parameter.getParameter("echostr");
 			String token = parameter.getParameter("token");
-			String fromOpenId = Const.WXmsg.openid;
-			if(token != null) {
-				String fromOpenIdKey = String.join(Const.delimiter, Const.Version.V1, "WXID", "Token", token);
-				fromOpenId = account().get(fromOpenIdKey);
-			}
+			
 			if(msgSignature == null || !msgSignature.equals(sha1)) {
 				logger.error("[WX] wrong signature");
-				if(openid != null) {
-					return xml(openid, Const.WXmsg.reply[0], fromOpenId);
-				}
+				return SUCCESS;
 			}
 			if(echoStr != null) {
 				return echoStr;
@@ -1409,10 +1463,18 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(openid != null) {
 				String sms = parameter.getParameter(Parameter.POST_BODY);
 				if(sms == null) {
-					return xml(openid, Const.WXmsg.reply[1], fromOpenId);
+					logger.error("[WX] no post body");
+					return SUCCESS;
 				}
 				Map<String, String> wxmsg = WXPayUtil.xmlToMap(sms);
-				
+				String fromOpenId = wxmsg.get("ToUserName");
+				if(token == null) {
+					logger.error("token is null, config wrong");
+					if(fromOpenId != null) {
+						return xml(openid, "这个公众号还没有联系「素朴网联」管理员配置WXID，现在不能提供智能回复服务。", fromOpenId);
+					}
+					return SUCCESS;
+				}
 				String msgType = wxmsg.get("MsgType");
 				logger.info("[WX] check: " + msgType);
 				if(msgType == null) {
@@ -1458,31 +1520,27 @@ public class CorpusService implements HTTPService, CommandProvider {
 							}
 						}
 						
-						String article = "https://mp.weixin.qq.com/s/2dkcH0vRvqFsfKk70zuARw";
-						String set = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Setting", "Article"));
-						if(!isNull(set)) {
-							article = set;
-						}
+						String article = article(openid);
 						WXnews news = new WXnews();
-						news.setTitle("请阅读文章并点击广告");
-						news.setDescription("请关注「素朴网联」请点击文章，请点击广告！");
+						news.setTitle("请阅读文章了解「素朴网联」全方位介绍");
+						news.setDescription("请关注「素朴网联」阅读文章，全方位了解！");
 						news.setUrl(article);
 						news.setPicUrl("https://suppresswarnings.com/like.png");
 						String json = "news://" + gson.toJson(news);
-						
+						String hitokoto = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Hitokoto"));
 						if(subscribe == null) {
 							account().put(subscribeKey, time);
-							atUser(openid, "你好，请把我当作你的好朋友，陪我聊天，教我很多东西");
+							atUser(openid, hitokoto);
 							return xml(openid, json, fromOpenId);
 						} else {
 							String subscribeHistoryKey = String.join(Const.delimiter, Const.Version.V1, openid, "Subscribe", subscribe);
 							account().put(subscribeHistoryKey, time);
 							account().put(subscribeKey, time);
 							if(subscribe.contains("unsubscribe")) {
-								atUser(openid, "你又回来了，我很高兴，你愿意陪我聊天吗");
+								atUser(openid, hitokoto);
 								return xml(openid, json, fromOpenId);
 							} else {
-								atUser(openid, "谢谢你关注我，你愿意和我聊天，教我说话吗");
+								atUser(openid, hitokoto);
 								return xml(openid, json, fromOpenId);
 							}
 						}
@@ -1515,10 +1573,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 							return xml(openid, contxt.output(), fromOpenId);
 						}
 						
-						return xml(openid, "欢迎来到【" + where + "】", fromOpenId);
+						return xml(openid, where, fromOpenId);
 					} else if("LOCATION".equals(event)) {
 						logger.info("[corpus] location: " + wxmsg.get("FromUserName") + " = (" + wxmsg.get("Latitude") + ", " + wxmsg.get("Longitude") + ") * " + wxmsg.get("Precision"));
 						String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Location", ""+System.currentTimeMillis(), openid);
+						String position = "LOC_" +wxmsg.get("Latitude") + ";" + wxmsg.get("Longitude") + ";" + wxmsg.get("Label");
+						account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Send", "Location"), position);
 						data().put(mediaKey, sms);
 						return SUCCESS;
 					} else if("user_view_card".equals(event)) {
@@ -1530,8 +1590,93 @@ public class CorpusService implements HTTPService, CommandProvider {
 					} else if("user_del_card".equals(event)) {
 						account().put(String.join(Const.delimiter, Const.Version.V1, "Keep", "DeleteCard", openid, ""+System.currentTimeMillis()), wxmsg.get("UserCardCode"));
 						return SUCCESS;
+					} else if("ShakearoundUserShake".equals(event)) {
+						/**
+						 * ChosenBeacon:Major = 10197
+						 * ChosenBeacon:Minor = 49838
+						 * CreateTime = 1562864790
+						 * ChosenBeacon:Uuid = FDA50693-A4E2-4FB1-AFCF-C6EB07647825
+						 * ChosenBeacon:Distance = 1.5933141040212173
+						 * ToUserName = gh_b3ac48e83f7d
+						 * MsgType = event
+						 * ChosenBeacon = FDA50693-A4E2-4FB1-AFCF-C6EB0764782510197498381.5933141040212173-67
+						 * ChosenBeacon:Rssi = -67
+						 * AroundBeacons = 
+						 * ChosenPageId = 6750529
+						 * Event = ShakearoundUserShake
+						 * FromUserName = oDqlM1T1RcLQuv48d0iVr0r1VpLQ
+						 */
+						String major = wxmsg.get("ChosenBeacon:Major");
+						String minor = wxmsg.get("ChosenBeacon:Minor");
+						String uuid = wxmsg.get("ChosenBeacon:Uuid");
+						String pageid = wxmsg.get("ChosenPageId");
+						String time = "" + System.currentTimeMillis();
+						if(debug()) {
+							atUser(STUPID, String.format("摇一摇：%s%s,pageid:%s,uuid:%s\nopenid:%s", major, minor, pageid, uuid, openid));
+						}
+						String ibeacon = major + minor;
+						String key = String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "Bind", ibeacon);
+						String bind = account().get(key);
+						account().put(String.join(Const.delimiter, Const.Version.V1, "iBeacon", "Shake", ibeacon, pageid, uuid, openid, time), openid);
+						account().put(String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Shake", ibeacon, pageid, uuid, time), ibeacon);
+						WXuser user = getWXuserByOpenId(openid);
+						String name = "匿名";
+						if(user != null) {
+							name = user.getNickname();
+						}
+						if(isNull(bind)) {
+							atUser(STUPID, name+"发现了（未绑定）的摇钱树:" + ibeacon);
+						} else {
+							account().put(String.join(Const.delimiter, Const.Version.V1, bind, "iBeacon", "Customer", ibeacon, pageid, uuid, openid), openid);
+							data().put(String.join(Const.delimiter, Const.Version.V1, bind, "iBeacon", "Customer", ibeacon, pageid, uuid, openid, time), openid);
+							atUser(bind, name+"发现了你的摇钱树");
+						}
+					} else if("user_get_card".equals(event)) {
+						String cardid = wxmsg.get("CardId");
+						String give   = wxmsg.get("IsGiveByFriend");
+						String friend = wxmsg.get("FriendUserName");
+						String key = String.join(Const.delimiter, Const.Version.V1, "Info", "Card", "Bind", cardid);
+						String bind = account().get(key);
+						String time = "" + System.currentTimeMillis();
+						account().put(String.join(Const.delimiter, Const.Version.V1, "Card", "Get", cardid, openid, time), openid);
+						account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Card", "Get", cardid, time), cardid);
+						if(debug()) {
+							atUser(STUPID, String.format("卡券:%s,赠送:%s,来自:%s,绑定:%s\nopenid:%s", cardid, give, friend, bind, openid));
+						}
+						String from = "";
+						if("1".equals(give)) {
+							WXuser given = getWXuserByOpenId(friend);
+							if(given != null) {
+								from = "("+given.getNickname() + "赠送的)";
+							}
+						}
+						WXuser user = getWXuserByOpenId(openid);
+						String name = "匿名";
+						if(user != null) {
+							name = user.getNickname();
+						}
+						if(isNull(bind)) {
+							atUser(STUPID, name + "领取了(未绑定)的卡券" + from + cardid);
+						} else {
+							account().put(String.join(Const.delimiter, Const.Version.V1, bind, "Card", "Customer", cardid, openid), openid);
+							data().put(String.join(Const.delimiter, Const.Version.V1, bind, "Card", "Customer", cardid, openid, time), openid);
+							atUser(bind, name + "领取了你的卡券" + from);
+						}
 					} else {
+						atUser(STUPID, "未处理的事件：" + wxmsg);
 						logger.info("unhandled event: " + event + ", " + eventKey);
+						return SUCCESS;
+					}
+				} else if("location".equals(msgType)) {
+					String position = "LOC_" + wxmsg.get("Location_X") +";"+ wxmsg.get("Location_Y") + ";" + wxmsg.get("Label");
+					Context<?> context = context(openid);
+					logger.info("[corpus] LOCATION context: " + context + ", openid: " + openid);
+					account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Send", "Location"), position);
+					if(context != null) {
+						context.test(position);
+						logger.info("[corpus] LOCATION return: " + context + ", openid: " + openid);
+						return xml(openid, context.output(), fromOpenId);
+					} else {
 						return SUCCESS;
 					}
 				} 
@@ -1558,7 +1703,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					String saveTo = System.getProperty("path.html") + downloadFolder;
 					CallableDownload download = new CallableDownload(url, CallableDownload.MB10, saveTo, ".jpg", true, TimeUnit.HOURS.toMillis(48));
 					scheduler.submit(download);
-					String futureUrl = "http://suppresswarnings.com/" + downloadFolder + download.getFileName();
+					String futureUrl = "https://suppresswarnings.com/" + downloadFolder + download.getFileName();
 					input = "IMAGE_" + futureUrl;
 				} else {
 					String mediaKey = String.join(Const.delimiter, Const.Version.V1, "Keep", "Other", ""+System.currentTimeMillis(), openid);
@@ -1621,6 +1766,20 @@ public class CorpusService implements HTTPService, CommandProvider {
 			if(reportToken == null || reportToken.length() > 240) {
 				return "";
 			}
+			String openid = parameter.getParameter("openid");
+			if(openid != null) {
+				logger.info("report to openid: " + openid);
+				WXuser user = this.getWXuserByOpenId(openid);
+				if(user!= null) {
+					String tokenKey  = String.join(Const.delimiter, Const.Version.V2, openid, "Token");
+					String token = this.account().get(tokenKey);
+					logger.info("check token: " + token);
+					if(!this.isNull(token) && reportToken.equals(token)) {
+						tellAdmins(openid, reportMsg);
+					}
+				}
+			}
+			
 			String lastKey = String.join(Const.delimiter, Const.Version.V1, "Report", "Token", reportToken);
 			String last = token().get(lastKey);
 			if(last == null) {
@@ -1672,8 +1831,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			
-			logger.info("[corpus access_token] " + accessToken.toString());
 			if(accessToken.getOpenid() == null) {
+				logger.info("[daigou] accessToken.getOpenid == null");
 				return "fail";
 			}
 			
@@ -1699,9 +1858,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[corpus collect access_token] accessToken == null");
 				return "fail";
 			}
-			logger.info("[corpus collect access_token] " + accessToken.toString());
 			String openId = accessToken.getOpenid();
 			if(openId == null) {
+				logger.info("[accessToken.getOpenid] is null");
 				return "fail";
 			}
 			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
@@ -1864,8 +2023,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[corpus user access_token] accessToken == null");
 				return "fail";
 			}
-			logger.info("[corpus user access_token] " + accessToken.toString());
+			
 			if(accessToken.getOpenid() == null) {
+				logger.info("[corpus user access_token] " + accessToken.toString());
 				return "fail";
 			}
 			
@@ -1998,6 +2158,44 @@ public class CorpusService implements HTTPService, CommandProvider {
 				result.put("quiz", quiz);
 				return gson.toJson(result);
 			}
+		} else if("minipay".equals(action)){
+			String random = parameter.getParameter("random");
+			if(random == null) {
+				return "fail";
+			}
+			String openid = parameter.getParameter("openid");
+			String groupid = parameter.getParameter("groupid");
+			String goodsid = parameter.getParameter("goods");
+			String userid = parameter.getParameter("userid");
+			String notice = parameter.getParameter("notice");
+			String goodsPriceKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Price");
+			String amount = account().get(goodsPriceKey);
+			if(isNull(amount)) {
+				tellAdmins(openid, "商品未上架：" + goodsid);
+				return "fail";
+			}
+			String name = parameter.getParameter("name");
+			String typeKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Type");
+			String type = account().get(typeKey);
+			if(isNull(type)) {
+				type = "mini";
+			}
+			
+			String openIdEnd = openid.substring(openid.length() - 7);
+			String randEnd = random.substring(random.length() - 4);
+			long current = System.currentTimeMillis(); 
+			String orderid = type + current + openIdEnd + randEnd;
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Userid"), isNull(userid) ? "null" : userid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Notice"), isNull(notice) ? "null" : notice);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Groupid"), isNull(groupid) ? "null" : groupid);
+			try {
+				String appid = System.getProperty("mp.appid");
+				String argsAppid = parameter.getParameter("appid");
+				WXPayConfig config = new MiniPayConfigImpl(isNull(argsAppid)?appid:argsAppid);
+				return minipay(config, orderid, "素朴网联摇钱树支付", name, goodsid, "1", amount, ip, openid, current, type);
+			} catch (Exception e) {
+				return "fail";
+			}
 		} else if("prepay".equals(action)){
 			String random = parameter.getParameter("random");
 			if(random == null) {
@@ -2091,8 +2289,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 				return "fail";
 			}
 			
-			logger.info("[corpus access_token] " + accessToken.toString());
+			
 			if(accessToken.getOpenid() == null) {
+				logger.info("[corpus access_token] " + accessToken.toString());
 				return "fail";
 			}
 			
@@ -2127,7 +2326,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 			String url = parameter.getParameter("url");
 			Base64.Decoder decoder = Base64.getDecoder();
 			String de = new String(decoder.decode(url.getBytes("UTF-8")), "UTF-8");
-			logger.info("request = " + String.join(" - ", noncestr, jsapiTicket, timestamp, url, de));
 			String sha1 = getSHA1("jsapi_ticket="+jsapiTicket, "noncestr=" + noncestr, "timestamp="+timestamp, "url="+de, "&");
 			Map<String, Object> map = new HashMap<>();
 			map.put("nonceStr", noncestr);
@@ -2225,7 +2423,6 @@ public class CorpusService implements HTTPService, CommandProvider {
 		try {
 			json = get.call();
 			JsAccessToken accessToken = gson.fromJson(json, JsAccessToken.class);
-			logger.info("[jsAccessToken] " + accessToken.toString());
 			return accessToken;
 		} catch (Exception e) {
 			logger.error("[jsAccessToken] fail to call get ", e);
@@ -2237,6 +2434,71 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(origin.length() < length + 4) return origin;
 		int size = origin.length();
 		return origin.substring(size - length, size);
+	}
+	public String minipay(WXPayConfig config, String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) {
+		long timeStamp = current / 1000;
+		try {
+			WXPay wxPay = new WXPay(config);
+			logger.info("[corpus minipay] MiniPay ready");
+			
+			Map<String, String> reqData = new HashMap<>();
+			reqData.put("timeStamp", ""+timeStamp);
+			reqData.put("device_info", "WEB");
+			reqData.put("body", body);
+			reqData.put("detail", detail);
+			reqData.put("attach", goodsid);
+			reqData.put("out_trade_no", orderid);
+			reqData.put("fee_type", "CNY");
+			reqData.put("total_fee", totalcent);
+			reqData.put("spbill_create_ip", clientip);
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			reqData.put("time_start", dateFormat.format(new Date(current)));
+			reqData.put("time_expire", dateFormat.format(new Date(current + TimeUnit.HOURS.toMillis(2))));
+			reqData.put("notify_url", "http://suppresswarnings.com/notify.http");
+			reqData.put("trade_type", "JSAPI");
+			reqData.put("product_id", orderid);
+			reqData.put("openid", openid);
+			logger.info("[corpus minipay] reqData: " + reqData.toString());
+			logger.info("[corpus minipay] unifiedOrder result ready");
+			Map<String, String> resultData = wxPay.unifiedOrder(reqData);
+			Map<String, String> result = new HashMap<>();
+	    	String appid = resultData.get("appid");
+	    	String nonceStr = resultData.get("nonce_str");
+	    	String prepay_id = resultData.get("prepay_id");
+	    	
+	    	result.put("appId", appid);
+	    	result.put("timeStamp", ""+timeStamp);
+	    	result.put("nonceStr", nonceStr);
+	    	result.put("package", "prepay_id=" + prepay_id);
+	    	result.put("signType", SignType.HMACSHA256.name());
+	    	//sign
+	    	String sign = wxPay.sign(result, SignType.HMACSHA256);
+			result.put("paySign", sign);
+			logger.info("[corpus minipay] paySign ready");
+			
+			String unifiedOrder = gson.toJson(result);
+			logger.info("[corpus minipay] unifiedOrder OK: " + unifiedOrder);
+			String reqjson = gson.toJson(reqData);
+			String resultjson = gson.toJson(resultData);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", "Orderid", orderid), orderid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "UnifiedOrder"), unifiedOrder);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Reqjson"), reqjson);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Resultjson"), resultjson);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "State"), "Wait");
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Openid"), openid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Goodsid"), goodsid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Amount"), amount);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Pricecent"), totalcent);
+			account().put(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Type"), type);
+			
+			account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid), orderid);
+			account().put(String.join(Const.delimiter, Const.Version.V1, openid, "Orderid", orderid, "Body"), body);			
+			return unifiedOrder;
+		} catch (Exception e) {
+			logger.error("获取minipay接口参数失败", e);
+			return null;
+		}
+		
 	}
 	
 	public String prepay(String orderid, String body, String detail, String goodsid, String amount, String totalcent, String clientip, String openid, long current, String type) {
@@ -2455,29 +2717,26 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	
 	public void updateWXuser() {
+		if(new Random().nextDouble() < 0.6) {
+			logger.info("no need to update WXuser");
+			return;
+		}
 		String head = String.join(Const.delimiter, Const.Version.V1, "User");
+		List<String> openids = new ArrayList<>();
 		account().page(head, head, null, 100000, (k, t) ->{
 			String openid = k.substring(head.length() + Const.delimiter.length());
-			getWXuserByOpenId(openid);
-			logger.info("check user " + openid + " from " + t);
+			openids.add(openid);
+		});
+		
+		openids.forEach(openid -> {
+			logger.info("check user " + openid);
+			WXuser user = syncWXuser(openid);
+			if(user != null) {
+				users.put(openid, user);
+			}
 		});
 		
 		logger.info("update user info: " + users.size());
-		users.forEach((k, v) -> {
-			String accessToken = accessToken("Update User");
-			String userKey = String.join(Const.delimiter, Const.Version.V1, k, "User");
-			String json = account().get(userKey);
-			logger.info("[corpus] update WXuser info: " + k);
-			CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN", accessToken, k);
-			try {
-				json = get.call();
-				WXuser user = gson.fromJson(json, WXuser.class);
-				account().put(userKey, json);
-				users.put(k, user);
-			} catch (Exception e) {
-				logger.error("[corpus] fail to update user info: " + k, e);
-			}
-		});
 	}
 	
 	public WXuser syncWXuser(String openId) {
@@ -2609,6 +2868,44 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return post.call();
 		} catch (Exception e) {
 			return null;
+		}
+	}
+	
+	String article = "https://w.url.cn/s/AbDIQuB";
+	List<String> articles = new ArrayList<>();
+	Random random = new Random();
+	public void updateArticle() {
+		String head = String.join(Const.delimiter, Const.Version.V2, "Article", "List", "Link");
+		logger.info("0/1 articles = " + articles);
+		articles.clear();
+		account().page(head, head, null, 10000, (k, link) ->{
+			articles.add(link);
+		});
+		logger.info("1/1 articles = " + articles);
+	}
+	public String article(String openid) {
+		try {
+			String read = account().get(String.join(Const.delimiter, Const.Version.V2, "Article", "Read", openid));
+			String chose = null;
+			if(isNull(read)) {
+				String set = account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "Setting", "Article"));
+				if(!isNull(set)) {
+					article = set;
+				}
+			}
+
+			if(articles.size() < 2) {
+				chose = article;
+			} else {
+				chose = articles.get(random.nextInt(articles.size()));
+			}
+			logger.info("[article] " + openid + " chose " + chose);
+			account().put(String.join(Const.delimiter, Const.Version.V2, "Article", "Read", openid), chose);
+			data().put(String.join(Const.delimiter, Const.Version.V2, "Article", "Read", openid, "" + System.currentTimeMillis()), chose);
+			return chose;
+		} catch (Exception e) {
+			logger.error("fail to get article", e);
+			return article;
 		}
 	}
 	public String getSHA1(String token, String timestamp, String nonce, String encrypt, String join) {
@@ -2747,17 +3044,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return little;
 		}
 	}
+	
 	public String getRealValue(String openid) {
 		return account().get(String.join(Const.delimiter, Const.Version.V2, openid, "RealValue"));
 	}
-	public String getRandomText(String openid) {
-		int i = assimilatedQuiz.size();
-		int select = new Random().nextInt(i);
-		Quiz quiz = assimilatedQuiz.get(select);
-		String text = quiz.getQuiz().value();
-		data().put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "GoodBye", "" + System.currentTimeMillis()), text);
-		return text;
-	}
+
 	public String requestApprove(String openid, int cent) {
 		if(cent < 30 || cent > 10000) {
 			return "提现金额不合法，未能提交";
@@ -2774,15 +3065,16 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(cent < 30 || cent > 10000) {
 			return "提现金额不合法，未能提交";
 		}
-		CallableGet get = new CallableGet("http://localhost:8998/pay?input=%s&sign=%s&time=%s&cent=%s", openid, System.getProperty("wx.key"), ""+ System.currentTimeMillis(), cent);
+		String time = ""+ System.currentTimeMillis();
 		try {
+			CallableGet get = new CallableGet("http://localhost:8998/pay?input=%s&sign=%s&time=%s&cent=%s&what=%s", openid, ACrypt.md5(System.getProperty("wx.key") + openid + time + cent + System.getProperty("wx.key")), time, cent, reason);
 			String result = get.call();
 			logger.info("[reward] openid: " + openid + ", result: " + result);
 			atUser(STUPID, new Date().toString() + "提现：" + cent + ",理由：" + reason + "，用户: " + openid + ", 结果: " + result);
 			return result;
 		} catch (Exception e) {
-			e.printStackTrace();
-			return "Error";
+			logger.error("fail to reward", e);
+			return "Fail";
 		}
 	}
 }

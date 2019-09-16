@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
+import com.suppresswarnings.corpus.service.wx.WXnews;
 
 public class AutoCoinContext extends WXContext {
 	public static final String CMD = "我要app";
@@ -23,10 +25,14 @@ public class AutoCoinContext extends WXContext {
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("「素朴网联」APP可以自动操作手机！");
-			u.output("请在浏览器打开下载链接");
-			u.output("http://suppresswarnings.com/third.html");
-			u.output("（你可以自己写命令，请输入：" + command.name()+"）");
+			WXnews news = new WXnews();
+			Gson gson = new Gson();
+			news.setTitle("素朴网联 APP");
+			news.setDescription("点击后选择在浏览器打开，然后下载，安装，激活，绑定。");
+			news.setUrl("http://suppresswarnings.com/third.html?state=" + openid());
+			news.setPicUrl("http://SuppressWarnings.com/like.png");
+			String json = gson.toJson(news);
+			u.output("news://" + json);
 		}
 
 		@Override

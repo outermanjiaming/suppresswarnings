@@ -60,7 +60,7 @@ public class Counter {
 	
 	public String report(){
 		StringBuffer sb = new StringBuffer();
-		sb.append("\n最近一次：").append(format.format(new Date(lastTime)));
+		sb.append("最近一次：").append(format.format(new Date(lastTime)));
 		sb.append("\n重复数量：").append(existCounter.get());
 		sb.append("\n提问数量：").append(quizCounter.get());
 		sb.append("\n回答数量：").append(replyCounter.get());

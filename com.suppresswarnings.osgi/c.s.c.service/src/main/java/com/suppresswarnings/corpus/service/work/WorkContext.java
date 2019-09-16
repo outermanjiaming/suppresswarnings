@@ -44,19 +44,20 @@ public class WorkContext extends WXContext {
 		public void accept(String t, Context<CorpusService> u) {
 			if("跳过".equals(t)) {
 				u.output("（因为你输入'跳过'）这一句跳过了：" + task.getQuiz());
-			} else if("删除这一条".equals(t)) {
+			} else if("删除".equals(t)) {
 				String deleteKey = String.join(Const.delimiter, Const.Version.V1, "Corpus", "Delete", time(), openid(), "Quizid", task.getQuizId());
 				u.content().data().put(deleteKey, task.getQuiz());
 				u.content().data().del(task.getQuizId());
 				handler.tasks.remove(task.getQuizId());
 				handler.tasks.remove(task.getOpenId());
-				u.output("（因为你输入'删除这一条'）这一句被删除了： "  + task.getQuiz());
+				u.output("（因为你输入'删除'）这一句删除了："  + task.getQuiz());
 			} else if(task != null) {
 				//lijiaming: save answer and done
 				String answer = t;
 				String answerKey = String.join(Const.delimiter, task.getQuizId(), worker.getType().name(), openid(), time(), random());
 				update();
 				u.content().data().put(answerKey, answer);
+				u.content().collectV2(answer);
 				logger.info("[WorkContext] save question: " + answerKey);
 				task.finish(answer);
 				boolean reply = handler.done(task, worker.getType(), counter(u.content()));

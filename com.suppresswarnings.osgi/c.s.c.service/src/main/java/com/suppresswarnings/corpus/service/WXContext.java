@@ -98,7 +98,6 @@ public class WXContext extends Context<CorpusService> {
 		
 	};
 	public static int bear = 1;
-	public String quizId = null;
 	public Counter counter = null;
 	Random random = new Random();
 	public Counter counter(CorpusService service) {
@@ -133,7 +132,8 @@ public class WXContext extends Context<CorpusService> {
 				"啥？%s",
 				"等一下没事吧，%s",
 				"哦，%s",
-				"嗯，%s"
+				"嗯，%s",
+				"什么？%s"
 				};
 		int count = bear;
 		Map<String, AutoContext> contexts = new HashMap<>();
@@ -146,20 +146,18 @@ public class WXContext extends Context<CorpusService> {
 				u.output("稍等，我现在还没有准备好！");
 			}
 			if(exit(t, "exit()")) {
-				u.output("不聊算了～");
+				String hitokoto = u.content().hitokoto();
+				u.output(hitokoto);
 				u.content().forgetIt(openid());
-				//TODO bugfixed
 				return;
 			}
+			u.content().collectV2(t);
 			String command = CheckUtil.cleanStr(t);
 			ContextFactory<CorpusService> cf = u.content().factories.get(command);
 			if(cf == null) {
 				String exchange = u.content().globalCommand(command);
 				if(exchange != null) {
 					cf = u.content().factories.get(exchange);
-					if(cf == null) {
-						cf = u.content().factories.get(command.toLowerCase());
-					}
 				}
 			}
 			
@@ -183,15 +181,17 @@ public class WXContext extends Context<CorpusService> {
 				logger.info("[WXContext] "+ openid() + "\tAccost words: " + t);
 				
 				if(t.startsWith("我要") || t.startsWith("我是") || t.startsWith("我有")) {
-					String remote = u.content().remoteCall(openid(), "T_Things_MQTT_Publish_201906011732", "发布MQTT消息", String.join("#", openid(), t));
-					u.output("已加入需求反应堆：" + remote);
-				}
+		            String subtopic = t.substring(0, 2);
+		            String what     = t.substring(2);
+		            StringBuffer topic = new StringBuffer();
+		            topic.append("corpus").append("/").append(subtopic).append("/").append(what);
+		            u.content().publish(topic.toString(), openid());
+		            logger.info("发布消息稍后执行");
+		        }
 				
 				if(t.startsWith("@")) {
 					String[] ww = t.split("\\s+", 2);
-					if(ww.length < 2) {
-						u.output("你使用了 @ 功能，但是格式不对，请在@谁谁谁之后 加一个空格再输入内容");
-					} else {
+					if(ww.length == 2) {
 						String who = ww[0];
 						String what = ww[1];
 						String code = who.substring(1);
@@ -206,22 +206,17 @@ public class WXContext extends Context<CorpusService> {
 						}
 					}
 				}
-				
-				if(quizId == null) {
-					quizId = u.content().getTodoQuizid();
-					logger.info("[WXContext] quizId was null, Now = " + quizId);
-				}
-				String reply = CheckUtil.cleanStr(t);
-				String aid = u.content().questionToAid.get(reply);
-				logger.info("[WXContext] after clean: " + reply + " = " + aid);
+
+				String aid = u.content().questionToAid.get(command);
+				logger.info("[WXContext] after clean: " + command + " = " + aid);
 				if(aid != null) {
 					//TODO lijiaming: check cmd
-					String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", reply);
+					String keyCMD = String.join(Const.delimiter, Const.Version.V1, openid(), "AIIoT", command);
 					String code = u.content().account().get(keyCMD);
 					//get my things code, which is unique for each things
 					logger.info("Key: " + keyCMD + " => " + code);
 					if(code != null) {
-						String remote = u.content().aiiot(wxid(), openid(), code, reply, t, u);
+						String remote = u.content().aiiot(wxid(), openid(), code, command, t, u);
 						logger.info("[WXContext] remote: " + remote);
 						u.output("远程状态："+ remote);
 						if(remote != null) {
@@ -234,7 +229,7 @@ public class WXContext extends Context<CorpusService> {
 					if(answers != null && answers.size() > 0) {
 						AutoContext context = contexts.get(aid);
 						if(context == null) {
-							context = new AutoContext(init, reply, aid, answers, wxid(), openid(), u.content());
+							context = new AutoContext(init, command, aid, answers, wxid(), openid(), u.content());
 							contexts.put(aid, context);
 						}
 						context.test(t);
@@ -246,14 +241,14 @@ public class WXContext extends Context<CorpusService> {
 				
 				if(aid == null) {
 					//save new question
-					String answerKey = String.join(Const.delimiter, Const.Version.V1, "Collect", "Corpus", "Quiz", quizId, "Answer", openid(), time(), random());
+					String answerKey = String.join(Const.delimiter, Const.Version.V2, "Collect", "Corpus", "Quiz", wxid(), "Answer", openid(), time(), random());
 					u.content().data().put(answerKey, t);
 					//counter for quiz
 					counter(u.content()).quiz(System.currentTimeMillis(), t);
 					aid = answerKey;
 				}
 				//save
-				u.content().questionToAid.put(reply, aid);
+				u.content().questionToAid.put(command, aid);
 				//send task
 				String result = u.content().youGotMe(openid(), t, aid);
 				if(result != null) {
@@ -266,9 +261,6 @@ public class WXContext extends Context<CorpusService> {
 					u.output(result);
 					count = bear;
 				} else {
-//					u.content().connectChat(wxid(), openid(), t);
-					//count to 2
-					//fetch a task todo
 					count --;
 					if(count < 0) {
 						count = bear;
@@ -288,6 +280,8 @@ public class WXContext extends Context<CorpusService> {
 							}
 						}
 					}
+					String string = u.content().remoteCall(openid(), "T_Things_Tencent_201907201450", "获取腾讯智能回复", t);
+					u.output(string);
 				}
 			}
 		}
@@ -349,7 +343,6 @@ public class WXContext extends Context<CorpusService> {
 		this.wxid = wxid;
 		this.openid = openid;
 		this.state = init;
-		this.quizId = ctx.getTodoQuizid();
 	}
 	
 	public WXuser user() {
@@ -365,7 +358,6 @@ public class WXContext extends Context<CorpusService> {
 	
 	@Override
 	public State<Context<CorpusService>> exit() {
-		content().sendTxtTo("close " + getClass().getSimpleName(), content().getRandomText(openid()), openid());
 		return init;
 	}
 	public void state(State<Context<CorpusService>> state) {

@@ -11,15 +11,13 @@ package com.suppresswarnings.corpus.service.manage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
-import com.google.gson.Gson;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.KeyValue;
@@ -27,8 +25,6 @@ import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.daigou.Goods;
-import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
-import com.suppresswarnings.corpus.service.wx.WXnews;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class ManageContext extends WXContext {
@@ -48,18 +44,18 @@ public class ManageContext extends WXContext {
 			u.output("后台管理，等级森严，你可以输入以下指令：");
 			u.output(goodsManage.name());
 			u.output(examManage.name());
-			u.output(corpusManage.name());
 			u.output(cashoutManage.name());
 			u.output(alert.name());
+			u.output(rawSetting.name());
 		}
 
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(goodsManage.name().equals(t)) return goodsManage;
 			if(examManage.name().equals(t)) return examManage;
-			if(corpusManage.name().equals(t)) return corpusManage;
 			if(cashoutManage.name().equals(t)) return cashoutManage;
 			if(alert.name().equals(t)) return alert;
+			if(rawSetting.name().equals(t)) return rawSetting;
 			return enter;
 		}
 
@@ -73,9 +69,82 @@ public class ManageContext extends WXContext {
 			return false;
 		}
 	};
-	
+	State<Context<CorpusService>> rawSetting = new State<Context<CorpusService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1490645437562410681L;
+		State<Context<CorpusService>> put = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 842887322287890300L;
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				String[] kv = t.split("/", 2);
+				String key = kv[0];
+				String value = kv[1];
+				String old = u.content().account().get(key);
+				u.content().account().put(key, value);
+				u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "RawSetting", key), key);
+				u.output(String.format("设置成功：\nkey:%s\nval:%s\nold:%s", key, value, old));
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				return rawSetting;
+			}
+
+			@Override
+			public String name() {
+				return "设置值";
+			}
+
+			@Override
+			public boolean finish() {
+				return true;
+			}
+			
+		};
+		@Override
+		public void accept(String t, Context<CorpusService> u) {
+			String head = String.join(Const.delimiter, Const.Version.V1, "Info", "RawSetting");
+			u.output("以前配置过的key：");
+			u.content().account().page(head, head, null, 1000, new BiConsumer<String, String>() {
+				
+				@Override
+				public void accept(String k, String v) {
+					u.output(v);
+				}
+			});
+			u.output("请按格式输入：key/value");
+		}
+
+		@Override
+		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+			return put;
+		}
+
+		@Override
+		public String name() {
+			return "绑定配置";
+		}
+
+		@Override
+		public boolean finish() {
+			return false;
+		}
+		
+	};
 	
 	State<Context<CorpusService>> cashoutManage = new State<Context<CorpusService>>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5073508375477564133L;
 		Iterator<String> itr;
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
@@ -83,9 +152,12 @@ public class ManageContext extends WXContext {
 			if(admin) {
 				u.output("欢迎使用工资管理");
 				Set<String> set = u.content().todoSet();
-				u.output("待审核的提现请求：" + set.size());
-				itr = set.iterator();
-				u.output("请输入：" + approve.name());
+				if(set.size() > 0) {
+					u.output("待审核的提现请求：" + set.size());
+					itr = set.iterator();
+					u.output("请输入：" + approve.name());
+				}
+				u.output("请输入：" + salary.name());
 			} else {
 				u.output("目前仅支持管理员发工资");
 			}
@@ -94,6 +166,7 @@ public class ManageContext extends WXContext {
 		@Override
 		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 			if(approve.name().equals(t)) return approve;
+			if(salary.name().equals(t)) return salary;
 			return enter;
 		}
 
@@ -106,6 +179,159 @@ public class ManageContext extends WXContext {
 		public boolean finish() {
 			return false;
 		}
+		
+		State<Context<CorpusService>> salary = new State<Context<CorpusService>>() {
+			WXuser wxuser = null;
+			int totalcent = 0;
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7387172215455497024L;
+
+			@Override
+			public void accept(String t, Context<CorpusService> u) {
+				u.output("请输入员工的ID：");
+			}
+
+			@Override
+			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+				return crew;
+			}
+
+			@Override
+			public String name() {
+				return "发工资";
+			}
+
+			@Override
+			public boolean finish() {
+				return false;
+			}
+			State<Context<CorpusService>> confirm = new State<Context<CorpusService>>() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 2406201958772687441L;
+
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					if(name().equals(t)) {
+						u.output(String.format("系统已经接受请求，正在发工资给(%s)%s，总共%d分", wxuser.getOpenid(), wxuser.getNickname(), totalcent));
+						String ret = u.content().reward("素朴网联发工资", wxuser.getOpenid(), totalcent);
+						u.output("工资发放结果：" + ret);
+						totalcent = 0;
+						wxuser = null;
+					} else {
+						u.output(String.format("你正在发工资给(%s)%s，总共%d分，请输入：确认", wxuser.getOpenid(), wxuser.getNickname(), totalcent));
+					}
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					if("取消".equals(t) || wxuser == null) return cashoutManage;
+					return confirm;
+				}
+
+				@Override
+				public String name() {
+					return "确认";
+				}
+
+				@Override
+				public boolean finish() {
+					return true;
+				}
+				
+			};
+			State<Context<CorpusService>> money = new State<Context<CorpusService>>() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 5009566210156032984L;
+				boolean fail = true;
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					String amount = t;
+					try {
+						int cent = Integer.parseInt(amount);
+						if(cent < 30) {
+							u.output("工资金额最低30分，请重新输入：（单位：分）");
+							fail = true;
+						} else if (cent > 10000) {
+							u.output("目前最大金额限制为10000分，请重新输入：（单位：分）");
+							fail = true;
+						} else  {
+							fail = false;
+							totalcent = cent;
+							u.output(String.format("你正在发工资给(%s)%s，总共%d分，(如果想放弃，请输入：取消)请输入：确认", wxuser.getOpenid(), wxuser.getNickname(), cent));
+						}
+					} catch (Exception e) {
+						logger.error("工资金额不对", e);
+						fail = true;
+					}
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					if(fail) {
+						fail = true;
+						return money;
+					}
+					return confirm;
+				}
+
+				@Override
+				public String name() {
+					return "工资金额";
+				}
+
+				@Override
+				public boolean finish() {
+					return false;
+				}
+				
+			};
+			State<Context<CorpusService>> crew = new State<Context<CorpusService>>() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 7472872732591041261L;
+
+				@Override
+				public void accept(String t, Context<CorpusService> u) {
+					String userid = t;
+					wxuser = u.content().getWXuserByOpenId(userid);
+					if(wxuser == null) {
+						u.output("请输入正确的员工ID：");
+					} else {
+						u.output(String.format("你将发工资给(%s)%s，请输入工资金额：（单位：分，比如输入30就是30分，也就是0.3元）", wxuser.getOpenid(), wxuser.getNickname()));
+					}
+				}
+
+				@Override
+				public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
+					if(wxuser != null) {
+						return money;
+					}
+					return crew;
+				}
+
+				@Override
+				public String name() {
+					return "员工openid";
+				}
+
+				@Override
+				public boolean finish() {
+					return false;
+				}
+				
+			};
+			
+		};
 		
 		State<Context<CorpusService>> approve = new State<Context<CorpusService>>() {
 			/**
@@ -129,13 +355,17 @@ public class ManageContext extends WXContext {
 						} else {
 							if("同意".equals(t)) {
 								u.output("你同意了审核提现请求: " + string + " "  + who.getNickname());
-								u.content().approvedRunnable(openid(), string, Integer.parseInt(kv.value()));
+								int cent = Integer.parseInt(kv.value());
+								u.output("正在执行: " + cent);
+								String result = u.content().reward("素朴网联同意提现", string, cent);
+								u.output(result);
 								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Accept", "Cashout", openid(), time()), kv.toString());
-								u.content().atUser(string, "恭喜你，管理员同意了你的提现请求：" + kv.value() + "分，继续加油");
+								u.content().atUser(string, "恭喜你，素朴网联 同意了你的提现请求：" + kv.value() + "分，请查看微信零钱。");
 							} else if("拒绝".equals(t)){
 								u.output("你拒绝了审核提现请求: "  + string + " " + who.getNickname());
 								u.content().rejectRunnable(openid(), string, Integer.parseInt(kv.value()));
 								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Reject", "Cashout", openid(), time()), kv.toString());
+								u.content().atUser(string, "非常抱歉，素朴网联 拒绝了你的提现请求：" + kv.value() + "分，不要气馁，还有机会。");
 							} else {
 								u.content().account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Wrong", "Cashout", openid(), time()), kv.toString());
 								u.output("你输入了错误的命令，该用户的提现请求无法被再次审核：" + string + " " + who.getNickname());
@@ -182,56 +412,13 @@ public class ManageContext extends WXContext {
 		};
 	};
 	
-	State<Context<CorpusService>> corpusManage = new State<Context<CorpusService>>() {
-		long lastTime = 0;
-		@Override
-		public void accept(String t, Context<CorpusService> u) {
-			if("刷新语料".equals(t)) {
-				if(System.currentTimeMillis() - lastTime < TimeUnit.MINUTES.toMillis(10)) {
-					String report = u.content().workHandler.report();
-					u.output(report);
-				} else {
-					lastTime = System.currentTimeMillis();
-					new Thread(() ->{
-						String quizId = u.content().getTodoQuizid();
-						u.content().fillQuestionsAndAnswers(quizId);
-					}).start();
-					u.output("已刷新语料数据，稍后查看");
-				}
-			} else if(t.startsWith("设置阈值")) {
-				if(t.length() == "设置阈值".length()) {
-					u.output("请带上参数N，比如 设置阈值5");
-				} else {
-					String N = t.substring("设置阈值".length());
-					int n = Integer.parseInt(N);
-					u.content().bear.set(n);
-					u.output("已设置阈值"+ n);
-				}
-			}
-			
-			u.output("\n你可以输入");
-			u.output("    刷新语料");
-			u.output("    设置阈值N");
-		}
-
-		@Override
-		public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
-			return corpusManage;
-		}
-
-		@Override
-		public String name() {
-			return "语料管理";
-		}
-
-		@Override
-		public boolean finish() {
-			return false;
-		}
-		
-	};
 	State<Context<CorpusService>> examManage = new State<Context<CorpusService>>() {
 
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1781563629242769303L;
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
@@ -258,6 +445,11 @@ public class ManageContext extends WXContext {
 		}
 	};
 	State<Context<CorpusService>> examOff = new State<Context<CorpusService>>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 248223907177679117L;
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
@@ -288,6 +480,11 @@ public class ManageContext extends WXContext {
 	};
 	State<Context<CorpusService>> examOn = new State<Context<CorpusService>>() {
 
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3071885384883325588L;
 
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
@@ -329,6 +526,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> goodsCreate = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 6223810646770795371L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("输入商品标题（一句话，一目了然）");
@@ -362,6 +564,11 @@ public class ManageContext extends WXContext {
 		};
 		State<Context<CorpusService>> goodsName = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -8880661297292678751L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setTitle(t);
@@ -390,6 +597,11 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsOuturl = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -8996015865773382247L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -420,6 +632,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> goodsExtra = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -3792470520505502634L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setExtra(t);
@@ -448,6 +665,11 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsQuota = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 6209214087731374248L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -478,6 +700,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> goodsPriceagent = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1626839693582430055L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setPriceagent(t);
@@ -507,6 +734,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> goodsPricevip = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2597039011439778871L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setPricevip(t);
@@ -535,6 +767,11 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsPricesecret = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6991986613864852205L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -566,6 +803,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> goodsPrice = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 5695039305616072090L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				if(!"不修改".equals(t)) todo.setPricecent(t);
@@ -594,6 +836,11 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsImage = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 24808056831639001L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -627,6 +874,10 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsImagelist = new State<Context<CorpusService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5184762709328382480L;
 			List<String> images = new ArrayList<>();
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -670,6 +921,11 @@ public class ManageContext extends WXContext {
 		};
 		State<Context<CorpusService>> goodsFinish = new State<Context<CorpusService>>() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 520903050877528334L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("商品详情");
@@ -695,6 +951,11 @@ public class ManageContext extends WXContext {
 			
 		};
 		State<Context<CorpusService>> goodsConfirm = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2653687424983970872L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -722,7 +983,17 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsOff = new State<Context<CorpusService>>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 3405658341549718899L;
+
 			State<Context<CorpusService>> goodsLack = new State<Context<CorpusService>>() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = -2043730208805465523L;
 
 				@Override
 				public void accept(String t, Context<CorpusService> u) {
@@ -751,6 +1022,11 @@ public class ManageContext extends WXContext {
 			
 			State<Context<CorpusService>> goodsDown = new State<Context<CorpusService>>() {
 
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = -5663807013247315793L;
+
 				@Override
 				public void accept(String t, Context<CorpusService> u) {
 					String goodsid = todo.getGoodsid();
@@ -777,6 +1053,11 @@ public class ManageContext extends WXContext {
 			};
 			
 			State<Context<CorpusService>> goodsDelete = new State<Context<CorpusService>>() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 7168011886175885716L;
 
 				@Override
 				public void accept(String t, Context<CorpusService> u) {
@@ -833,6 +1114,11 @@ public class ManageContext extends WXContext {
 		};
 		
 		State<Context<CorpusService>> goodsModify = new State<Context<CorpusService>>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -3519420607410387813L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -965,8 +1251,17 @@ public class ManageContext extends WXContext {
 	};
 	
 	State<Context<CorpusService>> alert = new State<Context<CorpusService>>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6589604222047894996L;
 		State<Context<CorpusService>> info = new State<Context<CorpusService>>() {
 
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -8524769684511160999L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -976,7 +1271,7 @@ public class ManageContext extends WXContext {
 			@Override
 			public State<Context<CorpusService>> apply(String t, Context<CorpusService> u) {
 				
-				return info;
+				return init;
 			}
 
 			@Override
@@ -991,6 +1286,11 @@ public class ManageContext extends WXContext {
 		};
 		State<Context<CorpusService>> alluser = new State<Context<CorpusService>>() {
 
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -4362155309121757653L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
@@ -1017,6 +1317,11 @@ public class ManageContext extends WXContext {
 		State<Context<CorpusService>> allvip = new State<Context<CorpusService>>() {
 
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -3416552825809522341L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("所有vip总共有N人，正在发送公告");
@@ -1042,6 +1347,11 @@ public class ManageContext extends WXContext {
 		State<Context<CorpusService>> myvip = new State<Context<CorpusService>>() {
 
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -750136022994626832L;
+
 			@Override
 			public void accept(String t, Context<CorpusService> u) {
 				u.output("你授权开通的vip总共有N人，正在发送公告");
@@ -1066,6 +1376,11 @@ public class ManageContext extends WXContext {
 		
 		State<Context<CorpusService>> mycrew = new State<Context<CorpusService>>() {
 
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7904523441105860956L;
 
 			@Override
 			public void accept(String t, Context<CorpusService> u) {

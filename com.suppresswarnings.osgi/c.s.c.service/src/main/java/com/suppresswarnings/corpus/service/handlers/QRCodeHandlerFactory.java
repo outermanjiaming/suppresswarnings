@@ -1,21 +1,18 @@
 package com.suppresswarnings.corpus.service.handlers;
 
-import org.slf4j.LoggerFactory;
-
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.service.CorpusService;
 import com.suppresswarnings.corpus.service.RequestHandler;
 import com.suppresswarnings.osgi.network.http.Parameter;
 
 public class QRCodeHandlerFactory {
-	org.slf4j.Logger logger = LoggerFactory.getLogger("SYSTEM");
 	static RequestHandler likeshare = (param, service, args) ->{
 		String projectid = param.getParameter("projectid");
 		String openid = args[0];
 		String accessToken = service.accessToken("like share");
 		String qrScene = "T_Like_Share$" + projectid + "$" + openid;
 		service.account().put(String.join(Const.delimiter, Const.Version.V1, "QRCode", qrScene), qrScene);
-		service.setGlobalCommand(qrScene, "我要分享点赞", openid, "" + System.currentTimeMillis());
+		service.setGlobalCommand(qrScene, "我要发起点赞", openid, "" + System.currentTimeMillis());
 		return service.qrCode(accessToken, 120, "QR_STR_SCENE", qrScene);
 	};
 	public static String handle(Parameter parameter, CorpusService service) {

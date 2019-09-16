@@ -42,10 +42,64 @@ public class WXPayUtil {
 
     private static final Random RANDOM = new SecureRandom();
 
+    /**
+     * @param args
+     * @throws Exception
+     */
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
-		String xxx = "<xml><ToUserName><![CDATA[gh_baomc48e83f7d]]></ToUserName><FromUserName><![CDATA[oDqlM1fwmRaomXTkKTjalDwMXsj2ME]]></FromUserName><CreateTime>1532582315</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[subscribe]]></Event><EventKey><![CDATA[qrscene_‘素朴网联’官网]]></EventKey><Ticket><![CDATA[gQF47zwAAAAAAAAAAS5odHRwOi8vd2VpeGlaomFxLmNvbS9xLzAyV0FkZXhTZUZkY2wxbG5xcDFyY1EAAgSjWVlbAwS0AAAA]]></Ticket></xml>";
-		
-		Map<String, String> map = xmlToMap(xxx);
+//		String xxx = "<xml><ToUserName><![CDATA[gh_b3ac48e83f7d]]></ToUserName>\n" + 
+//				"<FromUserName><![CDATA[oDqlM1T1RcLQuv48d0iVr0r1VpLQ]]></FromUserName>\n" + 
+//				"<CreateTime>1562864790</CreateTime>\n" + 
+//				"<MsgType><![CDATA[event]]></MsgType>\n" + 
+//				"<Event><![CDATA[ShakearoundUserShake]]></Event><ChosenBeacon><Uuid><![CDATA[FDA50693-A4E2-4FB1-AFCF-C6EB07647825]]></Uuid><Major>10197</Major><Minor>49838</Minor><Distance>1.5933141040212173</Distance><Rssi>-67</Rssi></ChosenBeacon><AroundBeacons></AroundBeacons><ChosenPageId>6750529</ChosenPageId></xml>";
+//		
+    	String xxx = "<xml><ToUserName><![CDATA[gh_b3ac48e83f7d]]></ToUserName>\n" + 
+    			"<FromUserName><![CDATA[oDqlM1T1RcLQuv48d0iVr0r1VpLQ]]></FromUserName>\n" + 
+    			"<CreateTime>1563090095</CreateTime>\n" + 
+    			"<MsgType><![CDATA[event]]></MsgType>\n" + 
+    			"<Event><![CDATA[user_get_card]]></Event>\n" + 
+    			"<CardId><![CDATA[pDqlM1YsEzf5pU_DZzo8v63You64]]></CardId>\n" + 
+    			"<IsGiveByFriend>0</IsGiveByFriend>\n" + 
+    			"<UserCardCode><![CDATA[401838674686]]></UserCardCode>\n" + 
+    			"<FriendUserName><![CDATA[]]></FriendUserName>\n" + 
+    			"<OuterId>0</OuterId>\n" + 
+    			"<OldUserCardCode><![CDATA[]]></OldUserCardCode>\n" + 
+    			"<IsRestoreMemberCard>0</IsRestoreMemberCard>\n" + 
+    			"<IsRecommendByFriend>0</IsRecommendByFriend>\n" + 
+    			"<SourceScene><![CDATA[SOURCE_SCENE_APPMSG_JSAPI]]></SourceScene>\n" + 
+    			"<UnionId><![CDATA[oAAAAAOtb28yY2_C54hSN7gj6YpA]]></UnionId>\n" + 
+    			"</xml>";
+    	String yyy = "<xml><ToUserName><![CDATA[gh_b3ac48e83f7d]]></ToUserName>\n" + 
+    			"<FromUserName><![CDATA[oDqlM1TyKpSulfMC2OsZPwhi-9Wk]]></FromUserName>\n" + 
+    			"<CreateTime>156309≈0444</CreateTime>\n" + 
+    			"<MsgType><![CDATA[event]]></MsgType>\n" + 
+    			"<Event><![CDATA[user_get_card]]></Event>\n" + 
+    			"<CardId><![CDATA[pDqlM1YsEzf5pU_DZzo8v63You64]]></CardId>\n" + 
+    			"<IsGiveByFriend>1</IsGiveByFriend>\n" + 
+    			"<UserCardCode><![CDATA[732947834955]]></UserCardCode>\n" + 
+    			"<FriendUserName><![CDATA[oDqlM1T1RcLQuv48d0iVr0r1VpLQ]]></FriendUserName>\n" + 
+    			"<OuterId>0</OuterId>\n" + 
+    			"<OldUserCardCode><![CDATA[401838674686]]></OldUserCardCode>\n" + 
+    			"<OutetStr><![CDATA[]]></OutetStr>\n" + 
+    			"</xml>";
+    	String zzz = "<xml><ToUserName><![CDATA[gh_b3ac48e83f7d]]></ToUserName>\n" + 
+    			"<FromUserName><![CDATA[oDqlM1eskciYMfB7xSLAPzo04oIU]]></FromUserName>\n" + 
+    			"<CreateTime>1563090686</CreateTime>\n" + 
+    			"<MsgType><![CDATA[event]]></MsgType>\n" + 
+    			"<Event><![CDATA[user_get_card]]></Event>\n" + 
+    			"<CardId><![CDATA[pDqlM1YsEzf5pU_DZzo8v63You64]]></CardId>\n" + 
+    			"<IsGiveByFriend>1</IsGiveByFriend>\n" + 
+    			"<UserCardCode><![CDATA[687337417790]]></UserCardCode>\n" + 
+    			"<FriendUserName><![CDATA[oDqlM1TyKpSulfMC2OsZPwhi-9Wk]]></FriendUserName>\n" + 
+    			"<OuterId>0</OuterId>\n" + 
+    			"<OldUserCardCode><![CDATA[732947834955]]></OldUserCardCode>\n" + 
+    			"<OutetStr><![CDATA[]]></OutetStr>\n" + 
+    			"</xml>";
+		Map<String, String> map = xmlToMap(zzz);
 		map.forEach((x, y) -> System.out.println(x + " = " + y));
 	}
     /**
@@ -67,6 +121,14 @@ public class WXPayUtil {
                 Node node = nodeList.item(idx);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     org.w3c.dom.Element element = (org.w3c.dom.Element) node;
+                    NodeList nodes = element.getChildNodes();
+                    if(nodes.getLength() > 1) {
+                    	for (int x = 0; x < nodes.getLength(); ++x) {
+                            Node n = nodes.item(x);
+                            org.w3c.dom.Element e = (org.w3c.dom.Element) n;
+                            data.put(element.getNodeName() + ':' + e.getNodeName(), e.getTextContent());
+                    	}
+                    }
                     data.put(element.getNodeName(), element.getTextContent());
                 }
             }
@@ -214,7 +276,6 @@ public class WXPayUtil {
      * @return 签名
      */
     public static String generateSignature(final Map<String, String> data, String key, SignType signType) throws Exception {
-    	WXPayUtil.getLogger().info("[WXPayUtil] key: " + key);
         Set<String> keySet = data.keySet();
         String[] keyArray = keySet.toArray(new String[keySet.size()]);
         Arrays.sort(keyArray);

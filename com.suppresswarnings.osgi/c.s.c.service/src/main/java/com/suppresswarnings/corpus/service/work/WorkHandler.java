@@ -13,14 +13,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -30,7 +28,6 @@ import com.suppresswarnings.corpus.common.CheckUtil;
 import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.CorpusService;
-import com.suppresswarnings.corpus.service.wx.WXuser;
 
 public class WorkHandler implements Cloneable {
 	public static final String SENDOK = "{\"errcode\":0,\"errmsg\":\"ok\"}";
@@ -320,55 +317,5 @@ public class WorkHandler implements Cloneable {
 			TodoTask task = tasks.remove(openId);
 			if(task != null) tasks.remove(task.getQuizId());
 		}
-	}
-
-	public void informUsersExcept(String openid, String message, Map<String, WXuser> users) {
-		Set<String> set = workers.keySet();
-		
-		AtomicInteger count = new AtomicInteger(0);
-		AtomicInteger success = new AtomicInteger(0);
-		logger.info("[WorkHandler] inform users size: " + users.size());
-		users.forEach((userid, user) ->{
-			if(set.contains(userid)) {
-				logger.info("[WorkHandler] inform users except: " + userid);
-			} else {
-				
-				Long lasttime = informs.get(userid);
-				
-				boolean need = false;
-				if(lasttime == null) {
-					lasttime = System.currentTimeMillis();
-					informs.put(userid, lasttime);
-					need = true;
-				}
-				
-				if(System.currentTimeMillis() - lasttime > TimeUnit.HOURS.toMillis(1)) {
-					need = true;
-				}
-				logger.info("[WorkHandler] need inform users: " + need);
-				if(need) {
-					count.incrementAndGet();
-					String ret = null;
-					if("online".equals(message)) {
-						TodoTask task = replyTasks.peek();
-						if(task == null) {
-							task = new TodoTask();
-							task.setQuiz("你今天过得怎么样？");
-						}
-						ret = service.sendTxtTo("Inform Users Task " + userid, task.quiz, userid);
-						logger.info("[WorkHandler] inform this user: " + userid + ", ret: " + ret);
-					} else {
-						ret = service.sendTxtTo("Inform Users Msg " + userid, message, userid);
-						logger.info("[WorkHandler] inform this user: " + userid + ", ret: " + ret);
-					}
-					
-					if(SENDOK.equals(ret)) {
-						success.incrementAndGet();
-					}
-				}
-			}
-		});
-		String ret = service.sendTxtTo("Inform Openid Result " + openid, "你通知了" + success.get() + "/" + count.get()+"个用户", openid);
-		logger.info("[WorkHandler] inform openid result: " + ret);
 	}
 }

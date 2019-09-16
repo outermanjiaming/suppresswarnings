@@ -39,7 +39,6 @@ public class ReplyContext extends WXContext {
 			} else {
 				u.output("现在暂时没有在线任务，\n不想接任务就输入「打卡下班」，\n如果发现错误数据就输入「删除这一条」，\n如果不知道怎么答就输入「跳过」");
 			}
-			u.content().informUsers(openid(), "online");
 		}
 
 		@Override
