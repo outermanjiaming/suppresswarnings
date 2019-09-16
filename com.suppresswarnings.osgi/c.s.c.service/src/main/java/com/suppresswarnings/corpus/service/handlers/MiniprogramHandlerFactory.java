@@ -785,7 +785,7 @@ public class MiniprogramHandlerFactory {
 		String name = param.getParameter("name");
 		String avatar = param.getParameter("avatar");
 		String intro = param.getParameter("intro");
-		String crewsKey = String.join(Const.delimiter, Const.Version.V1, "Clients", groupid, "Crew", "List", groupid);
+		String crewsKey = String.join(Const.delimiter, Const.Version.V1, "Clients", groupid, "Crew", "List", openid);
 		String crew = service.account().get(crewsKey);
 		if(service.isNull(crew)) {
 			service.account().put(crewsKey, openid);
