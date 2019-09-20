@@ -54,13 +54,14 @@ public class NotifyHandlerFactory {
 		String openid = args[2];
 		String goodsid = args[3];
 		String cashfee = args[4];
+		String nickname = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "NickName", openid));
 		if("SUCCESS".equals(result)) {
 			if(goodsid.startsWith("coin")) {
 				String coinKey = String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Coin");
 				String coin = service.account().get(coinKey);
 				String myFeeKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "MyCoin", "Fee", orderid);
 				service.account().put(myFeeKey, cashfee);
-				service.publish("corpus/mini/coin/" + openid, orderid + ";" + openid + ";" + openid + ";" + goodsid + ";充值金币" + coin + ";" + cashfee);
+				service.publish("corpus/mini/coin/" + openid, "订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n商品：" + goodsid + "\n充值金币:" + coin + "付款金额：" + cashfee+"分");
 				if(!service.isNull(coin)) {
 					//unlock the coin
 					AtomicBoolean lock = service.switches("mycoin" + openid);
@@ -69,6 +70,11 @@ public class NotifyHandlerFactory {
 				} else {
 					logger.error("coin is not set");
 				}
+			} else if(goodsid.startsWith("goods")) {
+				String groupid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Groupid"));
+				service.publish("corpus/mini/goods/" + groupid, "订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n抢购商品：" + goodsid + "付款金额：" + cashfee+"分");
+				String rushGoodsKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Rush", "Goods", groupid, orderid);
+				service.account().put(rushGoodsKey, goodsid);
 			} else {
 				//unlock the coin
 				AtomicBoolean lock = service.switches("mycoin" + openid);
@@ -80,7 +86,8 @@ public class NotifyHandlerFactory {
 				if(goodsid.startsWith("packet")) {
 					String count = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", goodsid, "Count"));
 					AtomicBoolean redlock = service.switches("haspacket" + groupid);
-					service.publish("corpus/mini/packet/" + groupid, orderid + ";" + openid + ";" + openid + ";" + goodsid + ";" + notice + ";" + cashfee);
+					//"订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n商品：" + goodsid + 
+					service.publish("corpus/mini/packet/" + groupid, "订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n红包商品：" + goodsid + "\n留言：" + notice + "\n支付金额：" + cashfee + "分");
 					synchronized(redlock) {
 						String packetKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", groupid, "Redpacket", orderid);
 						service.account().put(packetKey, count);
@@ -91,11 +98,12 @@ public class NotifyHandlerFactory {
 					}
 				} else if(goodsid.startsWith("gift")) {
 					String userid = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Order", orderid, "Userid"));
+					String username = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "NickName", userid));
 					String sendGiftKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", openid, "Gift", "Send", orderid);
 					String haveGiftKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", userid, "Gift", "Have", orderid);
 					service.account().put(sendGiftKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
 					service.account().put(haveGiftKey, userid+ ";" + openid+ ";" + goodsid + ";" + notice);
-					service.publish("corpus/mini/gift/" + groupid, orderid + ";" + openid + ";" + userid + ";" + goodsid + ";" + notice + ";" + cashfee);
+					service.publish("corpus/mini/gift/" + groupid, "订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n收礼人：" + username + "\n商品:" + goodsid + "\n留言：" + notice + "\n付款金额：" + cashfee + "分");
 				}
 			}
 				

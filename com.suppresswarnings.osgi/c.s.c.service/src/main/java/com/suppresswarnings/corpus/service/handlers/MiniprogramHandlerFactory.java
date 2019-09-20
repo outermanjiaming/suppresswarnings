@@ -28,8 +28,15 @@ public class MiniprogramHandlerFactory {
 		String openid;
 		String groupid;
 		String textid;
+		String avatar;
 		String time;
 		
+		public String getAvatar() {
+			return avatar;
+		}
+		public void setAvatar(String avatar) {
+			this.avatar = avatar;
+		}
 		public String getType() {
 			return type;
 		}
@@ -323,6 +330,17 @@ public class MiniprogramHandlerFactory {
 		return gson.toJson(array);
 	};
 	
+	static RequestHandler avatarUrl = (param, service, args) ->{
+		String avatar = param.getParameter("avatar");
+		String openid =  param.getParameter("openid");
+		String code = param.getParameter("code");
+		String time =  param.getParameter("time");
+		logger.info("[avatarUrl] "+ avatar + " " + openid + ":" + code + " " + time);
+		service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "Avatar", openid), avatar);
+		service.data().put(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "Avatar", openid, time), avatar);
+		return "success";
+	};
+	
 	static RequestHandler mine = (param, service, args) ->{
 		List<String> array = new ArrayList<String>();
 		String openid =  param.getParameter("openid");
@@ -562,7 +580,8 @@ public class MiniprogramHandlerFactory {
 					
 				}
 			}
-			
+			String icon = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Clients", groupid, "Icon"));
+			map.put("icon", icon);
 			//////////////////////////////
 			//    coins
 			//////////////////////////////
@@ -621,6 +640,7 @@ public class MiniprogramHandlerFactory {
 			String userid = argv[3];
 			String time = argv[2];
 			String nickname = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "NickName", userid));
+			String avatar = service.account().get(String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "Avatar", userid));
 			Record one = new Record();
 			one.setType(type);
 			one.setText(v);
@@ -629,6 +649,7 @@ public class MiniprogramHandlerFactory {
 			one.setTextid(textid);
 			one.setName(nickname);
 			one.setTime(time);
+			one.setAvatar(avatar);
 			list.add(one);
 		});
 		
@@ -917,6 +938,8 @@ public class MiniprogramHandlerFactory {
 			return waitress.handler(parameter, service);
 		} else if("mine".equals(todo)) {
 			return mine.handler(parameter, service);
+		} else if("avatar".equals(todo)) {
+			return avatarUrl.handler(parameter, service);
 		} else if("service".equals(todo)) {
 			logger.info("[mini 后台service]");
 			return waiter.handler(parameter, service);
