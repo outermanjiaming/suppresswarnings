@@ -250,7 +250,7 @@ function addorder(order) {
         orderinfo = orderinfo + '<li>' + indx +'. <br/>'+
         'KEY：<span>' + k + '</span><br/>'+
         'VAL：<span>' + v + '</span><br/>'+
-        'NEW：<span><a href="update('+k+')">更新数据</a></span><br/>'+'</li>';
+        'NEW：<span><button type="button" onclick="update('+k+')">更新数据</button></span><br/>'+'</li>';
     }
     orderinfo = orderinfo + '</ul>'
     
