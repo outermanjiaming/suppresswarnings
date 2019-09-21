@@ -210,7 +210,6 @@ function show(id){
 }
 
 function update(key) {
-    alert(key)
     var val = $('#update').val()
     $('#update').val('')
     $.ajax({
@@ -226,6 +225,7 @@ function update(key) {
             },
             success: function( result ) {
                 closeDiv()
+                alert(result + ' update ' + key)
               if("fail" == result) {
                   console.log('fail to manageorders')
               } else {
