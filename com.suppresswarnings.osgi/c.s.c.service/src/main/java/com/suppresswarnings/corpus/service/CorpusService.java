@@ -9,7 +9,10 @@
  */
 package com.suppresswarnings.corpus.service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -41,6 +44,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.LoggerFactory;
@@ -64,6 +74,7 @@ import com.suppresswarnings.corpus.service.backup.Server;
 import com.suppresswarnings.corpus.service.daigou.DaigouHandler;
 import com.suppresswarnings.corpus.service.game.Guard;
 import com.suppresswarnings.corpus.service.handlers.DaigouHandlerFactory;
+import com.suppresswarnings.corpus.service.handlers.ManagementHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.MiniprogramHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.NotifyHandlerFactory;
 import com.suppresswarnings.corpus.service.handlers.PingHandlerFactory;
@@ -72,6 +83,7 @@ import com.suppresswarnings.corpus.service.handlers.ShortUrlHandlerFactory;
 import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
+import com.suppresswarnings.corpus.service.http.HttpClientHolder;
 import com.suppresswarnings.corpus.service.mqtt.MqttPublish;
 import com.suppresswarnings.corpus.service.sdk.MiniPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
@@ -87,6 +99,7 @@ import com.suppresswarnings.corpus.service.wx.AccessToken;
 import com.suppresswarnings.corpus.service.wx.JsAccessToken;
 import com.suppresswarnings.corpus.service.wx.QRCodeTicket;
 import com.suppresswarnings.corpus.service.wx.WXnews;
+import com.suppresswarnings.corpus.service.wx.WXresult;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 import com.suppresswarnings.osgi.leveldb.LevelDB;
 import com.suppresswarnings.osgi.leveldb.LevelDBImpl;
@@ -801,6 +814,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 		buffer.append("\t deleten - deleten <startkey> <limit> - delete some values by start limit.\n");
 		buffer.append("\t findn - findn <startkey> <what> <limit> - find them and delete some key-values by what value.\n");
 		buffer.append("\t action - action <method name> - invoke method\n");
+		buffer.append("\t img_sec_check - img_sec_check <key> - do img_sec_check\n");
+		buffer.append("\t access - access <appid> - get access token and keep in token()\n");
 		
 		return buffer.toString();
 	}
@@ -811,6 +826,31 @@ public class CorpusService implements HTTPService, CommandProvider {
 		ci.println(providers.keySet() + ": "+ arg);
 		leveldb = (LevelDB) providers.get(arg).instance();
 		ci.println("[_which] " + leveldb);
+	}
+	
+	public void _access(CommandInterpreter ci) {
+		logger.info("[_access] " + leveldb);
+		String head = String.join(Const.delimiter, Const.Version.V1, "Info", "Appid");
+		account().page(head, head, null, 1000, (k,appid) ->{
+			String secKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Secret", appid);
+			String secret = account().get(secKey);
+			ci.println("[_access] " + appid);
+			String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", appid);
+			String expireKey = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Expire", appid);
+			try {
+				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appid, secret);
+				String json = get.call();
+				AccessToken at = gson.fromJson(json, AccessToken.class);
+				String access = at.getAccess_token();
+				long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(at.getExpires_in());
+				int result = token().put(key, access);
+				token().put(expireKey, "" + expireAt);
+				logger.info("[_access] refresh " + result + ", expires at " + at.getExpires_in());
+			} catch(Exception e) {
+				ci.println("[_access] Exception: " + e.getMessage());
+			}
+		});
+		ci.println("[_access] finish");
 	}
 	
 	public void _putkv(CommandInterpreter ci) {
@@ -844,36 +884,32 @@ public class CorpusService implements HTTPService, CommandProvider {
 		});
 	}
 	
-	public void _replacen(CommandInterpreter ci) {
-		logger.info("[_replacen] " + leveldb);
+	public void _img_sec_check(CommandInterpreter ci) {
+		logger.info("[img_sec_check] " + leveldb);
 		if(leveldb == null) return;
-		String target = ci.nextArgument();
-		String real = ci.nextArgument();
-		ci.println("[_replacen] target: " + target + ", real: " + real);
-		AtomicInteger i = new AtomicInteger(0);
-		leveldb.page(target, target, null, Integer.MAX_VALUE, (k, v) -> {
-			String key = k.replace(target, real);
-			leveldb.put(key, v);
-			leveldb.del(k);
-			int index = i.incrementAndGet();
-			ci.println("[_replacen] " + index + ". replace key:\n" + k + "\n -> \n" + key + "\n   = " + v);
-		});
-	}
-	
-	public void _updaten(CommandInterpreter ci) {
-		logger.info("[_updaten] " + leveldb);
-		if(leveldb == null) return;
-		String target = ci.nextArgument();
-		String real = ci.nextArgument();
-		String n = ci.nextArgument();
-		int idx = Integer.valueOf(n);
-		ci.println("[_updaten] start: " + target + ", value: " + real);
-		AtomicInteger i = new AtomicInteger(0);
-		leveldb.page(target, target, null, idx, (k, v) -> {
-			leveldb.put(k, real);
-			int index = i.incrementAndGet();
-			ci.println("[_updaten] " + index + ". update key:\n" + k + "value:"+v+"\n -> \n" + real);
-		});
+		String key = ci.nextArgument();
+		String todo = leveldb.get(key);
+		ci.println("[img_sec_check] key: " + key + " todo: " + todo);
+		LevelDB db = leveldb;
+		if(key.endsWith("Account")) {
+			db = account();
+		} else if(key.endsWith("Data")) {
+			db = data();
+		}
+		String value = db.get(todo);
+		if(isNull(value)) {
+			ci.println("[img_sec_check] value: null");
+			leveldb.put(String.join(Const.delimiter, Const.Version.V1, "NULL", "imgSecCheck"), key);
+		} else {
+			ci.println("[img_sec_check] value: " + value);
+			boolean ret = imgSecCheck(value);
+			leveldb.put(String.join(Const.delimiter, Const.Version.V1, "DONE", "imgSecCheck"), key);
+			ci.println("[img_sec_check] alert: " + ret);
+			if(!ret) {
+				db.put(todo, "alert.png#" + value);
+				logger.info("[img_sec_check] update image to alert.png: " + todo);
+			}
+		}
 	}
 	
 	public void _findn(CommandInterpreter ci) {
@@ -886,25 +922,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 		int n = Integer.valueOf(limit);
 		AtomicInteger index = new AtomicInteger(0);
 		AtomicInteger count = new AtomicInteger(0);
-		leveldb.page(start, start, null, n, new BiConsumer<String, String>() {
-			@Override
-			public void accept(String t, String u) {
+		leveldb.page(start, start, null, n, (k,v)->{
+			if(v.contains(what)) {
+				ci.println("[_findn] found key." +count.get()+ " = " + k);
+				ci.println("[_findn] found val." +count.get()+ " = " + v);
 				count.incrementAndGet();
-				if(u.equals(what)) {
-					index.incrementAndGet();
-					ci.println("[_findn] " + index.get() + ". " + t + " = " + u);
-					String[] ab = t.split("Similar|Reply");
-					if(ab.length == 2) {
-						AtomicInteger i = new AtomicInteger(0);
-						String key = ab[0];
-						leveldb.page(key, key, null, 10, (k, v) -> {
-							leveldb.put(String.join(Const.delimiter, Const.Version.V1, "Corpus", "Delete", ""+System.currentTimeMillis(), "oDqlM1TyKpSulfMC2OsZPwhi-9Wk", "Quizid", k), v);
-							leveldb.del(k);
-							int x = i.incrementAndGet();
-							ci.println("        [delete] " + x + ". remove key:" + k + " = " + v);
-						});
-					}
-				}
 			}
 		});
 		ci.println("[_findn] find " + index.get() + " / " + count.get() + " from " + start + " for " + what);
@@ -965,6 +987,40 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	public boolean isNull(String value) {
 		return value == null || "null".equals(value) || "None".equals(value);
+	}
+	
+	public boolean imgSecCheck(String upload) {
+		boolean result = true;
+		logger.info("[img_sec_check] " + upload);
+		
+        try {
+        	CloseableHttpClient httpclient = HttpClientHolder.getInstance().newHttpClient();
+    		HttpPost request = new HttpPost("https://api.weixin.qq.com/wxa/img_sec_check?access_token=" + accessToken("img_sec_check"));
+            request.addHeader("Content-Type", "application/octet-stream");
+            String path = System.getProperty("path.html") + upload;
+            logger.info("[img_sec_check] check path: " + path);
+	        InputStream inputStream = new FileInputStream(new File(path));
+	        byte[] byt = new byte[inputStream.available()];
+	        inputStream.read(byt);
+	        request.setEntity(new ByteArrayEntity(byt, ContentType.create("image/jpg")));
+	        HttpResponse response = httpclient.execute(request);
+	        inputStream.close();
+	        HttpEntity httpEntity = response.getEntity();
+	        String json = EntityUtils.toString(httpEntity, "UTF-8");
+	        logger.info("[img_sec_check] check result: " + json);
+	        WXresult jso = gson.fromJson(json, WXresult.class);
+	        if (jso.getErrcode() == 0) {
+	        	result = true;
+	        } else if (jso.getErrcode() == 87014) {
+	        	result = false;
+	        	tellAdmins(STUPID, "图片审核违法：" + json);
+	        } else {
+	        	tellAdmins(STUPID, "图片审核失败：" + json);
+	        }
+	    } catch (Exception e) {
+	        logger.error("[img_sec_check] fail to imgSecCheck", e);
+	    }
+		return result;
 	}
 	
 	public String updateCoin(String openid, int coin) {
@@ -1235,6 +1291,8 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return ShortUrlHandlerFactory.handle(parameter, this);
 		} else if("miniprogram".equals(action)) {  
 			return MiniprogramHandlerFactory.handle(parameter, this);
+		} else if("management".equals(action)) {  
+			return ManagementHandlerFactory.handle(parameter, this);
 		} else if("addget".equals(action)) {
 			String todo = parameter.getParameter("todo");
 			logger.info("addget: " + todo);
@@ -1387,61 +1445,24 @@ public class CorpusService implements HTTPService, CommandProvider {
 				logger.info("[managereports] check auth failed");
 				return "fail";
 			}
-			
-			Expire cache = caches.get("managereports");
-			logger.info("[managereports] " + cache);
-			if(cache == null || cache.expired()) {
-				threadpool.execute(() ->{
-					List<Map<String, Object>> temp = new ArrayList<>();
-					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					counters.forEach((userid, counter) ->{
-						try {
-							logger.info("[managereports] counter for " + userid);
-							Map<String, Object> map = new HashMap<>();
-							WXuser user = getWXuserByOpenId(userid);
-							
-							if(authrized(userid, "VIP")) {
-								map.put("vip", "1");
-								List<KeyValue> invited = new ArrayList<>();
-								List<String> openids = new ArrayList<>();
-								String start = String.join(Const.delimiter, Const.Version.V1, userid, "Crew");
-								account().page(start, start, null, Integer.MAX_VALUE, (k,v)->{
-									String crew = k.substring(start.length() + Const.delimiter.length());
-									openids.add(crew);
-								});
-								openids.forEach(o ->{
-									WXuser u = getWXuserByOpenId(o);
-									KeyValue kv = new KeyValue(u.getHeadimgurl(), u.getNickname());
-									invited.add(kv);
-								});
-								map.put("count", "" + openids.size());
-								map.put("entries", invited);
-								
-								map.put("username", user.getNickname());
-								map.put("image", user.getHeadimgurl());
-								map.put("openid", userid);
-								map.put("quiz", ""+counter.getQuizCounter().get());
-								map.put("reply", ""+counter.getReplyCounter().get());
-								map.put("exist", ""+counter.getExistCounter().get());
-								map.put("similar", ""+counter.getSimilarCounter().get());
-								map.put("lasttime", dateFormat.format(new Date(counter.getLastTime())));
-								map.put("firsttime", dateFormat.format(new Date(counter.getFirstTime())));
-								map.put("openid", userid);
-								map.put("repetition", ""+counter.repetition());
-								map.put("sum", ""+counter.sum());
-								temp.add(map);
-							}
-						} catch (Exception e) {
-							logger.error("[managereports] error while foreach", e);
-						}
-					});
-					list.clear();
-					list.addAll(temp);
-					temp.clear();
-					Collections.sort(list, (Map<String, Object> a, Map<String, Object> b) -> Integer.compare(Integer.parseInt((String)b.get("count")),Integer.parseInt((String)a.get("count"))));
-					caches.put("managereports", new Expire(TimeUnit.MINUTES.toMillis(3)));
+			String code2OpenIdKey = String.join(Const.delimiter, Const.Version.V1, "To", "OpenId", CODE);
+			long expire = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+			token().put(String.join(Const.delimiter, Const.Version.V1, "Info", "Admin", "Token", CODE), "" + expire);
+			token().put(code2OpenIdKey, openId);
+			String start = String.join(Const.delimiter, Const.Version.V1, "Info", "Update", "Head");
+			list.clear();
+			logger.info("[managereports] list.clear()");
+			account().page(start, start, null, 100, (x,head) ->{
+				logger.info("[managereports] head = " + head);
+				Map<String, Object> e = new HashMap<String, Object>();
+				List<KeyValue> li = new ArrayList<KeyValue>();
+				account().page(head, head, null, 999999, (k,v)-> {
+					KeyValue kv = new KeyValue(k,v);
+					li.add(kv);
 				});
-			}
+				e.put("list", li);
+				list.add(e);
+			});
 			return gson.toJson(list);
 		} else if("WX".equals(action)) {
 			logger.info("[WX] request: " + parameter.toString());
@@ -2858,6 +2879,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	public String accessToken(String business) {
 		logger.info("[corpus] get access token for " + business);
+		if("img_sec_check".equals(business)) {
+			return token().get(String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "wxc2e12f2151179727"));
+		} else if(business.startsWith("wx")) {
+			return token().get(String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", business));
+		}
 		return token().get(String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", "973rozg"));
 	}
 	public String qrCode(String accessToken, int expire_seconds, String actionName, String scene_str) {

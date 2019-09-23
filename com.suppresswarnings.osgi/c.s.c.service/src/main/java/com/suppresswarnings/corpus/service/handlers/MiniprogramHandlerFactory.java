@@ -741,6 +741,7 @@ public class MiniprogramHandlerFactory {
 		return code;
 	};
 	static RequestHandler record = (param, service, args) ->{
+		String argsAppid = param.getParameter("appid");
 		String openid = param.getParameter("openid");
 		String groupid = param.getParameter("groupid");
 		String name = param.getParameter("name");
@@ -788,6 +789,12 @@ public class MiniprogramHandlerFactory {
 			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", textid, "Bossid"), goodsBoss);
 			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", textid, "Type"), type);
 			logger.info("goods created: " + textid);
+		} else if("pic".equals(type)) {
+			if(!service.imgSecCheck(text)) {
+				service.data().put(textKey, "alert.png#"+text);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info",  "Alert", argsAppid, groupid, openid), textKey);
+			}
+			service.token().put(String.join(Const.delimiter, Const.Version.V1, "TODO", "imgSecCheck", "" + System.currentTimeMillis(), argsAppid, groupid, openid, "Data"), textKey);
 		}
 		return textid;
 	};
@@ -801,6 +808,7 @@ public class MiniprogramHandlerFactory {
 	
 	static RequestHandler waitress = (param, service, args) ->{
 		String code = param.getParameter("code");
+		String argsAppid = param.getParameter("appid");
 		String openid = param.getParameter("openid");
 		String groupid = param.getParameter("groupid");
 		String name = param.getParameter("name");
@@ -820,7 +828,13 @@ public class MiniprogramHandlerFactory {
 		
 		
 		if(!service.isNull(avatar)) {
-			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Clients", groupid, "Crew", openid, "Avatar"), avatar);// 'namei.png', 
+			String key = String.join(Const.delimiter, Const.Version.V1, "Clients", groupid, "Crew", openid, "Avatar");
+			service.token().put(String.join(Const.delimiter, Const.Version.V1, "TODO", "imgSecCheck", "" + System.currentTimeMillis(), argsAppid, groupid, openid, "Account"), key);
+			service.account().put(key, avatar);// 'namei.png',
+			if(!service.imgSecCheck(avatar)) {
+				service.data().put(key, "alert.png#"+avatar);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info",  "Alert", argsAppid, groupid, openid), key);
+			}
 		}
 		
 		if(!service.isNull(intro)) {
