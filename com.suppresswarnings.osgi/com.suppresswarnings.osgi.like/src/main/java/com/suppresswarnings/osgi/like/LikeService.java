@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +43,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public LikeHandler handler;
 	public DrawHandler drawHandler;
 	public Map<String, AtomicInteger> counters;
+	public static final long STOP_THE_WORLD = 2000000000000l;
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		AtomicInteger integer = new AtomicInteger(1);
@@ -160,6 +162,115 @@ public class LikeService implements HTTPService, CommandProvider {
 					Quiz data = drawHandler.select(userid, category, chapter, id);
 					return gson.toJson(new Result(data));
 				} 
+			}
+		} else if("location".equals(action)) {
+			logger.info(parameter.toString());
+			String todo = parameter.getParameter("todo");
+			String locationid = parameter.getParameter("locationid");
+			String code = parameter.getParameter("code");
+			String openid = parameter.getParameter("openid");
+			if("free".equals(todo)) {
+				return gson.toJson(new Result("free"));
+			} else if("comments".equals(todo)) {
+				String curr = parameter.getParameter("curr");
+				String head = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Comments");
+				if(curr == null || curr.trim().length() < 1) {
+					curr = head;
+				}
+				List<String> comments = new ArrayList<String>();
+				data().page(head, curr, null, 20, (k,v) ->{
+					comments.add(v);
+				});
+				return gson.toJson(new Result(comments));
+			} else if("comment".equals(todo)) {
+				long now = System.currentTimeMillis();
+				long curr = STOP_THE_WORLD - now;
+				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Comments", ""+curr, openid);
+				String comment = parameter.getParameter("comment");
+				String value = now +";" + openid + ";" + comment;
+				data().put(String.join(Const.delimiter, Const.Version.V2, "Location", openid, "Comments", locationid, ""+ now), comment);
+				data().put(key, value);
+				return gson.toJson(new Result(value));
+			} else if("star".equals(todo)) {
+				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Rate", openid);
+				String rate = parameter.getParameter("rate");
+				float value = 1;
+				try {
+					value = Float.parseFloat(rate);
+					if(value > 5) value = 5;
+					if(value < 0) value = 1;
+				} catch(Exception e) {
+					value = 1;
+				}
+				data().put(key, "" + value);
+				return gson.toJson(new Result("" + value));
+			} else if("publish".equals(todo)) {
+				locationid = System.currentTimeMillis() + Const.delimiter + new Random().nextInt(99999);
+				account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "List", locationid), locationid);
+				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Openid");
+				String value = parameter.getParameter("openid"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Image");
+				value = parameter.getParameter("image"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Latitude");
+				value = parameter.getParameter("latitude"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Longitude");
+				value = parameter.getParameter("longitude"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Address");
+				value = parameter.getParameter("address"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Name");
+				value = parameter.getParameter("name"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Description");
+				value = parameter.getParameter("desc"); 
+				account().put(key, value);
+				return gson.toJson(new Result(locationid));
+			} else if("clients".equals(todo)) {
+				String head = String.join(Const.delimiter, Const.Version.V2, "Location", "List");
+				List<Map<String, String>> list = new ArrayList<>();
+				List<String> ids = new ArrayList<>();
+				account().page(head, head, null, 10000, (k, id) -> {
+					ids.add(id);
+				});
+				for(String id: ids) {
+					Map<String,String> e = new HashMap<String, String>();
+					e.put("locationid", id);
+					e.put("free", "true");
+					e.put("order", "true");
+					e.put("iconPath", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Image")));
+					e.put("name", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Name")));
+					e.put("location", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Description")));
+					e.put("latitude", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Latitude")));
+					e.put("longitude", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Longitude")));
+					
+					String key = String.join(Const.delimiter, Const.Version.V2, "Location", id, "Rate");
+					AtomicInteger count = new AtomicInteger(0);
+					AtomicInteger sum = new AtomicInteger(0);
+					data().page(key, key, null, 999, (k,v)->{
+						count.incrementAndGet();
+						try {
+							float value = Float.parseFloat(v);
+							if(value > 5) value = 5;
+							if(value < 0) value = 1;
+							value = value*100;
+							sum.addAndGet((int)value);
+						} catch(Exception x) {
+							sum.addAndGet(100);
+						}
+					});
+					float rate = sum.floatValue() / 100;
+					float average = rate / count.get();
+					float percent = average * 20;
+					e.put("percent", ""+(int)percent);
+					e.put("star", ""+count.get());
+					e.put("rate", ""+rate);
+					list.add(e);
+				}
+				return gson.toJson(new Result(list));
 			}
 		}
 		return gson.toJson(new Result(400, "unknown action"));

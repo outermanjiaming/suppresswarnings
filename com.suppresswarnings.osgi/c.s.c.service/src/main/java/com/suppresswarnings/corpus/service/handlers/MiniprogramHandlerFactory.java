@@ -752,7 +752,7 @@ public class MiniprogramHandlerFactory {
 		//server time
 		String now = "" + System.currentTimeMillis();
 		String textid = String.join(Const.delimiter, groupid, now, time, openid, type);
-		
+
 		String openidKey = String.join(Const.delimiter, Const.Version.V1, "Info", "iBeacon", "User", groupid, openid);
 		service.account().put(openidKey, now);
 		service.data().put(openidKey, openid);
@@ -768,6 +768,13 @@ public class MiniprogramHandlerFactory {
 		service.account().put(groupKey, groupid);
 		
 		String textKey = String.join(Const.delimiter, Const.Version.V1, "iBeacon", "Text", textid);
+		if("pic".equals(type)) {
+			if(!service.imgSecCheck(text)) {
+				text =  "alert.png#" + text;
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info",  "Alert", argsAppid, groupid, openid), textKey);
+			}
+			service.token().put(String.join(Const.delimiter, Const.Version.V1, "TODO", "imgSecCheck", "" + System.currentTimeMillis(), argsAppid, groupid, openid, "Data"), textKey);
+		}
 		service.data().put(textKey, text);
 		
 		String mytextKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Text", textid);
@@ -789,12 +796,6 @@ public class MiniprogramHandlerFactory {
 			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", textid, "Bossid"), goodsBoss);
 			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", textid, "Type"), type);
 			logger.info("goods created: " + textid);
-		} else if("pic".equals(type)) {
-			if(!service.imgSecCheck(text)) {
-				service.data().put(textKey, "alert.png#"+text);
-				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info",  "Alert", argsAppid, groupid, openid), textKey);
-			}
-			service.token().put(String.join(Const.delimiter, Const.Version.V1, "TODO", "imgSecCheck", "" + System.currentTimeMillis(), argsAppid, groupid, openid, "Data"), textKey);
 		}
 		return textid;
 	};
@@ -832,7 +833,7 @@ public class MiniprogramHandlerFactory {
 			service.token().put(String.join(Const.delimiter, Const.Version.V1, "TODO", "imgSecCheck", "" + System.currentTimeMillis(), argsAppid, groupid, openid, "Account"), key);
 			service.account().put(key, avatar);// 'namei.png',
 			if(!service.imgSecCheck(avatar)) {
-				service.data().put(key, "alert.png#"+avatar);
+				service.account().put(key, "alert.png#"+avatar);
 				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info",  "Alert", argsAppid, groupid, openid), key);
 			}
 		}
@@ -879,6 +880,7 @@ public class MiniprogramHandlerFactory {
 	};
 	static RequestHandler clients = (param, service, args) ->{
 		Gson gson = new Gson();
+		String argsAppid = param.getParameter("appid");
 		String code = param.getParameter("code");
 		String openid = param.getParameter("openid");
 		logger.info("[clients] " + code + "," + openid);
