@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 import org.apache.http.HttpEntity;
@@ -373,9 +374,12 @@ public class CorpusService implements HTTPService, CommandProvider {
 		this.workHandler.clockOut(openId);
 		return this.workHandler.newJob(quiz, quizId, openId);
 	}
+	
 	public void tellAdmins(String openid, String msg) {
-		notifyAdmins.put(uniqueKey("TellAdmins") + "$" + System.currentTimeMillis(), new KeyValue(openid, msg));
+		String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, "" + System.currentTimeMillis(), uniqueKey("TellAdmins"));
+		account().put(tellAdminsKey, msg);
 	}
+	
 	public void tellBossNow(String openid, String msg) {
 		String boss = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "Boss"));
 		if(boss == null || "None".equals(boss)) {
@@ -680,34 +684,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 				});
 				
 				updateWXuser();
-				
-				Set<String> keys = notifyAdmins.keySet();
-				StringBuffer ks  = new StringBuffer();
-				for(String k : keys) {
-					KeyValue kv = notifyAdmins.remove(k);
-					String openid = kv.key();
-					String boss = account().get(String.join(Const.delimiter, Const.Version.V1, openid, "Boss"));
-					if(boss == null || "None".equals(boss)) {
-						logger.error("boss is null " + openid);
-					} else {
-						boss = getWXuserByOpenId(boss).getNickname();
-					}
-					ks.append(boss + "->" + kv.value()).append("\n");
-				}
-				
 				String[] admin = admins.split(",");
 				StringBuffer info = new StringBuffer();
-				if(notifyAdmins.size() > 0) {
-					String filename = System.currentTimeMillis() + times + ".html";
-					String path = System.getProperty("path.html") + filename;
-					try {
-						Files.write(Paths.get(path), ks.toString().getBytes(), StandardOpenOption.CREATE_NEW);
-					} catch (Exception e) {
-						logger.error("fail to write notifyAdmins file", e);
-					}
-					info.append("https://suppresswarnings.com/" + filename);
-				}
-				info.append("（仅通知管理员）\n周期汇报：第").append(times).append("次").append("\n");
+				info.append("仅通知管理员\n周期汇报：第").append(times).append("次").append("\n");
 				info.append("VIP邀请：" + cnt.get() + "次").append("\n");
 				info.append("用户统计：" + users.size()).append("\n");
 				info.append("当前对话: " + contexts.size()).append("\n");
@@ -720,10 +699,32 @@ public class CorpusService implements HTTPService, CommandProvider {
 					.append("/").append(corpusCount.get()).append("\n");
 				info.append("待审批：").append(tobeApproved.size()).append(",已执行：").append(atUserPool.getCompletedTaskCount()).append("\n");
 //				info.append("后台工作：\n" + workHandler.report());
+				
+				String retrieveKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Retrieve", "TellAdmins", "Last");
+				String lastRetrieved = account().get(retrieveKey);
+				String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins");
+				String start = null;
+				AtomicReference<String> last = new AtomicReference<String>();
+				if(isNull(lastRetrieved)) {
+					start = tellAdminsKey;
+				} else {
+					start = lastRetrieved;
+				}
+				last.set(start);
+				List<String> tellAdmins = new ArrayList<String>();
+				account().page(tellAdminsKey, start, null, 50, (k, v) ->{
+					last.set(k);
+					tellAdmins.add(v);
+				});
+				account().put(retrieveKey, last.get());
+				for(String tell: tellAdmins) {
+					uniqueKey(tell);
+				}
 				info.append("访问计数：");
 				atomicIds.forEach((k, v) ->{
 					info.append("\n" + k + "\t" + v.get());
 				});
+				
 				for(String one : admin) {
 					atUser(one, info.toString());
 				}
@@ -2738,7 +2739,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	
 	public void updateWXuser() {
-		if(new Random().nextDouble() < 0.6) {
+		if(new Random().nextDouble() < 0.3) {
 			logger.info("no need to update WXuser");
 			return;
 		}

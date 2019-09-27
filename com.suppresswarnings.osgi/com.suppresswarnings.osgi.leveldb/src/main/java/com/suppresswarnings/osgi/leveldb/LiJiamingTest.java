@@ -14,12 +14,12 @@ import com.leveldb.common.options.WriteOptions;
 public class LiJiamingTest{
 
 	public static void main(String[] args) {
-		String dbname_ = "/Users/lijiaming/Codes/SuppressWarnings/SuppressWarnings/account";
+		String dbname_ = "/Users/lijiaming/temp/users";
 		DB db_;
 		WriteOptions woption = new WriteOptions();
 		ReadOptions roption = new ReadOptions();
 		Options options = new Options();
-		options.create_if_missing = true;
+		options.create_if_missing = false;
 		db_ = DB.Open(options, dbname_);
 		
 		
@@ -63,7 +63,7 @@ public class LiJiamingTest{
 //		for(itr.Seek(new Slice("f5"));itr.Valid();itr.Next()) {
 //			System.out.println(itr.key() + " = " + itr.value());
 //		}
-		System.out.println("go...");
+		System.out.println("go..." + db_);
 		Scanner scanner = new Scanner(System.in);
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();

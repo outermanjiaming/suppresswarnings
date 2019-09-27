@@ -632,7 +632,7 @@ public class MiniprogramHandlerFactory {
 		last.set(start);
 		String head = String.join(Const.delimiter, Const.Version.V1, "iBeacon", "Text");
 		int index = head.length() + 1;
-		service.data().page(groupTextKey, start, null, 50, (k, v) ->{
+		service.data().page(groupTextKey, start + ".0", null, 50, (k, v) ->{
 			last.set(k);
 			String textid = k.substring(index);
 			String[] argv = textid.split("\\.", 5);
@@ -797,6 +797,9 @@ public class MiniprogramHandlerFactory {
 			service.account().put(String.join(Const.delimiter, Const.Version.V1, "Sell", "Goods", textid, "Type"), type);
 			logger.info("goods created: " + textid);
 		}
+		String sentKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Sent", "Last", groupid);
+		//bugfix
+		service.account().put(sentKey, textid);
 		return textid;
 	};
 	

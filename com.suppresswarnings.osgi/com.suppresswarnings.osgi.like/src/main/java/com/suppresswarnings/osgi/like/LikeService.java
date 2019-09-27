@@ -44,6 +44,7 @@ public class LikeService implements HTTPService, CommandProvider {
 	public DrawHandler drawHandler;
 	public Map<String, AtomicInteger> counters;
 	public static final long STOP_THE_WORLD = 2000000000000l;
+	public static final String STUPID = "oAAug4oI8JS7hk6_LXyzctHx9efM";
 	long start = System.currentTimeMillis();
 	ScheduledExecutorService service = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		AtomicInteger integer = new AtomicInteger(1);
@@ -164,13 +165,22 @@ public class LikeService implements HTTPService, CommandProvider {
 				} 
 			}
 		} else if("location".equals(action)) {
-			logger.info(parameter.toString());
 			String todo = parameter.getParameter("todo");
+			String appid = parameter.getParameter("appid");
 			String locationid = parameter.getParameter("locationid");
 			String code = parameter.getParameter("code");
 			String openid = parameter.getParameter("openid");
+			logger.info("code: " + code + ",openid: " + openid);
 			if("free".equals(todo)) {
 				return gson.toJson(new Result("free"));
+			} else if("delete".equals(todo)) {
+				if(STUPID.equals(openid)) {
+					account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "List", locationid), locationid + ".Delete." + System.currentTimeMillis());
+					account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "Delete", "" + System.currentTimeMillis(), openid), locationid);
+				} else {
+					logger.info("user delete location");
+				}
+				return gson.toJson(new Result("delete"));
 			} else if("comments".equals(todo)) {
 				String curr = parameter.getParameter("curr");
 				String head = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Comments");
@@ -228,14 +238,18 @@ public class LikeService implements HTTPService, CommandProvider {
 				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Description");
 				value = parameter.getParameter("desc"); 
 				account().put(key, value);
+				String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, "" + System.currentTimeMillis(), appid);
+				account().put(tellAdminsKey, "发布地点：" + value);
 				return gson.toJson(new Result(locationid));
 			} else if("clients".equals(todo)) {
 				String head = String.join(Const.delimiter, Const.Version.V2, "Location", "List");
 				List<Map<String, String>> list = new ArrayList<>();
 				List<String> ids = new ArrayList<>();
 				account().page(head, head, null, 10000, (k, id) -> {
-					ids.add(id);
+					if(k.contains(id)) ids.add(id);
 				});
+				String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, "" + System.currentTimeMillis(), appid);
+				account().put(tellAdminsKey, "地点点赞列表");
 				for(String id: ids) {
 					Map<String,String> e = new HashMap<String, String>();
 					e.put("locationid", id);
@@ -267,7 +281,7 @@ public class LikeService implements HTTPService, CommandProvider {
 					float percent = average * 20;
 					e.put("percent", ""+(int)percent);
 					e.put("star", ""+count.get());
-					e.put("rate", ""+rate);
+					e.put("rate", ""+average);
 					list.add(e);
 				}
 				return gson.toJson(new Result(list));
