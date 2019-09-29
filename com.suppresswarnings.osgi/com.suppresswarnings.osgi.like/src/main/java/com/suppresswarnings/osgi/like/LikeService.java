@@ -172,6 +172,12 @@ public class LikeService implements HTTPService, CommandProvider {
 			String openid = parameter.getParameter("openid");
 			logger.info("code: " + code + ",openid: " + openid);
 			if("free".equals(todo)) {
+				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Free");
+				String free = account().get(key);
+				if("false".equals(free)) {
+					logger.info("user " + openid + " want a charged location " + locationid);
+					return gson.toJson(new Result(502, "这是一个收费地点"));
+				}
 				return gson.toJson(new Result("free"));
 			} else if("delete".equals(todo)) {
 				if(STUPID.equals(openid)) {
@@ -179,6 +185,22 @@ public class LikeService implements HTTPService, CommandProvider {
 					account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "Delete", "" + System.currentTimeMillis(), openid), locationid);
 				} else {
 					logger.info("user delete location");
+				}
+				return gson.toJson(new Result("delete"));
+			} else if("charge".equals(todo)) {
+				if(STUPID.equals(openid)) {
+					String now = "" + System.currentTimeMillis();
+					String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, now, appid);
+					String free = parameter.getParameter("free");
+					String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Free");
+					account().put(key, free);
+					if("false".equals(free)) {
+						account().put(String.join(Const.delimiter, Const.Version.V1, "Sell","Goods", locationid, "Price"), "100");
+						logger.info("create goods location: " + locationid);
+						account().put(tellAdminsKey, "创建收费地点");
+					}
+				} else {
+					logger.info("user charge location");
 				}
 				return gson.toJson(new Result("delete"));
 			} else if("comments".equals(todo)) {
@@ -216,12 +238,25 @@ public class LikeService implements HTTPService, CommandProvider {
 				return gson.toJson(new Result("" + value));
 			} else if("publish".equals(todo)) {
 				locationid = System.currentTimeMillis() + Const.delimiter + new Random().nextInt(99999);
+				String now = "" + System.currentTimeMillis();
+				String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, now, appid);
 				account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "List", locationid), locationid);
 				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Openid");
 				String value = parameter.getParameter("openid"); 
 				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Appid");
+				value = parameter.getParameter("appid"); 
+				account().put(key, value);
 				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Image");
 				value = parameter.getParameter("image"); 
+				account().put(key, value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Free");
+				value = parameter.getParameter("free"); 
+				if("false".equals(value)) {
+					account().put(String.join(Const.delimiter, Const.Version.V1, "Sell","Goods", locationid, "Price"), "100");
+					logger.info("create goods location: " + locationid);
+					account().put(tellAdminsKey, "创建收费地点");
+				}
 				account().put(key, value);
 				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Latitude");
 				value = parameter.getParameter("latitude"); 
@@ -238,8 +273,9 @@ public class LikeService implements HTTPService, CommandProvider {
 				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Description");
 				value = parameter.getParameter("desc"); 
 				account().put(key, value);
-				String tellAdminsKey = String.join(Const.delimiter, Const.Version.V1, "Info", "TellAdmins", openid, "" + System.currentTimeMillis(), appid);
 				account().put(tellAdminsKey, "发布地点：" + value);
+				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Rate", openid, now);
+				data().put(key, "5");
 				return gson.toJson(new Result(locationid));
 			} else if("clients".equals(todo)) {
 				String head = String.join(Const.delimiter, Const.Version.V2, "Location", "List");
@@ -252,9 +288,13 @@ public class LikeService implements HTTPService, CommandProvider {
 				account().put(tellAdminsKey, "地点点赞列表");
 				for(String id: ids) {
 					Map<String,String> e = new HashMap<String, String>();
+					String free = account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Free"));
+					if(!"false".equals(free)) {
+						free = "true";
+					}
 					e.put("locationid", id);
-					e.put("free", "true");
 					e.put("order", "true");
+					e.put("free", free);
 					e.put("iconPath", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Image")));
 					e.put("name", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Name")));
 					e.put("location", account().get(String.join(Const.delimiter, Const.Version.V2, "Location", id, "Description")));
