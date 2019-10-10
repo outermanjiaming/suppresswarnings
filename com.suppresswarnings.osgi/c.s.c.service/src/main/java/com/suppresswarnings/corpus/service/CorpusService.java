@@ -11,12 +11,8 @@ package com.suppresswarnings.corpus.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,6 +50,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -66,7 +66,6 @@ import com.suppresswarnings.corpus.common.Format;
 import com.suppresswarnings.corpus.common.KeyValue;
 import com.suppresswarnings.corpus.common.Provider;
 import com.suppresswarnings.corpus.common.SendMail;
-import com.suppresswarnings.corpus.common.State;
 import com.suppresswarnings.corpus.common.TTL;
 import com.suppresswarnings.corpus.common.Type;
 import com.suppresswarnings.corpus.service.aiiot.AIIoT;
@@ -85,7 +84,6 @@ import com.suppresswarnings.corpus.service.http.CallableDownload;
 import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.http.CallablePost;
 import com.suppresswarnings.corpus.service.http.HttpClientHolder;
-import com.suppresswarnings.corpus.service.mqtt.MqttPublish;
 import com.suppresswarnings.corpus.service.sdk.MiniPayConfigImpl;
 import com.suppresswarnings.corpus.service.sdk.WXPay;
 import com.suppresswarnings.corpus.service.sdk.WXPayConfig;
@@ -312,6 +310,11 @@ public class CorpusService implements HTTPService, CommandProvider {
 	List<Map<String, Object>> list = new ArrayList<>();
 	Map<String, Runnable> approvedRunnable = new ConcurrentHashMap<>();
 	Map<String, KeyValue> tobeApproved = new ConcurrentHashMap<>();
+	
+	//mqtt
+	String clientId;
+    MqttClient mqttClient;
+    
 	public Set<String> todoSet() {
 		return tobeApproved.keySet();
 	}
@@ -361,7 +364,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 	public void publish(String topic, String payload) {
 		String md5sum = ACrypt.md5(payload + payload);
 		String check = topic + "/" + md5sum;
-		threadpool.execute(new MqttPublish(payload, "tcp://suppresswarnings.com:1883", check, SuppressWarnings.class.getSimpleName(), SuppressWarnings.class.getSimpleName(), CorpusService.class.getSimpleName()));
+		MqttMessage message = new MqttMessage(payload.getBytes());
+        message.setQos(1);
+        try {
+			mqttClient.publish(check, message);
+		} catch (Exception e) {
+			logger.error("fail to publish message to mqtt", e);
+		}
 	}
 	
 	public void atUser(String openid, String message) {
@@ -498,9 +507,21 @@ public class CorpusService implements HTTPService, CommandProvider {
 	}
 	public void activate() {
 		CorpusService that = this;
-		System.setProperty("mqtt", SuppressWarnings.class.getName());
 		logger.info("[corpus] activate");
 		System.out.println("服务正在启动");
+		//mqtt
+		try {
+			clientId = SuppressWarnings.class.getSimpleName();
+			MemoryPersistence persistence = new MemoryPersistence();
+			MqttConnectOptions connOpts = new MqttConnectOptions();
+			connOpts.setCleanSession(true);
+			connOpts.setUserName(clientId);
+			connOpts.setPassword(clientId.toCharArray());
+			mqttClient = new MqttClient("tcp://suppresswarnings.com:1883", clientId, persistence);
+			mqttClient.connect(connOpts);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		scheduler = Executors.newScheduledThreadPool(10, new ThreadFactory() {
 			int index = 0;
 			@Override
@@ -1231,47 +1252,60 @@ public class CorpusService implements HTTPService, CommandProvider {
 		String quizId = ci.nextArgument();
 		ci.println("[_interception] quizId: " + quizId);
 		fillQuestionsAndAnswers(quizId);
-		AtomicInteger integer = new AtomicInteger(0);
-		this.questionToAid.forEach((quiz, aid) -> {
-			ci.println(integer.incrementAndGet() + ".   " + quiz + "\n\t->A. " + this.aidToAnswers.get(aid) + "\n\t->S. " + this.aidToSimilars.get(aid));
+		ci.println("[_interception] done");
+	}
+	
+	/**
+	 * publish all Chinese data to mqtt
+	 * @param ci
+	 */
+	public void _publish(CommandInterpreter ci) {
+		ci.println("[publish] start");
+		String start = ci.nextArgument();
+		if(leveldb == null) {
+			ci.println("[publish] leveldb == null");
+			return;
+		}
+		AtomicInteger count = new AtomicInteger(0);
+		leveldb.page(start, start, null, 1000000, (k,v)->{
+			if(CheckUtil.hasChinese(v)) {
+				publish("corpus/publish", v);
+				ci.println("[_findn] found val." +count.get() + " = " + v);
+				count.incrementAndGet();
+			}
 		});
 	}
 	
 	public void _prepare(CommandInterpreter ci) {
 		ci.println("[prepare] start to write data");
-		LevelDB prepare = new LevelDBImpl("/prepare");
 		AtomicInteger integer = new AtomicInteger(0);
 		this.assimilatedQuiz.forEach(quiz ->{
 			String q = quiz.getQuiz().value();
-			if(!quiz.getReply().isEmpty()) {
-				List<KeyValue> reply = quiz.getReply();
-				int index = 0;
-				String a = "";
-				do{
-					a = reply.get(index).value();
-					
-					if(CheckUtil.hasChinese(a) && a.length() < 30) {
-						break;
-					}
-					
-					index ++;
-				} while(index < reply.size());
-				prepare.put("001." + q, a);
-				integer.incrementAndGet();
-				List<KeyValue> similar = quiz.getSimilar();
-				for(KeyValue kv : similar) {
-					String k = kv.value();
-					if(CheckUtil.hasChinese(k) && k.length() < 30) {
-						prepare.put("001." + k, a);
-						integer.incrementAndGet();
-					}
+			leveldb.put("003." + q, q);
+			integer.incrementAndGet();
+			List<KeyValue> reply = quiz.getReply();
+			List<KeyValue> similar = quiz.getSimilar();
+			AtomicInteger re = new AtomicInteger(0);
+			for(KeyValue kv : reply) {
+				String k = kv.value();
+				if(CheckUtil.hasChinese(k) && k.length() < 30) {
+					leveldb.put("003." + k, k);
+					integer.incrementAndGet();
+					leveldb.put("003." + q + ".Reply." + re.incrementAndGet(), k);
 				}
-			} else {
-				ci.println("[prepare] no reply for this: " + q);
 			}
+			AtomicInteger si = new AtomicInteger(0);
+			for(KeyValue kv : similar) {
+				String k = kv.value();
+				if(CheckUtil.hasChinese(k) && k.length() < 30) {
+					leveldb.put("003." + k, k);
+					integer.incrementAndGet();
+					leveldb.put("003." + q + ".Similar." + si.incrementAndGet(), k);
+				}
+			}
+			ci.println("[prepare] prepare: " + integer.get());
 		});
-		prepare.close();
-		ci.println("[prepare] put QA count: " + integer.get() + " at " + prepare.toString());
+		ci.println("[prepare] done");
 	}
 	
 	@Override

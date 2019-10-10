@@ -41,7 +41,7 @@
  bottom: 0px;
  width: 100%;
  height: constant(safe-area-inset-bottom);
- background-color: #fff;
+ background-color: #EEE;
 }
 
 .explain {

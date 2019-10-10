@@ -3,6 +3,8 @@ const colors = ['lightgreen', 'lightblue', 'gray', 'yellow', 'pink']
 const head = 'https://suppresswarnings.com/wx.http?action=draw'
 Page({
   data: {
+    code:null,
+    categories: ['一注材料', '一注物理', '一注场地', '一注经济', '一注结构', '一注建知'],
     times: 1,
     count: 0,
     box: {},
@@ -12,13 +14,18 @@ Page({
       dx: 0,
       dy: 0
     },
+    entrance: null,
     canvas: {},
-    frames: {}
+    frames: {},
+    interval: -1
+  }, 
+  onHide: function (){
+    console.log('hide')
+    clearInterval(this.data.interval)
   },
   onLoad: function(options) {
     var that = this;
     that.sys();
-    console.log("hello world");
     const ctx = wx.createCanvasContext('canvas');
     that.data.canvas = ctx;
     this.interval = null;
@@ -31,6 +38,57 @@ Page({
     that.house(ctx, 'pink', 280, 120, 20, 110, 'b4');
 
     ctx.draw();
+    wx.request({
+      url: head,
+      data:{
+        todo:'entrance',
+        time: Date.now()
+      },
+      success(res) {
+        console.log(res.data)
+        var result = res.data
+        if (result.startsWith('entrance')) {
+          that.setData({
+            entrance: result.substring(8)
+          })
+        }
+      }
+    })
+    var interval = setInterval(function(){
+      that.randomMove()
+    }, 1300)
+    that.setData({
+      interval: interval
+    })
+  },
+  randomMove(){
+    var boxmap = {}
+    for (var key in this.data.box) {
+      var box = this.data.box[key];
+      var x = Math.floor(((Math.random() - 0.5) * 10) + box[0]);
+      var y = Math.floor(((Math.random() - 0.5) * 10) + box[1]);
+      box[0] = x
+      box[1] = y
+      if (box[0] < 0) {
+        box[0] = 0
+      }
+      if (box[0] + box[2] > 320) {
+        box[0] = 320 - box[2]
+      }
+
+      if (box[1] < 0) {
+        box[1] = 0
+      }
+
+      if (box[1] + box[3] > 320) {
+        box[1] = 320 - box[3]
+      }
+      boxmap[key] = box
+    }
+    this.setData({
+      box: boxmap
+    })
+    this.onUpdate()
   },
   onUpdate: function() {
     const ctx = this.data.canvas;
@@ -58,8 +116,8 @@ Page({
     if (who == '0') {
       if (e.timeStamp - this.touchStartTime < 300) {
         var i = Math.floor((Math.random() * colors.length) + 1);
-        var x = Math.floor((Math.random() * 100) + 1);
-        var y = Math.floor((Math.random() * 100) + 1);
+        var x = Math.floor((Math.random() * 100) + 10);
+        var y = Math.floor((Math.random() * 100) + 10);
         var idx = this.data.count
         var ctx = this.data.canvas
         this.house(ctx, colors[i], arr['x'], arr['y'], x, y, 'c' + idx);
@@ -183,22 +241,61 @@ Page({
   playQuiz(e){
     var index = e.target.dataset.index
     var title = e.target.dataset.title
-    wx.navigateTo({
-      url: '../quiz/quiz?index=' + index,
-    })
-  },
-  iamvip:function(e) {
-    wx.showModal({
-      title: '感谢您的支持',
-      content: '素朴网联建造师（素造）免费提供复习平台。我们正在考虑开通会员机制，以便提供更优质的服务。',
-    })
+    var that = this
+    var code = this.data.code
+    if (code == null) {
+      wx.login({
+        success(res) {
+          code = res.code
+          that.setData({
+            code: code
+          })
+        }
+      })
+    }
     wx.request({
       url: head,
       data:{
-        todo:'vip'
+        todo:'playquiz',
+        index: index,
+        code: that.data.code
       },
       success(res) {
         console.log(res.data)
+        if ('success' === res.data) {
+          wx.navigateTo({
+            url: '../quiz/quiz?index=' + index,
+          })
+        } else {
+          wx.showModal({
+            title: '感谢您的支持',
+            content: res.data,
+          })
+        }
+      }
+    })
+    
+  },
+  iamvip:function(e) {
+    var code = this.data.code
+    wx.request({
+      url: head,
+      data:{
+        todo:'vip',
+        code: code
+      },
+      success(res) {
+        if('success' === res.data) {
+          wx.showModal({
+            title: '感谢您的支持',
+            content: '素朴网联建造师（素造）免费提供复习平台。我们正在考虑开通会员机制，以便提供更优质的服务。',
+          })
+        } else {
+          wx.showModal({
+            title: '感谢您的支持',
+            content: res.data,
+          })
+        }
       }
     })
   },

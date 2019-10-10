@@ -179,6 +179,38 @@ public class LikeService implements HTTPService, CommandProvider {
 					return gson.toJson(new Result(502, "这是一个收费地点"));
 				}
 				return gson.toJson(new Result("free"));
+			} else if("search".equals(todo)) {
+				String search = parameter.getParameter("search");
+				String[] words = search.split("\\s+");
+				String head = String.join(Const.delimiter, Const.Version.V2, "Location", "List");
+				List<String> list = new ArrayList<>();
+				List<String> ids = new ArrayList<>();
+				account().page(head, head, null, 10000, (k, id) -> {
+					if(k.contains(id)) ids.add(id);
+				});
+				for(String id: ids) {
+					for(String word : words) {
+						String key = String.join(Const.delimiter, Const.Version.V2, "Location", id, "Address");
+						String value = account().get(key);
+						if(value.contains(word)) {
+							list.add(id);
+							break;
+						}
+						key = String.join(Const.delimiter, Const.Version.V2, "Location", id, "Name");
+						value = account().get(key);
+						if(value.contains(word)) {
+							list.add(id);
+							break;
+						}
+						key = String.join(Const.delimiter, Const.Version.V2, "Location", id, "Description");
+						value = account().get(key);
+						if(value.contains(word)) {
+							list.add(id);
+							break;
+						}
+					}
+				}
+				return gson.toJson(new Result(list));
 			} else if("delete".equals(todo)) {
 				if(STUPID.equals(openid)) {
 					account().put(String.join(Const.delimiter, Const.Version.V2, "Location", "List", locationid), locationid + ".Delete." + System.currentTimeMillis());
@@ -256,6 +288,8 @@ public class LikeService implements HTTPService, CommandProvider {
 					account().put(String.join(Const.delimiter, Const.Version.V1, "Sell","Goods", locationid, "Price"), "100");
 					logger.info("create goods location: " + locationid);
 					account().put(tellAdminsKey, "创建收费地点");
+				} else {
+					value = "true";
 				}
 				account().put(key, value);
 				key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Latitude");

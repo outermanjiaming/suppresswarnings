@@ -4,6 +4,6 @@ App({
     
   },
   globalData: {
-    
+    userInfo:null
   }
 })

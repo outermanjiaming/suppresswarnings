@@ -1,48 +1,24 @@
 package com.suppresswarnings.spring;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tencentcloudapi.common.Credential;
-import com.tencentcloudapi.common.profile.ClientProfile;
-import com.tencentcloudapi.common.profile.HttpProfile;
-
-import com.tencentcloudapi.aai.v20180522.AaiClient;
-
-import com.tencentcloudapi.aai.v20180522.models.ChatRequest;
-import com.tencentcloudapi.aai.v20180522.models.ChatResponse;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 @Controller
@@ -53,59 +29,7 @@ public class QueryController {
 	long update = System.currentTimeMillis();
 	
 	ByteBuffer buffer = ByteBuffer.allocateDirect(2048);
-	
-	ConcurrentHashMap<String, File> files = new ConcurrentHashMap<>();
-	//TODO the id & key was updated
-	Credential cred = new Credential("KIDA72i8JGoReHomeHfmeGgqlRIuJUQAhwxi", "f5FAtNightGuJOKExOZUVGn7CetsbjcJlx");
-    HttpProfile httpProfile = new HttpProfile();
-    ClientProfile clientProfile = new ClientProfile();
-    AaiClient client = null;
-	
-	
-	@GetMapping("/index")
-    public String index() {
-		System.out.println("/index -> index.html");
-		System.out.println(ev.getProperty("server.port", "8009"));
-		
-		try{
-			httpProfile.setEndpoint("aai.tencentcloudapi.com");
-			clientProfile.setHttpProfile(httpProfile);
-			client = new AaiClient(cred, "ap-beijing", clientProfile);
-            
-            String params = "{\"Text\":\"吃饭了吗\",\"User\":\"{\\\"id\\\":\\\"10010\\\",\\\"gender\\\":\\\"0\\\"}\",\"ProjectId\":1255895122}";
-            ChatRequest req = ChatRequest.fromJsonString(params, ChatRequest.class);
-            ChatResponse resp = client.Chat(req);
-            
-            System.out.println(resp.getAnswer());
-            System.setOut(new PrintStream("/Users/lijiaming/qa_lijiaming_"+System.currentTimeMillis()+".log"));
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
-		
-        return "index.html";
-    }
-	
-	@RequestMapping("chat")
-    @ResponseBody
-    public String chat(@RequestParam("input") String input){
-		
-		try {
-			ChatRequest req = new ChatRequest();
-			req.setUser("{\"id\":\"test\",\"gender\":\"male\"}");
-			req.setText(input);
-			req.setProjectId(1255895122);
-			ChatResponse resp = client.Chat(req);
-			String reply = resp.getAnswer();
-			System.out.println(input);
-			System.out.println(reply);
-			System.out.println();
-			return reply;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "无语😓";
-		}
-		
-	}
+
 	/**
      * 实现文件上传
      * */
@@ -118,15 +42,20 @@ public class QueryController {
         String fileName = System.currentTimeMillis() + "." + file.getOriginalFilename();
         int size = (int) file.getSize();
         System.out.println(fileName + "-->" + size);
-        File dest = uploadFile(fileName, email);
+		String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop");
+        File dest = uploadFile(path, fileName, email);
         if(!dest.getParentFile().exists()){
             dest.getParentFile().mkdir();
         }
         try {
-            file.transferTo(dest); 
-            System.out.println(dest.getAbsolutePath());
-            
-            return "true == " + dest.exists();
+            file.transferTo(dest);
+            String input = dest.getAbsolutePath();
+            if("transform".equals(email)) {
+				System.out.println("transform:" + input);
+				String transform = writepng(input);
+            	return transform.substring(path.length());
+			}
+            return input.substring(path.length());
         } catch (IllegalStateException e) {
             e.printStackTrace();
             return "false";
@@ -136,21 +65,21 @@ public class QueryController {
         }
     }
     
-    public File uploadFile(String filename, String email) {
+    public File uploadFile(String path, String filename, String email) {
     	long time = System.currentTimeMillis();
     	Random rand = new Random();
-    	SimpleDateFormat folder = new SimpleDateFormat("yyyy-MM-dd");
-    	SimpleDateFormat name = new SimpleDateFormat("HH-mm-ss");
-    	String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop") ;
-    	File upload = new File(path, "upload/" + folder.format(time) + "/" + name.format(time) + "#" + email + "#" + filename);
+    	SimpleDateFormat folder = new SimpleDateFormat("yyyyMMdd");
+    	SimpleDateFormat name = new SimpleDateFormat("HHmmss");
+
+    	File upload = new File(path, "upload/" + folder.format(time) + "/" + name.format(time) + "." + email + "." + filename);
     	checkFolder(upload);
     	if(upload.exists()) {
     		try {
-				TimeUnit.MILLISECONDS.sleep(rand.nextInt(3000));
+				TimeUnit.MILLISECONDS.sleep(rand.nextInt(300));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-    		uploadFile(filename, email);
+    		uploadFile(path, filename, email);
     	} else {
     		try {
     			upload.createNewFile();
@@ -161,150 +90,50 @@ public class QueryController {
     	}
     	return null;
     }
-    
-    public void downloaded(File downloaded, String msg) {
-    	try {
-    		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(downloaded),"UTF-8"));    
-            out.write(msg); 
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        
-    }
+
+
     private void checkFolder(File file) {
     	if(file.exists()) return;
     	if(file.getParentFile().exists()) return;
     	file.getParentFile().mkdirs();
     }
-    public File downloadFile(File file, String email) {
-    	long time = System.currentTimeMillis();
-    	Random rand = new Random();
-    	SimpleDateFormat folder = new SimpleDateFormat("yyyy-MM-dd");
-    	SimpleDateFormat name = new SimpleDateFormat("HH-mm-ss");
-    	String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop") ;
-    	File downloaded = new File(path, "download/" + folder.format(time) + "/" + name.format(time) + "#" + email + "#" + file.getName());
-    	checkFolder(downloaded);
-    	if(downloaded.exists()) {
-    		try {
-				TimeUnit.MILLISECONDS.sleep(rand.nextInt(3000));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+
+	public static String byteToHex(byte[] bytes){
+		String strHex = "";
+		StringBuilder sb = new StringBuilder("");
+		for (int n = 0; n < bytes.length; n++) {
+			strHex = Integer.toHexString(bytes[n] & 0xFF);
+			sb.append((strHex.length() == 1) ? "0" + strHex : strHex); // 每个字节由两个字符表示，位数不够，高位补0
+		}
+		return sb.toString().trim();
+	}
+
+    private String writepng(String input) throws IOException {
+		byte[] bytes = Files.readAllBytes(Paths.get(input));
+		char[] chars = byteToHex(bytes).toCharArray();
+		int index = 0;
+		int w = Integer.parseInt(chars[index]+""+chars[index+1]+""+chars[index+2]+""+chars[index+3], 16);
+		index += 4;
+		int h = Integer.parseInt(chars[index]+""+chars[index+1]+""+chars[index+2]+""+chars[index+3], 16);
+		index += 4;
+		int size = (chars.length - 8) / 2;
+		int[] data = new int[size];
+		for(int i=index,pointer = 0;i<chars.length;i+=2,pointer++) {
+			int d = Integer.parseInt(chars[i]+""+chars[i+1], 16);
+			data[pointer] = d;
+		}
+		String path = input+ ".png";
+		BufferedImage bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
+		index = 0;
+		for(int i=0;i<bufferedImage.getHeight();i++) {
+			for(int j=0;j<bufferedImage.getWidth();j++) {
+				Color c = new Color(data[index],data[index+1],data[index+2],data[index+3]);
+				bufferedImage.setRGB(j, i, c.getRGB());
+				index += 4;
 			}
-    		return downloadFile(file, email);
-    	} else {
-    		try {
-    			downloaded.createNewFile();
-				return downloaded;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-    	}
-    	return null;
-    }
-    
-    @RequestMapping("download")
-    public String downLoad(HttpServletResponse response, @RequestParam("index") Integer index,  @RequestParam("email") String email){
-        File file = files.get(""+index);
-        String filename = file.getName();
-        if(email== null || email.length() < 1) return "false";
-        System.out.println(email);
-        if(file.exists()){
-        	
-        	File downloaded = downloadFile(file, email);
-            response.setContentType("application/force-download");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + filename);
-            try {
-				OutputStream os = response.getOutputStream();
-				WritableByteChannel outChannel = Channels.newChannel(os);
-				FileInputStream fis = new FileInputStream(file);
-				FileChannel srcChannel= fis.getChannel();
-				while (srcChannel.read(buffer) != -1)
-				{
-				    buffer.flip();
-				    while (buffer.hasRemaining())
-				    {
-				    	outChannel.write(buffer);
-				    }
-				    buffer.clear();
-				}
-				os.flush();
-				
-				downloaded(downloaded, email);
-				
-				fis.close();
-				srcChannel.close();
-				return "true";
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            System.out.println("----------file download " + filename);
-            
-        }
-        System.out.println("File not exist! " + filename);
-        return "false";
-    }
-    
-    private void list(){
-    	String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop") ;
-    	File file = new File(path + "/" + "files");
-    	File[] fs = file.listFiles((f,n) -> !n.endsWith(".desc"));
-    	int i=0; 
-    	System.out.println("list file of " + file.getAbsolutePath());
-    	for(File f : fs) {
-    		files.put(""+i, f);
-    		i++;
-    	}
-    }
-    
-    @RequestMapping("listFiles")
-    @ResponseBody
-    public List<Map<String, String>> listFiles(){
-    	if(files.isEmpty() || (System.currentTimeMillis() - update > minutes)) {
-    		update = System.currentTimeMillis();
-    		String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop") ;
-        	File upload = new File(path, "/upload");
-        	upload.mkdirs();
-        	File download = new File(path, "/download");
-        	download.mkdirs();
-    		list();
-    	}
-    	List<Map<String, String>> result = new ArrayList<>();
-    	files.forEach((index, file) ->{
-    		Map<String, String> map = new HashMap<>();
-    		map.put("name", file.getName());
-			try {
-				List<String> lines = Files.readAllLines(Paths.get(file.getAbsolutePath() + ".desc"));
-				map.put("desc", String.join("<br/>", lines));
-			} catch (Exception e) {
-				e.printStackTrace();
-				map.put("desc", "Download it and see the details");
-			}
-			result.add(map);
-    	});
-    	
-    	String path = ev.getProperty("upload.path", "/Users/lijiaming/worldpop") ;
-    	File terms = new File(path, "/terms");
-    	File[] tfs = terms.listFiles();
-    	if(tfs != null && tfs.length > 0) {
-    		File file = tfs[0];
-    		Map<String, String> map = new HashMap<>();
-    		map.put("name", file.getName());
-			try {
-				List<String> lines = Files.readAllLines(Paths.get(file.getAbsolutePath()));
-				map.put("desc", String.join("<br/>", lines));
-			} catch (Exception e) {
-				e.printStackTrace();
-				map.put("desc", "Please see worldpop.co.nz/termsConditions.php");
-			}
-			result.add(map);
-    	}
-    	
-    	return result;
-    }
-    
-    
+		}
+		File file = new File(path);
+		ImageIO.write(bufferedImage, "png",  file);
+		return path;
+	}
 }

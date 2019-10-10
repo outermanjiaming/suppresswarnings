@@ -14,7 +14,7 @@ import com.leveldb.common.options.WriteOptions;
 public class LiJiamingTest{
 
 	public static void main(String[] args) {
-		String dbname_ = "/Users/lijiaming/temp/users";
+		String dbname_ = "/Users/lijiaming/SuppressWarnings/20191004/backup/root/osgi/data";
 		DB db_;
 		WriteOptions woption = new WriteOptions();
 		ReadOptions roption = new ReadOptions();
@@ -87,9 +87,15 @@ public class LiJiamingTest{
 					long count = 1;
 					Iterator iterator = db_.NewIterator(new ReadOptions());
 					for(iterator.Seek(new Slice(head));iterator.Valid();iterator.Next()) {
-						System.out.println("[list] " + count + ": " +iterator.key() + " = " + iterator.value());
+						String key = iterator.key().toString();
+						String value = iterator.value().toString();
+						if(!key.startsWith(head)) {
+							System.out.println("list exceeds head, last key:" + key);
+							break;
+						}
+						System.out.println("[list] " + count + ": " +key + " = " + value);
 						if(count >= limit) {
-							System.out.println("list exceeds limit, last key:" + iterator.key());
+							System.out.println("list exceeds limit, last key:" + key);
 							break;
 						}
 						count ++;

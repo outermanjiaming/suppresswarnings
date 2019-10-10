@@ -1,6 +1,6 @@
 <!--index.wxml-->
 <view>
-  <official-account></official-account>
+  
   <view class='canvas'>
     <canvas canvas-id='canvas' class="draw" bindtouchstart="MoveStart" bindtouchmove="JudgeGestures" bindtouchend="MoveEnd">
 
@@ -10,14 +10,11 @@
 
     </canvas>
   </view>
+  
   <view>
-    <text class="entrance">一注考试复习</text>
-    <view wx:key="index" wx:for="{{['一注材料', '一注物理', '一注场地','一注经济','一注结构','一注建知']}}" class="buttons">
-      <button size="mini" class="entry" bindtap="playQuiz" data-title="{{item}}" data-index="{{index}}">{{index+1}}. {{item}}</button>
+    <text class="entrance">{{entrance ? entrance : '素造师，加油～'}}</text>
+    <view wx:key="index" wx:for="{{categories}}" class="buttons">
+      <button size="mini" class="entry" bindtap="playQuiz" data-title="{{item}}" data-index="{{index}}">{{item}}</button>
     </view>
-  </view>
-
-  <view class="vip">
-      <text bindtap="iamvip"> 开通会员 </text>
   </view>
 </view>

@@ -1,5 +1,6 @@
 // pages/quiz/quiz.js
 var touchStartTime = 0
+var app = getApp()
 const head = 'https://suppresswarnings.com/like.http?action=draw'
 Page({
 
@@ -7,21 +8,68 @@ Page({
    * 页面的初始数据
    */
   data: {
+    start: {},
+    left: 100,
+    top: 0,
     list:[],
+    todo:[],
     index:0,
     count:0,
     current:'',
-    quiz:{},
+    quiz: null,
     mywrong:0,
     mystar:0,
+    chose: 0,
+    select:0,
+    categories: ['一注材料', '一注物理', '一注场地', '一注经济', '一注结构', '一注建知'],
+    chapters: ['全部章节', '第一章', '第二章', '第三章', '第四章', '第五章', '第六章', '第七章', '第八章', '第九章', '第十章', '第十一章', '第十二章', '第十三章', '第十四章', '第十五章', '第十六章', '第十七章', '第十八章', '第十九章', '第二十章'],
     option:{'A':'', 'B':'', 'C':'', 'D':''},
-    study:false
+    study:false,
+    userInfo: null,
+    hasUserInfo: false,
+    canIUse: wx.canIUse('button.open-type.getUserInfo')
   }, 
+  bindPickerChange(e){
+    var chose = e.detail.value
+    var todo = []
+    var list = this.data.list
+    var start = this.data.select + '.' + chose
+    for(var i =0;i<list.length;i++) {
+      if (list[i].startsWith(start)) {
+        todo.push(list[i])
+      }
+    }
+    console.log(todo.length)
+    this.setData({
+      chose: chose,
+      todo: todo,
+      quiz: null,
+      index:0
+    })
+  },
+  navigateBack(e){
+    wx.navigateBack()
+  },
+  getUserInfo: function (e) {
+    console.log(e)
+    app.globalData.userInfo = e.detail.userInfo
+    this.setData({
+      userInfo: e.detail.userInfo,
+      hasUserInfo: true
+    })
+  },
   showrong(e) {
     var wrong = wx.getStorageSync('wrong') || []
     wx.showModal({
       title: '我的错题',
-      content: '当前错题总数：' + wrong.length,
+      content: JSON.stringify(wrong),
+    })
+  }, 
+  showstar(e){
+    var wrong = wx.getStorageSync('star') || []
+    wx.showModal({
+      title: '我的标星',
+      content: JSON.stringify(wrong),
     })
   },
   starquiz(e) {
@@ -52,9 +100,45 @@ Page({
     }
     this.touchStartTime = e.timeStamp
   },
+  MoveStart: function (e) {
+    var arr = e.touches[0];
+    this.setData({
+      start: arr
+    })
+  },
+  JudgeGestures: function (e) {
+    var start = this.data.start
+    var endPoint = e.touches[e.touches.length - 1]
+    var translateX = endPoint.clientX - start.clientX
+    var translateY = endPoint.clientY - start.clientY
+    start = endPoint
+    var top = this.data.top + translateY
+    var left = this.data.left + translateX
+    this.setData({
+      start: start,
+      left: left,
+      top: top
+    })
+  },
+  MoveEnd: function (e) {
+
+  },
   choose(e) {
     var chose = e.target.dataset.option
     var quiz = this.data.quiz
+    var user = this.data.userInfo
+    if(quiz == null) {
+      if (user == null) {
+        wx.showToast({
+          title: '请登录',
+        })
+      } else {
+        wx.showToast({
+          title: '请点击下一题',
+        })
+      }
+      return
+    }
     var other = ''
     var option = { 'A': '', 'B': '', 'C': '', 'D': '' }
     quiz.chose = true
@@ -117,7 +201,7 @@ Page({
     })
     var study = that.data.study
     var idx = that.data.index
-    if (idx >= that.data.list.length) {
+    if (idx >= that.data.todo.length) {
       wx.showModal({
         title: '题目做完了',
         content: '请问需要重新开始吗？',
@@ -132,7 +216,7 @@ Page({
       })
       return
     }
-    var curr = that.data.list[idx]
+    var curr = that.data.todo[idx]
     idx += 1
     wx.showLoading({
       title: '加载中...',
@@ -178,16 +262,47 @@ Page({
     wx.showLoading({
       title: '正在加载题库',
     })
+    var select = options.index
+    var category = this.data.categories[select]
+    this.setData({
+      category: category,
+      select: select
+    })
     wx.request({
       url: head,
       data: {
         todo: 'list',
+        category: select,
       },
       success(res) {
         var ret = res.data
-        console.log(ret)
+        var list = ret.data
+        if(list.length < 1) {
+          that.setData({
+            none: true
+          })
+        } else {
+          var last = list[list.length-1]
+          console.log(last)
+          var chapterid = last.split('\.')[1]
+          var max = parseInt(chapterid) + 2
+          var chapters = that.data.chapters
+          if(max > chapters.length) {
+            max = chapters.length
+          }
+          var chosed = []
+          for(var i=0;i<max;i++) {
+            var one = chapters[i]
+            chosed.push(one)
+          }
+          console.log(chosed)
+          that.setData({
+            chapters: chosed
+          })
+        }
         that.setData({
-          list:ret.data
+          list: list,
+          todo: list
         })
       },
       complete(res) {

@@ -1,11 +1,14 @@
 <!--pages/quiz/quiz.wxml-->
 <view>
   <view class="center">
-    <text class="title">操作面板</text>
-    <button size="mini">模拟考试</button>
-    <button size="mini" bindtap="changemode" class="{{study ? 'right' : ''}}">{{study ? '复习模式(切答题)' : '答题模式(切复习)'}}</button>
-    <button size="mini">{{index}}/{{list.length}}</button>
-    
+    <view class="title"><text> {{category}} </text> <picker style="font-size:13px;" bindchange="bindPickerChange" value="{{chose}}" range="{{chapters}}">
+    <view class="picker">{{chapters[chose]}}</view>
+  </picker></view>
+    <button size="mini" bindtap="changemode" class="{{study ? 'right' : ''}}">{{study ? '复习模式' : '答题模式'}}</button>
+    <button size="mini">{{index}}/{{todo.length}}</button>
+<button size="mini" bindtap="showrong">错题 {{mywrong}}</button>
+    <button size="mini" bindtap="showstar">标星 {{mystar}}</button>
+    <button size="mini" bindtap="navigateBack">返回</button>
   </view>
   <view class="question">
     <text class="title">使用说明：双击标星，错题自动收藏</text>
@@ -18,13 +21,13 @@
 
     <view class="explain" bindtap="starquiz">{{quiz.chose ? quiz.explain : ''}}</view>
   </view>
-  <view class="operation">
-  <button size="xlarge" bindtap="nextquiz">下一题</button>
-  </view>
 
-  <view class="center">
-  <text class="title">温故知新</text>
-<button size="mini" bindtap="showrong">我的错题 {{mywrong}}</button>
-    <button size="mini" bindtap="showstar">我的标星 {{mystar}}</button>
-  </view>
+
+<view class="userinfo">
+<button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo">登录</button>
+    <block wx:else>
+      <image bindtouchstart="MoveStart" bindtouchmove="JudgeGestures" bindtouchend="MoveEnd" bindtap="nextquiz" src="{{userInfo.avatarUrl}}" style="position:relative; top:{{top}}px; left:{{left}}px; width: 64px;height: 64px; border-radius: 50%;" mode="cover"></image>
+      <text style="position:relative; color:#FFFFFF; top:{{top-10}}px; left:{{left-53}}px; font-size:13px;">下一题</text>
+    </block>
+</view>
 </view>
