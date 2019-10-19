@@ -27,22 +27,6 @@
 }
 pre{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
   </style>
-
-  <script>
-
-$(document).ready(function() {
-
-  $.fn.fullpage({
-
-    slidesColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#f90'],
-
-    anchors: ['page1', 'page2', 'page3', 'page4']
-
-  });
-
-});
-
-</script>
 </head>
 <body>
 
@@ -132,6 +116,12 @@ $(document).ready(function() {
 <script type="text/javascript">
     var message_Path = '/'
     var home_Path = 'http://suppresswarnings.com/'
+    $(document).ready(function() {
+      $.fn.fullpage({
+        slidesColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#f90'],
+        anchors: ['page1', 'page2', 'page3', 'page4']
+      });
+    });
 </script>
 <script type="text/javascript" src="js/live2d.js"></script>
 <script type="text/javascript" src="js/message.js"></script>
