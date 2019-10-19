@@ -51,4 +51,7 @@
     </g>
   </g>
   <image xlink:href="accost.png" x="250" y="0" height="200" width="200"></image>
+  <a xlink:href="http://suppresswarnings.com/accost.html" target="new">
+    <text x="250" y="50" font-size="12">搭讪吧</text>
+  </a>
 </svg>
