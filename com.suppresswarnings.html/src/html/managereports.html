@@ -170,6 +170,11 @@ font-size: 12;
 font-size: 14;
 color: #666
 }
+.list-input{
+    position: fixed;
+    bottom: 0px;
+    border: 1px solid red;
+}
 </style>
 
 </head>
@@ -179,7 +184,7 @@ color: #666
 </div>
 <div class="notice">所有用户列表</div>
 <div class="list-item">
-    输入：<input name="update" id="update" value=""/>
+    <div class="list-input"> 输入：<input name="update" id="update" value=""/></div>
 	<div id="myorders">
 	
 	
@@ -211,7 +216,6 @@ function show(id){
 
 function update(key) {
     var val = $('#update').val()
-    $('#update').val('')
     $.ajax({
             url: "/wx.http?r=" + Math.random(),
             data: {
