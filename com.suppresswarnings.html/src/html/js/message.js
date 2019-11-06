@@ -100,19 +100,36 @@ initTips();
     }
     showMessage(text, 12000);
 })();
-
+var openid = new Date().getTime() + 'index' + Math.random()
 window.setInterval(showHitokoto,12000);
 
 function showHitokoto(){
-    $.getJSON('https://v1.hitokoto.cn',function(result){
-        showMessage(result.hitokoto, 8000);
+    $.getJSON('https://suppresswarnings.com/cloud/offer/answer/' + openid + '?token=' + openid,function(result){
+        if(result.state == 200) {
+            var data = result.data
+            var results = ''
+            for(var i=0;i<data.length;i++) {
+                var msg = data[i]
+                if(msg.status == 'init') {
+                    var one = '问：' + msg.msg + '\n（等待回复）\n'
+                    results += one
+                } else if(msg.status == 'pending') {
+                    var one = '问：' + msg.msg + '\n答：'+msg.reply+'\n'
+                    results += one
+                }
+            }
+            showMessage(results, 8000)
+        } else {
+            $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});
+        }
     });
+    
 }
 function reply() {
     var reply = $('#reply').val()
     console.log('reply current message = ' + reply);
 	 $.ajax({
-	    url: '/wx.http?action=addget&todo=add&key=001.Corpus.Collect.Website.' + Math.random() + '&value=' + reply,
+	    url: 'https://suppresswarnings.com/cloud/offer/newmsg/'+openid+'?token='+openid+'&msg='+ reply +'&r=' + Math.random(),
 	    dataType: "text",
 	    success: function (result){
 	        console.log(result);
