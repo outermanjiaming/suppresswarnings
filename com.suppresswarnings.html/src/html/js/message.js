@@ -104,17 +104,17 @@ var openid = new Date().getTime() + 'index' + Math.random()
 window.setInterval(showHitokoto,12000);
 
 function showHitokoto(){
-    $.getJSON('https://suppresswarnings.com/cloud/offer/answer/' + openid + '?token=' + openid,function(result){
+    $.getJSON('/cloud/offer/answer/' + openid + '?token=' + openid,function(result){
         if(result.state == 200) {
             var data = result.data
             var results = ''
             for(var i=0;i<data.length;i++) {
                 var msg = data[i]
                 if(msg.status == 'init') {
-                    var one = '问：' + msg.msg + '\n（等待回复）\n'
+                    var one = '问：' + msg.msg + '<br/>（等待回复）<br/>'
                     results += one
                 } else if(msg.status == 'pending') {
-                    var one = '问：' + msg.msg + '\n答：'+msg.reply+'\n'
+                    var one = '问：' + msg.msg + '<br/>答：'+msg.reply+'<br/>'
                     results += one
                 }
             }
