@@ -129,7 +129,7 @@ function reply() {
     var reply = $('#reply').val()
     console.log('reply current message = ' + reply);
 	 $.ajax({
-	    url: 'https://suppresswarnings.com/cloud/offer/newmsg/'+openid+'?token='+openid+'&msg='+ reply +'&r=' + Math.random(),
+	    url: '/cloud/offer/newmsg/'+openid+'?token='+openid+'&msg='+ reply +'&r=' + Math.random(),
 	    dataType: "text",
 	    success: function (result){
 	        console.log(result);
