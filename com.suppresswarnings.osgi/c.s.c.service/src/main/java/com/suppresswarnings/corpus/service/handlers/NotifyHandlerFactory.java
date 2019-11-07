@@ -75,6 +75,24 @@ public class NotifyHandlerFactory {
 				service.publish("corpus/mini/goods/" + groupid, "订单号：" + orderid + "\n昵称：" + nickname + "\nID:" + openid + "\n抢购商品：" + goodsid + "付款金额：" + cashfee+"分");
 				String rushGoodsKey = String.join(Const.delimiter, Const.Version.V1, openid, "iBeacon", "Rush", "Goods", groupid, orderid);
 				service.account().put(rushGoodsKey, goodsid);
+			} else if(goodsid.startsWith("vip")) {
+				logger.info("someone paid vip: " + openid + " " + goodsid + " " + orderid );
+				service.publish("corpus/mini/vip/" + goodsid, "订单号：" + orderid + "\nID:" + openid + "\nVIP：" + goodsid + "付款金额：" + cashfee+"分");
+				String vipKey = String.join(Const.delimiter, Const.Version.V2, "VIP", "ExpireAt", openid);
+				long now = System.currentTimeMillis();
+				long time = 1000L * 60 * 60 * 24 * 30;
+				long expireAt = now + time;
+				if("vip3".equals(goodsid)) {
+					expireAt = now + time * 3;
+				} else if("vip6".equals(goodsid)) {
+					expireAt = now + time * 6;
+				} else if("vip12".equals(goodsid)) {
+					expireAt = now + time * 12;
+				} else if("vip999".equals(goodsid)) {
+					expireAt = now + time * 999;
+				}
+				service.account().put(vipKey, "" + expireAt);
+				service.account().put(String.join(Const.delimiter, Const.Version.V1, "Info", "VIP", goodsid, openid, orderid), orderid);
 			} else {
 				//unlock the coin
 				AtomicBoolean lock = service.switches("mycoin" + openid);

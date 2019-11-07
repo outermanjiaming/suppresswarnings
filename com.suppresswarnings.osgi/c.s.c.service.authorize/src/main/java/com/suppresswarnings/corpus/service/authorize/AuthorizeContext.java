@@ -100,6 +100,7 @@ public class AuthorizeContext extends WXContext {
 			}
 			u.content().sendTxtTo("sell authority", "请购买相应的权限，购买权限之后，请将授权申请码交给管理员。购买地址：\n：http://suppresswarnings.com/payment.html?state=" + target, openid());
 			u.output(authCode);
+			u.content().atUser(CorpusService.STUPID, authCode);
 		}
 
 		@Override

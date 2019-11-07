@@ -24,6 +24,7 @@ import com.suppresswarnings.corpus.common.Const;
 import com.suppresswarnings.corpus.common.Context;
 import com.suppresswarnings.corpus.common.ContextFactory;
 import com.suppresswarnings.corpus.common.State;
+import com.suppresswarnings.corpus.service.http.CallableGet;
 import com.suppresswarnings.corpus.service.work.Counter;
 import com.suppresswarnings.corpus.service.work.Quiz;
 import com.suppresswarnings.corpus.service.wx.WXuser;
@@ -73,7 +74,7 @@ public class WXContext extends Context<CorpusService> {
 		boolean first = true;
 		@Override
 		public void accept(String t, Context<CorpusService> u) {
-			u.output("暂时无权查看，请联系管理员。（本次对话结束）");
+			u.output("（请联系我们：0756-6145606）高级功能，暂时无权使用该服务。");
 		}
 
 		@Override
@@ -205,6 +206,15 @@ public class WXContext extends Context<CorpusService> {
 							return;
 						}
 					}
+				} else if(t.startsWith("#")) {
+					String[] ww = t.split("\\s+", 2);
+					String who = ww[0];
+					String reply = ww[1];
+					String id = who.substring(1);
+					CallableGet get = new CallableGet("https://suppresswarnings.com/cloud/offer/reply/" + openid() + "?id=" + id + "&reply=" + reply);
+					try {String ret = get.call();u.output("回复成功:" + ret);}
+					catch(Exception e) {u.output("回复异常："+e.getMessage());}
+					return;
 				}
 
 				String aid = u.content().questionToAid.get(command);

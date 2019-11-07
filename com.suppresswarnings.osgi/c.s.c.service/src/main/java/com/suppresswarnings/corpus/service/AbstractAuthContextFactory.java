@@ -47,7 +47,7 @@ public abstract class AbstractAuthContextFactory implements ContextFactory<Corpu
 						
 						@Override
 						public void accept(String t, Context<CorpusService> u) {
-							u.output("因权限控制，暂时无法使用该服务：" + description());
+							u.output("（请联系我们：0756-6145606）高级功能，暂时无权使用该服务：" + description());
 						}
 						
 						@Override

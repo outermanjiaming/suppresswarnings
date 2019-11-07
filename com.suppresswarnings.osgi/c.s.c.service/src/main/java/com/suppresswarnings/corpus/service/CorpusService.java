@@ -534,9 +534,9 @@ public class CorpusService implements HTTPService, CommandProvider {
 		if(backup != null) backup.close();
 		if(aiiot != null) aiiot.close();
 		if(workHandler != null) workHandler.close();
-		if(guard == null) guard = new Guard(that);
-		//1
-		scheduler.scheduleWithFixedDelay(guard, 3, 10, TimeUnit.SECONDS);
+//		if(guard == null) guard = new Guard(that);
+//		//1
+//		scheduler.scheduleWithFixedDelay(guard, 3, 10, TimeUnit.SECONDS);
 		scheduler.submit(new Runnable() {
 			
 			@Override
@@ -670,7 +670,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 					token().put(jskey, ticket);
 					token().put(jsexpireKey, "" + expireAt);
 					logger.info("[js access token] refresh " + jsjson);
-					
+					accessTokens();
 					hitokoto();
 				} catch (Exception e) {
 					logger.error("[access token] Exception when refresh", e);
@@ -852,26 +852,7 @@ public class CorpusService implements HTTPService, CommandProvider {
 	
 	public void _access(CommandInterpreter ci) {
 		logger.info("[_access] " + leveldb);
-		String head = String.join(Const.delimiter, Const.Version.V1, "Info", "Appid");
-		account().page(head, head, null, 1000, (k,appid) ->{
-			String secKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Secret", appid);
-			String secret = account().get(secKey);
-			ci.println("[_access] " + appid);
-			String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", appid);
-			String expireKey = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Expire", appid);
-			try {
-				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appid, secret);
-				String json = get.call();
-				AccessToken at = gson.fromJson(json, AccessToken.class);
-				String access = at.getAccess_token();
-				long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(at.getExpires_in());
-				int result = token().put(key, access);
-				token().put(expireKey, "" + expireAt);
-				logger.info("[_access] refresh " + result + ", expires at " + at.getExpires_in());
-			} catch(Exception e) {
-				ci.println("[_access] Exception: " + e.getMessage());
-			}
-		});
+		accessTokens();
 		ci.println("[_access] finish");
 	}
 	
@@ -969,7 +950,28 @@ public class CorpusService implements HTTPService, CommandProvider {
 			}
 		});
 	}
-	
+	public void accessTokens() {
+		String head = String.join(Const.delimiter, Const.Version.V1, "Info", "Appid");
+		account().page(head, head, null, 1000, (k,appid) ->{
+			String secKey = String.join(Const.delimiter, Const.Version.V1, "Info", "Secret", appid);
+			String secret = account().get(secKey);
+			logger.info("[accessTokens] " + appid);
+			String key = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Token", appid);
+			String expireKey = String.join(Const.delimiter, Const.Version.V1, "AccessToken", "Expire", appid);
+			try {
+				CallableGet get = new CallableGet("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", appid, secret);
+				String json = get.call();
+				AccessToken at = gson.fromJson(json, AccessToken.class);
+				String access = at.getAccess_token();
+				long expireAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(at.getExpires_in());
+				int result = token().put(key, access);
+				token().put(expireKey, "" + expireAt);
+				logger.info("[accessTokens] refresh " + result + ", expires at " + at.getExpires_in());
+			} catch(Exception e) {
+				logger.info("[accessTokens] Exception: " + e.getMessage());
+			}
+		});
+	}
 	public String hitokoto() {
 		try {
 			CallableGet hitokotoget = new CallableGet("https://v1.hitokoto.cn", "");
@@ -1328,6 +1330,13 @@ public class CorpusService implements HTTPService, CommandProvider {
 			return MiniprogramHandlerFactory.handle(parameter, this);
 		} else if("management".equals(action)) {  
 			return ManagementHandlerFactory.handle(parameter, this);
+		} else if("index".equals(action)) {  
+			String id = parameter.getParameter("id");
+			String msg = parameter.getParameter("msg");
+			String openid = parameter.getParameter("openid");
+			atUser(STUPID, "#" + id + " " + msg + ";来自" + openid);
+			logger.info("atUser " + STUPID + " from index");
+			return SUCCESS;
 		} else if("addget".equals(action)) {
 			String todo = parameter.getParameter("todo");
 			logger.info("addget: " + todo);

@@ -72,6 +72,24 @@ public class LikeService implements HTTPService, CommandProvider {
 	public String getName() {
 		return "like.http";
 	}
+	public boolean checkVIP(String appid, String code, String openid) {
+		logger.info("amivip ? " + appid + " " + code + " " + openid);
+		String vipKey = String.join(Const.delimiter, Const.Version.V2, "VIP", "ExpireAt", openid);
+		String vip = account().get(vipKey);
+		if(isNull(vip)) {
+			return false;
+		} else {
+			try {
+				long expiredAt = Long.parseLong(vip);
+				if(expiredAt - System.currentTimeMillis() > 0) {
+					return true;
+				}
+			} catch(Exception e) {
+				logger.info("error while check vip");
+			}
+			return false;
+		}
+	}
 
 	@Override
 	public String start(Parameter parameter) throws Exception {
@@ -134,6 +152,9 @@ public class LikeService implements HTTPService, CommandProvider {
 			return gson.toJson(result);
 		} else if("draw".equals(action)) {
 			String todo = parameter.getParameter("todo");
+			String appid = parameter.getParameter("appid");
+			String code = parameter.getParameter("code");
+			String openid = parameter.getParameter("openid");
 			if("insert".equals(todo)) {
 				String category = parameter.getParameter("category");
 				String chapter = parameter.getParameter("chapter");
@@ -163,7 +184,13 @@ public class LikeService implements HTTPService, CommandProvider {
 					Quiz data = drawHandler.select(userid, category, chapter, id);
 					return gson.toJson(new Result(data));
 				} 
-			}
+			} else if("amivip".equals(todo)) {
+				if(checkVIP(appid, code, openid)) {
+					return gson.toJson(new Result(new String[] {"VIP", appid, openid}));
+				} else {
+					return gson.toJson(new Result(500, "VIP error"));
+				}
+			} 
 		} else if("location".equals(action)) {
 			String todo = parameter.getParameter("todo");
 			String appid = parameter.getParameter("appid");
@@ -179,6 +206,12 @@ public class LikeService implements HTTPService, CommandProvider {
 					return gson.toJson(new Result(502, "这是一个收费地点"));
 				}
 				return gson.toJson(new Result("free"));
+			} else if("amivip".equals(todo)) {
+				if(checkVIP(appid, code, openid)) {
+					return gson.toJson(new Result(new String[] {"VIP", appid, openid}));
+				} else {
+					return gson.toJson(new Result(500, "VIP error"));
+				}
 			} else if("search".equals(todo)) {
 				String search = parameter.getParameter("search");
 				String[] words = search.split("\\s+");
@@ -251,7 +284,8 @@ public class LikeService implements HTTPService, CommandProvider {
 				long curr = STOP_THE_WORLD - now;
 				String key = String.join(Const.delimiter, Const.Version.V2, "Location", locationid, "Comments", ""+curr, openid);
 				String comment = parameter.getParameter("comment");
-				String value = now +";" + openid + ";" + comment;
+				String value = now +";" + openid + ";[审核之后显示];" + comment;
+				logger.info("comment needs to be approved: " + value);
 				data().put(String.join(Const.delimiter, Const.Version.V2, "Location", openid, "Comments", locationid, ""+ now), comment);
 				data().put(key, value);
 				return gson.toJson(new Result(value));
@@ -360,10 +394,25 @@ public class LikeService implements HTTPService, CommandProvider {
 				}
 				return gson.toJson(new Result(list));
 			}
+		} else if("joinnearby".equals(action)) {
+			String todo = parameter.getParameter("todo");
+			String appid = parameter.getParameter("appid");
+			String code = parameter.getParameter("code");
+			String openid = parameter.getParameter("openid");
+			logger.info("code: " + code + ",openid: " + openid);
+			if("amivip".equals(todo)) {
+				if(checkVIP(appid, code, openid)) {
+					return gson.toJson(new Result(new String[] {"VIP", appid, openid}));
+				} else {
+					return gson.toJson(new Result(500, "未加入VIP"));
+				}
+			} 
 		}
 		return gson.toJson(new Result(400, "unknown action"));
 	}
-	
+	public boolean isNull(String value) {
+		return value == null || "null".equals(value) || "None".equals(value);
+	}
 	public String sharedProjectid(String projectid, String openid) {
 		logger.info("sharedProjectid: " + projectid + ", " + openid);
 		if(projectid != null && projectid.startsWith("T_Like_Share")) {

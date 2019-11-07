@@ -12,14 +12,14 @@ package com.suppresswarnings.corpus.service.shop;
 import java.util.concurrent.TimeUnit;
 
 import com.suppresswarnings.corpus.common.Context;
-import com.suppresswarnings.corpus.common.ContextFactory;
+import com.suppresswarnings.corpus.service.AbstractAuthContextFactory;
 import com.suppresswarnings.corpus.service.CorpusService;
 
-public class ShopContextFactory implements ContextFactory<CorpusService> {
+public class ShopContextFactory extends AbstractAuthContextFactory {
 
 	@Override
 	public String command() {
-		return ShopContext.CMD;
+		return ShopCtx.CMD;
 	}
 
 	@Override
@@ -31,20 +31,15 @@ public class ShopContextFactory implements ContextFactory<CorpusService> {
 	public long ttl() {
 		return TimeUnit.MINUTES.toMillis(15);
 	}
-//
-//	@Override
-//	public String[] requiredAuth() {
-//		return ShopContext.AUTH;
-//	}
-//
-//	@Override
-//	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
-//		return new ShopContext(wxid, openid, content);
-//	}
 
 	@Override
-	public Context<CorpusService> getInstance(String wxid, String openid, CorpusService content) {
-		return new ShopContext(wxid, openid, content);
+	public String[] requiredAuth() {
+		return ShopCtx.AUTH;
+	}
+
+	@Override
+	public Context<CorpusService> getContext(String wxid, String openid, CorpusService content) {
+		return new ShopCtx(wxid, openid, content);
 	}
 
 }

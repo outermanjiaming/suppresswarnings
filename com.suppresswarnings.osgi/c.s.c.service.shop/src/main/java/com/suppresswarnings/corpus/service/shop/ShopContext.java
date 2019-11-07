@@ -22,6 +22,7 @@ import com.suppresswarnings.corpus.service.WXContext;
 import com.suppresswarnings.corpus.service.shop.game.SameReplyAndBonus;
 import com.suppresswarnings.corpus.service.wx.WXuser;
 
+@Deprecated
 public class ShopContext extends WXContext {
 	public static final String[] AUTH = {"Shop"};
 	public static final String CMD = "我的商铺";
