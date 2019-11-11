@@ -100,7 +100,9 @@ initTips();
     }
     showMessage(text, 12000);
 })();
-var openid = new Date().getTime() + 'index' + Math.random()
+var date = new Date()
+var today = date.getFullYear() + "." + date.getMonth() + "." + date.getDate();
+var openid = today + "." + returnCitySN["cip"]
 window.setInterval(showHitokoto,12000);
 
 function showHitokoto(){
@@ -118,7 +120,11 @@ function showHitokoto(){
                     results += one
                 }
             }
-            showMessage(results, 8000)
+            if(data.length < 1) {
+                $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});
+            } else {
+                showMessage(results, 8000)
+            }
         } else {
             $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});
         }
