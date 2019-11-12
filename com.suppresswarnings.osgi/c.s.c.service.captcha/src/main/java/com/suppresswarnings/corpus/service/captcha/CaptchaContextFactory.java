@@ -15,7 +15,7 @@ public class CaptchaContextFactory implements ContextFactory<CorpusService> {
 
 	@Override
 	public String description() {
-		return "素朴网联共享vip获取登录验证码";
+		return "素朴网联提供临时支付通道";
 	}
 
 	@Override
