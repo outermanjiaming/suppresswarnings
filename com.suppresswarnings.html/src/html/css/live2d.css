@@ -1,8 +1,8 @@
 #landlord {
     user-select: none;
     position: fixed;
-    left: 15px;
-    bottom: 50px;
+    left: 66px;
+    bottom: 250px;
     width: 225px;
     height: 252px;
     z-index: 10000;

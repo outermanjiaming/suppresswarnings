@@ -19,7 +19,7 @@ function renderTip(template, context) {
 String.prototype.renderTip = function (context) {
     return renderTip(this, context);
 };
-
+var socket;
 var re = /x/;
 console.log(re);
 re.toString = function() {
@@ -103,46 +103,17 @@ initTips();
 var date = new Date()
 var today = date.getFullYear() + "." + date.getMonth() + "." + date.getDate();
 var openid = today + "." + returnCitySN["cip"]
-window.setInterval(showHitokoto,12000);
+window.setInterval(showHitokoto,32000);
 
 function showHitokoto(){
-    $.getJSON('/cloud/offer/answer/' + openid + '?token=' + openid,function(result){
-        if(result.state == 200) {
-            var data = result.data
-            var results = ''
-            for(var i=0;i<data.length;i++) {
-                var msg = data[i]
-                if(msg.status == 'init') {
-                    var one = '问：' + msg.msg + '<br/>（等待回复）<br/>'
-                    results += one
-                } else if(msg.status == 'pending') {
-                    var one = '问：' + msg.msg + '<br/>答：'+msg.reply+'<br/>'
-                    results += one
-                }
-            }
-            if(data.length < 1) {
-                $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});
-            } else {
-                showMessage(results, 8000)
-            }
-        } else {
-            $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});
-        }
-    });
-    
+    $.getJSON('https://v1.hitokoto.cn',function(result){showMessage(result.hitokoto, 8000)});    
 }
 function reply() {
-    var reply = $('#reply').val()
-    console.log('reply current message = ' + reply);
-	 $.ajax({
-	    url: '/cloud/offer/newmsg/'+openid+'?token='+openid+'&msg='+ reply +'&r=' + Math.random(),
-	    dataType: "text",
-	    success: function (result){
-	        console.log(result);
-	    }
-	 });
-	 showMessage(reply, 8000);
-	 $('#reply').val('')
+    var msg = $('#reply').val()
+    console.log('reply current message = ' + msg);
+    socket.send(msg);
+    $('#reply').val('')
+    $('#reply').attr('placeholder',msg)
 }
 function onreply(event){ if(event.keyCode==13){ reply(); } }
 
@@ -180,3 +151,46 @@ function initLive2d (){
 }
 initLive2d ();
 
+    function openSocket() {
+        var has = window.location.hash.slice(1);
+        console.log(' === === === ' + has + ' === === === ')
+        if(has.length < 3) {
+            window.location.href = window.location.href + '#' + 'html' + Math.random().toString(16).substr(2)
+            window.location.reload()
+        } else {
+            if(typeof(WebSocket) == "undefined") {
+                console.log("您的浏览器不支持WebSocket");
+            } else {
+                console.log("您的浏览器支持WebSocket");
+                var socketUrl = "ws://suppresswarnings.com:8804/ws/" + has;
+                console.log(socketUrl);
+                if(socket!=null){
+                    socket.close();
+                    socket=null;
+                }
+                socket = new WebSocket(socketUrl);
+
+                socket.onopen = function() {
+                    console.log("websocket已打开");
+                };
+
+                socket.onmessage = function(msg) {
+                    console.log(msg.data);
+                    showMessage(msg.data, 23000);
+                    $('#audio')[0].play()
+                };
+
+                socket.onclose = function() {
+                    console.log("websocket已关闭");
+                };
+
+                socket.onerror = function() {
+                    console.log("websocket发生了错误");
+                }
+            }
+        }
+    }
+
+openSocket()
+
+console.log('openSocket()')
