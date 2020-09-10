@@ -36,9 +36,9 @@ public class NN implements AI, Serializable {
 	double error = 0;
 	/**
 	 * for unlinked layers
-	 * @param inputSize
-	 * @param outputSize
-	 * @param hiddenSize
+	 * @param inputSize inputSize
+	 * @param outputSize outputSize
+	 * @param hiddenSize hiddenSize
 	 */
 	public NN(int inputSize, int outputSize, int[] hiddenSize) {
 		this.inputSize = inputSize;

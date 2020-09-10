@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ai
+Bundle-Name: SuppressWarnings.AI
 Bundle-SymbolicName: com.suppresswarnings.ai
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1
 Export-Package: com.suppresswarnings.ai

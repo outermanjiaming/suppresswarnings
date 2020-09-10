@@ -53,6 +53,7 @@ public class Util {
 			oos = new ObjectOutputStream(stream);
 			oos.writeObject(object);
 			oos.flush();
+			stream.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -60,7 +61,7 @@ public class Util {
 				try {
 					oos.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+					//pass
 				}
 			}
 		}
@@ -68,11 +69,13 @@ public class Util {
 	
 	public static Object deserialize(String serializeTo) {
 		File file = new File(serializeTo);
+		Util.backup(serializeTo, true);
 		ObjectInputStream ois = null;
 		try {
 			InputStream stream = new FileInputStream(file);
 			ois = new ObjectInputStream(stream);
 			Object object = ois.readObject();
+			stream.close();
 			return object;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -82,7 +85,7 @@ public class Util {
 				try {
 					ois.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+					//pass
 				}
 			}
 		}
@@ -129,6 +132,7 @@ public class Util {
 		}
 		return result;
 	}
+
 	public static void saveImage(String imageFilePath, double[][] image) {
 		File file = new File(imageFilePath);
 		int w = image.length;
@@ -476,13 +480,28 @@ public class Util {
 		}
 		return matrix;
 	}
-	public static Image getImage(double[][] image) {
+
+	public static Image readImage(double[][] image) {
+		int x = image.length;
+		int y = image[0].length;
+		BufferedImage bi = new BufferedImage(x, y, BufferedImage.TYPE_BYTE_GRAY);
+		for(int i=0;i<x;i++){
+			for(int j=0;j<y;j++) {
+				int rgb = (int) image[i][j];
+				Color color = new Color(rgb, rgb, rgb);
+				bi.setRGB(i, j, color.getRGB());
+			}
+		}
+		return bi;
+	}
+
+	public static Image getMnistImage(double[][] image) {
 		int y = image.length;
 		int x = image[0].length;
 		BufferedImage bi = new BufferedImage(x, y, BufferedImage.TYPE_BYTE_GRAY);
 		for(int j=0;j<y;j++) {
 			for(int i=0;i<x;i++){
-				int rgb = (int) (255* image[j][i]);
+				int rgb = (int) (255.0 * image[j][i]);
 				Color color = new Color(rgb, rgb, rgb);
 				bi.setRGB(i, j, color.getRGB());
 			}
@@ -509,11 +528,11 @@ public class Util {
 	
 	/**
 	 * cutting the image into pieces
-	 * @param image
+	 * @param image pixels of image
 	 * @param n number of pieces according to x
 	 * @param m number of pieces according to y
 	 * @param prefix path prefix
-	 * @return
+	 * @return lots of image pixels
 	 */
 	public static int[][] [][] cutting(int[][] image, int n, int m, String prefix) {
 		int w = image.length;
