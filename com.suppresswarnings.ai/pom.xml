@@ -93,7 +93,6 @@
             </goals>
             <configuration>
               <executable>/usr/local/Cellar/gnupg/2.2.21/bin/gpg</executable>
-              <passphrase>helloaom1@</passphrase>
             </configuration>
           </execution>
         </executions>
