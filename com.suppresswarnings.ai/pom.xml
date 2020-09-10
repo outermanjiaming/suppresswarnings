@@ -86,14 +86,11 @@
         <version>1.1</version>
         <executions>
           <execution>
-            <id>sign-artifacts</id>
+            <id>gpg</id>
             <phase>verify</phase>
             <goals>
               <goal>sign</goal>
             </goals>
-            <configuration>
-              <executable>/usr/local/Cellar/gnupg/2.2.21/bin/gpg</executable>
-            </configuration>
           </execution>
         </executions>
       </plugin>
