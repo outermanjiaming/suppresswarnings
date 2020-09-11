@@ -32,12 +32,12 @@ public class Demo {
 	public static void main(String[] args) throws Exception {
 //		trainImg();
 //		trainYesNo();
-		testImg();
+		testImg("/Users/mingo/Downloads/id21.png");
 	}
 	public static AtomicInteger lastNum = new AtomicInteger(0);
 	public static double[] lastPro = new double[1];
-	public static void testImg() throws IOException {
-		File file = new File("/Users/mingo/Downloads/id9.png");
+	public static void testImg(String png) throws IOException {
+		File file = new File(png);
 		int[][] image = Util.readImage(file);
 		System.out.println(image.length);
 		System.out.println(image[0].length);
@@ -106,13 +106,13 @@ public class Demo {
 								return false;
 							}).findAny();
 					if(first.isPresent()) {
-						next.addAndGet(16);
+						next.addAndGet(13);
 					} else {
 						next.addAndGet(1);
 					}
 				}
 				System.out.println(list);
-				if(idcard.size() == 18) {
+				if(idcard.size() >= 18) {
 					idcard.forEach(data -> {
 						String filename = String.format("frame_%d-x%d.jpg", data.y, data.x);
 						Util.printImage(data.data, "/Users/mingo/work/code/files/png/idcard-predict/" + filename);

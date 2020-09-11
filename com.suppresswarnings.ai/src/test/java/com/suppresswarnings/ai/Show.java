@@ -27,7 +27,7 @@ public class Show extends JFrame {
     }
     public static void main(String[] args) throws Exception {
         Show show = new Show("Hello");
-        int[][] img = Util.readImage(new File("/Users/mingo/Downloads/id5.jpg"));
+        int[][] img = Util.readImage(new File("/Users/mingo/Downloads/id1.png"));
         BackgroundPanel bgp =new BackgroundPanel(img); //参数是一个Image对象,
         show.getContentPane().add(bgp);
         show.setSize(img.length,img[0].length);
@@ -133,7 +133,7 @@ class BackgroundPanel extends JPanel {
                     if(result > 0) {
                         count += 1;
                         try {
-                            TimeUnit.MILLISECONDS.sleep(200);
+                            TimeUnit.MILLISECONDS.sleep(20);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -174,7 +174,8 @@ class BackgroundPanel extends JPanel {
             double[] result = nn.test(data.x);
             int number = Util.argmax(result);
             System.out.println("here is the number: " + number + " which probability is " + result[number]);
-            if(result[number] > 0.65) {
+            if(result[number] > 0.75) {
+                drawIn(startx, starty-25, Util.readImage(new File("/Users/mingo/work/code/files/png/idcard-best/" + number + ".png")));
                 return number;
             }
         } else {
@@ -196,8 +197,8 @@ class BackgroundPanel extends JPanel {
         }
         Util.printImage(frame, "/Users/mingo/work/code/files/png/idcard-predict/"+ filename);
     }
-    public void change(int[][] nw) {
-        this.image = nw;
+    public void drawIn(int startx, int starty, int[][] small) {
+        Util.drawIn(image, startx, starty, small);
     }
     public void paintComponent(Graphics g) {
         super.paintComponents(g);

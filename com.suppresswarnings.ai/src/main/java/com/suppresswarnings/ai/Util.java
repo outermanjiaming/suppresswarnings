@@ -574,4 +574,12 @@ public class Util {
 			throw new Exception("获取本机身份异常，请联系素朴网联客服！");
 		}
 	}
+
+	public static void drawIn(int[][] image, int startx, int starty, int[][] small) {
+		for(int i=0;i<small.length;i++) {
+			for(int j=0;j<small[0].length;j++) {
+				image[startx+i][starty+j] = small[i][j];
+			}
+		}
+	}
 }
